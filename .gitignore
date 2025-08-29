@@ -1,0 +1,41 @@
+### Maven ###
+target/
+pom.xml.tag
+pom.xml.versionsBackup
+pom.xml.releaseBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+build/
+!target/classes/
+!**/src/main/resources/
+
+### Gradle ###
+.gradle
+build/
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.settings/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos de log
+
+# Arquivos gerados por testes
+*.jar
+*.warjunit-platform.properties
+
+# Arquivos de package e deploy
+
+# Variáveis de ambiente
+.env
+
