@@ -1,3 +1,5 @@
 package com.diacono.diacono.membros.dto;
 
-public record MembrosResponseDTO() { }
+import java.time.LocalDate;
+
+public record MembrosResponseDTO(String nome, LocalDate dataNascimento, Integer id) {}
