@@ -5,10 +5,9 @@ import com.diacono.diacono.membros.dto.MembrosResponseDTO;
 import com.diacono.diacono.membros.service.MembroService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/membros")
@@ -28,6 +27,31 @@ public class MembrosController {
 
         return ResponseEntity.status(201).body(response);
 
+    }
+
+    @GetMapping
+    public ResponseEntity<List<MembrosResponseDTO>> readAllMembros(){
+
+        List<MembrosResponseDTO> response = membrosService.getAll();
+
+        return response != null ? ResponseEntity.status(200).body(response) : ResponseEntity.status(204).build();
+
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<MembrosResponseDTO> readUniqueMembro(@PathVariable Integer id){
+        MembrosResponseDTO response = membrosService.getForID(id);
+
+        return response != null ? ResponseEntity.status(200).body(response) : ResponseEntity.status(204).build();
+
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMembro(@PathVariable Integer id){
+
+        Boolean response = membrosService.deleteMembro(id);
+
+        return response != null ? ResponseEntity.status(204).build() : ResponseEntity.status(404).build();
 
     }
 
