@@ -2,6 +2,7 @@ package com.diacono.diacono.membros.controller;
 
 import com.diacono.diacono.membros.dto.MembrosCreateRequestDTO;
 import com.diacono.diacono.membros.dto.MembrosResponseDTO;
+import com.diacono.diacono.membros.dto.MembrosUpdateRequestDTO;
 import com.diacono.diacono.membros.service.MembroService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +54,14 @@ public class MembrosController {
 
         return response != null ? ResponseEntity.status(204).build() : ResponseEntity.status(404).build();
 
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<MembrosResponseDTO> updateSomeFields(@RequestBody @Valid MembrosUpdateRequestDTO membrosUpdate, @PathVariable Integer id){
+
+        MembrosResponseDTO response = membrosService.updateMembro(membrosUpdate, id);
+
+        return response != null ? ResponseEntity.status(200).body(response) : ResponseEntity.status(404).build();
     }
 
 }

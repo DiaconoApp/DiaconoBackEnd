@@ -72,4 +72,20 @@ public class Membro {
     public String getSenha() {
         return senha;
     }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setCep(String cep) {
+        this.cep = cep;
+    }
+
+    public void setNumeroCasa(Integer numeroCasa) {
+        this.numeroCasa = numeroCasa;
+    }
+
+    public void setSenha(String senha) {
+        this.senha = senha;
+    }
 }

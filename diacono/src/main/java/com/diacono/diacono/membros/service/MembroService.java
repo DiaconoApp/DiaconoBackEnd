@@ -2,6 +2,7 @@ package com.diacono.diacono.membros.service;
 
 import com.diacono.diacono.membros.dto.MembrosCreateRequestDTO;
 import com.diacono.diacono.membros.dto.MembrosResponseDTO;
+import com.diacono.diacono.membros.dto.MembrosUpdateRequestDTO;
 import com.diacono.diacono.membros.entity.Membro;
 import com.diacono.diacono.membros.repository.MembrosRepository;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ public class MembroService {
 
         Membro salvo = membrosRepository.save(membro);
 
-        return new MembrosResponseDTO(salvo.getNome(), salvo.getDataNascimento(), salvo.getId());
+        return new MembrosResponseDTO(salvo.getNome(), salvo.getDataNascimento(), salvo.getId(), salvo.getEmail());
 
     }
 
@@ -40,7 +41,7 @@ public class MembroService {
         }
 
         List<MembrosResponseDTO> membrosResponseDTOS = membros.stream()
-                .map(m -> new MembrosResponseDTO(m.getNome(), m.getDataNascimento(), m.getId()))
+                .map(m -> new MembrosResponseDTO(m.getNome(), m.getDataNascimento(), m.getId(), m.getEmail()))
                 .toList();
 
         return membrosResponseDTOS;
@@ -51,7 +52,7 @@ public class MembroService {
         if(membrosRepository.existsById(id)){
 
             Membro encontrado = membrosRepository.findById(id).get();
-            return new MembrosResponseDTO(encontrado.getNome(), encontrado.getDataNascimento(), encontrado.getId());
+            return new MembrosResponseDTO(encontrado.getNome(), encontrado.getDataNascimento(), encontrado.getId(), encontrado.getEmail());
 
         }
 
@@ -69,6 +70,37 @@ public class MembroService {
         }
 
         return false;
+
+    }
+
+    public MembrosResponseDTO updateMembro(MembrosUpdateRequestDTO membroDTO, Integer id){
+
+        if(membrosRepository.existsById(id)){
+
+            Membro encontrado = membrosRepository.findById(id).get();
+
+            if(membroDTO.email() != null){
+                encontrado.setEmail(membroDTO.email());
+            }
+
+            if(membroDTO.cep() != null){
+                encontrado.setCep(membroDTO.cep());
+            }
+
+            if(membroDTO.numeroCasa() != null){
+                encontrado.setNumeroCasa(membroDTO.numeroCasa());
+            }
+
+            if(membroDTO.senha() != null){
+                encontrado.setSenha(membroDTO.senha());
+            }
+
+            membrosRepository.save(encontrado);
+
+            return new MembrosResponseDTO(encontrado.getNome(), encontrado.getDataNascimento(), encontrado.getId(), encontrado.getEmail());
+        }
+
+        return null;
 
     }
 
