@@ -5,7 +5,7 @@ import org.hibernate.validator.constraints.br.CPF;
 
 import java.time.LocalDate;
 
-public record MembrosCreateRequestDTO(
+public record MembrosCreateDTO(
 
         @NotBlank String nome,
         @Email @NotBlank String email,

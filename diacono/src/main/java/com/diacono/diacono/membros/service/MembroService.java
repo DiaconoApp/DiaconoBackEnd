@@ -1,15 +1,13 @@
 package com.diacono.diacono.membros.service;
 
-import com.diacono.diacono.membros.dto.MembrosCreateRequestDTO;
+import com.diacono.diacono.membros.dto.MembrosCreateDTO;
 import com.diacono.diacono.membros.dto.MembrosResponseDTO;
-import com.diacono.diacono.membros.dto.MembrosUpdateRequestDTO;
+import com.diacono.diacono.membros.dto.MembrosUpdateDTO;
 import com.diacono.diacono.membros.entity.Membro;
 import com.diacono.diacono.membros.repository.MembrosRepository;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class MembroService {
@@ -21,7 +19,7 @@ public class MembroService {
         this.membrosRepository = membrosRepository;
     }
 
-    public MembrosResponseDTO criar (MembrosCreateRequestDTO membroDTO){
+    public MembrosResponseDTO criar (MembrosCreateDTO membroDTO){
         Membro membro = new Membro(membroDTO.nome(), membroDTO.email(), membroDTO.dataNascimento(),
                 membroDTO.cpf(), membroDTO.cep(), membroDTO.numeroCasa(),
                 membroDTO.senhaTemporaria(), membroDTO.senha());
@@ -73,7 +71,7 @@ public class MembroService {
 
     }
 
-    public MembrosResponseDTO updateMembro(MembrosUpdateRequestDTO membroDTO, Integer id){
+    public MembrosResponseDTO updateMembro(MembrosUpdateDTO membroDTO, Integer id){
 
         if(membrosRepository.existsById(id)){
 
