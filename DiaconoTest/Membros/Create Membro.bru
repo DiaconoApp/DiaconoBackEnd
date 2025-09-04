@@ -1,0 +1,29 @@
+meta {
+  name: Create Membro
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8080/membros
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "nome": "fabiam",
+    "email": "ricardos@email.com",
+    "dataNascimento": "1995-08-15",
+    "cpf": "123.456.789-09",
+    "cep": "12345-678",
+    "numeroCasa": 120,
+    "senhaTemporaria": "abc123",
+    "senha": "minhaSenhaSegura"
+  }
+  
+}
+
+settings {
+  encodeUrl: true
+}

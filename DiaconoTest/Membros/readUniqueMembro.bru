@@ -1,0 +1,15 @@
+meta {
+  name: readUniqueMembro
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:8080/membros/3
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}
