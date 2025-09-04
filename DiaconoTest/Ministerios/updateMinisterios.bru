@@ -1,0 +1,22 @@
+meta {
+  name: updateMinisterios
+  type: http
+  seq: 5
+}
+
+patch {
+  url: http://localhost:8080/ministerios/1
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "nome": "Aguas de março",
+    "status": "ativo"
+  }
+}
+
+settings {
+  encodeUrl: true
+}
