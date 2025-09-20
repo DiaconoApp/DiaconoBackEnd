@@ -1,4 +1,4 @@
-package com.diacono.diacono.membros.dto;
+package com.diacono.diacono.membros.model.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;

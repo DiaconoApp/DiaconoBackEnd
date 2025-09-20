@@ -1,10 +1,8 @@
 package com.diacono.diacono.ministerios.controller;
 
-import com.diacono.diacono.membros.dto.MembrosResponseDTO;
-import com.diacono.diacono.membros.dto.MembrosUpdateDTO;
-import com.diacono.diacono.ministerios.dto.MinisterioCreateDTO;
-import com.diacono.diacono.ministerios.dto.MinisterioResponseDTO;
-import com.diacono.diacono.ministerios.dto.MinisterioUpdateDTO;
+import com.diacono.diacono.ministerios.model.dto.MinisterioCreateDTO;
+import com.diacono.diacono.ministerios.model.dto.MinisterioResponseDTO;
+import com.diacono.diacono.ministerios.model.dto.MinisterioUpdateDTO;
 import com.diacono.diacono.ministerios.service.MinisteriosService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;

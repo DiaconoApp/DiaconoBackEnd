@@ -1,4 +1,4 @@
-package com.diacono.diacono.membros.entity;
+package com.diacono.diacono.membros.model.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

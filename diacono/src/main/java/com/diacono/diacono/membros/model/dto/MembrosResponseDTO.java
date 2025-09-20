@@ -1,4 +1,4 @@
-package com.diacono.diacono.membros.dto;
+package com.diacono.diacono.membros.model.dto;
 
 import java.time.LocalDate;
 

@@ -1,12 +1,9 @@
 package com.diacono.diacono.ministerios.service;
 
-import com.diacono.diacono.membros.dto.MembrosResponseDTO;
-import com.diacono.diacono.membros.dto.MembrosUpdateDTO;
-import com.diacono.diacono.membros.entity.Membro;
-import com.diacono.diacono.ministerios.dto.MinisterioCreateDTO;
-import com.diacono.diacono.ministerios.dto.MinisterioResponseDTO;
-import com.diacono.diacono.ministerios.dto.MinisterioUpdateDTO;
-import com.diacono.diacono.ministerios.entity.Ministerio;
+import com.diacono.diacono.ministerios.model.dto.MinisterioCreateDTO;
+import com.diacono.diacono.ministerios.model.dto.MinisterioResponseDTO;
+import com.diacono.diacono.ministerios.model.dto.MinisterioUpdateDTO;
+import com.diacono.diacono.ministerios.model.entity.Ministerio;
 import com.diacono.diacono.ministerios.repository.MinisteriosRepository;
 import org.springframework.stereotype.Service;
 

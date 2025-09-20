@@ -1,9 +1,9 @@
 package com.diacono.diacono.membros.service;
 
-import com.diacono.diacono.membros.dto.MembrosCreateDTO;
-import com.diacono.diacono.membros.dto.MembrosResponseDTO;
-import com.diacono.diacono.membros.dto.MembrosUpdateDTO;
-import com.diacono.diacono.membros.entity.Membro;
+import com.diacono.diacono.membros.model.dto.MembrosCreateDTO;
+import com.diacono.diacono.membros.model.dto.MembrosResponseDTO;
+import com.diacono.diacono.membros.model.dto.MembrosUpdateDTO;
+import com.diacono.diacono.membros.model.entity.Membro;
 import com.diacono.diacono.membros.repository.MembrosRepository;
 import org.springframework.stereotype.Service;
 
