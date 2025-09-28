@@ -1,9 +1,6 @@
 package com.diacono.diacono.membros.model.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
@@ -13,28 +10,26 @@ public class Membro {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
     private String nome;
-    private String email;
-    private LocalDate dataNascimento;
     private String cpf;
-    private String cep;
-    private Integer numeroCasa;
-    private String senhaTemporaria;
+    private LocalDate dataNascimento;
+    private String email;
+    private String celular;
     private String senha;
+    private Boolean ativo = true;
+    @OneToOne(cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+    private EnderecoMembro enderecoMembro;
 
-    public Membro(String nome, String email, LocalDate dataNascimento, String cpf, String cep, Integer numeroCasa, String senhaTemporaria, String senha) {
+    public Membro(Integer id, String nome, String cpf, LocalDate dataNascimento, String email, String celular, String senha, Boolean ativo, EnderecoMembro enderecoMembro) {
+        this.id = id;
         this.nome = nome;
-        this.email = email;
-        this.dataNascimento = dataNascimento;
         this.cpf = cpf;
-        this.cep = cep;
-        this.numeroCasa = numeroCasa;
-        this.senhaTemporaria = senhaTemporaria;
+        this.dataNascimento = dataNascimento;
+        this.email = email;
+        this.celular = celular;
         this.senha = senha;
-    }
-
-    public Membro() {
+        this.ativo = ativo;
+        this.enderecoMembro = enderecoMembro;
     }
 
     public Integer getId() {
@@ -45,47 +40,31 @@ public class Membro {
         return nome;
     }
 
-    public String getEmail() {
-        return email;
+    public String getCpf() {
+        return cpf;
     }
 
     public LocalDate getDataNascimento() {
         return dataNascimento;
     }
 
-    public String getCpf() {
-        return cpf;
+    public String getEmail() {
+        return email;
     }
 
-    public String getCep() {
-        return cep;
-    }
-
-    public Integer getNumeroCasa() {
-        return numeroCasa;
-    }
-
-    public String getSenhaTemporaria() {
-        return senhaTemporaria;
+    public String getCelular() {
+        return celular;
     }
 
     public String getSenha() {
         return senha;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public Boolean getAtivo() {
+        return ativo;
     }
 
-    public void setCep(String cep) {
-        this.cep = cep;
-    }
-
-    public void setNumeroCasa(Integer numeroCasa) {
-        this.numeroCasa = numeroCasa;
-    }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
+    public EnderecoMembro getEnderecoMembro() {
+        return enderecoMembro;
     }
 }
