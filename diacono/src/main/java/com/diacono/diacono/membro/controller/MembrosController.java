@@ -1,9 +1,9 @@
-package com.diacono.diacono.membros.controller;
+package com.diacono.diacono.membro.controller;
 
-import com.diacono.diacono.membros.model.dto.MembrosCreateDTO;
-import com.diacono.diacono.membros.model.dto.MembrosResponseDTO;
-import com.diacono.diacono.membros.model.dto.MembrosUpdateDTO;
-import com.diacono.diacono.membros.service.MembroService;
+import com.diacono.diacono.membro.model.dto.MembrosCreateDTO;
+import com.diacono.diacono.membro.model.dto.MembrosResponseDTO;
+import com.diacono.diacono.membro.model.dto.MembrosUpdateDTO;
+import com.diacono.diacono.membro.service.MembroService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
