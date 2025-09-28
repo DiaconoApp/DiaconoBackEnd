@@ -1,6 +1,6 @@
-package com.diacono.diacono.ministerios.repository;
+package com.diacono.diacono.ministerio.repository;
 
-import com.diacono.diacono.ministerios.model.entity.Ministerio;
+import com.diacono.diacono.ministerio.model.entity.Ministerio;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

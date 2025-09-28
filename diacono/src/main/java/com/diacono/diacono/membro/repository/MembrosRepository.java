@@ -1,6 +1,6 @@
-package com.diacono.diacono.membros.repository;
+package com.diacono.diacono.membro.repository;
 
-import com.diacono.diacono.membros.model.entity.Membro;
+import com.diacono.diacono.membro.model.entity.Membro;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

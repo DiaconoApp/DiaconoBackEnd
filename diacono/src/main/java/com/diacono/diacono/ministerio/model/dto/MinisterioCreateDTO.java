@@ -1,4 +1,4 @@
-package com.diacono.diacono.ministerios.model.dto;
+package com.diacono.diacono.ministerio.model.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

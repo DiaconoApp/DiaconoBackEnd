@@ -1,4 +1,4 @@
-package com.diacono.diacono.membros.model.entity;
+package com.diacono.diacono.membro.model.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import java.time.LocalDate;
 
 @Entity
-public class Membro {
+public class Membro  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
