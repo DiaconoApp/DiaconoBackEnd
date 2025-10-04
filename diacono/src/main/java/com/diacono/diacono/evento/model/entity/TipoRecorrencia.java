@@ -1,0 +1,9 @@
+package com.diacono.diacono.evento.model.entity;
+
+public enum TipoRecorrencia {
+    NAO_REPETE,
+    DIARIO,
+    SEMANAL,
+    MENSAL,
+    ANUAL
+}

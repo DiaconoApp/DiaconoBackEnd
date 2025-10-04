@@ -1,15 +1,61 @@
 package com.diacono.diacono.evento.service;
 
+import com.diacono.diacono.evento.mapper.EventoMapper;
+import com.diacono.diacono.evento.model.dto.response.EventoSimplificadoDTO;
+import com.diacono.diacono.evento.model.entity.Evento;
+import com.diacono.diacono.evento.repository.EventoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.Year;
+import java.time.YearMonth;
+import java.time.temporal.TemporalAdjusters;
+import java.util.List;
 
 @Service
 public class EventoService {
 
-    public void buscarEventosPorMesEAno(Integer mes, Integer ano){
+    private final EventoRepository eventoRepository;
+    private final EventoMapper eventoMapper;
 
+    public EventoService(EventoRepository eventoRepository, EventoMapper eventoMapper) {
+        this.eventoRepository = eventoRepository;
+        this.eventoMapper = eventoMapper;
+    }
 
+    public EventoSimplificadoDTO buscarEventosPorMesEAno(int mes, int ano){
+        YearMonth anoMes = YearMonth.of(ano, mes);
+        LocalDate inicio = anoMes.atDay(1);
+        LocalDate fim = anoMes.atEndOfMonth();
 
+        //buscar eventos do mês -- validação: se não tiver evento, precisa retorna que não há eventos registrado
+        List<Evento> eventos = eventoRepository.findByPeriodo(inicio, fim);
+        int totalSemana = totalSemana();
+        int totalMes = totalMes(inicio, fim);
+        int totalAno = totalAno(ano);
+        EventoSimplificadoDTO eventoResponse = eventoMapper.paraEventoSimplificado(eventos, totalSemana, totalMes, totalAno);
+
+        return eventoResponse;
+    }
+
+    public int totalSemana(){
+        LocalDate hoje = LocalDate.now();
+        LocalDate diaInicioSemana = hoje.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate diaFimSemana = hoje.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        return eventoRepository.countEventosNoPeriodo(diaInicioSemana, diaFimSemana);
+    }
+
+    public int totalMes(LocalDate inicio, LocalDate fim){
+        return eventoRepository.countEventosNoPeriodo(inicio, fim);
+    }
+
+    public int totalAno(int ano){
+        Year anoAtual = Year.of(ano);
+        LocalDate inicio = anoAtual.atDay(1);
+        LocalDate fim = anoAtual.atDay(anoAtual.length());
+        return eventoRepository.countEventosNoPeriodo(inicio, fim);
     }
 
 }

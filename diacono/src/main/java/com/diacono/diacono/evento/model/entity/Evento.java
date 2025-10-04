@@ -1,23 +1,25 @@
 package com.diacono.diacono.evento.model.entity;
 
+import com.diacono.diacono.global.entity.Endereco;
 import com.diacono.diacono.global.entity.Igreja;
 
 import com.diacono.diacono.global.util.IdEntityUtils;
 import com.diacono.diacono.membro.model.entity.Membro;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
-import java.util.UUID;
+
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
+@SuperBuilder(toBuilder = true)
 public class Evento extends IdEntityUtils {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -31,13 +33,23 @@ public class Evento extends IdEntityUtils {
     )
     private Membro organizador;
 
-    @OneToMany(
-            mappedBy = "evento",
-            cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY
-    )
-    private List<Recorrencia> recorrencias;
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "fk_endereco", unique = true, nullable = true)
+    private Endereco endereco;
 
+    private String nome;
+    private String descricao;
+    private String publicoAlvo;
+    private LocalDate data;
+    private LocalTime horaInicio;
+    private LocalTime horaFim;
+    private BigDecimal custo;
 
+    @Enumerated(EnumType.STRING)
+    private TipoRecorrencia tipoRecorrencia;
+    private LocalDate dataTerminoRecorrencia;
+    @Enumerated(EnumType.STRING)
+    private List<DiasSemanaRecorrencia> diasSemana;
+    private LocalTime horarioRecorrencia;
 
 }

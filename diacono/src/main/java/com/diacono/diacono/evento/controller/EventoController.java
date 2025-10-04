@@ -18,8 +18,8 @@ public class EventoController {
     }
 
     @GetMapping
-    public void buscarEventosPorMesEAno(@RequestParam Integer mes, @RequestParam Integer ano){
-
+    public void buscarEventosPorMesEAno(@RequestParam int mes, @RequestParam int ano){
+        
         if (mes < 1 || mes > 12) {
             throw new IllegalArgumentException("Mês inválido");
         }
