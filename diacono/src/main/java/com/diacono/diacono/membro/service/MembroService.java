@@ -8,6 +8,7 @@ import com.diacono.diacono.membro.repository.MembrosRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class MembroService {
@@ -102,5 +103,13 @@ public class MembroService {
 
     }
 
+
+    /*MÉTODO QUE SE RELACIONA COM A ENTIDADE EVENTO*/
+
+    public Membro buscarPorUUID(UUID idExterno){
+        /*FAZER VALIDAÇÃO DE PRESENÇA -- LANÇAR EXCEÇÃO*/
+        return membrosRepository.findByIdExterno(idExterno);
+
+    }
 
 }

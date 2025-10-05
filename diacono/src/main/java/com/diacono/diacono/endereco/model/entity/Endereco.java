@@ -1,4 +1,4 @@
-package com.diacono.diacono.global.model.entity;
+package com.diacono.diacono.endereco.model.entity;
 
 import com.diacono.diacono.global.util.IdEntityUtils;
 import jakarta.persistence.Entity;
@@ -12,9 +12,14 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
-public class Igreja extends IdEntityUtils{
+public class Endereco extends IdEntityUtils {
 
-    private String nome;
-    private String cnpj;
+    private String cep;
+    private String rua;
+    private String cidade;
+    private String bairro;
+    private String complemento;
+    private String numero;
+    private String apelido;
 
 }

@@ -1,16 +1,18 @@
 package com.diacono.diacono.evento.mapper;
 
+import com.diacono.diacono.evento.model.dto.request.EventoCreateDTO;
 import com.diacono.diacono.evento.model.dto.response.EventoCompletoDTO;
 import com.diacono.diacono.evento.model.dto.response.EventoSimplificadoDTO;
 import com.diacono.diacono.evento.model.dto.response.EventoUnicoSimplificadoDTO;
 import com.diacono.diacono.evento.model.entity.Evento;
-import com.diacono.diacono.global.mapper.EnderecoMapper;
-import com.diacono.diacono.global.mapper.IgrejaMapper;
+import com.diacono.diacono.endereco.mapper.EnderecoMapper;
+import com.diacono.diacono.Igreja.mapper.IgrejaMapper;
 import com.diacono.diacono.membro.mapper.MembroMapper;
 import com.diacono.diacono.ministerio.mapper.MinisterioMapper;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-import java.util.List;
+import java.util.ArrayList;
 
 @Mapper(componentModel = "spring",
         uses = {MembroMapper.class, MinisterioMapper.class, EnderecoMapper.class, IgrejaMapper.class})
@@ -18,11 +20,11 @@ public interface EventoMapper {
 
     EventoUnicoSimplificadoDTO paraEventoUnicoSimplificadoDTO(Evento evento);
 
-    List<EventoUnicoSimplificadoDTO> paraListaEventoUnicoSimplificadoDTO(List<Evento> eventos);
+    ArrayList<EventoUnicoSimplificadoDTO> paraListaEventoUnicoSimplificadoDTO(ArrayList<Evento> eventos);
 
-    default EventoSimplificadoDTO paraEventoSimplificado(List<Evento> eventos, int totalSemana, int totalMes, int totalAno) {
+    default EventoSimplificadoDTO paraEventoSimplificado(ArrayList<Evento> eventos, int totalSemana, int totalMes, int totalAno) {
 
-        List<EventoUnicoSimplificadoDTO> listaMapeada = paraListaEventoUnicoSimplificadoDTO(eventos);
+        ArrayList<EventoUnicoSimplificadoDTO> listaMapeada = paraListaEventoUnicoSimplificadoDTO(eventos);
 
         return new EventoSimplificadoDTO(
                 listaMapeada,
@@ -33,4 +35,11 @@ public interface EventoMapper {
     }
 
     EventoCompletoDTO paraEventoCompletoDTO(Evento evento);
+
+    @Mapping(target = "idInterno", ignore = true)
+    @Mapping(target = "idExterno", ignore = true)
+    @Mapping(target = "igreja", ignore = true)
+    @Mapping(target = "organizador", ignore = true)
+    @Mapping(target = "ministerios", ignore = true)
+    Evento paraEvento(EventoCreateDTO request);
 }

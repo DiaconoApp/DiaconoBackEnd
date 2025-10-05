@@ -1,7 +1,7 @@
 package com.diacono.diacono.evento.model.entity;
 
-import com.diacono.diacono.global.model.entity.Endereco;
-import com.diacono.diacono.global.model.entity.Igreja;
+import com.diacono.diacono.endereco.model.entity.Endereco;
+import com.diacono.diacono.Igreja.model.entity.Igreja;
 
 import com.diacono.diacono.global.util.IdEntityUtils;
 import com.diacono.diacono.membro.model.entity.Membro;
@@ -13,8 +13,7 @@ import lombok.experimental.SuperBuilder;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
-
+import java.util.ArrayList;
 
 @Entity
 @Getter
@@ -35,7 +34,7 @@ public class Evento extends IdEntityUtils {
     private Membro organizador;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "fk_endereco", unique = true, nullable = true)
+    @JoinColumn(name = "fk_endereco", unique = false, nullable = true)
     private Endereco endereco;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -44,7 +43,7 @@ public class Evento extends IdEntityUtils {
             joinColumns = @JoinColumn(name = "fk-evento"),
             inverseJoinColumns = @JoinColumn(name = "fk-ministerio")
     )
-    private List<Ministerio> ministerios;
+    private ArrayList<Ministerio> ministerios;
 
 
     private String nome;
@@ -57,9 +56,10 @@ public class Evento extends IdEntityUtils {
 
     @Enumerated(EnumType.STRING)
     private TipoRecorrencia tipoRecorrencia;
+    private LocalDate dataInicioRecorrencia;
     private LocalDate dataTerminoRecorrencia;
     @Enumerated(EnumType.STRING)
-    private List<DiasSemanaRecorrencia> diasSemana;
-    private LocalTime horarioRecorrencia;
+    private ArrayList<DiasSemanaRecorrencia> diasSemana;
+    private int intervaloRecorrencia;
 
 }

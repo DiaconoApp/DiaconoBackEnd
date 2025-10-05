@@ -1,4 +1,4 @@
-package com.diacono.diacono.global.model.dto.response;
+package com.diacono.diacono.Igreja.model.dto.response;
 
 import java.util.UUID;
 

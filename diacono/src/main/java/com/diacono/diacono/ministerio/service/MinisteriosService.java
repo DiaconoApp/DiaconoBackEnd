@@ -7,7 +7,9 @@ import com.diacono.diacono.ministerio.model.entity.Ministerio;
 import com.diacono.diacono.ministerio.repository.MinisteriosRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class MinisteriosService {
@@ -90,6 +92,15 @@ public class MinisteriosService {
         }
 
         return null;
+
+    }
+
+
+    /*ESSE MÉTODO SE RELACIONA COM EVENTO*/
+    public ArrayList<Ministerio> buscarPorUUID(ArrayList<UUID> idExterno){
+
+        /*FAZER VALIDAÇÃO DE PRESENÇA -- LANÇAR EXCEÇÃO*/
+        return this.ministerios.findByIdExterno(idExterno);
 
     }
 
