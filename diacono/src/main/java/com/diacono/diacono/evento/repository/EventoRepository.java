@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public interface EventoRepository extends JpaRepository<Evento, Long> {
@@ -18,5 +19,5 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
     @Query("SELECT COUNT(e) FROM Evento e WHERE e.data BETWEEN :inicio AND :fim")
     int countEventosNoPeriodo(@Param("inicio") LocalDate inicio, @Param("fim") LocalDate fim);
 
-
+   Evento findByIdExterno(UUID idExterno);
 }
