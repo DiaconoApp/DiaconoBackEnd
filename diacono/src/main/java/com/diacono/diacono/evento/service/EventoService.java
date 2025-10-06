@@ -40,33 +40,41 @@ public class EventoService {
         this.ocorrenciaService = ocorrenciaService;
     }
 
-    public void buscarEventosPorMesEAno(int mes, int ano){
+    public EventoSimplificadoDTO buscarEventosPorMesEAno(int mes, int ano){
+
         YearMonth anoMes = YearMonth.of(ano, mes);
-        LocalDate inicio = anoMes.atDay(1);
-        LocalDate fim = anoMes.atEndOfMonth();
+        LocalDate inicioMes = anoMes.atDay(1);
+        LocalDate fimMes = anoMes.atEndOfMonth();
+
+        Year anoAtual = Year.of(ano);
+        LocalDate fimAno = anoAtual.atDay(anoAtual.length());
+        LocalDate inicioAno = Year.of(ano).atDay(1);
 
         //validações necessárias (mes dentro de 1 e 12) e eventos vazio
-        ArrayList<Evento> eventos = eventoRepository.findByPeriodo(inicio, fim);
-        ArrayList<Evento> todosOsEventos = new ArrayList<>();
+        ArrayList<Evento> todosOsEventosMes = new ArrayList<>();
+        ArrayList<Evento> eventosAno = eventoRepository.findByPeriodo(inicioAno, fimAno);
 
-        for(Evento evento: eventos){
+        int totalAno = 0;
+        int totalSemana = calcularTotalSemana();
+
+        for(Evento evento: eventosAno){
 
             if(evento.getTipoRecorrencia() == TipoRecorrencia.NAO_REPETE){
-                todosOsEventos.add(evento);
+                if (!evento.getData().isBefore(inicioMes) && !evento.getData().isAfter(fimMes)) {
+                    todosOsEventosMes.add(evento);
+                }
+                totalAno++;
             }else{
-                todosOsEventos.addAll(ocorrenciaService.gerarEvento(evento, inicio, fim));
+                todosOsEventosMes.addAll(ocorrenciaService.gerarEvento(evento, inicioMes, fimMes));
+                totalAno += ocorrenciaService.contarOcorrencias(evento, inicioAno, fimAno);
             }
 
         }
 
+        int totalMes = todosOsEventosMes.size();
 
-
-//        int totalSemana = totalSemana();
-//        int totalMes = totalMes(inicio, fim);
-//        int totalAno = totalAno(ano);
-//        EventoSimplificadoDTO eventoResponse = eventoMapper.paraEventoSimplificado(eventos, totalSemana, totalMes, totalAno);
-//
-//        return eventoResponse;
+        EventoSimplificadoDTO eventoResponse = eventoMapper.paraEventoSimplificado(todosOsEventosMes, totalSemana, totalMes, totalAno);
+        return eventoResponse;
     }
 
     public EventoCompletoDTO buscarEventoEspecifico(UUID id){
@@ -107,22 +115,27 @@ public class EventoService {
 
     }
 
-    private int totalSemana(){
+    private int calcularTotalSemana() {
         LocalDate hoje = LocalDate.now();
-        LocalDate diaInicioSemana = hoje.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-        LocalDate diaFimSemana = hoje.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
-        return eventoRepository.countEventosNoPeriodo(diaInicioSemana, diaFimSemana);
-    }
 
-    private int totalMes(LocalDate inicio, LocalDate fim){
-        return eventoRepository.countEventosNoPeriodo(inicio, fim);
-    }
+        LocalDate inicioSemana = hoje.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate fimSemana = hoje.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
 
-    private int totalAno(int ano){
-        Year anoAtual = Year.of(ano);
-        LocalDate inicio = anoAtual.atDay(1);
-        LocalDate fim = anoAtual.atDay(anoAtual.length());
-        return eventoRepository.countEventosNoPeriodo(inicio, fim);
+        ArrayList<Evento> eventosMestres = eventoRepository.findByPeriodo(inicioSemana, fimSemana);
+
+        int totalSemana = 0;
+
+        for (Evento evento : eventosMestres) {
+
+            if (evento.getTipoRecorrencia() == TipoRecorrencia.NAO_REPETE) {
+                if (!evento.getData().isBefore(inicioSemana) && !evento.getData().isAfter(fimSemana)) {
+                    totalSemana++;
+                }
+            } else {
+                totalSemana += ocorrenciaService.contarOcorrencias(evento, inicioSemana, fimSemana);
+            }
+        }
+        return totalSemana;
     }
 
 

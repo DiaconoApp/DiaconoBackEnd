@@ -40,8 +40,8 @@ public class Evento extends IdEntityUtils {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "evento_ministerio",
-            joinColumns = @JoinColumn(name = "fk-evento"),
-            inverseJoinColumns = @JoinColumn(name = "fk-ministerio")
+            joinColumns = @JoinColumn(name = "fk_evento"),
+            inverseJoinColumns = @JoinColumn(name = "fk_ministerio")
     )
     private ArrayList<Ministerio> ministerios;
 
