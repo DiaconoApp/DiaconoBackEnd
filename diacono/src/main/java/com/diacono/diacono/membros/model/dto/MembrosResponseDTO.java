@@ -8,5 +8,6 @@ public record MembrosResponseDTO(
         String email,
         String celular,
         LocalDate dataNascimento,
+        String ministerio,
         Boolean ativo
         ) {}

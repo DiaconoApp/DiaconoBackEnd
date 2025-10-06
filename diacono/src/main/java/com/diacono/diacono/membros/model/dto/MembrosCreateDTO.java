@@ -27,6 +27,8 @@ public record MembrosCreateDTO(
         @NotBlank(message = "O campo senha não pode estar vazio")
         String senha,
 
+        String ministerio,
+
         Boolean status,
 
         EnderecoMembroDTO membroEnderecoDTO

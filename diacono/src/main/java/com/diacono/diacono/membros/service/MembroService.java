@@ -7,6 +7,8 @@ import com.diacono.diacono.membros.model.dto.MembrosUpdateDTO;
 import com.diacono.diacono.membros.model.entity.EnderecoMembro;
 import com.diacono.diacono.membros.model.entity.Membro;
 import com.diacono.diacono.membros.repository.MembrosRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +23,7 @@ public class MembroService {
     }
 
     public MembrosResponseDTO criar (MembrosCreateDTO membroDTO){
+
         EnderecoMembro endereco = new EnderecoMembro(
                 membroDTO.membroEnderecoDTO().cep(),
                 membroDTO.membroEnderecoDTO().estado(),
@@ -39,29 +42,52 @@ public class MembroService {
                 membroDTO.email(),
                 membroDTO.celular(),
                 membroDTO.senha(),
+                membroDTO.ministerio(),
                 membroDTO.status(),
                 endereco
         );
 
         Membro salvo = membrosRepository.save(membro);
 
-        return new MembrosResponseDTO(salvo.getId(), salvo.getNome(), salvo.getEmail(), salvo.getCelular(), salvo.getDataNascimento(), salvo.getAtivo());
+        return new MembrosResponseDTO(salvo.getId(), salvo.getNome(), salvo.getEmail(), salvo.getCelular(), salvo.getDataNascimento(), salvo.getMinisterio(), salvo.getAtivo());
     }
 
 //    public List<MembrosResponseDTO> getAll (){
 //
 //        List<Membro> membros = membrosRepository.findAll();
 //
+//
 //        if(membros.isEmpty()){
 //            return null;
 //        }
-//
-//        List<MembrosResponseDTO> membrosResponseDTOS = membros.stream()
-//                .map(m -> new MembrosResponseDTO(m.getNome(), m.getDataNascimento(), m.getId(), m.getEmail()))
+//        List<MembrosResponseDTO> membrosResponseDTO = membros.stream()
+//                .map(m -> new MembrosResponseDTO(m.getId(), m.getNome(), m.getEmail(), m.getCelular(), m.getDataNascimento(), m.getMinisterio(), m.getAtivo()))
 //                .toList();
 //
-//        return membrosResponseDTOS;
+//        return membrosResponseDTO;
 //    }
+
+    public Page<MembrosResponseDTO> getAll(Pageable pageable) {
+
+        return membrosRepository.findAll(pageable)
+                .map(membro -> new MembrosResponseDTO(membro.getId(),
+                        membro.getNome(), membro.getEmail(),
+                        membro.getCelular(), membro.getDataNascimento(),
+                        membro.getMinisterio(), membro.getAtivo()));
+    }
+
+    public Long getMembroAtivos(){
+        return membrosRepository.countMembroStatusIgualAtivo();
+    }
+
+    public Long getMembrosComMinisterio(){
+        return membrosRepository.countMembrosComMinisterio();
+    }
+
+    public Long getCountMembrosDiscipulados() {
+        return membrosRepository.countMembrosDiscipulados();
+    }
+
 //
 //    public MembrosResponseDTO getForID (Integer id){
 //

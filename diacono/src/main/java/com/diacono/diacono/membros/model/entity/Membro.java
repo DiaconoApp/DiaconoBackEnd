@@ -16,11 +16,15 @@ public class Membro {
     private String email;
     private String celular;
     private String senha;
+    private String ministerio;
     private Boolean ativo = true;
     @OneToOne(cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     private EnderecoMembro enderecoMembro;
+    @ManyToOne
+    @JoinColumn(name = "discipulador_id")
+    private Membro discipulador;
 
-    public Membro(Integer id, String nome, String cpf, LocalDate dataNascimento, String email, String celular, String senha, Boolean ativo, EnderecoMembro enderecoMembro) {
+    public Membro(Integer id, String nome, String cpf, LocalDate dataNascimento, String email, String celular, String senha, String ministerio, Boolean ativo, EnderecoMembro enderecoMembro) {
         this.id = id;
         this.nome = nome;
         this.cpf = cpf;
@@ -28,6 +32,7 @@ public class Membro {
         this.email = email;
         this.celular = celular;
         this.senha = senha;
+        this.ministerio = ministerio;
         this.ativo = ativo;
         this.enderecoMembro = enderecoMembro;
     }
@@ -60,8 +65,20 @@ public class Membro {
         return senha;
     }
 
+    public String getMinisterio() {
+        return ministerio;
+    }
+
     public Boolean getAtivo() {
         return ativo;
+    }
+
+    public Membro getDiscipulador() {
+        return discipulador;
+    }
+
+    public void setDiscipulador(Membro discipulador) {
+        this.discipulador = discipulador;
     }
 
     public EnderecoMembro getEnderecoMembro() {
