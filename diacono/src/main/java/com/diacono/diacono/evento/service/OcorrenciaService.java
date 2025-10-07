@@ -149,7 +149,7 @@ public class OcorrenciaService {
         return dataAtual;
     }
 
-    private Evento criarOcorrencia(Evento eventoMestre, LocalDate novaData) {
+    public Evento criarOcorrencia(Evento eventoMestre, LocalDate novaData) {
         return eventoMestre.toBuilder()
                 .data(novaData)
                 .tipoRecorrencia(TipoRecorrencia.NAO_REPETE)

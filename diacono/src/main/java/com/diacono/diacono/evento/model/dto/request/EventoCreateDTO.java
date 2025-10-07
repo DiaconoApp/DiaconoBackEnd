@@ -2,7 +2,7 @@ package com.diacono.diacono.evento.model.dto.request;
 
 import com.diacono.diacono.evento.model.entity.DiasSemanaRecorrencia;
 import com.diacono.diacono.evento.model.entity.TipoRecorrencia;
-import com.diacono.diacono.endereco.model.dto.request.EnderecoDTO;
+import com.diacono.diacono.endereco.model.dto.request.EnderecoEventoDTO;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -38,6 +38,6 @@ public record EventoCreateDTO(
         LocalTime horarioRecorrencia,
         int intervaloRecorrencia,
 
-        EnderecoDTO endereco
+        EnderecoEventoDTO endereco
 ) {
 }

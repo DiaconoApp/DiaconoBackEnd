@@ -1,6 +1,9 @@
 package com.diacono.diacono.evento.service;
 
 import com.diacono.diacono.Igreja.service.IgrejaService;
+import com.diacono.diacono.endereco.mapper.EnderecoEventoMapper;
+import com.diacono.diacono.endereco.model.entity.EnderecoEvento;
+import com.diacono.diacono.endereco.service.EnderecoEventoService;
 import com.diacono.diacono.evento.mapper.EventoMapper;
 import com.diacono.diacono.evento.model.dto.request.EventoCreateDTO;
 import com.diacono.diacono.evento.model.dto.response.EventoCompletoDTO;
@@ -30,14 +33,18 @@ public class EventoService {
     private final MinisteriosService ministerioService;
     private final MembroService membroService;
     private final OcorrenciaService ocorrenciaService;
+    private final EnderecoEventoMapper enderecoEventoMapper;
+    private final EnderecoEventoService enderecoEventoService;
 
-    public EventoService(EventoRepository eventoRepository, EventoMapper eventoMapper, IgrejaService igrejaService, MinisteriosService ministerioService, MembroService membroService, OcorrenciaService ocorrenciaService) {
+    public EventoService(EventoRepository eventoRepository, EventoMapper eventoMapper, IgrejaService igrejaService, MinisteriosService ministerioService, MembroService membroService, OcorrenciaService ocorrenciaService, EnderecoEventoMapper enderecoEventoMapper, EnderecoEventoService enderecoEventoService) {
         this.eventoRepository = eventoRepository;
         this.eventoMapper = eventoMapper;
         this.igrejaService = igrejaService;
         this.ministerioService = ministerioService;
         this.membroService = membroService;
         this.ocorrenciaService = ocorrenciaService;
+        this.enderecoEventoMapper = enderecoEventoMapper;
+        this.enderecoEventoService = enderecoEventoService;
     }
 
     public EventoSimplificadoDTO buscarEventosPorMesEAno(int mes, int ano){
@@ -77,12 +84,21 @@ public class EventoService {
         return eventoResponse;
     }
 
-    public EventoCompletoDTO buscarEventoEspecifico(UUID id){
-
+    public EventoCompletoDTO buscarEventoEspecifico(UUID id, LocalDate dataHoje){
+        //Validar dataHoje preenchida
         //validar a existencia do evento, se n existir lançar exceção
         Evento evento = eventoRepository.findByIdExterno(id);
 
-        EventoCompletoDTO eventoResponse = eventoMapper.paraEventoCompletoDTO(evento);
+        Evento eventoOcorrencia;
+
+        if (evento.getTipoRecorrencia() == TipoRecorrencia.NAO_REPETE) {
+            eventoOcorrencia = evento;
+        } else {
+            eventoOcorrencia = ocorrenciaService.criarOcorrencia(evento, dataHoje);
+
+        }
+
+        EventoCompletoDTO eventoResponse = eventoMapper.paraEventoCompletoDTO(eventoOcorrencia);
 
         return eventoResponse;
     }
@@ -93,12 +109,31 @@ public class EventoService {
         /*EM UM FUTURO MELHOR AS QUERYS DE BUSCA DE MINISTERIO E ORGANIZADOR, LEVANDO-SE
         * EM CONSIDERAÇÃO A IGREJA DONA*/
 
+
         Evento evento = eventoMapper.paraEvento(request);
+        EnderecoEvento enderecoEvento;
+        if (request.endereco().idExterno() != null) {
+
+            enderecoEvento = enderecoEventoService.buscarPorUUID(request.endereco().idExterno());
+
+        } else {
+            enderecoEvento = enderecoEventoMapper.paraEndereco(request.endereco());
+        }
+        //VALIDAR TODOS OS CAMPOS PREENCHIDOS NO SET
+        evento.setEnderecoEvento(enderecoEvento);
         evento.setIgreja(igrejaService.buscarUUID(request.fkIgreja()));
         evento.setOrganizador(membroService.buscarPorUUID(request.fkOrganizador()));
         evento.setMinisterios(ministerioService.buscarPorUUID(request.fkMinisterios()));
 
         return criarEventoMestre(evento);
+
+    }
+
+    @Transactional
+    public boolean apagarEvento(UUID idExterno){
+
+        //validar idExterno preenchido
+        return eventoRepository.deleteByIdExterno(idExterno) > 0;
 
     }
 

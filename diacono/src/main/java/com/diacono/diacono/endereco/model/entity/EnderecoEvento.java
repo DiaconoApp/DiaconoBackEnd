@@ -12,7 +12,7 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
-public class Endereco extends IdEntityUtils {
+public class EnderecoEvento extends IdEntityUtils {
 
     private String cep;
     private String rua;

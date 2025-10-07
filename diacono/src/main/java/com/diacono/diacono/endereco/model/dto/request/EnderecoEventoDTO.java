@@ -1,9 +1,11 @@
 package com.diacono.diacono.endereco.model.dto.request;
 
-public record EnderecoDTO(
+import java.util.UUID;
+
+public record EnderecoEventoDTO(
 
         //fazer as validações
-
+        UUID idExterno,
         String cep,
         String rua,
         String cidade,

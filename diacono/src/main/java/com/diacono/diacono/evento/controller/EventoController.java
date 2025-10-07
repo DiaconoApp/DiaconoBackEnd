@@ -5,6 +5,7 @@ import com.diacono.diacono.evento.model.dto.request.EventoCreateDTO;
 import com.diacono.diacono.evento.service.EventoService;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @RestController
@@ -22,14 +23,21 @@ public class EventoController {
         eventoService.buscarEventosPorMesEAno(mes, ano);
     }
 
-    @GetMapping("/{id}")
-    public void buscarEventoEspecifico(@PathVariable UUID id){
-        eventoService.buscarEventoEspecifico(id);
+    @GetMapping("/{id}/{dataHoje}")
+    public void buscarEventoEspecifico(@PathVariable UUID id,@PathVariable LocalDate dataHoje){
+        eventoService.buscarEventoEspecifico(id, dataHoje);
     }
 
     @PostMapping
     public void criarEvento(@RequestBody EventoCreateDTO request){
-
+        eventoService.criarEvento(request);
     }
+
+    @DeleteMapping("/{id}")
+    public void apagarEvento(@PathVariable UUID idExterno){
+        eventoService.apagarEvento(idExterno);
+    }
+
+
 
 }

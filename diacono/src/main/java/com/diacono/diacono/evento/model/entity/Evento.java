@@ -1,6 +1,6 @@
 package com.diacono.diacono.evento.model.entity;
 
-import com.diacono.diacono.endereco.model.entity.Endereco;
+import com.diacono.diacono.endereco.model.entity.EnderecoEvento;
 import com.diacono.diacono.Igreja.model.entity.Igreja;
 
 import com.diacono.diacono.global.util.IdEntityUtils;
@@ -33,9 +33,9 @@ public class Evento extends IdEntityUtils {
     )
     private Membro organizador;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_endereco", unique = false, nullable = true)
-    private Endereco endereco;
+    private EnderecoEvento enderecoEvento;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
