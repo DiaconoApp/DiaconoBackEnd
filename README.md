@@ -1,7 +1,5 @@
 # Diacono
 
-Resumo breve do projeto Diacono — backend
-
 Tecnologias e dependências
 
 - Java 21
@@ -32,7 +30,7 @@ Funcionalidades principais
   - Atualização parcial (nome, status)
   - Remoção por id
 
-Como rodar (resumo)
+Guia de Execução
 
 1. Entrar na pasta do módulo:
 
@@ -42,12 +40,3 @@ Como rodar (resumo)
 
    mvn clean package
    mvn spring-boot:run
-
-Observações rápidas
-
-- O uso do H2 torna o projeto pronto para testes locais sem configuração adicional; para produção configure um banco externo.
-- As senhas atualmente são salvas em texto no modelo — para produção, aplique hashing e uma política de segurança.
-
----
-
-Se quiser, eu acrescento um README mais longo com exemplos de payloads ou adiciono um Dockerfile para execução em container.
