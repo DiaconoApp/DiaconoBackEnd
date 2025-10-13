@@ -39,7 +39,7 @@ public class MinisteriosController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MinisterioResponseDTO> readUniqueMinisterio(@PathVariable Integer id){
+    public ResponseEntity<MinisterioResponseDTO> readUniqueMinisterio(@PathVariable Long id){
 
         MinisterioResponseDTO response = ministerio.getForIDMinisterio(id);
 
@@ -48,7 +48,7 @@ public class MinisteriosController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMinisterio(@PathVariable Integer id){
+    public ResponseEntity<Void> deleteMinisterio(@PathVariable Long id){
 
         Boolean response = ministerio.deleteMinisterio(id);
 
@@ -57,7 +57,7 @@ public class MinisteriosController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<MinisterioResponseDTO> updateSomeFieldsMinisterio(@RequestBody MinisterioUpdateDTO ministerioDTO, @PathVariable Integer id){
+    public ResponseEntity<MinisterioResponseDTO> updateSomeFieldsMinisterio(@RequestBody MinisterioUpdateDTO ministerioDTO, @PathVariable Long id){
 
         MinisterioResponseDTO response = ministerio.updateMinisterio(ministerioDTO, id);
 

@@ -8,7 +8,7 @@ import com.diacono.diacono.ministerio.model.dto.response.MinisterioSimplificadoD
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
+import java.util.List;
 
 public record EventoCompletoDTO(
         String nome,
@@ -19,7 +19,7 @@ public record EventoCompletoDTO(
         LocalTime horaFim,
         BigDecimal custo,
         MembroSimplificadoDTO organizador,
-        ArrayList<MinisterioSimplificadoDTO> ministerios,
+        List<MinisterioSimplificadoDTO> ministerios,
         EnderecoEventoSimplificadoDTO endereco,
         IgrejaSimplificadoDTO igreja
 

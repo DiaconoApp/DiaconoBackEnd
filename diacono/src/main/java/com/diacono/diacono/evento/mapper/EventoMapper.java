@@ -1,6 +1,7 @@
 package com.diacono.diacono.evento.mapper;
 
 import com.diacono.diacono.evento.model.dto.request.EventoCreateDTO;
+import com.diacono.diacono.evento.model.dto.request.EventoUpdateDTO;
 import com.diacono.diacono.evento.model.dto.response.EventoCompletoDTO;
 import com.diacono.diacono.evento.model.dto.response.EventoSimplificadoDTO;
 import com.diacono.diacono.evento.model.dto.response.EventoUnicoSimplificadoDTO;
@@ -13,6 +14,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Mapper(componentModel = "spring",
         uses = {MembroMapper.class, MinisterioMapper.class, EnderecoEventoMapper.class, IgrejaMapper.class})
@@ -20,11 +22,11 @@ public interface EventoMapper {
 
     EventoUnicoSimplificadoDTO paraEventoUnicoSimplificadoDTO(Evento evento);
 
-    ArrayList<EventoUnicoSimplificadoDTO> paraListaEventoUnicoSimplificadoDTO(ArrayList<Evento> eventos);
+    List<EventoUnicoSimplificadoDTO> paraListaEventoUnicoSimplificadoDTO(List<Evento> eventos);
 
-    default EventoSimplificadoDTO paraEventoSimplificado(ArrayList<Evento> eventos, int totalSemana, int totalMes, int totalAno) {
+    default EventoSimplificadoDTO paraEventoSimplificado(List<Evento> eventos, int totalSemana, int totalMes, int totalAno) {
 
-        ArrayList<EventoUnicoSimplificadoDTO> listaMapeada = paraListaEventoUnicoSimplificadoDTO(eventos);
+        List<EventoUnicoSimplificadoDTO> listaMapeada = paraListaEventoUnicoSimplificadoDTO(eventos);
 
         return new EventoSimplificadoDTO(
                 listaMapeada,
@@ -42,4 +44,11 @@ public interface EventoMapper {
     @Mapping(target = "organizador", ignore = true)
     @Mapping(target = "ministerios", ignore = true)
     Evento paraEvento(EventoCreateDTO request);
+
+    @Mapping(target = "idInterno", ignore = true)
+    @Mapping(target = "idExterno", ignore = true)
+    @Mapping(target = "igreja", ignore = true)
+    @Mapping(target = "organizador", ignore = true)
+    @Mapping(target = "ministerios", ignore = true)
+    Evento paraEvento(EventoUpdateDTO request);
 }

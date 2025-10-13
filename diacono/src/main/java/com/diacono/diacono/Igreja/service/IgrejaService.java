@@ -2,6 +2,7 @@ package com.diacono.diacono.Igreja.service;
 
 import com.diacono.diacono.Igreja.model.entity.Igreja;
 import com.diacono.diacono.Igreja.repository.IgrejaRepository;
+import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -18,7 +19,13 @@ public class IgrejaService {
     /*ESSE MÉTODO SE RELACIONA COM EVENTO*/
     public Igreja buscarUUID(UUID idExterno){
         //adicionar validação da existência da Igreja -- SE DER ERRO LANÇAR EXCEÇÃO
-        return igrejaRepository.findByIdExterno(idExterno);
+        Igreja igreja = igrejaRepository.findByIdExterno(idExterno);
+
+        if(igreja == null){
+            throw new ObjectNotFoundException("Igreja não encontrada");
+        }
+
+        return igreja;
 
     }
 }

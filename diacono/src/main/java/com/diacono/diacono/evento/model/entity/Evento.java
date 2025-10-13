@@ -13,11 +13,10 @@ import lombok.experimental.SuperBuilder;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
 public class Evento extends IdEntityUtils {
@@ -26,6 +25,7 @@ public class Evento extends IdEntityUtils {
     @JoinColumn (name = "fk_igreja", nullable = false)
     private Igreja igreja;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "fk_organizador",
@@ -33,7 +33,7 @@ public class Evento extends IdEntityUtils {
     )
     private Membro organizador;
 
-    @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_endereco", unique = false, nullable = true)
     private EnderecoEvento enderecoEvento;
 
@@ -43,7 +43,7 @@ public class Evento extends IdEntityUtils {
             joinColumns = @JoinColumn(name = "fk_evento"),
             inverseJoinColumns = @JoinColumn(name = "fk_ministerio")
     )
-    private ArrayList<Ministerio> ministerios;
+    private List<Ministerio> ministerios;
 
 
     private String nome;
@@ -58,8 +58,74 @@ public class Evento extends IdEntityUtils {
     private TipoRecorrencia tipoRecorrencia;
     private LocalDate dataInicioRecorrencia;
     private LocalDate dataTerminoRecorrencia;
+
+    @ElementCollection
     @Enumerated(EnumType.STRING)
-    private ArrayList<DiasSemanaRecorrencia> diasSemana;
+    private List<DiasSemanaRecorrencia> diasSemana;
     private int intervaloRecorrencia;
 
+
+    public void setIgreja(Igreja igreja) {
+        this.igreja = igreja;
+    }
+
+    public void setOrganizador(Membro organizador) {
+        this.organizador = organizador;
+    }
+
+    public void setEnderecoEvento(EnderecoEvento enderecoEvento) {
+        this.enderecoEvento = enderecoEvento;
+    }
+
+    public void setMinisterios(List<Ministerio> ministerios) {
+        this.ministerios = ministerios;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public void setPublicoAlvo(String publicoAlvo) {
+        this.publicoAlvo = publicoAlvo;
+    }
+
+    public void setData(LocalDate data) {
+        this.data = data;
+    }
+
+    public void setHoraInicio(LocalTime horaInicio) {
+        this.horaInicio = horaInicio;
+    }
+
+    public void setHoraFim(LocalTime horaFim) {
+        this.horaFim = horaFim;
+    }
+
+    public void setCusto(BigDecimal custo) {
+        this.custo = custo;
+    }
+
+    public void setTipoRecorrencia(TipoRecorrencia tipoRecorrencia) {
+        this.tipoRecorrencia = tipoRecorrencia;
+    }
+
+    public void setDataInicioRecorrencia(LocalDate dataInicioRecorrencia) {
+        this.dataInicioRecorrencia = dataInicioRecorrencia;
+    }
+
+    public void setDataTerminoRecorrencia(LocalDate dataTerminoRecorrencia) {
+        this.dataTerminoRecorrencia = dataTerminoRecorrencia;
+    }
+
+    public void setDiasSemana(List<DiasSemanaRecorrencia> diasSemana) {
+        this.diasSemana = diasSemana;
+    }
+
+    public void setIntervaloRecorrencia(int intervaloRecorrencia) {
+        this.intervaloRecorrencia = intervaloRecorrencia;
+    }
 }

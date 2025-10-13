@@ -1,5 +1,6 @@
 package com.diacono.diacono.ministerio.service;
 
+import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.ministerio.model.dto.MinisterioCreateDTO;
 import com.diacono.diacono.ministerio.model.dto.MinisterioResponseDTO;
 import com.diacono.diacono.ministerio.model.dto.MinisterioUpdateDTO;
@@ -45,7 +46,7 @@ public class MinisteriosService {
 
     }
 
-    public MinisterioResponseDTO getForIDMinisterio (Integer id){
+    public MinisterioResponseDTO getForIDMinisterio (Long id){
 
         if(ministerios.existsById(id)){
 
@@ -58,7 +59,7 @@ public class MinisteriosService {
 
     }
 
-    public Boolean deleteMinisterio(Integer id){
+    public Boolean deleteMinisterio(Long id){
 
         if(ministerios.existsById(id)){
 
@@ -71,7 +72,7 @@ public class MinisteriosService {
 
     }
 
-    public MinisterioResponseDTO updateMinisterio(MinisterioUpdateDTO ministerioDTO, Integer id){
+    public MinisterioResponseDTO updateMinisterio(MinisterioUpdateDTO ministerioDTO, Long id){
 
         if(ministerios.existsById(id)){
 
@@ -97,10 +98,25 @@ public class MinisteriosService {
 
 
     /*ESSE MÉTODO SE RELACIONA COM EVENTO*/
-    public ArrayList<Ministerio> buscarPorUUID(ArrayList<UUID> idExterno){
+    public List<Ministerio> buscarPorUUID(List<UUID> idExterno){
+        List<Ministerio> ministerios = new ArrayList<>();
 
-        /*FAZER VALIDAÇÃO DE PRESENÇA -- LANÇAR EXCEÇÃO*/
-        return this.ministerios.findByIdExterno(idExterno);
+        idExterno.forEach(
+                id -> {
+                    if(idExterno != null){
+                        List<Ministerio> encontrado = this.ministerios.findByIdExterno(id);
+                        if(!encontrado.isEmpty()){
+                            ministerios.add(encontrado.get(0));
+                        }
+                    }
+                }
+        );
+
+        if(ministerios.isEmpty() || ministerios == null){
+            throw new ObjectNotFoundException("Ministérios não encontrados");
+        }
+
+        return ministerios;
 
     }
 

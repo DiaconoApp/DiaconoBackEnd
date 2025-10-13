@@ -1,0 +1,53 @@
+meta {
+  name: createEvento
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8080/eventos
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "fkIgreja": "550e8400-e29b-41d4-a716-446655440000",
+    "fkOrganizador": "550e8400-e29b-41d4-a716-446655440010",
+    "fkMinisterios": [
+      "550e8400-e29b-41d4-a716-446655440022",
+      "550e8400-e29b-41d4-a716-446655440023"
+    ],
+    "nome": "Reunião Semanal de Líderes",
+    "descricao": "Reunião obrigatória para líderes de ministérios. Planejamento e alinhamento de metas.",
+    "publicoAlvo": "Líderes de Ministério e Diáconos",
+    "data": "2025-10-20",
+    "horaInicio": "19:30:00",
+    "horaFim": "21:00:00",
+    "custo": 0.00,
+    
+    "tipoRecorrencia": "SEMANAL",
+    "dataInicioRecorrencia": "2025-10-20",
+    "dataTerminoRecorrencia": "2026-03-31",
+    "diasSemana": [
+      "SEGUNDA",  
+      "QUARTA" 
+    ],
+    "horarioRecorrencia": "19:30:00",
+    "intervaloRecorrencia": 1,
+    
+    "endereco": {
+      "cep": "01049-010",
+      "rua": "Avenida Ipiranga",
+      "cidade": "São Paulo",
+      "bairro": "Centro",
+      "complemento": "Sala 301",
+      "numero": "350",
+      "apelido": "Sala de Reuniões"
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+}

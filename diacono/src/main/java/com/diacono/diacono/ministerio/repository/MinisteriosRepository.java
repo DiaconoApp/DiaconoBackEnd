@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface MinisteriosRepository extends JpaRepository<Ministerio, Integer> {
+public interface MinisteriosRepository extends JpaRepository<Ministerio, Long> {
 
-    ArrayList<Ministerio> findByIdExterno(ArrayList<UUID> idExterno);
+    ArrayList<Ministerio> findByIdExterno(UUID idExterno);
 
 }

@@ -1,0 +1,20 @@
+meta {
+  name: readAllEventos
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:8080/eventos?mes={valor_do_mes}&ano={valor_do_ano}
+  body: none
+  auth: inherit
+}
+
+params:query {
+  mes: {valor_do_mes}
+  ano: {valor_do_ano}
+}
+
+settings {
+  encodeUrl: true
+}

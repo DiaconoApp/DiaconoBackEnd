@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface MembrosRepository extends JpaRepository<Membro, Integer> {
+public interface MembrosRepository extends JpaRepository<Membro, Long> {
 
     Membro findByIdExterno(UUID idExterno);
 

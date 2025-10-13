@@ -12,7 +12,7 @@ import java.util.UUID;
 @MappedSuperclass
 @Getter
 @NoArgsConstructor
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 public abstract class IdEntityUtils {
 
     // 1. CHAVE INTERNA

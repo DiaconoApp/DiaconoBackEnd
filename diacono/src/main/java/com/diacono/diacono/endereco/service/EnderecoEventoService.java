@@ -2,7 +2,7 @@ package com.diacono.diacono.endereco.service;
 
 import com.diacono.diacono.endereco.model.entity.EnderecoEvento;
 import com.diacono.diacono.endereco.repository.EnderecoEventoRepository;
-import com.diacono.diacono.evento.model.entity.Evento;
+import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -17,7 +17,17 @@ public class EnderecoEventoService {
     }
 
     public EnderecoEvento buscarPorUUID(UUID idExterno){
-        //validar se o ID está preenchido
-        return enderecoEventoRepository.findByIdExterno(idExterno);
+        EnderecoEvento enderecoEvento = enderecoEventoRepository.findByIdExterno(idExterno);
+
+        if(enderecoEvento == null){
+            throw new ObjectNotFoundException("Endereço do evento não encontrado");
+        }
+
+        return enderecoEvento;
     }
+
+    public void salvarEnderecoEvento(EnderecoEvento endereco){
+        EnderecoEvento salvo = enderecoEventoRepository.save(endereco);
+    }
+
 }

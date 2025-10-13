@@ -1,18 +1,18 @@
 package com.diacono.diacono.membro.model.entity;
 
+import com.diacono.diacono.global.util.IdEntityUtils;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 
 @Entity
-public class Membro  {
+@SuperBuilder(toBuilder = true)
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+public class Membro extends IdEntityUtils {
 
     private String nome;
     private String email;
@@ -37,9 +37,7 @@ public class Membro  {
     public Membro() {
     }
 
-    public Integer getId() {
-        return id;
-    }
+
 
     public String getNome() {
         return nome;
