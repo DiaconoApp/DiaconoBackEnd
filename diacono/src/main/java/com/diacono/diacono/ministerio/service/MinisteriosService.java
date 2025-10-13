@@ -1,5 +1,6 @@
 package com.diacono.diacono.ministerio.service;
 
+import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.ministerio.model.dto.MinisterioCreateDTO;
 import com.diacono.diacono.ministerio.model.dto.MinisterioResponseDTO;
 import com.diacono.diacono.ministerio.model.dto.MinisterioUpdateDTO;
@@ -7,7 +8,9 @@ import com.diacono.diacono.ministerio.model.entity.Ministerio;
 import com.diacono.diacono.ministerio.repository.MinisteriosRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class MinisteriosService {
@@ -43,7 +46,7 @@ public class MinisteriosService {
 
     }
 
-    public MinisterioResponseDTO getForIDMinisterio (Integer id){
+    public MinisterioResponseDTO getForIDMinisterio (Long id){
 
         if(ministerios.existsById(id)){
 
@@ -56,7 +59,7 @@ public class MinisteriosService {
 
     }
 
-    public Boolean deleteMinisterio(Integer id){
+    public Boolean deleteMinisterio(Long id){
 
         if(ministerios.existsById(id)){
 
@@ -69,7 +72,7 @@ public class MinisteriosService {
 
     }
 
-    public MinisterioResponseDTO updateMinisterio(MinisterioUpdateDTO ministerioDTO, Integer id){
+    public MinisterioResponseDTO updateMinisterio(MinisterioUpdateDTO ministerioDTO, Long id){
 
         if(ministerios.existsById(id)){
 
@@ -90,6 +93,30 @@ public class MinisteriosService {
         }
 
         return null;
+
+    }
+
+
+    /*ESSE MÉTODO SE RELACIONA COM EVENTO*/
+    public List<Ministerio> buscarPorUUID(List<UUID> idExterno){
+        List<Ministerio> ministerios = new ArrayList<>();
+
+        idExterno.forEach(
+                id -> {
+                    if(idExterno != null){
+                        List<Ministerio> encontrado = this.ministerios.findByIdExterno(id);
+                        if(!encontrado.isEmpty()){
+                            ministerios.add(encontrado.get(0));
+                        }
+                    }
+                }
+        );
+
+        if(ministerios.isEmpty() || ministerios == null){
+            throw new ObjectNotFoundException("Ministérios não encontrados");
+        }
+
+        return ministerios;
 
     }
 

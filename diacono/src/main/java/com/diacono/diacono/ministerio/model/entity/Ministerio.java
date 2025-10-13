@@ -1,18 +1,18 @@
 package com.diacono.diacono.ministerio.model.entity;
 
+import com.diacono.diacono.global.util.IdEntityUtils;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 
 @Entity
-public class Ministerio {
+@SuperBuilder(toBuilder = true)
+public class Ministerio extends IdEntityUtils{
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
 
     private String nome;
     private LocalDate dataCriacao;
@@ -29,13 +29,6 @@ public class Ministerio {
     public Ministerio() {
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
 
     public String getNome() {
         return nome;

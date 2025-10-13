@@ -35,8 +35,9 @@ public class SecurityConfig {
         http.authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll()) //mudar o permiteAll
                 .csrf(csrf -> csrf.disable()) //ativar o csrf -> produção
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .headers(headers -> headers
+                .frameOptions(frame -> frame.disable()));
         return http.build();
     }
 
