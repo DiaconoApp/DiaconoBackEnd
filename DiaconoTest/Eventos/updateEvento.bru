@@ -5,9 +5,39 @@ meta {
 }
 
 put {
-  url: http://localhost:8080/eventos/id
-  body: none
+  url: http://localhost:8080/eventos/49a4d19c-3cae-4493-91d7-e6e7e80c1ef2
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "fkMinisterios": [
+      "550e8400-e29b-41d4-a716-446655440020"
+    ],
+    "nome": "Reunião de Líderes - Ajuste",
+    "descricao": "Reunião mensal com todos os líderes de ministério.",
+    "publicoAlvo": "Líderes de Ministérios",
+    "data": "2025-11-20",
+    "horaInicio": "18:00:00",
+    "horaFim": "20:00:00",
+    "custo": 15.50,
+    "tipoRecorrencia": "NAO_REPETE",
+    "dataInicioRecorrencia": null,
+    "dataTerminoRecorrencia": null,
+    "diasSemana": null,
+    "horarioRecorrencia": null,
+    "intervaloRecorrencia": 0,
+    "endereco": {
+      "cep": "05000-000",
+      "rua": "Nova Rua",
+      "cidade": "São Paulo",
+      "bairro": "Nova Cidade",
+      "complemento": "Sala 101",
+      "numero": "300",
+      "apelido": "Sala de Reuniões"
+    }
+  }
 }
 
 settings {

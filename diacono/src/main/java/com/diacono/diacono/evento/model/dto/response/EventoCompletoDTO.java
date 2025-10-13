@@ -20,7 +20,7 @@ public record EventoCompletoDTO(
         BigDecimal custo,
         MembroSimplificadoDTO organizador,
         List<MinisterioSimplificadoDTO> ministerios,
-        EnderecoEventoSimplificadoDTO endereco,
+        EnderecoEventoSimplificadoDTO enderecoEvento,
         IgrejaSimplificadoDTO igreja
 
 ) {

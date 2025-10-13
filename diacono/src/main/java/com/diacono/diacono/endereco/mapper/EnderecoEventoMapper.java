@@ -9,7 +9,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface EnderecoEventoMapper {
 
-    EnderecoEventoSimplificadoDTO paraEnderecoSimplificadoDTO(EnderecoEvento enderecoEvento);
+    EnderecoEventoSimplificadoDTO paraEnderecoEventoSimplificadoDTO(EnderecoEvento enderecoEvento);
 
     @Mapping(target = "idInterno", ignore = true)
     @Mapping(target = "idExterno", ignore = true)

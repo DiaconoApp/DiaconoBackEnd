@@ -18,6 +18,7 @@ import com.diacono.diacono.evento.model.entity.DiasSemanaRecorrencia;
 import com.diacono.diacono.evento.model.entity.Evento;
 import com.diacono.diacono.evento.model.entity.TipoRecorrencia;
 import com.diacono.diacono.evento.repository.EventoRepository;
+import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
 import com.diacono.diacono.membro.service.MembroService;
 import com.diacono.diacono.ministerio.service.MinisteriosService;
@@ -60,6 +61,16 @@ public class EventoService {
 
     public EventoSimplificadoDTO buscarEventosPorMesEAno(int mes, int ano){
 
+        //completo
+
+        if(mes < 1 || mes > 12){
+            throw new FieldInvalidException("O mês precisa estar entre 1 e 12");
+        }
+
+        if(ano <= 0) {
+            throw new FieldInvalidException("O ano precisa ser maior que 0");
+        }
+
         YearMonth anoMes = YearMonth.of(ano, mes);
         LocalDate inicioMes = anoMes.atDay(1);
         LocalDate fimMes = anoMes.atEndOfMonth();
@@ -68,9 +79,12 @@ public class EventoService {
         LocalDate fimAno = anoAtual.atDay(anoAtual.length());
         LocalDate inicioAno = Year.of(ano).atDay(1);
 
-        //validações necessárias (mes dentro de 1 e 12) e eventos vazio
         List<Evento> todosOsEventosMes = new ArrayList<>();
         List<Evento> eventosAno = eventoRepository.findByPeriodo(inicioAno, fimAno);
+
+        if(eventosAno.isEmpty() || eventosAno == null){
+            throw new ObjectNotFoundException("Nenhum evento encontrado para o mês e ano informados");
+        }
 
         int totalAno = 0;
         int totalSemana = calcularTotalSemana();
@@ -89,6 +103,10 @@ public class EventoService {
 
         }
 
+        if(todosOsEventosMes.isEmpty() || todosOsEventosMes == null){
+            throw new ObjectNotFoundException("Nenhum evento encontrado para o mês e ano informados");
+        }
+
         int totalMes = todosOsEventosMes.size();
 
         EventoSimplificadoDTO eventoResponse = eventoMapper.paraEventoSimplificado(todosOsEventosMes, totalSemana, totalMes, totalAno);
@@ -96,9 +114,17 @@ public class EventoService {
     }
 
     public EventoCompletoDTO buscarEventoEspecifico(UUID id, LocalDate dataHoje){
-        //Validar dataHoje preenchida
-        //validar a existencia do evento, se n existir lançar exceção
+
+        //completo
+
+        validarIdExternoPreenchido(id);
+        if(dataHoje == null){
+            throw new FieldInvalidException("A data precisa ser informada");
+        }
         Evento evento = eventoRepository.findByIdExterno(id);
+        if(evento == null){
+            throw new ObjectNotFoundException("Evento não encontrado");
+        }
 
         Evento eventoOcorrencia;
 
@@ -106,8 +132,9 @@ public class EventoService {
             eventoOcorrencia = evento;
         } else {
             eventoOcorrencia = ocorrenciaService.criarOcorrencia(evento, dataHoje);
-
         }
+
+        //ajustar o mapper para trazer o endereço do evento, mapper complexo
 
         EventoCompletoDTO eventoResponse = eventoMapper.paraEventoCompletoDTO(eventoOcorrencia);
 
@@ -217,6 +244,13 @@ public class EventoService {
         if (dias == null || dias.isEmpty()) {
             throw new FieldInvalidException("Para recorrências semanais, é obrigatório informar os dias da semana.");
         }
+
+        for(DiasSemanaRecorrencia dia : dias){
+            if(dia == null){
+                throw new FieldInvalidException("Para recorrências semanais, é obrigatório informar os dias da semana.");
+            }
+        }
+
     }
 
     private void validarHoraRecorrencia(LocalTime horarioRecorrencia){
