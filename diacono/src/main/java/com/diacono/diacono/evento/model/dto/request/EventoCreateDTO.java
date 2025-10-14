@@ -13,10 +13,10 @@ import java.util.UUID;
 
 public record EventoCreateDTO(
 
-        @NotNull
+        @NotNull(message = "Você deve estar associado a uma Igreja para criar um evento.")
         UUID fkIgreja,
 
-        @NotNull
+        @NotNull(message = "Todo evento precisa ter um membro responsável por ele.")
         UUID fkOrganizador,
 
         @NotNull
