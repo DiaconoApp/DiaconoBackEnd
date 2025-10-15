@@ -129,6 +129,9 @@ public class EventoService {
         Evento eventoOcorrencia;
 
         if (evento.getTipoRecorrencia() == TipoRecorrencia.NAO_REPETE) {
+            if (!evento.getData().isEqual(dataHoje)) {
+                throw new ObjectNotFoundException("Evento não encontrado para a data informada");
+            }
             eventoOcorrencia = evento;
         } else {
             eventoOcorrencia = ocorrenciaService.criarOcorrencia(evento, dataHoje);
@@ -183,7 +186,7 @@ public class EventoService {
         long deleteCount = eventoRepository.deleteByIdExterno(idExterno);
 
         if(deleteCount == 0){
-            throw new ObjectSaveErrorException("Não foi possível apagar o evento");
+            throw new ObjectNotFoundException("Não foi possível apagar o evento, verifique se o evento existe");
         }
 
         RestResponseMessage message = new RestResponseMessage(HttpStatus.OK, "Evento apagado com sucesso");
@@ -209,6 +212,17 @@ public class EventoService {
         }
 
         eventoUpdateMapper.updateEventoDTO(request, evento);
+
+        if(request.horaInicio() != null && request.horaFim() != null){
+            validaHoraInicioMenorHoraFim(request.horaInicio(), request.horaFim());
+            validarHoraFuturo(evento.getData(), request.horaInicio(), request.horaFim());
+        } else if(request.horaInicio() != null){
+            validaHoraInicioMenorHoraFim(request.horaInicio(), evento.getHoraFim());
+            validarHoraFuturo(evento.getData(), request.horaInicio(), evento.getHoraFim());
+        } else if(request.horaFim() != null){
+            validaHoraInicioMenorHoraFim(evento.getHoraInicio(), request.horaFim());
+            validarHoraFuturo(evento.getData(), evento.getHoraInicio(), request.horaFim());
+        }
 
         Evento eventoAtualizado = eventoRepository.save(evento);
 
