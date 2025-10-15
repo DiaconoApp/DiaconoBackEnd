@@ -67,7 +67,7 @@ public class EventoController {
     @ApiErrorsComuns
     @ApiResponse(responseCode = "200", description = "Evento atualizado com sucesso")
     @PutMapping("/{id}")
-    public ResponseEntity<RestResponseMessage> atualizarEvento(@RequestBody EventoUpdateDTO evento, @PathVariable("id") UUID id){
+    public ResponseEntity<RestResponseMessage> atualizarEvento(@RequestBody @Valid EventoUpdateDTO evento, @PathVariable("id") UUID id){
         return ResponseEntity.status(HttpStatus.OK).body(eventoService.alterarEvento(evento, id));
     }
 
