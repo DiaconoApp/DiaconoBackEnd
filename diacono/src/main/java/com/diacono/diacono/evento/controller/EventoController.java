@@ -51,7 +51,10 @@ public class EventoController {
     @ApiResponse(responseCode = "201", description = "Evento criado com sucesso")
     @PostMapping
     public ResponseEntity<RestResponseMessage> criarEvento(@RequestBody @Valid EventoCreateDTO request){
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventoService.criarEvento(request));
+
+        RestResponseMessage response = eventoService.criarEvento(request);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @ApiErrorsComuns

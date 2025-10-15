@@ -3,6 +3,7 @@ package com.diacono.diacono.evento.model.dto.request;
 import com.diacono.diacono.evento.model.entity.DiasSemanaRecorrencia;
 import com.diacono.diacono.evento.model.entity.TipoRecorrencia;
 import com.diacono.diacono.endereco.model.dto.request.EnderecoEventoDTO;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
@@ -34,7 +35,7 @@ public record EventoCreateDTO(
         @NotBlank(message = "O evento precisa ter um público-alvo.")
         String publicoAlvo,
 
-        @NotNull
+        @NotNull(message = "É necessário que o evento tenha uma data.")
         @FutureOrPresent(message = "Não é possível cadastrar eventos com datas passadas.")
         LocalDate data,
 
@@ -53,9 +54,9 @@ public record EventoCreateDTO(
         @NotNull(message = "Mesmo que o evento não seja recorrente, é necessário selecionar.")
         TipoRecorrencia tipoRecorrencia,
 
-        @FutureOrPresent
+        @FutureOrPresent(message = "A data não pode ser anterior ao dia de hoje.")
         LocalDate dataInicioRecorrencia,
-        @FutureOrPresent
+        @FutureOrPresent(message = "A data não pode ser anterior ao dia de hoje.")
         LocalDate dataTerminoRecorrencia,
 
         // Sem @NotNull, para ser validado no Service
@@ -67,6 +68,7 @@ public record EventoCreateDTO(
         int intervaloRecorrencia,
 
         @NotNull(message = "É necessário que o evento tenha um endereço vinculado a ele.")
+        @Valid
         EnderecoEventoDTO endereco
 ) {
 }

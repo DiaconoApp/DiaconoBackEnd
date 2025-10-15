@@ -148,7 +148,7 @@ public class EventoService {
         * EM CONSIDERAÇÃO A IGREJA DONA*/
 
         // completo, fazer ajuste no futuro para encontrar com fk igreja
-
+        validarHoraFuturo(request.data(),request.horaInicio(), request.horaFim());
         validaHoraInicioMenorHoraFim(request.horaInicio(), request.horaFim());
 
         if (request.tipoRecorrencia() != TipoRecorrencia.NAO_REPETE) {
@@ -230,6 +230,15 @@ public class EventoService {
     private void validaHoraInicioMenorHoraFim(LocalTime inicio, LocalTime fim){
         if(fim.isBefore(inicio)){
             throw new TimeInvalidException("O horário de término do evento precisa ser maior que o horário de início");
+        }
+    }
+
+    private void validarHoraFuturo(LocalDate data,LocalTime inicio, LocalTime fim){
+        LocalDate hoje = LocalDate.now();
+        LocalTime agora = LocalTime.now();
+        LocalTime agoraComMargem = agora.minusMinutes(3);
+        if(hoje.isEqual(data) && (inicio.isBefore(agoraComMargem) || fim.isBefore(agoraComMargem))){
+            throw new TimeInvalidException("Não é possível cadastrar eventos com horários passados.");
         }
     }
 
