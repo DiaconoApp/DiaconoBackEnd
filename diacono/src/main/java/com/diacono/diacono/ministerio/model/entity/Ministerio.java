@@ -1,13 +1,13 @@
 package com.diacono.diacono.ministerio.model.entity;
 
 import com.diacono.diacono.global.util.IdEntityUtils;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.diacono.diacono.membro.model.entity.MembroMinisterio;
+import jakarta.persistence.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @SuperBuilder(toBuilder = true)
@@ -18,6 +18,9 @@ public class Ministerio extends IdEntityUtils{
     private LocalDate dataCriacao;
     private String nomeLider;
     private String status;
+
+    @OneToMany(mappedBy = "ministerio", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<MembroMinisterio> membros = new HashSet<>();
 
     public Ministerio(String nome, LocalDate data, String nomeLider, String status) {
         this.nome = nome;

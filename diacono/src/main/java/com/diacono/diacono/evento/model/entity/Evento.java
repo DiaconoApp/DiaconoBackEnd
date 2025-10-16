@@ -45,7 +45,6 @@ public class Evento extends IdEntityUtils {
     )
     private List<Ministerio> ministerios;
 
-
     private String nome;
     private String descricao;
     private String publicoAlvo;

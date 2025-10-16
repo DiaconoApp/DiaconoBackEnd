@@ -219,12 +219,6 @@ public class EventoService {
         return new RestResponseMessage(HttpStatus.OK, "Evento atualizado com sucesso");
     }
 
-
-
-
-
-
-
     /*MÉTODOS AUXILIARES -> CONTEM LÓGICAS PARA UTILIZAR EM OUTROS MÉTODOS*/
 
     private void validaHoraInicioMenorHoraFim(LocalTime inicio, LocalTime fim){
@@ -296,15 +290,6 @@ public class EventoService {
         return enderecoEvento;
     }
 
-
-
-
-
-
-
-
-
-
     private RestResponseMessage criarEventoMestre(Evento evento){
         /*VALIDAR SE FOI POSSÍVEL CRIAR OU NÃO -- GERA EXCEÇÃO*/
         /*MELHORAR O RETORNO DO MÉTODO*/
@@ -343,7 +328,4 @@ public class EventoService {
         }
         return totalSemana;
     }
-
-
-
 }

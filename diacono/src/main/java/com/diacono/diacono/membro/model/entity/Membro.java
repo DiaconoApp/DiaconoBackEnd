@@ -1,89 +1,61 @@
 package com.diacono.diacono.membro.model.entity;
 
+import com.diacono.diacono.Igreja.model.entity.Igreja;
 import com.diacono.diacono.global.util.IdEntityUtils;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.diacono.diacono.ministerio.model.entity.Ministerio;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
 @SuperBuilder(toBuilder = true)
-
 public class Membro extends IdEntityUtils {
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn (name = "fk_igreja", nullable = false)
+    private Igreja igreja;
+
     private String nome;
-    private String email;
-    private LocalDate dataNascimento;
+
     private String cpf;
-    private String cep;
-    private Integer numeroCasa;
-    private String senhaTemporaria;
+
+    private LocalDate dataNascimento;
+
+    private String email;
+
+    private String celular;
+
     private String senha;
 
-    public Membro(String nome, String email, LocalDate dataNascimento, String cpf, String cep, Integer numeroCasa, String senhaTemporaria, String senha) {
-        this.nome = nome;
-        this.email = email;
-        this.dataNascimento = dataNascimento;
-        this.cpf = cpf;
-        this.cep = cep;
-        this.numeroCasa = numeroCasa;
-        this.senhaTemporaria = senhaTemporaria;
-        this.senha = senha;
-    }
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "membro_ministerio",
+            joinColumns = @JoinColumn(name = "fk_membro"),
+            inverseJoinColumns = @JoinColumn(name = "fk_ministerio")
+    )
+    private List<Ministerio> ministerio;
 
-    public Membro() {
-    }
+    @Enumerated(EnumType.STRING)
+    private EnumStatusMembro statusMembro = EnumStatusMembro.ATIVO;
 
+//    @OneToMany(mappedBy = "membro", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private Set<MembroMinisterio> ministerios;
 
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "endereco_id")
+    private EnderecoMembro enderecoMembro;
 
-    public String getNome() {
-        return nome;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public LocalDate getDataNascimento() {
-        return dataNascimento;
-    }
-
-    public String getCpf() {
-        return cpf;
-    }
-
-    public String getCep() {
-        return cep;
-    }
-
-    public Integer getNumeroCasa() {
-        return numeroCasa;
-    }
-
-    public String getSenhaTemporaria() {
-        return senhaTemporaria;
-    }
-
-    public String getSenha() {
-        return senha;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setCep(String cep) {
-        this.cep = cep;
-    }
-
-    public void setNumeroCasa(Integer numeroCasa) {
-        this.numeroCasa = numeroCasa;
-    }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
-    }
+    @ManyToOne
+    @JoinColumn(name = "discipulador_id")
+    private Membro discipulador;
 }

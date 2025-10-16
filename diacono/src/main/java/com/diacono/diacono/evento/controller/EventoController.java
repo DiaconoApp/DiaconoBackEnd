@@ -67,7 +67,4 @@ public class EventoController {
     public ResponseEntity<RestResponseMessage> atualizarEvento(@RequestBody EventoUpdateDTO evento, @PathVariable("id") UUID id){
         return ResponseEntity.status(HttpStatus.OK).body(eventoService.alterarEvento(evento, id));
     }
-
-
-
 }

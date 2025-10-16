@@ -1,5 +1,16 @@
 package com.diacono.diacono.membro.model.dto;
 
-import java.time.LocalDate;
+import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
+import com.diacono.diacono.ministerio.model.entity.Ministerio;
 
-public record MembrosResponseDTO(String nome, LocalDate dataNascimento, Integer id, String email) {}
+import java.time.LocalDate;
+import java.util.List;
+
+public record MembrosResponseDTO(
+        String nome,
+        String email,
+        String celular,
+        LocalDate dataNascimento,
+        List<Ministerio> ministerio,
+        EnumStatusMembro statusMembro
+        ) {}

@@ -13,4 +13,5 @@ public interface MinisteriosRepository extends JpaRepository<Ministerio, Long> {
 
     ArrayList<Ministerio> findByIdExterno(UUID idExterno);
 
+    ArrayList<Ministerio> findAllByIdExterno(List<UUID> idExterno);
 }
