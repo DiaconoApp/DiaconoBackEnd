@@ -129,6 +129,9 @@ public class EventoService {
         Evento eventoOcorrencia;
 
         if (evento.getTipoRecorrencia() == TipoRecorrencia.NAO_REPETE) {
+            if (!evento.getData().isEqual(dataHoje)) {
+                throw new ObjectNotFoundException("Evento não encontrado para a data informada");
+            }
             eventoOcorrencia = evento;
         } else {
             eventoOcorrencia = ocorrenciaService.criarOcorrencia(evento, dataHoje);
@@ -148,7 +151,7 @@ public class EventoService {
         * EM CONSIDERAÇÃO A IGREJA DONA*/
 
         // completo, fazer ajuste no futuro para encontrar com fk igreja
-
+        validarHoraFuturo(request.data(),request.horaInicio(), request.horaFim());
         validaHoraInicioMenorHoraFim(request.horaInicio(), request.horaFim());
 
         if (request.tipoRecorrencia() != TipoRecorrencia.NAO_REPETE) {
@@ -183,7 +186,7 @@ public class EventoService {
         long deleteCount = eventoRepository.deleteByIdExterno(idExterno);
 
         if(deleteCount == 0){
-            throw new ObjectSaveErrorException("Não foi possível apagar o evento");
+            throw new ObjectNotFoundException("Não foi possível apagar o evento, verifique se o evento existe");
         }
 
         RestResponseMessage message = new RestResponseMessage(HttpStatus.OK, "Evento apagado com sucesso");
@@ -210,6 +213,17 @@ public class EventoService {
 
         eventoUpdateMapper.updateEventoDTO(request, evento);
 
+        if(request.horaInicio() != null && request.horaFim() != null){
+            validaHoraInicioMenorHoraFim(request.horaInicio(), request.horaFim());
+            validarHoraFuturo(evento.getData(), request.horaInicio(), request.horaFim());
+        } else if(request.horaInicio() != null){
+            validaHoraInicioMenorHoraFim(request.horaInicio(), evento.getHoraFim());
+            validarHoraFuturo(evento.getData(), request.horaInicio(), evento.getHoraFim());
+        } else if(request.horaFim() != null){
+            validaHoraInicioMenorHoraFim(evento.getHoraInicio(), request.horaFim());
+            validarHoraFuturo(evento.getData(), evento.getHoraInicio(), request.horaFim());
+        }
+
         Evento eventoAtualizado = eventoRepository.save(evento);
 
         if(eventoAtualizado == null){
@@ -224,6 +238,15 @@ public class EventoService {
     private void validaHoraInicioMenorHoraFim(LocalTime inicio, LocalTime fim){
         if(fim.isBefore(inicio)){
             throw new TimeInvalidException("O horário de término do evento precisa ser maior que o horário de início");
+        }
+    }
+
+    private void validarHoraFuturo(LocalDate data,LocalTime inicio, LocalTime fim){
+        LocalDate hoje = LocalDate.now();
+        LocalTime agora = LocalTime.now();
+        LocalTime agoraComMargem = agora.minusMinutes(3);
+        if(hoje.isEqual(data) && (inicio.isBefore(agoraComMargem) || fim.isBefore(agoraComMargem))){
+            throw new TimeInvalidException("Não é possível cadastrar eventos com horários passados.");
         }
     }
 
