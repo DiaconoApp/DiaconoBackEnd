@@ -1,6 +1,6 @@
 package com.diacono.diacono.membro.mapper;
 
-import com.diacono.diacono.membro.model.dto.EnderecoMembroDTO;
+import com.diacono.diacono.membro.model.dto.request.EnderecoMembroDTO;
 import com.diacono.diacono.membro.model.entity.EnderecoMembro;
 import org.mapstruct.Mapper;
 

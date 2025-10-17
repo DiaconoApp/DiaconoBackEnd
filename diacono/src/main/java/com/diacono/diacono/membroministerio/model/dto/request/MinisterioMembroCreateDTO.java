@@ -1,4 +1,4 @@
-package com.diacono.diacono.membro.model.dto;
+package com.diacono.diacono.membroministerio.model.dto.request;
 
 import java.util.UUID;
 

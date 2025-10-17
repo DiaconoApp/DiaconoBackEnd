@@ -1,7 +1,7 @@
 package com.diacono.diacono.ministerio.model.entity;
 
 import com.diacono.diacono.global.util.IdEntityUtils;
-import com.diacono.diacono.membro.model.entity.MembroMinisterio;
+import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
 import jakarta.persistence.*;
 import lombok.experimental.SuperBuilder;
 

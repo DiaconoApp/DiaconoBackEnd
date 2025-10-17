@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -43,7 +44,7 @@ public class Evento extends IdEntityUtils {
             joinColumns = @JoinColumn(name = "fk_evento"),
             inverseJoinColumns = @JoinColumn(name = "fk_ministerio")
     )
-    private List<Ministerio> ministerios;
+    private Set<Ministerio> ministerios;
 
     private String nome;
     private String descricao;
@@ -76,7 +77,7 @@ public class Evento extends IdEntityUtils {
         this.enderecoEvento = enderecoEvento;
     }
 
-    public void setMinisterios(List<Ministerio> ministerios) {
+    public void setMinisterios(Set<Ministerio> ministerios) {
         this.ministerios = ministerios;
     }
 
