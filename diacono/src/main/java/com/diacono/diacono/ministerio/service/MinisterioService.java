@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-public class MinisteriosService {
+public class MinisterioService {
 
     private final MinisteriosRepository ministerios;
 
-    public MinisteriosService(MinisteriosRepository ministerios) {
+    public MinisterioService(MinisteriosRepository ministerios) {
         this.ministerios = ministerios;
     }
 
@@ -105,6 +105,7 @@ public class MinisteriosService {
 
         return ministerios;
     }
+
 
 
 

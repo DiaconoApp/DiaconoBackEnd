@@ -37,7 +37,7 @@ public record MembroCreateDTO(
         String senha,
 
 
-        List<MinisterioMembroCreateDTO> ministerios,
+        List<UUID> idExternoMinisterios,
 
         EnumCargoMembro cargo,
 

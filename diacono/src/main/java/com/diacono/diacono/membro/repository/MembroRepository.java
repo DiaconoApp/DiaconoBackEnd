@@ -26,8 +26,8 @@ public interface MembroRepository extends JpaRepository<Membro, Long> {
     Long countMembrosDiscipulados();
 
     @Query("SELECT m FROM Membro m " +
-            "WHERE nome LIKE :buscaGeral" +
-            "OR email LIKE :buscaGeral" +
+            "WHERE nome LIKE :buscaGeral " +
+            "OR email LIKE :buscaGeral " +
             "OR celular LIKE :buscaGeral"
             )
     Page<Membro> findAllWithFilter(

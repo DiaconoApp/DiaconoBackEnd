@@ -11,6 +11,11 @@ import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
 import com.diacono.diacono.membro.model.entity.Membro;
 import com.diacono.diacono.membro.repository.MembroRepository;
 import com.diacono.diacono.membro.model.entity.EnumCargoMembro;
+import com.diacono.diacono.membroministerio.model.entity.EnumCargoMembroMinisterio;
+import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
+import com.diacono.diacono.membroministerio.service.MembroMinisterioService;
+import com.diacono.diacono.ministerio.model.entity.Ministerio;
+import com.diacono.diacono.ministerio.service.MinisterioService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -25,23 +30,25 @@ import java.util.stream.Collectors;
 public class MembroService {
 
     private final MembroRepository membroRepository;
-//    private final EnderecoMembroMapper enderecoMembroMapper;
     private final MembroMapper membroMapper;
     private final PasswordEncoder passwordEncoder;
-//    private final MinisteriosRepository ministerioRepository;
+    private final MinisterioService ministerioService;
+    private final MembroMinisterioService membroMinisterioService;
 
-    public MembroService(MembroRepository membroRepository, MembroMapper membroMapper, PasswordEncoder passwordEncoder) {
+    public MembroService(MembroRepository membroRepository, MembroMapper membroMapper, PasswordEncoder passwordEncoder, MinisterioService ministerioService, MembroMinisterioService membroMinisterioService) {
         this.membroRepository = membroRepository;
         this.membroMapper = membroMapper;
         this.passwordEncoder = passwordEncoder;
+        this.ministerioService = ministerioService;
+        this.membroMinisterioService = membroMinisterioService;
     }
 
     @Transactional(readOnly = true)
-    public Page<MembroResponseDTO> buscarTodosSemFiltro(Pageable pageable) {
+    public List<MembroResponseDTO> buscarTodosSemFiltro(Pageable pageable) {
 
         Page<Membro> membros = buscaMembros(pageable, null);
-        Page<MembroResponseDTO> response = membroMapper.paraMembrosResponseDTO(membros);
-        validaResponsePage(response);
+        List<MembroResponseDTO> response = membroMapper.paraMembrosResponseDTO(membros);
+        validaResponseList(response);
 
         return response;
     }
@@ -88,14 +95,16 @@ public class MembroService {
 
     }
 
+    @Transactional
     public RestResponseMessage criarMembro(MembroCreateDTO membroDTO){
 
-        //dois cenários possíveis:
-        //membro com fkMinisterio preenchido
-        //membro com fkMinisterio nulo
+        if(membroDTO == null){
+            throw new ObjectSaveErrorException("Dados do membro não podem ser nulos.");
+        }
 
-        if(membroDTO.ministerios() == null || membroDTO.ministerios().isEmpty()){
-            return criarMembroSemMinisterio(membroDTO);
+        if(membroDTO.idExternoMinisterios() == null || membroDTO.idExternoMinisterios().isEmpty()){
+            Membro response = criarMembroSemMinisterio(membroDTO);
+            return new RestResponseMessage(HttpStatus.CREATED, "Usuário cadastrado com sucesso");
         }
 
         return criarMembroComMinisterio(membroDTO);
@@ -103,7 +112,7 @@ public class MembroService {
 
     // METODOS AUXILIARES
 
-    private RestResponseMessage criarMembroSemMinisterio(MembroCreateDTO membroDTO){
+    private Membro criarMembroSemMinisterio(MembroCreateDTO membroDTO){
 
         if(membroDTO.cargo().equals(EnumCargoMembro.LIDER_MINISTERIO)){
             throw new ObjectSaveErrorException("Para cadastrar um líder de ministério, é necessário associar um ministério ao membro.");
@@ -114,64 +123,85 @@ public class MembroService {
         Membro membroSalvo = membroRepository.save(membro);
         validaCriacao(membroSalvo);
 
-        return new RestResponseMessage(HttpStatus.CREATED, "Usuário cadastrado com sucesso");
+        return membroSalvo;
+
     }
 
     private RestResponseMessage criarMembroComMinisterio(MembroCreateDTO membroDTO){
-        //IMPLEMENTAR
-        return null;
+        Set<Ministerio> ministerios = ministerioService.buscarPorUUID(membroDTO.idExternoMinisterios());
+
+        Membro membro = criarMembroSemMinisterio(membroDTO);
+        membroMinisterioService.apagarMembroMinisterioPorMembro(membro);
+
+        List<MembroMinisterio> novasAssociacoes = ministerios.stream()
+                .map(ministerio -> {
+
+                    MembroMinisterio associaco = new MembroMinisterio();
+
+                    associaco.setMembro(membro);
+                    associaco.setMinisterio(ministerio);
+
+                    if(membro.getCargoMembro().equals(EnumCargoMembro.LIDER_MINISTERIO)){
+                        associaco.setCargoMembro(EnumCargoMembroMinisterio.LIDER_MINISTERIO);
+                    }
+
+                    return associaco;
+
+                })
+                .collect(Collectors.toList());
+
+        membroMinisterioService.salvarTodos(novasAssociacoes);
+
+        return new RestResponseMessage(HttpStatus.CREATED, "Usuário cadastrado com sucesso");
+
     }
 
-    private void validaCriacao(Membro membro){
-        if(membro == null){
-            throw new ObjectSaveErrorException("Não foi possível cadastrar o usuário");
-        }
+
+private void validaCriacao(Membro membro){
+    if(membro == null){
+        throw new ObjectSaveErrorException("Não foi possível cadastrar o usuário");
     }
+}
 
-    private Page<Membro> buscaMembros(Pageable pageable, String busca){
+private Page<Membro> buscaMembros(Pageable pageable, String busca){
 
-        if (busca == null || busca.isBlank()){
-            Page<Membro> membros = membroRepository.findAll(pageable);
-            validarMembrosEncontrados(membros);
-            return membros;
-        }
-
-        String buscaFormatada = "%"+busca+"%";
-        Page<Membro> membros = membroRepository.findAllWithFilter(pageable, buscaFormatada);
+    if (busca == null || busca.isBlank()){
+        Page<Membro> membros = membroRepository.findAll(pageable);
         validarMembrosEncontrados(membros);
-
         return membros;
     }
 
-    private void validarMembrosEncontrados(Page<Membro> membros){
-        if(membros.isEmpty()){
-            throw new ObjectNotFoundException("Nenhum membro encontrado");
-        }
+    String buscaFormatada = "%"+busca+"%";
+    Page<Membro> membros = membroRepository.findAllWithFilter(pageable, buscaFormatada);
+    validarMembrosEncontrados(membros);
+
+    return membros;
+}
+
+private void validarMembrosEncontrados(Page<Membro> membros){
+    if(membros.isEmpty()){
+        throw new ObjectNotFoundException("Nenhum membro encontrado");
     }
+}
 
-    private void validaResponseList(List<MembroResponseDTO> membros){
-        if(membros == null || membros.isEmpty()){
-            throw new ObjectNotFoundException("Não foi possível converter para DTOs");
-        }
-    };
-
-    private void validaResponsePage(Page<MembroResponseDTO> response){
-        if(response.isEmpty()){
-            throw new ObjectNotFoundException("Não foi possível converter para DTOs");
-        }
-    };
-
-    public String hashSenha(String senha) {
-        return passwordEncoder.encode(senha);
+private void validaResponseList(List<MembroResponseDTO> membros){
+    if(membros == null || membros.isEmpty()){
+        throw new ObjectNotFoundException("Não foi possível converter para DTOs");
     }
+};
 
-    /*MÉTODO QUE SE RELACIONA COM A ENTIDADE EVENTO*/
 
-    public Membro buscarPorUUID(UUID idExterno){
-        /*FAZER VALIDAÇÃO DE PRESENÇA -- LANÇAR EXCEÇÃO*/
-        Membro membro = membroRepository.findByIdExterno(idExterno)
-                .orElseThrow(() -> new MembroNaoEncontradoException("Membro não encontrado com ID: " + idExterno));
+public String hashSenha(String senha) {
+    return passwordEncoder.encode(senha);
+}
 
-        return membro;
+/*MÉTODO QUE SE RELACIONA COM A ENTIDADE EVENTO*/
+
+public Membro buscarPorUUID(UUID idExterno){
+    /*FAZER VALIDAÇÃO DE PRESENÇA -- LANÇAR EXCEÇÃO*/
+    Membro membro = membroRepository.findByIdExterno(idExterno)
+            .orElseThrow(() -> new MembroNaoEncontradoException("Membro não encontrado com ID: " + idExterno));
+
+    return membro;
     }
 }

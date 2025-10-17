@@ -27,6 +27,7 @@ public class MembroController {
         this.membrosService = membrosService;
     }
 
+
     @ApiErrorsComuns
     @ApiResponse(responseCode = "201", description = "Membro criado com sucesso")
     @PostMapping
@@ -40,20 +41,15 @@ public class MembroController {
     @ApiErrorsComuns
     @ApiResponse(responseCode = "200", description = "Membros encontrados com sucesso")
     @GetMapping
-    public ResponseEntity<Page<MembroResponseDTO>> buscarTodosSemFiltro(Pageable pageable) {
-
-        Page<MembroResponseDTO> response = membrosService.buscarTodosSemFiltro(pageable);
-
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-
-    }
-
-    @ApiErrorsComuns
-    @ApiResponse(responseCode = "200", description = "Membros encontrados com sucesso")
-    @GetMapping
     public ResponseEntity<List<MembroResponseDTO>> buscarTodosComFiltro(Pageable pageable, @RequestParam(required = false) String buscaGeral,
-                                                                        @RequestParam(required = false, defaultValue = "ATIVO") EnumStatusMembro status,
+                                                                        @RequestParam(required = false) EnumStatusMembro status,
                                                                         @RequestParam(required = false) UUID fkMinisterio) {
+
+        if(buscaGeral != null && !buscaGeral.isEmpty() && fkMinisterio == null && status == null){
+            List<MembroResponseDTO> response = membrosService.buscarTodosSemFiltro(pageable);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        }
+
 
         List<MembroResponseDTO> response = membrosService.buscarTodosComFiltro(pageable, buscaGeral, status, fkMinisterio);
 
@@ -62,33 +58,4 @@ public class MembroController {
     }
 
 
-
-
-
-//    @ApiErrorsComuns
-//    @ApiResponse(responseCode = "200", description = "Membros ativos contabilizados com sucesso")
-//    @GetMapping("/ativos/count")
-//    public ResponseEntity<Long> getMembrosAtivos() {
-//        Long userAtivos = membrosService.getMembroAtivos();
-//
-//        return ResponseEntity.status(HttpStatus.OK).body(userAtivos);
-//    }
-//
-//    @ApiErrorsComuns
-//    @ApiResponse(responseCode = "200", description = "Membros com ministérios contabilizados com sucesso")
-//    @GetMapping("/com-ministerio/count")
-//    public ResponseEntity<Long> getMembrosComMinisterio() {
-//        Long userComMinisterio = membrosService.getMembrosComMinisterio();
-//
-//        return ResponseEntity.status(HttpStatus.OK).body(userComMinisterio);
-//    }
-//
-//    @ApiErrorsComuns
-//    @ApiResponse(responseCode = "200", description = "Membros discipulados contabilizados com sucesso")
-//    @GetMapping("/discipulados/count")
-//    public ResponseEntity<Long> getTotalMembrosDiscipulados() {
-//        Long countMembrosDiscipulados = membrosService.getCountMembrosDiscipulados();
-//
-//        return ResponseEntity.status(HttpStatus.OK).body(countMembrosDiscipulados);
-//    }
 }

@@ -3,7 +3,7 @@ package com.diacono.diacono.ministerio.controller;
 import com.diacono.diacono.ministerio.model.dto.MinisterioCreateDTO;
 import com.diacono.diacono.ministerio.model.dto.MinisterioResponseDTO;
 import com.diacono.diacono.ministerio.model.dto.MinisterioUpdateDTO;
-import com.diacono.diacono.ministerio.service.MinisteriosService;
+import com.diacono.diacono.ministerio.service.MinisterioService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +14,9 @@ import java.util.List;
 @RequestMapping("/ministerios")
 public class MinisteriosController {
 
-    private final MinisteriosService ministerio;
+    private final MinisterioService ministerio;
 
-    public MinisteriosController(MinisteriosService ministerio) {
+    public MinisteriosController(MinisterioService ministerio) {
         this.ministerio = ministerio;
     }
 

@@ -29,7 +29,7 @@ public interface MembroMapper {
     Membro paraMembro(MembroCreateDTO membroDTO);
 
 
-    Page<MembroResponseDTO> paraMembrosResponseDTO(Page<Membro> membros);
+    List<MembroResponseDTO> paraMembrosResponseDTO(Page<Membro> membros);
 
     List<MembroResponseDTO> paraMembrosResponseDTO(List<Membro> membros);
 }

@@ -5,11 +5,17 @@ import com.diacono.diacono.membro.model.entity.EnumCargoMembro;
 import com.diacono.diacono.membro.model.entity.Membro;
 import com.diacono.diacono.ministerio.model.entity.Ministerio;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "membro_ministerio", uniqueConstraints = @UniqueConstraint(columnNames = {"fk_membro", "fk_ministerio"}))
 @SuperBuilder(toBuilder = true)
+@NoArgsConstructor
+@Setter
+@Getter
 public class MembroMinisterio extends IdEntityUtils{
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
