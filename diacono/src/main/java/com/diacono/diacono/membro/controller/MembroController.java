@@ -41,7 +41,7 @@ public class MembroController {
     @ApiErrorsComuns
     @ApiResponse(responseCode = "200", description = "Membros encontrados com sucesso")
     @GetMapping
-    public ResponseEntity<Page<MembroResponseDTO>> buscarTodos(Pageable pageable, @RequestParam(required = false) String buscaGeral,
+    public ResponseEntity<Page<MembroResponseDTO>> buscarTodos(Pageable pageable, @RequestParam(required = false, defaultValue = "") String buscaGeral,
                                                                         @RequestParam(required = false) EnumStatusMembro status,
                                                                         @RequestParam(required = false) UUID fkMinisterio) {
 
