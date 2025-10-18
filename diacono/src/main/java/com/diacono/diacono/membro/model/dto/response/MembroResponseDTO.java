@@ -1,7 +1,7 @@
 package com.diacono.diacono.membro.model.dto.response;
 
 import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
-import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
+import com.diacono.diacono.membroministerio.model.dto.response.MembroMinisterioDTO;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -13,6 +13,6 @@ public record MembroResponseDTO(
         String email,
         String celular,
         LocalDate dataNascimento,
-        Set<MembroMinisterio> ministerios,
+        Set<MembroMinisterioDTO> ministerios,
         EnumStatusMembro status
         ) {}

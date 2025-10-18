@@ -59,7 +59,8 @@ public class MembroService {
         Page<MembroResponseDTO> responsePage = new PageImpl<>(
                 response,
                 pageable,
-                15L
+                response.size()
+
         );
 
         return responsePage;
@@ -79,7 +80,7 @@ public class MembroService {
             Page<MembroResponseDTO> responsePage = new PageImpl<>(
                     response,
                     pageable,
-                    15L
+                    response.size()
             );
             validaResponsePage(responsePage);
             return responsePage;
@@ -111,7 +112,8 @@ public class MembroService {
         Page<MembroResponseDTO> responsePage = new PageImpl<>(
                 response,
                 pageable,
-                15L
+                response.size()
+
         );
 
         validaResponsePage(responsePage);

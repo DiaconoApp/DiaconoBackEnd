@@ -5,6 +5,8 @@ import com.diacono.diacono.membro.model.dto.request.MembroCreateDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroResponseDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroSimplificadoDTO;
 import com.diacono.diacono.membro.model.entity.Membro;
+import com.diacono.diacono.membroministerio.mapper.MembroMinisterioMapper;
+import com.diacono.diacono.ministerio.mapper.MinisterioMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.data.domain.Page;
@@ -12,7 +14,7 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 @Mapper(componentModel = "spring",
-        uses = {EnderecoMembroMapper.class, IgrejaMapper.class})
+        uses = {EnderecoMembroMapper.class, IgrejaMapper.class, MinisterioMapper.class, MembroMinisterioMapper.class})
 public interface MembroMapper {
 
     MembroSimplificadoDTO paraMembroSimplificadoDTO(Membro membro);
