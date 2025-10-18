@@ -21,10 +21,6 @@ public class MembroMinisterioService {
     public void apagarMembroMinisterioPorMembro(Membro membro){
         int count = membroMinisterioRepository.deleteByMembro(membro);
 
-        if(count == 0){
-            throw new ObjectNotFoundException("Nenhum membro_ministerio encontrado para o membro.");
-        }
-
     }
 
     public void salvarTodos(List<MembroMinisterio> membrosMinisterios){

@@ -1,5 +1,7 @@
 package com.diacono.diacono.membro.service;
 
+import com.diacono.diacono.Igreja.model.entity.Igreja;
+import com.diacono.diacono.Igreja.service.IgrejaService;
 import com.diacono.diacono.global.dto.response.RestResponseMessage;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
@@ -34,20 +36,22 @@ public class MembroService {
     private final PasswordEncoder passwordEncoder;
     private final MinisterioService ministerioService;
     private final MembroMinisterioService membroMinisterioService;
+    private final IgrejaService igrejaService;
 
-    public MembroService(MembroRepository membroRepository, MembroMapper membroMapper, PasswordEncoder passwordEncoder, MinisterioService ministerioService, MembroMinisterioService membroMinisterioService) {
+    public MembroService(MembroRepository membroRepository, MembroMapper membroMapper, PasswordEncoder passwordEncoder, MinisterioService ministerioService, MembroMinisterioService membroMinisterioService, IgrejaService igrejaService) {
         this.membroRepository = membroRepository;
         this.membroMapper = membroMapper;
         this.passwordEncoder = passwordEncoder;
         this.ministerioService = ministerioService;
         this.membroMinisterioService = membroMinisterioService;
+        this.igrejaService = igrejaService;
     }
 
     @Transactional(readOnly = true)
-    public List<MembroResponseDTO> buscarTodosSemFiltro(Pageable pageable) {
+    public Page<MembroResponseDTO> buscarTodosSemFiltro(Pageable pageable) {
 
         Page<Membro> membros = buscaMembros(pageable, null);
-        List<MembroResponseDTO> response = membroMapper.paraMembrosResponseDTO(membros);
+        Page<MembroResponseDTO> response = membroMapper.paraMembrosResponseDTO(membros);
         validaResponseList(response);
 
         return response;
@@ -119,6 +123,9 @@ public class MembroService {
         }
 
         Membro membro = membroMapper.paraMembro(membroDTO);
+        Igreja igreja = igrejaService.buscarUUID(membroDTO.fkIgreja());
+        membro.setIgreja(igreja);
+        membro.setCargoMembro(membroDTO.cargo());
         membro.setSenha(hashSenha(membroDTO.senha()));
         Membro membroSalvo = membroRepository.save(membro);
         validaCriacao(membroSalvo);

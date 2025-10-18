@@ -39,6 +39,7 @@ public record MembroCreateDTO(
 
         List<UUID> idExternoMinisterios,
 
+        @NotNull(message = "O cargo do membro deve ser informado.")
         EnumCargoMembro cargo,
 
         @Valid

@@ -20,7 +20,7 @@ import java.util.Set;
 @SuperBuilder(toBuilder = true)
 public class Membro extends IdEntityUtils {
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn (name = "fk_igreja", nullable = false)
     private Igreja igreja;
 
@@ -52,6 +52,6 @@ public class Membro extends IdEntityUtils {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private EnumCargoMembro cargoMembro = EnumCargoMembro.MEMBRO;
+    private EnumCargoMembro cargoMembro;
 
 }
