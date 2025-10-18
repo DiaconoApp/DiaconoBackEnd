@@ -29,6 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+// REMOVIDO: Este import era desnecessário e poderia causar conflitos.
+// import static java.util.stream.Nodes.collect;
+
 @Service
 public class MembroService {
 
@@ -48,22 +51,14 @@ public class MembroService {
         this.igrejaService = igrejaService;
     }
 
+
     @Transactional(readOnly = true)
     public Page<MembroResponseDTO> buscarTodosSemFiltro(Pageable pageable) {
 
-        List<Membro> membros = membroRepository.findAll();
-        validarMembrosEncontradosList(membros);
-        List<MembroResponseDTO> response = membroMapper.paraMembrosResponseDTO(membros);
-        validaResponseList(response);
+        Page<Membro> membrosPage = membroRepository.findAll(pageable);
+        validarMembrosEncontradosPage(membrosPage);
 
-        Page<MembroResponseDTO> responsePage = new PageImpl<>(
-                response,
-                pageable,
-                response.size()
-
-        );
-
-        return responsePage;
+        return membrosPage.map(membroMapper::paraMembroResponseDTO);
     }
 
     @Transactional(readOnly = true)
@@ -73,31 +68,22 @@ public class MembroService {
             EnumStatusMembro status,
             UUID fkMinisterio) {
 
-        List<Membro> membrosPage = buscaMembros(termoBusca);
+        List<Membro> membrosBrutos = buscaMembros(termoBusca);
 
-        if (status == null && fkMinisterio == null) {
-            List<MembroResponseDTO> response = membroMapper.paraMembrosResponseDTO(membrosPage);
-            Page<MembroResponseDTO> responsePage = new PageImpl<>(
-                    response,
-                    pageable,
-                    response.size()
-            );
-            validaResponsePage(responsePage);
-            return responsePage;
-        }
-
-        List<Membro> membrosFiltradosList = membrosPage.stream()
+        List<Membro> membrosFiltrados = membrosBrutos.stream()
                 .filter(membro -> {
-
                     boolean passaNoFiltro = true;
+
                     if (passaNoFiltro && status != null) {
-                        if (!membro.getStatus().equals(status)) {
+                        if (membro.getStatus() == null || !membro.getStatus().equals(status)) {
                             passaNoFiltro = false;
                         }
                     }
 
                     if (passaNoFiltro && fkMinisterio != null) {
-                        if (!fkMinisterio.equals(membro.getIdExterno())) {
+                        boolean pertenceAoMinisterio = membro.getMinisterios().stream()
+                                .anyMatch(mm -> mm.getMinisterio().getIdExterno().equals(fkMinisterio));
+                        if (!pertenceAoMinisterio) {
                             passaNoFiltro = false;
                         }
                     }
@@ -106,20 +92,27 @@ public class MembroService {
                 })
                 .collect(Collectors.toList());
 
-        List<MembroResponseDTO> response = membroMapper.paraMembrosResponseDTO(membrosFiltradosList);
-        validaResponseList(response);
+        validarMembrosEncontradosList(membrosFiltrados);
 
-        Page<MembroResponseDTO> responsePage = new PageImpl<>(
-                response,
+        int pageSize = pageable.getPageSize();
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageSize), membrosFiltrados.size());
+
+        List<Membro> contentListForPage;
+
+        if (start > end) {
+            contentListForPage = Collections.emptyList();
+        } else {
+            contentListForPage = membrosFiltrados.subList(start, end);
+        }
+
+        List<MembroResponseDTO> responseContent = membroMapper.paraMembrosResponseDTO(contentListForPage);
+
+        return new PageImpl<>(
+                responseContent,
                 pageable,
-                response.size()
-
+                membrosFiltrados.size()
         );
-
-        validaResponsePage(responsePage);
-
-        return responsePage;
-
     }
 
     @Transactional
@@ -128,6 +121,8 @@ public class MembroService {
         if (membroDTO == null) {
             throw new ObjectSaveErrorException("Dados do membro não podem ser nulos.");
         }
+
+
 
         if (membroDTO.idExternoMinisterios() == null || membroDTO.idExternoMinisterios().isEmpty()) {
             Membro response = criarMembroSemMinisterio(membroDTO);
@@ -147,6 +142,7 @@ public class MembroService {
 
         Membro membro = membroMapper.paraMembro(membroDTO);
         Igreja igreja = igrejaService.buscarUUID(membroDTO.fkIgreja());
+        membro.setStatus(EnumStatusMembro.ATIVO);
         membro.setIgreja(igreja);
         membro.setCargoMembro(membroDTO.cargo());
         membro.setSenha(hashSenha(membroDTO.senha()));
@@ -170,6 +166,7 @@ public class MembroService {
 
                     associaco.setMembro(membro);
                     associaco.setMinisterio(ministerio);
+                    associaco.setNomeMinisterio(ministerio.getNome());
 
                     if (membro.getCargoMembro().equals(EnumCargoMembro.LIDER_MINISTERIO)) {
                         associaco.setCargoMembro(EnumCargoMembroMinisterio.LIDER_MINISTERIO);
@@ -197,7 +194,6 @@ public class MembroService {
 
         String buscaFormatada = "%" + busca + "%";
         List<Membro> membros = membroRepository.findAllWithFilter(buscaFormatada);
-        validarMembrosEncontradosList(membros);
 
         return membros;
     }
@@ -220,15 +216,12 @@ public class MembroService {
         }
     }
 
-    ;
 
     private void validaResponsePage(Page<MembroResponseDTO> membros) {
         if (membros == null || membros.isEmpty()) {
             throw new ObjectNotFoundException("Não foi possível converter para DTOs");
         }
     }
-
-    ;
 
 
     public String hashSenha(String senha) {

@@ -29,4 +29,7 @@ public class MembroMinisterio extends IdEntityUtils{
     @Enumerated(EnumType.STRING)
     @Column(name = "cargo_membro", nullable = false)
     private EnumCargoMembroMinisterio cargoMembro = EnumCargoMembroMinisterio.MEMBRO_MINISTERIO;
+
+    @Column(name="nome_ministerio")
+    private String nomeMinisterio;
 }

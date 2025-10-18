@@ -1,5 +1,6 @@
 package com.diacono.diacono.membro.model.dto.request;
 
+import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
 import com.diacono.diacono.membroministerio.model.dto.request.MinisterioMembroCreateDTO;
 import com.diacono.diacono.membro.model.entity.EnumCargoMembro;
 import jakarta.validation.Valid;

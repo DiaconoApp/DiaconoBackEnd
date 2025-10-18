@@ -48,7 +48,7 @@ public class Membro extends IdEntityUtils {
     private String senha;
 
     @Enumerated(EnumType.STRING)
-    private EnumStatusMembro status = EnumStatusMembro.ATIVO;
+    private EnumStatusMembro status;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

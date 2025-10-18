@@ -1,0 +1,25 @@
+meta {
+  name: readAllWithFilter
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:8080/membros?page=0&size=5&sort=nome,desc&buscaGeral=Oliveira&status=ATIVO&fkMinisterio=550e8400-e29b-41d4-a716-446655440020
+  body: none
+  auth: inherit
+}
+
+params:query {
+  page: 0
+  size: 5
+  sort: nome,desc
+  buscaGeral: Oliveira
+  status: ATIVO
+  fkMinisterio: 550e8400-e29b-41d4-a716-446655440020
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

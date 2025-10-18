@@ -5,11 +5,18 @@ meta {
 }
 
 get {
-  url: http://localhost:8080/membros
+  url: http://localhost:8080/membros?page=0&size=5&sort=nome,asc
   body: none
   auth: inherit
 }
 
+params:query {
+  page: 0
+  size: 5
+  sort: nome,asc
+}
+
 settings {
   encodeUrl: true
+  timeout: 0
 }

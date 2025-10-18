@@ -9,7 +9,6 @@ import com.diacono.diacono.membroministerio.mapper.MembroMinisterioMapper;
 import com.diacono.diacono.ministerio.mapper.MinisterioMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -17,7 +16,14 @@ import java.util.List;
         uses = {EnderecoMembroMapper.class, IgrejaMapper.class, MinisterioMapper.class, MembroMinisterioMapper.class})
 public interface MembroMapper {
 
+
+    MembroResponseDTO paraMembroResponseDTO(Membro membro);
+
     MembroSimplificadoDTO paraMembroSimplificadoDTO(Membro membro);
+
+    List<MembroResponseDTO> paraMembrosResponseDTO(List<Membro> membros);
+
+
 
     @Mapping(target = "idInterno", ignore = true)
     @Mapping(target = "idExterno", ignore = true)
@@ -30,7 +36,4 @@ public interface MembroMapper {
     @Mapping(target = "status", ignore = true)
     Membro paraMembro(MembroCreateDTO membroDTO);
 
-
-
-    List<MembroResponseDTO> paraMembrosResponseDTO(List<Membro> membros);
 }
