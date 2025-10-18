@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,8 +31,7 @@ public interface MembroRepository extends JpaRepository<Membro, Long> {
             "OR email LIKE :buscaGeral " +
             "OR celular LIKE :buscaGeral"
             )
-    Page<Membro> findAllWithFilter(
-            Pageable pageable,
+    List<Membro> findAllWithFilter(
             @Param("buscaGeral") String buscaGeral
     );
 }

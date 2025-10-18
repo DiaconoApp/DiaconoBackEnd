@@ -29,7 +29,6 @@ public interface MembroMapper {
     Membro paraMembro(MembroCreateDTO membroDTO);
 
 
-    List<MembroResponseDTO> paraMembrosResponseDTO(Page<Membro> membros);
 
     List<MembroResponseDTO> paraMembrosResponseDTO(List<Membro> membros);
 }

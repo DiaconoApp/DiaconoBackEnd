@@ -41,17 +41,17 @@ public class MembroController {
     @ApiErrorsComuns
     @ApiResponse(responseCode = "200", description = "Membros encontrados com sucesso")
     @GetMapping
-    public ResponseEntity<List<MembroResponseDTO>> buscarTodos(Pageable pageable, @RequestParam(required = false) String buscaGeral,
+    public ResponseEntity<Page<MembroResponseDTO>> buscarTodos(Pageable pageable, @RequestParam(required = false) String buscaGeral,
                                                                         @RequestParam(required = false) EnumStatusMembro status,
                                                                         @RequestParam(required = false) UUID fkMinisterio) {
 
         if(buscaGeral == null && buscaGeral.isEmpty() && fkMinisterio == null && status == null){
-            List<MembroResponseDTO> response = membrosService.buscarTodosSemFiltro(pageable);
+            Page<MembroResponseDTO> response = membrosService.buscarTodosSemFiltro(pageable);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         }
 
 
-        List<MembroResponseDTO> response = membrosService.buscarTodosComFiltro(pageable, buscaGeral, status, fkMinisterio);
+        Page<MembroResponseDTO> response = membrosService.buscarTodosComFiltro(pageable, buscaGeral, status, fkMinisterio);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
 

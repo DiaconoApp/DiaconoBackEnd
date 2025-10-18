@@ -19,6 +19,7 @@ import com.diacono.diacono.membroministerio.service.MembroMinisterioService;
 import com.diacono.diacono.ministerio.model.entity.Ministerio;
 import com.diacono.diacono.ministerio.service.MinisterioService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -50,30 +51,41 @@ public class MembroService {
     @Transactional(readOnly = true)
     public Page<MembroResponseDTO> buscarTodosSemFiltro(Pageable pageable) {
 
-        Page<Membro> membros = buscaMembros(pageable, null);
-        Page<MembroResponseDTO> response = membroMapper.paraMembrosResponseDTO(membros);
+        List<Membro> membros = membroRepository.findAll();
+        validarMembrosEncontradosList(membros);
+        List<MembroResponseDTO> response = membroMapper.paraMembrosResponseDTO(membros);
         validaResponseList(response);
 
-        return response;
+        Page<MembroResponseDTO> responsePage = new PageImpl<>(
+                response,
+                pageable,
+                15L
+        );
+
+        return responsePage;
     }
 
     @Transactional(readOnly = true)
-    public List<MembroResponseDTO> buscarTodosComFiltro(
+    public Page<MembroResponseDTO> buscarTodosComFiltro(
             Pageable pageable,
             String termoBusca,
             EnumStatusMembro status,
-            UUID fkMinisterio ) {
+            UUID fkMinisterio) {
 
-        Page<Membro> membrosPage = buscaMembros(pageable, termoBusca);
-        List<Membro> membros = membrosPage.getContent();
+        List<Membro> membrosPage = buscaMembros(termoBusca);
 
-        if(status == null && fkMinisterio == null){
-            List<MembroResponseDTO> response = membroMapper.paraMembrosResponseDTO(membros);
-            validaResponseList(response);
-            return response;
+        if (status == null && fkMinisterio == null) {
+            List<MembroResponseDTO> response = membroMapper.paraMembrosResponseDTO(membrosPage);
+            Page<MembroResponseDTO> responsePage = new PageImpl<>(
+                    response,
+                    pageable,
+                    15L
+            );
+            validaResponsePage(responsePage);
+            return responsePage;
         }
 
-        List<Membro> membrosFiltradosList = membros.stream()
+        List<Membro> membrosFiltradosList = membrosPage.stream()
                 .filter(membro -> {
 
                     boolean passaNoFiltro = true;
@@ -95,18 +107,27 @@ public class MembroService {
 
         List<MembroResponseDTO> response = membroMapper.paraMembrosResponseDTO(membrosFiltradosList);
         validaResponseList(response);
-        return response;
+
+        Page<MembroResponseDTO> responsePage = new PageImpl<>(
+                response,
+                pageable,
+                15L
+        );
+
+        validaResponsePage(responsePage);
+
+        return responsePage;
 
     }
 
     @Transactional
-    public RestResponseMessage criarMembro(MembroCreateDTO membroDTO){
+    public RestResponseMessage criarMembro(MembroCreateDTO membroDTO) {
 
-        if(membroDTO == null){
+        if (membroDTO == null) {
             throw new ObjectSaveErrorException("Dados do membro não podem ser nulos.");
         }
 
-        if(membroDTO.idExternoMinisterios() == null || membroDTO.idExternoMinisterios().isEmpty()){
+        if (membroDTO.idExternoMinisterios() == null || membroDTO.idExternoMinisterios().isEmpty()) {
             Membro response = criarMembroSemMinisterio(membroDTO);
             return new RestResponseMessage(HttpStatus.CREATED, "Usuário cadastrado com sucesso");
         }
@@ -116,9 +137,9 @@ public class MembroService {
 
     // METODOS AUXILIARES
 
-    private Membro criarMembroSemMinisterio(MembroCreateDTO membroDTO){
+    private Membro criarMembroSemMinisterio(MembroCreateDTO membroDTO) {
 
-        if(membroDTO.cargo().equals(EnumCargoMembro.LIDER_MINISTERIO)){
+        if (membroDTO.cargo().equals(EnumCargoMembro.LIDER_MINISTERIO)) {
             throw new ObjectSaveErrorException("Para cadastrar um líder de ministério, é necessário associar um ministério ao membro.");
         }
 
@@ -134,7 +155,7 @@ public class MembroService {
 
     }
 
-    private RestResponseMessage criarMembroComMinisterio(MembroCreateDTO membroDTO){
+    private RestResponseMessage criarMembroComMinisterio(MembroCreateDTO membroDTO) {
         Set<Ministerio> ministerios = ministerioService.buscarPorUUID(membroDTO.idExternoMinisterios());
 
         Membro membro = criarMembroSemMinisterio(membroDTO);
@@ -148,7 +169,7 @@ public class MembroService {
                     associaco.setMembro(membro);
                     associaco.setMinisterio(ministerio);
 
-                    if(membro.getCargoMembro().equals(EnumCargoMembro.LIDER_MINISTERIO)){
+                    if (membro.getCargoMembro().equals(EnumCargoMembro.LIDER_MINISTERIO)) {
                         associaco.setCargoMembro(EnumCargoMembroMinisterio.LIDER_MINISTERIO);
                     }
 
@@ -164,51 +185,61 @@ public class MembroService {
     }
 
 
-private void validaCriacao(Membro membro){
-    if(membro == null){
-        throw new ObjectSaveErrorException("Não foi possível cadastrar o usuário");
+    private void validaCriacao(Membro membro) {
+        if (membro == null) {
+            throw new ObjectSaveErrorException("Não foi possível cadastrar o usuário");
+        }
     }
-}
 
-private Page<Membro> buscaMembros(Pageable pageable, String busca){
+    private List<Membro> buscaMembros(String busca) {
 
-    if (busca == null || busca.isBlank()){
-        Page<Membro> membros = membroRepository.findAll(pageable);
-        validarMembrosEncontrados(membros);
+        String buscaFormatada = "%" + busca + "%";
+        List<Membro> membros = membroRepository.findAllWithFilter(buscaFormatada);
+        validarMembrosEncontradosList(membros);
+
         return membros;
     }
 
-    String buscaFormatada = "%"+busca+"%";
-    Page<Membro> membros = membroRepository.findAllWithFilter(pageable, buscaFormatada);
-    validarMembrosEncontrados(membros);
-
-    return membros;
-}
-
-private void validarMembrosEncontrados(Page<Membro> membros){
-    if(membros.isEmpty()){
-        throw new ObjectNotFoundException("Nenhum membro encontrado");
+    private void validarMembrosEncontradosList(List<Membro> membros) {
+        if (membros.isEmpty()) {
+            throw new ObjectNotFoundException("Nenhum membro encontrado");
+        }
     }
-}
 
-private void validaResponseList(List<MembroResponseDTO> membros){
-    if(membros == null || membros.isEmpty()){
-        throw new ObjectNotFoundException("Não foi possível converter para DTOs");
+    private void validarMembrosEncontradosPage(Page<Membro> membros) {
+        if (membros.isEmpty()) {
+            throw new ObjectNotFoundException("Nenhum membro encontrado");
+        }
     }
-};
+
+    private void validaResponseList(List<MembroResponseDTO> membros) {
+        if (membros == null || membros.isEmpty()) {
+            throw new ObjectNotFoundException("Não foi possível converter para DTOs");
+        }
+    }
+
+    ;
+
+    private void validaResponsePage(Page<MembroResponseDTO> membros) {
+        if (membros == null || membros.isEmpty()) {
+            throw new ObjectNotFoundException("Não foi possível converter para DTOs");
+        }
+    }
+
+    ;
 
 
-public String hashSenha(String senha) {
-    return passwordEncoder.encode(senha);
-}
+    public String hashSenha(String senha) {
+        return passwordEncoder.encode(senha);
+    }
 
-/*MÉTODO QUE SE RELACIONA COM A ENTIDADE EVENTO*/
+    /*MÉTODO QUE SE RELACIONA COM A ENTIDADE EVENTO*/
 
-public Membro buscarPorUUID(UUID idExterno){
-    /*FAZER VALIDAÇÃO DE PRESENÇA -- LANÇAR EXCEÇÃO*/
-    Membro membro = membroRepository.findByIdExterno(idExterno)
-            .orElseThrow(() -> new MembroNaoEncontradoException("Membro não encontrado com ID: " + idExterno));
+    public Membro buscarPorUUID(UUID idExterno) {
+        /*FAZER VALIDAÇÃO DE PRESENÇA -- LANÇAR EXCEÇÃO*/
+        Membro membro = membroRepository.findByIdExterno(idExterno)
+                .orElseThrow(() -> new MembroNaoEncontradoException("Membro não encontrado com ID: " + idExterno));
 
-    return membro;
+        return membro;
     }
 }
