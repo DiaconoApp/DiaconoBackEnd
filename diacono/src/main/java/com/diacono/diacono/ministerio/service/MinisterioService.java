@@ -8,16 +8,14 @@ import com.diacono.diacono.ministerio.model.entity.Ministerio;
 import com.diacono.diacono.ministerio.repository.MinisteriosRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
-public class MinisteriosService {
+public class MinisterioService {
 
     private final MinisteriosRepository ministerios;
 
-    public MinisteriosService(MinisteriosRepository ministerios) {
+    public MinisterioService(MinisteriosRepository ministerios) {
         this.ministerios = ministerios;
     }
 
@@ -26,7 +24,7 @@ public class MinisteriosService {
         Ministerio response = new Ministerio(ministerioDTO.nome(), ministerioDTO.dataCriacao(), ministerioDTO.nomeLider(), ministerioDTO.status());
         ministerios.save(response);
 
-        return new MinisterioResponseDTO(response.getNome(), response.getDataCriacao(), response.getNomeLider(), response.getStatus());
+        return new MinisterioResponseDTO(response.getIdExterno(),response.getNome(), response.getDataCriacao(), response.getNomeLider(), response.getStatus());
 
     }
 
@@ -35,11 +33,11 @@ public class MinisteriosService {
         List<Ministerio> ministerio = ministerios.findAll();
 
         if(ministerio.isEmpty()){
-            return null;
+            throw new ObjectNotFoundException("Nenhum ministério encontrado");
         }
 
         List<MinisterioResponseDTO> ministeriosDTO = ministerio.stream()
-                .map(m -> new MinisterioResponseDTO(m.getNome(), m.getDataCriacao(), m.getNomeLider(), m.getStatus()))
+                .map(m -> new MinisterioResponseDTO(m.getIdExterno(),m.getNome(), m.getDataCriacao(), m.getNomeLider(), m.getStatus()))
                 .toList();
 
         return ministeriosDTO;
@@ -51,7 +49,7 @@ public class MinisteriosService {
         if(ministerios.existsById(id)){
 
             Ministerio encontrado = ministerios.findById(id).get();
-            return new MinisterioResponseDTO(encontrado.getNome(), encontrado.getDataCriacao(), encontrado.getNomeLider(), encontrado.getStatus());
+            return new MinisterioResponseDTO(encontrado.getIdExterno(),encontrado.getNome(), encontrado.getDataCriacao(), encontrado.getNomeLider(), encontrado.getStatus());
 
         }
 
@@ -89,7 +87,7 @@ public class MinisteriosService {
             ministerios.save(encontrado);
 
 
-            return new MinisterioResponseDTO(encontrado.getNome(), encontrado.getDataCriacao(), encontrado.getNomeLider(), encontrado.getStatus());
+            return new MinisterioResponseDTO(encontrado.getIdExterno(),encontrado.getNome(), encontrado.getDataCriacao(), encontrado.getNomeLider(), encontrado.getStatus());
         }
 
         return null;
@@ -98,26 +96,17 @@ public class MinisteriosService {
 
 
     /*ESSE MÉTODO SE RELACIONA COM EVENTO*/
-    public List<Ministerio> buscarPorUUID(List<UUID> idExterno){
-        List<Ministerio> ministerios = new ArrayList<>();
+    public Set<Ministerio> buscarPorUUID(List<UUID> idExterno){
+        Set<Ministerio> ministerios = this.ministerios.findAllByIdExternoIn(idExterno);
 
-        idExterno.forEach(
-                id -> {
-                    if(idExterno != null){
-                        List<Ministerio> encontrado = this.ministerios.findByIdExterno(id);
-                        if(!encontrado.isEmpty()){
-                            ministerios.add(encontrado.get(0));
-                        }
-                    }
-                }
-        );
-
-        if(ministerios.isEmpty() || ministerios == null){
+        if (ministerios.isEmpty()) {
             throw new ObjectNotFoundException("Ministérios não encontrados");
         }
 
         return ministerios;
-
     }
+
+
+
 
 }

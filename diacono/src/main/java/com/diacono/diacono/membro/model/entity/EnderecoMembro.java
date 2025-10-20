@@ -1,10 +1,7 @@
-package com.diacono.diacono.endereco.model.entity;
+package com.diacono.diacono.membro.model.entity;
 
 import com.diacono.diacono.global.util.IdEntityUtils;
 import jakarta.persistence.Entity;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,22 +12,13 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
-public class EnderecoEvento extends IdEntityUtils {
+public class EnderecoMembro extends IdEntityUtils {
 
     private String cep;
-
     private String estado;
-
     private String cidade;
-
     private String bairro;
-
     private String rua;
-
+    private Integer numero;
     private String complemento;
-
-    private String numero;
-
-    private String apelido;
-
 }

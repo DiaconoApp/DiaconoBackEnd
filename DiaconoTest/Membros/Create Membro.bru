@@ -12,18 +12,29 @@ post {
 
 body:json {
   {
-    "nome": "fabiam",
-    "email": "ricardos@email.com",
-    "dataNascimento": "1995-08-15",
+    "fkIgreja": "550e8400-e29b-41d4-a716-446655440000",
+    "nome": "Lucas Oliveira",
     "cpf": "123.456.789-09",
-    "cep": "12345-678",
-    "numeroCasa": 120,
-    "senhaTemporaria": "abc123",
-    "senha": "minhaSenhaSegura"
+    "dataNascimento": "1992-03-15",
+    "email": "lucas.oliveira@email.com",
+    "celular": "11912345678",
+    "senha": "Senha@123",
+    "idExternoMinisterios": ["550e8400-e29b-41d4-a716-446655440020"],
+    "cargo": "MEMBRO",
+    "membroEnderecoDTO": {
+      "cep": "01310-100",
+      "logradouro": "Avenida Paulista",
+      "bairro": "Bela Vista",
+      "cidade": "São Paulo",
+      "rua": "Rua Ilha dos Ratones",
+      "estado": "SP",
+      "numero": "1500",
+      "complemento": "Apto 304"
+    }
   }
-  
 }
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

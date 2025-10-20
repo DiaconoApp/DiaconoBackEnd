@@ -1,6 +1,7 @@
-package com.diacono.diacono.cadastro.model.dto;
+package com.diacono.diacono.membro.model.dto.request;
 
-import com.diacono.diacono.membro.model.dto.request.EnderecoMembroDTO;
+import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
+import com.diacono.diacono.membroministerio.model.dto.request.MinisterioMembroCreateDTO;
 import com.diacono.diacono.membro.model.entity.EnumCargoMembro;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-public record CadastroExternoDTO(
+public record MembroCreateDTO(
 
         @NotNull(message = "Você deve estar associado a uma Igreja.")
         UUID fkIgreja,
@@ -30,17 +31,24 @@ public record CadastroExternoDTO(
         String email,
 
         @Pattern(regexp = "^(1[1-9]|2[12478]|3([1-5]|[7-8])|4[1-9]|5(1|[3-5])|6[1-9]|7[134579]|8[1-9]|9[1-9])9[0-9]{8}$",
-                message = "Formato inválido para o número de celular.")
+        message = "Formato inválido para o número de celular.")
         @NotBlank(message = "É necessário preencher o número de celular.")
         String celular,
 
         @NotBlank(message = "O campo senha não pode estar vazio")
         String senha,
 
+
+        List<UUID> idExternoMinisterios,
+
+        @NotNull(message = "O cargo do membro deve ser informado.")
+        EnumCargoMembro cargo,
+
         @Valid
         EnderecoMembroDTO membroEnderecoDTO
 ) {
-    public CadastroExternoDTO {
+
+    public MembroCreateDTO {
         nome = nome.toUpperCase(Locale.ROOT);
         email = email.toLowerCase(Locale.ROOT);
     }

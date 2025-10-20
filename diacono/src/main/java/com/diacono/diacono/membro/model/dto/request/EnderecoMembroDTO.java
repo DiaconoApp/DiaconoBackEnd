@@ -1,17 +1,14 @@
-package com.diacono.diacono.endereco.model.dto.request;
+package com.diacono.diacono.membro.model.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 import java.util.Locale;
 import java.util.UUID;
 
-public record EnderecoEventoDTO(
-
-        //fazer as validações
-        UUID idExterno,
+public record EnderecoMembroDTO(
 
         @Pattern(regexp = "\\d{5}-\\d{3}")
         @NotBlank(message = "O cep do endereço não pode ser nulo")
@@ -38,12 +35,10 @@ public record EnderecoEventoDTO(
         String complemento,
 
         @NotBlank(message = "O número da casa não pode ser nulo")
-        String numero,
-
-        @NotBlank(message = "O apelido do endereço não pode ser nulo")
-        String apelido
+        String numero
 ) {
-    public EnderecoEventoDTO {
+
+    public EnderecoMembroDTO {
         estado = estado.toUpperCase(Locale.ROOT);
         cidade = cidade.toUpperCase(Locale.ROOT);
         bairro = bairro.toUpperCase(Locale.ROOT);
@@ -51,3 +46,6 @@ public record EnderecoEventoDTO(
         complemento = complemento.toUpperCase(Locale.ROOT);
     }
 }
+
+
+

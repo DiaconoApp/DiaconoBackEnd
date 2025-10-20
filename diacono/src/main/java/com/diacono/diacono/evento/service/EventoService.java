@@ -21,9 +21,8 @@ import com.diacono.diacono.evento.repository.EventoRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
 import com.diacono.diacono.membro.service.MembroService;
-import com.diacono.diacono.ministerio.service.MinisteriosService;
+import com.diacono.diacono.ministerio.service.MinisterioService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,14 +39,14 @@ public class EventoService {
     private final EventoRepository eventoRepository;
     private final EventoMapper eventoMapper;
     private final IgrejaService igrejaService;
-    private final MinisteriosService ministerioService;
+    private final MinisterioService ministerioService;
     private final MembroService membroService;
     private final OcorrenciaService ocorrenciaService;
     private final EnderecoEventoMapper enderecoEventoMapper;
     private final EnderecoEventoService enderecoEventoService;
     private final EventoUpdateMapper eventoUpdateMapper;
 
-    public EventoService(EventoRepository eventoRepository, EventoMapper eventoMapper, IgrejaService igrejaService, MinisteriosService ministerioService, MembroService membroService, OcorrenciaService ocorrenciaService, EnderecoEventoMapper enderecoEventoMapper, EnderecoEventoService enderecoEventoService, EventoUpdateMapper eventoUpdateMapper) {
+    public EventoService(EventoRepository eventoRepository, EventoMapper eventoMapper, IgrejaService igrejaService, MinisterioService ministerioService, MembroService membroService, OcorrenciaService ocorrenciaService, EnderecoEventoMapper enderecoEventoMapper, EnderecoEventoService enderecoEventoService, EventoUpdateMapper eventoUpdateMapper) {
         this.eventoRepository = eventoRepository;
         this.eventoMapper = eventoMapper;
         this.igrejaService = igrejaService;
@@ -129,6 +128,9 @@ public class EventoService {
         Evento eventoOcorrencia;
 
         if (evento.getTipoRecorrencia() == TipoRecorrencia.NAO_REPETE) {
+            if (!evento.getData().isEqual(dataHoje)) {
+                throw new ObjectNotFoundException("Evento não encontrado para a data informada");
+            }
             eventoOcorrencia = evento;
         } else {
             eventoOcorrencia = ocorrenciaService.criarOcorrencia(evento, dataHoje);
@@ -148,7 +150,7 @@ public class EventoService {
         * EM CONSIDERAÇÃO A IGREJA DONA*/
 
         // completo, fazer ajuste no futuro para encontrar com fk igreja
-
+        validarHoraFuturo(request.data(),request.horaInicio(), request.horaFim());
         validaHoraInicioMenorHoraFim(request.horaInicio(), request.horaFim());
 
         if (request.tipoRecorrencia() != TipoRecorrencia.NAO_REPETE) {
@@ -183,7 +185,7 @@ public class EventoService {
         long deleteCount = eventoRepository.deleteByIdExterno(idExterno);
 
         if(deleteCount == 0){
-            throw new ObjectSaveErrorException("Não foi possível apagar o evento");
+            throw new ObjectNotFoundException("Não foi possível apagar o evento, verifique se o evento existe");
         }
 
         RestResponseMessage message = new RestResponseMessage(HttpStatus.OK, "Evento apagado com sucesso");
@@ -210,6 +212,17 @@ public class EventoService {
 
         eventoUpdateMapper.updateEventoDTO(request, evento);
 
+        if(request.horaInicio() != null && request.horaFim() != null){
+            validaHoraInicioMenorHoraFim(request.horaInicio(), request.horaFim());
+            validarHoraFuturo(evento.getData(), request.horaInicio(), request.horaFim());
+        } else if(request.horaInicio() != null){
+            validaHoraInicioMenorHoraFim(request.horaInicio(), evento.getHoraFim());
+            validarHoraFuturo(evento.getData(), request.horaInicio(), evento.getHoraFim());
+        } else if(request.horaFim() != null){
+            validaHoraInicioMenorHoraFim(evento.getHoraInicio(), request.horaFim());
+            validarHoraFuturo(evento.getData(), evento.getHoraInicio(), request.horaFim());
+        }
+
         Evento eventoAtualizado = eventoRepository.save(evento);
 
         if(eventoAtualizado == null){
@@ -219,17 +232,20 @@ public class EventoService {
         return new RestResponseMessage(HttpStatus.OK, "Evento atualizado com sucesso");
     }
 
-
-
-
-
-
-
     /*MÉTODOS AUXILIARES -> CONTEM LÓGICAS PARA UTILIZAR EM OUTROS MÉTODOS*/
 
     private void validaHoraInicioMenorHoraFim(LocalTime inicio, LocalTime fim){
         if(fim.isBefore(inicio)){
             throw new TimeInvalidException("O horário de término do evento precisa ser maior que o horário de início");
+        }
+    }
+
+    private void validarHoraFuturo(LocalDate data,LocalTime inicio, LocalTime fim){
+        LocalDate hoje = LocalDate.now();
+        LocalTime agora = LocalTime.now();
+        LocalTime agoraComMargem = agora.minusMinutes(3);
+        if(hoje.isEqual(data) && (inicio.isBefore(agoraComMargem) || fim.isBefore(agoraComMargem))){
+            throw new TimeInvalidException("Não é possível cadastrar eventos com horários passados.");
         }
     }
 
@@ -296,15 +312,6 @@ public class EventoService {
         return enderecoEvento;
     }
 
-
-
-
-
-
-
-
-
-
     private RestResponseMessage criarEventoMestre(Evento evento){
         /*VALIDAR SE FOI POSSÍVEL CRIAR OU NÃO -- GERA EXCEÇÃO*/
         /*MELHORAR O RETORNO DO MÉTODO*/
@@ -343,7 +350,4 @@ public class EventoService {
         }
         return totalSemana;
     }
-
-
-
 }
