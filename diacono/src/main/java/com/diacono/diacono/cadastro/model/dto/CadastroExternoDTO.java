@@ -42,6 +42,6 @@ public record CadastroExternoDTO(
 ) {
     public CadastroExternoDTO {
         nome = nome.toUpperCase(Locale.ROOT);
-        email = email.toLowerCase(Locale.ROOT);
+        email = email.toUpperCase(Locale.ROOT);
     }
 }
