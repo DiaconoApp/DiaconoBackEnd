@@ -192,8 +192,12 @@ public class MembroService {
 
     private List<Membro> buscaMembros(String busca) {
 
-        String buscaFormatada = "%" + busca + "%";
+        String buscaFormatada = "%" + busca.toUpperCase() + "%";
         List<Membro> membros = membroRepository.findAllWithFilter(buscaFormatada);
+
+        if(membros.isEmpty() || membros == null){
+            throw new ObjectNotFoundException("Nenhum membro encontrado");
+        }
 
         return membros;
     }

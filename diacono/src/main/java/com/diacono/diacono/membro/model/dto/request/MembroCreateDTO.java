@@ -9,6 +9,7 @@ import org.hibernate.validator.constraints.br.CPF;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 public record MembroCreateDTO(
@@ -45,4 +46,10 @@ public record MembroCreateDTO(
 
         @Valid
         EnderecoMembroDTO membroEnderecoDTO
-) {}
+) {
+
+    public MembroCreateDTO {
+        nome = nome.toUpperCase(Locale.ROOT);
+        email = email.toLowerCase(Locale.ROOT);
+    }
+}

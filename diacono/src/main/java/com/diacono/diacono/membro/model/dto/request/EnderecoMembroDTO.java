@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
+import java.util.Locale;
 import java.util.UUID;
 
 public record EnderecoMembroDTO(
@@ -35,7 +36,16 @@ public record EnderecoMembroDTO(
 
         @NotBlank(message = "O número da casa não pode ser nulo")
         String numero
-) {}
+) {
+
+    public EnderecoMembroDTO {
+        estado = estado.toUpperCase(Locale.ROOT);
+        cidade = cidade.toUpperCase(Locale.ROOT);
+        bairro = bairro.toUpperCase(Locale.ROOT);
+        rua = rua.toUpperCase(Locale.ROOT);
+        complemento = complemento.toUpperCase(Locale.ROOT);
+    }
+}
 
 
 
