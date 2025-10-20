@@ -2,6 +2,7 @@ package com.diacono.diacono.membro.service;
 
 import com.diacono.diacono.Igreja.model.entity.Igreja;
 import com.diacono.diacono.Igreja.service.IgrejaService;
+import com.diacono.diacono.cadastro.model.dto.CadastroExternoDTO;
 import com.diacono.diacono.global.dto.response.RestResponseMessage;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
@@ -153,6 +154,7 @@ public class MembroService {
 
     }
 
+
     private RestResponseMessage criarMembroComMinisterio(MembroCreateDTO membroDTO) {
         Set<Ministerio> ministerios = ministerioService.buscarPorUUID(membroDTO.idExternoMinisterios());
 
@@ -241,4 +243,26 @@ public class MembroService {
 
         return membro;
     }
+
+    //METODO QUE SE RELACIONA COM
+
+    public Membro criarMembroExterno(CadastroExternoDTO membroDTO) {
+
+        if(membroDTO == null){
+            throw new ObjectSaveErrorException("Dados do membro não podem ser nulos.");
+        }
+
+        Membro membro = membroMapper.paraMembro(membroDTO);
+        Igreja igreja = igrejaService.buscarUUID(membroDTO.fkIgreja());
+        membro.setStatus(EnumStatusMembro.ATIVO);
+        membro.setIgreja(igreja);
+        membro.setCargoMembro(EnumCargoMembro.MEMBRO);
+        membro.setSenha(hashSenha(membroDTO.senha()));
+        Membro membroSalvo = membroRepository.save(membro);
+        validaCriacao(membroSalvo);
+
+        return membroSalvo;
+
+    }
+
 }

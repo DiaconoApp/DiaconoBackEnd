@@ -1,6 +1,7 @@
 package com.diacono.diacono.membro.mapper;
 
 import com.diacono.diacono.Igreja.mapper.IgrejaMapper;
+import com.diacono.diacono.cadastro.model.dto.CadastroExternoDTO;
 import com.diacono.diacono.membro.model.dto.request.MembroCreateDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroResponseDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroSimplificadoDTO;
@@ -35,5 +36,10 @@ public interface MembroMapper {
     @Mapping(target = "idExterno", ignore = true)
     @Mapping(target = "status", ignore = true)
     Membro paraMembro(MembroCreateDTO membroDTO);
+
+    @Mapping(target = "idInterno", ignore = true)
+    @Mapping(target = "idExterno", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    Membro paraMembro(CadastroExternoDTO membroDTO);
 
 }

@@ -1,15 +1,15 @@
 package com.diacono.diacono.cadastro.controller;
 
 import com.diacono.diacono.Igreja.model.dto.response.IgrejaSemiCompletoDTO;
+import com.diacono.diacono.cadastro.model.dto.CadastroExternoDTO;
 import com.diacono.diacono.cadastro.service.CadastroService;
 import com.diacono.diacono.global.dto.response.RestResponseMessage;
 import com.diacono.diacono.global.error.comuns.ApiErrorsComuns;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -31,8 +31,14 @@ public class CadastroController {
         return ResponseEntity.status(HttpStatus.OK).body(igrejas);
     }
 
-    public void cadastrarMembro(){
+    @ApiErrorsComuns
+    @ApiResponse(responseCode = "201", description = "Membro criado com sucesso")
+    @PostMapping
+    public ResponseEntity<RestResponseMessage> cadastrarMembro(@RequestBody @Valid CadastroExternoDTO cadastroDTO){
 
+        RestResponseMessage response = cadastroService.cadastrarMembro(cadastroDTO);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 }

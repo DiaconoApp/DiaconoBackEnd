@@ -1,0 +1,40 @@
+meta {
+  name: Cadastro Externo
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/register
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "fkIgreja": "550e8400-e29b-41d4-a716-446655440000",
+    "nome": "string",
+    "cpf": "99209712005",
+    "dataNascimento": "2025-10-20",
+    "email": "oliveira@gmail.com",
+    "celular": "51928982091",
+    "senha": "string",
+    "idExternoMinisterios": [
+      "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    ],
+    "cargo": "GOVERNO",
+    "membroEnderecoDTO": {
+      "cep": "01009-459",
+      "estado": "string",
+      "cidade": "string",
+      "bairro": "string",
+      "rua": "string",
+      "complemento": "string",
+      "numero": "string"
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+}
