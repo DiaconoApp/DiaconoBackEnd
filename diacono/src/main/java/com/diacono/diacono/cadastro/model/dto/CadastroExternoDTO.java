@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.br.CPF;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 public record CadastroExternoDTO(
@@ -40,6 +41,7 @@ public record CadastroExternoDTO(
         EnderecoMembroDTO membroEnderecoDTO
 ) {
     public CadastroExternoDTO {
-
+        nome = nome.toUpperCase(Locale.ROOT);
+        email = email.toLowerCase(Locale.ROOT);
     }
 }
