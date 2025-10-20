@@ -24,7 +24,7 @@ public class MinisterioService {
         Ministerio response = new Ministerio(ministerioDTO.nome(), ministerioDTO.dataCriacao(), ministerioDTO.nomeLider(), ministerioDTO.status());
         ministerios.save(response);
 
-        return new MinisterioResponseDTO(response.getNome(), response.getDataCriacao(), response.getNomeLider(), response.getStatus());
+        return new MinisterioResponseDTO(response.getIdExterno(),response.getNome(), response.getDataCriacao(), response.getNomeLider(), response.getStatus());
 
     }
 
@@ -33,11 +33,11 @@ public class MinisterioService {
         List<Ministerio> ministerio = ministerios.findAll();
 
         if(ministerio.isEmpty()){
-            return null;
+            throw new ObjectNotFoundException("Nenhum ministério encontrado");
         }
 
         List<MinisterioResponseDTO> ministeriosDTO = ministerio.stream()
-                .map(m -> new MinisterioResponseDTO(m.getNome(), m.getDataCriacao(), m.getNomeLider(), m.getStatus()))
+                .map(m -> new MinisterioResponseDTO(m.getIdExterno(),m.getNome(), m.getDataCriacao(), m.getNomeLider(), m.getStatus()))
                 .toList();
 
         return ministeriosDTO;
@@ -49,7 +49,7 @@ public class MinisterioService {
         if(ministerios.existsById(id)){
 
             Ministerio encontrado = ministerios.findById(id).get();
-            return new MinisterioResponseDTO(encontrado.getNome(), encontrado.getDataCriacao(), encontrado.getNomeLider(), encontrado.getStatus());
+            return new MinisterioResponseDTO(encontrado.getIdExterno(),encontrado.getNome(), encontrado.getDataCriacao(), encontrado.getNomeLider(), encontrado.getStatus());
 
         }
 
@@ -87,7 +87,7 @@ public class MinisterioService {
             ministerios.save(encontrado);
 
 
-            return new MinisterioResponseDTO(encontrado.getNome(), encontrado.getDataCriacao(), encontrado.getNomeLider(), encontrado.getStatus());
+            return new MinisterioResponseDTO(encontrado.getIdExterno(),encontrado.getNome(), encontrado.getDataCriacao(), encontrado.getNomeLider(), encontrado.getStatus());
         }
 
         return null;

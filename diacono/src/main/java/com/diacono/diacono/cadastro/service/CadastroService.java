@@ -18,9 +18,6 @@ public class CadastroService {
 
     public List<IgrejaSemiCompletoDTO> buscarIgrejas(){
         List<IgrejaSemiCompletoDTO> igrejas = igrejaService.buscarIgrejas();
-        if(igrejas == null || igrejas.isEmpty()){
-            throw new ObjectNotFoundException("Igrejas não encontradas");
-        }
         return igrejas;
     }
 
