@@ -9,13 +9,15 @@ VALUES
 -- ========================================
 -- MEMBROS
 -- ========================================
-INSERT INTO membro (id_interno, id_externo, nome, email, data_nascimento, cpf, cep, numero_casa, senha_temporaria, senha)
-VALUES
-  (1, '550e8400-e29b-41d4-a716-446655440010', 'João da Silva', 'joao.silva@exemplo.com', '1985-10-15', '123.456.789-01', '01000-000', 105, 'temp123', '$2a$10$HASHED_SENHA_1'),
-  (2, '550e8400-e29b-41d4-a716-446655440011', 'Maria Oliveira', 'maria.oliver@exemplo.com', '1992-05-20', '987.654.321-02', '02000-000', 25, 'temp123', '$2a$10$HASHED_SENHA_2'),
-  (3, '550e8400-e29b-41d4-a716-446655440012', 'Pedro Santos', 'pedro.santos@exemplo.com', '1989-07-30', '741.852.963-00', '03000-000', 12, 'temp123', '$2a$10$HASHED_SENHA_3'),
-  (4, '550e8400-e29b-41d4-a716-446655440013', 'Ana Pereira', 'ana.pereira@exemplo.com', '1995-02-14', '369.258.147-00', '04000-000', 99, 'temp123', '$2a$10$HASHED_SENHA_4'),
-  (5, '550e8400-e29b-41d4-a716-446655440014', 'Carla Souza', 'carla.souza@exemplo.com', '1990-09-10', '159.753.486-00', '05000-000', 500, 'temp123', '$2a$10$HASHED_SENHA_5');
+--INSERT INTO membro (id_interno, id_externo, nome, email, data_nascimento, cpf, cep, numero_casa, senha_temporaria, senha)
+--VALUES
+--  (1, '550e8400-e29b-41d4-a716-446655440010', 'João da Silva', 'joao.silva@exemplo.com', '1985-10-15', '123.456.789-01', '01000-000', 105, 'temp123', '$2a$10$HASHED_SENHA_1'),
+--  (2, '550e8400-e29b-41d4-a716-446655440011', 'Maria Oliveira', 'maria.oliver@exemplo.com', '1992-05-20', '987.654.321-02', '02000-000', 25, 'temp123', '$2a$10$HASHED_SENHA_2'),
+--  (3, '550e8400-e29b-41d4-a716-446655440012', 'Pedro Santos', 'pedro.santos@exemplo.com', '1989-07-30', '741.852.963-00', '03000-000', 12, 'temp123', '$2a$10$HASHED_SENHA_3'),
+--  (4, '550e8400-e29b-41d4-a716-446655440013', 'Ana Pereira', 'ana.pereira@exemplo.com', '1995-02-14', '369.258.147-00', '04000-000', 99, 'temp123', '$2a$10$HASHED_SENHA_4'),
+--  (5, '550e8400-e29b-41d4-a716-446655440014', 'Carla Souza', 'carla.souza@exemplo.com', '1990-09-10', '159.753.486-00', '05000-000', 500, 'temp123', '$2a$10$HASHED_SENHA_5');
+
+
 
 -- ========================================
 -- MINISTÉRIOS

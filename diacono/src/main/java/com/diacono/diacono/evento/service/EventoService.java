@@ -21,9 +21,8 @@ import com.diacono.diacono.evento.repository.EventoRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
 import com.diacono.diacono.membro.service.MembroService;
-import com.diacono.diacono.ministerio.service.MinisteriosService;
+import com.diacono.diacono.ministerio.service.MinisterioService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,14 +39,14 @@ public class EventoService {
     private final EventoRepository eventoRepository;
     private final EventoMapper eventoMapper;
     private final IgrejaService igrejaService;
-    private final MinisteriosService ministerioService;
+    private final MinisterioService ministerioService;
     private final MembroService membroService;
     private final OcorrenciaService ocorrenciaService;
     private final EnderecoEventoMapper enderecoEventoMapper;
     private final EnderecoEventoService enderecoEventoService;
     private final EventoUpdateMapper eventoUpdateMapper;
 
-    public EventoService(EventoRepository eventoRepository, EventoMapper eventoMapper, IgrejaService igrejaService, MinisteriosService ministerioService, MembroService membroService, OcorrenciaService ocorrenciaService, EnderecoEventoMapper enderecoEventoMapper, EnderecoEventoService enderecoEventoService, EventoUpdateMapper eventoUpdateMapper) {
+    public EventoService(EventoRepository eventoRepository, EventoMapper eventoMapper, IgrejaService igrejaService, MinisterioService ministerioService, MembroService membroService, OcorrenciaService ocorrenciaService, EnderecoEventoMapper enderecoEventoMapper, EnderecoEventoService enderecoEventoService, EventoUpdateMapper eventoUpdateMapper) {
         this.eventoRepository = eventoRepository;
         this.eventoMapper = eventoMapper;
         this.igrejaService = igrejaService;
@@ -233,12 +232,6 @@ public class EventoService {
         return new RestResponseMessage(HttpStatus.OK, "Evento atualizado com sucesso");
     }
 
-
-
-
-
-
-
     /*MÉTODOS AUXILIARES -> CONTEM LÓGICAS PARA UTILIZAR EM OUTROS MÉTODOS*/
 
     private void validaHoraInicioMenorHoraFim(LocalTime inicio, LocalTime fim){
@@ -319,15 +312,6 @@ public class EventoService {
         return enderecoEvento;
     }
 
-
-
-
-
-
-
-
-
-
     private RestResponseMessage criarEventoMestre(Evento evento){
         /*VALIDAR SE FOI POSSÍVEL CRIAR OU NÃO -- GERA EXCEÇÃO*/
         /*MELHORAR O RETORNO DO MÉTODO*/
@@ -366,7 +350,4 @@ public class EventoService {
         }
         return totalSemana;
     }
-
-
-
 }
