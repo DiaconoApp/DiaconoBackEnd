@@ -13,7 +13,7 @@ public record EnderecoEventoDTO(
         //fazer as validações
         UUID idExterno,
 
-        @Pattern(regexp = "\\d{5}-\\d{3}")
+        @Pattern(regexp = "\\d{5}\\d{3}")
         @NotBlank(message = "O cep do endereço não pode ser nulo")
         String cep,
 

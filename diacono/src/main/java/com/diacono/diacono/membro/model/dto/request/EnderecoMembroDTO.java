@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public record EnderecoMembroDTO(
 
-        @Pattern(regexp = "\\d{5}-\\d{3}")
+        @Pattern(regexp = "\\d{5}\\d{3}")
         @NotBlank(message = "O cep do endereço não pode ser nulo")
         String cep,
 
