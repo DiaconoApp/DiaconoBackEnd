@@ -238,8 +238,11 @@ public class MembroService {
 
     public Membro buscarPorUUID(UUID idExterno) {
         /*FAZER VALIDAÇÃO DE PRESENÇA -- LANÇAR EXCEÇÃO*/
-        Membro membro = membroRepository.findByIdExterno(idExterno)
-                .orElseThrow(() -> new MembroNaoEncontradoException("Membro não encontrado com ID: " + idExterno));
+        Membro membro = membroRepository.findByIdExterno(idExterno);
+
+        if(membro == null){
+            throw new ObjectNotFoundException("Membro não encontrado.");
+        }
 
         return membro;
     }

@@ -15,7 +15,7 @@ import java.util.UUID;
 @Repository
 public interface MembroRepository extends JpaRepository<Membro, Long> {
 
-    Optional<Membro> findByIdExterno(UUID idExterno);
+    Membro findByIdExterno(UUID idExterno);
 
     @Query("SELECT COUNT(m) FROM Membro m WHERE m.status = 'ATIVO'")
     Long countMembroStatusIgualAtivo();
