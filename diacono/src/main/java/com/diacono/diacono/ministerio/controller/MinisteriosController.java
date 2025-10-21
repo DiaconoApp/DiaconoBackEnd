@@ -3,7 +3,7 @@ package com.diacono.diacono.ministerio.controller;
 import com.diacono.diacono.ministerio.model.dto.MinisterioCreateDTO;
 import com.diacono.diacono.ministerio.model.dto.MinisterioResponseDTO;
 import com.diacono.diacono.ministerio.model.dto.MinisterioUpdateDTO;
-import com.diacono.diacono.ministerio.service.MinisteriosService;
+import com.diacono.diacono.ministerio.service.MinisterioService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +14,9 @@ import java.util.List;
 @RequestMapping("/ministerios")
 public class MinisteriosController {
 
-    private final MinisteriosService ministerio;
+    private final MinisterioService ministerio;
 
-    public MinisteriosController(MinisteriosService ministerio) {
+    public MinisteriosController(MinisterioService ministerio) {
         this.ministerio = ministerio;
     }
 
@@ -39,7 +39,7 @@ public class MinisteriosController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MinisterioResponseDTO> readUniqueMinisterio(@PathVariable Integer id){
+    public ResponseEntity<MinisterioResponseDTO> readUniqueMinisterio(@PathVariable Long id){
 
         MinisterioResponseDTO response = ministerio.getForIDMinisterio(id);
 
@@ -48,7 +48,7 @@ public class MinisteriosController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMinisterio(@PathVariable Integer id){
+    public ResponseEntity<Void> deleteMinisterio(@PathVariable Long id){
 
         Boolean response = ministerio.deleteMinisterio(id);
 
@@ -57,7 +57,7 @@ public class MinisteriosController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<MinisterioResponseDTO> updateSomeFieldsMinisterio(@RequestBody MinisterioUpdateDTO ministerioDTO, @PathVariable Integer id){
+    public ResponseEntity<MinisterioResponseDTO> updateSomeFieldsMinisterio(@RequestBody MinisterioUpdateDTO ministerioDTO, @PathVariable Long id){
 
         MinisterioResponseDTO response = ministerio.updateMinisterio(ministerioDTO, id);
 

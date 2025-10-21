@@ -1,0 +1,20 @@
+meta {
+  name: readAllEventos
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:8080/eventos?mes=12&ano=2025
+  body: none
+  auth: inherit
+}
+
+params:query {
+  mes: 12
+  ano: 2025
+}
+
+settings {
+  encodeUrl: true
+}
