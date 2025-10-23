@@ -268,4 +268,14 @@ public class MembroService {
 
     }
 
+    //METODO Q SE RELACIONA COM LOGIN GOOGLE
+
+    public Membro buscarPorEmail(String email) {
+        Membro membro = membroRepository.findByEmail(email);
+        return membro;
+    }
+
+    public void salvarMembro(Membro membro) {
+        membroRepository.save(membro);
+    }
 }

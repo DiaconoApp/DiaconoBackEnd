@@ -1,5 +1,6 @@
 package com.diacono.diacono.global.config;
 
+import com.diacono.diacono.auth.service.CustomOAuth2UserService;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -36,15 +37,25 @@ public class SecurityConfig {
     private RSAPublicKey rsaPublicKey;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService) throws Exception{
 
-        http.authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll()) //mudar o permiteAll
+        http
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/login/**", "/oauth2/**", "/public/**").permitAll() //remover o permiteAll
+                        .requestMatchers("/h2-console/**").permitAll()
+
+                )
                 .csrf(csrf -> csrf.disable()) //ativar o csrf -> produção
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .headers(headers -> headers
-                .frameOptions(frame -> frame.disable()));
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        ));
+
+
         return http.build();
     }
 
