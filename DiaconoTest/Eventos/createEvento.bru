@@ -7,7 +7,11 @@ meta {
 post {
   url: http://localhost:8080/eventos
   body: json
-  auth: inherit
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{acessToken}}
 }
 
 body:json {
@@ -46,4 +50,5 @@ body:json {
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

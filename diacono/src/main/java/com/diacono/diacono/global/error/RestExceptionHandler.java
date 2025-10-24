@@ -2,9 +2,7 @@ package com.diacono.diacono.global.error;
 
 import com.diacono.diacono.evento.exceptions.DateInvalidException;
 import com.diacono.diacono.evento.exceptions.TimeInvalidException;
-import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
-import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
+import com.diacono.diacono.global.error.exceptions.*;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -127,6 +125,18 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         RestErrorMessage message = new RestErrorMessage(HttpStatus.UNAUTHORIZED, detailedMessage);
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(message);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    private ResponseEntity<RestErrorMessage> badCredentialsHandler(BadCredentialsException exception){
+        RestErrorMessage message = new RestErrorMessage(HttpStatus.UNAUTHORIZED,exception.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(message);
+    }
+
+    @ExceptionHandler(ObjectExistsException.class)
+    private ResponseEntity<RestErrorMessage> objectExistsHandler(ObjectExistsException exception){
+        RestErrorMessage message = new RestErrorMessage(HttpStatus.CONFLICT,exception.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(message);
     }
 
 }

@@ -1,24 +1,21 @@
 package com.diacono.diacono.auth.service;
 
 import com.diacono.diacono.auth.model.CustomMembroOAuth2User;
+import com.diacono.diacono.membro.model.entity.EnumCargoMembro;
 import com.diacono.diacono.membro.model.entity.Membro;
 import com.diacono.diacono.membro.service.MembroService;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 
-import java.util.Map;
-
 
 @Service
-public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
+public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final MembroService membroService;
-    private final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
 
     public CustomOAuth2UserService(MembroService membroService) {
         this.membroService = membroService;
@@ -27,24 +24,24 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
-        OAuth2User oauth2User = delegate.loadUser(userRequest);
+        System.out.println("teste pra ver se chega aqui");
 
-        Map<String, Object> attributes = oauth2User.getAttributes();
-        String email = (String) attributes.get("email");
-        String nomeCompleto = (String) attributes.get("name");
+        OAuth2User oAuth2User = super.loadUser(userRequest);
+
+        String email = oAuth2User.getAttribute("email");
+        String nome = oAuth2User.getAttribute("name");
 
         Membro membro = membroService.buscarPorEmail(email);
 
-
         if (membro == null) {
-            membro = new Membro();
-            membro.setEmail(email);
-            membro.setNome(nomeCompleto);
-
-
-            membroService.salvarMembro(membro);
+            Membro novoMembro = new Membro();
+            novoMembro.setEmail(email);
+            novoMembro.setNome(nome);
+            novoMembro.setCargoMembro(EnumCargoMembro.MEMBRO);
+            membroService.salvarMembro(novoMembro);
+            return new CustomMembroOAuth2User(novoMembro, oAuth2User.getAttributes());
         }
 
-        return new CustomMembroOAuth2User(membro, attributes);
+        return new CustomMembroOAuth2User(membro, oAuth2User.getAttributes());
     }
 }
