@@ -1,7 +1,7 @@
 package com.diacono.diacono.global.config;
 
 import com.diacono.diacono.auth.handler.CustomOAuth2AuthenticationSuccessHandler;
-import com.diacono.diacono.auth.service.CustomOAuth2UserService;
+import com.diacono.diacono.auth.service.CustomOidcUserService;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -40,7 +40,7 @@ public class SecurityConfig {
     private RSAPublicKey rsaPublicKey;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService, CustomOAuth2AuthenticationSuccessHandler successHandler ) throws Exception{
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOidcUserService customOidcUserService, CustomOAuth2AuthenticationSuccessHandler successHandler ) throws Exception{
 
         http
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
@@ -51,13 +51,14 @@ public class SecurityConfig {
                 )
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)
+                                .oidcUserService(customOidcUserService)
                         )
-                        .successHandler(successHandler));
+                        .successHandler(successHandler))
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .logout(logout -> logout.logoutSuccessUrl("/").permitAll());
 
 
         return http.build();

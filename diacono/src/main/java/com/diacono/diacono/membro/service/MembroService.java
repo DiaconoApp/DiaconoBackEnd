@@ -289,9 +289,7 @@ public class MembroService {
 
     @Transactional
     public Membro salvarMembro(Membro membro) {
-        System.out.println(">>> Chamando salvarMembro() para: " + membro.getEmail());
         Membro membroD = membroRepository.save(membro);
-        System.out.println(">>> Membro salvo (JPA retornou): " + membroD.getIdExterno());
         membroRepository.flush();
         return membroD;
     }
