@@ -45,17 +45,17 @@ public class SecurityConfig {
         http
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login", "/oauth2/**", "/register").permitAll()
+                        .requestMatchers("/login/**","/api/v1/auth/**",  "/oauth2/**", "/register").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .oauth2Login(oauth2 -> oauth2
+                /*oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
                                 .oidcUserService(customOidcUserService)
                         )
-                        .successHandler(successHandler))
+                        .successHandler(successHandler))*/
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .logout(logout -> logout.logoutSuccessUrl("/").permitAll());
