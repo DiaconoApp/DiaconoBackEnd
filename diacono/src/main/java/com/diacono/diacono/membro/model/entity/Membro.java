@@ -21,7 +21,7 @@ import java.util.Set;
 public class Membro extends IdEntityUtils {
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn (name = "fk_igreja", nullable = false)
+    @JoinColumn (name = "fk_igreja")
     private Igreja igreja;
 
     @ManyToOne(fetch = FetchType.LAZY)

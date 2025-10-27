@@ -2,15 +2,14 @@ package com.diacono.diacono.global.error;
 
 import com.diacono.diacono.evento.exceptions.DateInvalidException;
 import com.diacono.diacono.evento.exceptions.TimeInvalidException;
-import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
-import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
+import com.diacono.diacono.global.error.exceptions.*;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -110,6 +109,34 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         String msg = String.format("Parâmetro '%s' inválido. Valor recebido: '%s'. Esperado tipo: %s",
                 ex.getName(), ex.getValue(), ex.getRequiredType().getSimpleName());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RestErrorMessage(HttpStatus.BAD_REQUEST, msg));
+    }
+
+    @ExceptionHandler(OAuth2AuthenticationException.class)
+    private ResponseEntity<RestErrorMessage> oauth2AuthenticationHandler(OAuth2AuthenticationException exception) {
+
+        String detailedMessage = "Falha na autenticação via provedor externo. Tente novamente.";
+
+        System.err.println("OAuth2 Login Error: " + exception.getMessage());
+
+        if (exception.getCause() != null) {
+            System.err.println("Caused por: " + exception.getCause().getMessage());
+        }
+
+        RestErrorMessage message = new RestErrorMessage(HttpStatus.UNAUTHORIZED, detailedMessage);
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(message);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    private ResponseEntity<RestErrorMessage> badCredentialsHandler(BadCredentialsException exception){
+        RestErrorMessage message = new RestErrorMessage(HttpStatus.UNAUTHORIZED,exception.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(message);
+    }
+
+    @ExceptionHandler(ObjectExistsException.class)
+    private ResponseEntity<RestErrorMessage> objectExistsHandler(ObjectExistsException exception){
+        RestErrorMessage message = new RestErrorMessage(HttpStatus.CONFLICT,exception.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(message);
     }
 
 }

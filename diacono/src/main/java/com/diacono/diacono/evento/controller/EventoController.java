@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -31,7 +32,9 @@ public class EventoController {
     @ApiErrorsComuns
     @ApiResponse(responseCode = "200", description = "Eventos encontrados com sucesso")
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<EventoSimplificadoDTO> buscarEventosPorMesEAno(@RequestParam int mes, @RequestParam int ano){
+
         EventoSimplificadoDTO evento = eventoService.buscarEventosPorMesEAno(mes, ano);
 
         return ResponseEntity.status(HttpStatus.OK).body(evento);
@@ -40,7 +43,9 @@ public class EventoController {
     @ApiErrorsComuns
     @ApiResponse(responseCode = "200", description = "Evento encontrado com sucesso")
     @GetMapping("/{id}/{data}")
+    @PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO', 'SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<EventoCompletoDTO> buscarEventoEspecifico(@PathVariable("id") UUID id, @PathVariable("data")  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data){
+
         EventoCompletoDTO evento = eventoService.buscarEventoEspecifico(id, data);
 
         return ResponseEntity.status(HttpStatus.OK).body(evento);
@@ -50,6 +55,7 @@ public class EventoController {
     @ApiErrorsComuns
     @ApiResponse(responseCode = "201", description = "Evento criado com sucesso")
     @PostMapping
+    @PreAuthorize("hasAnyAuthority('SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<RestResponseMessage> criarEvento(@RequestBody @Valid EventoCreateDTO request){
 
         RestResponseMessage response = eventoService.criarEvento(request);
@@ -58,16 +64,18 @@ public class EventoController {
     }
 
     @ApiErrorsComuns
-    @ApiResponse(responseCode = "200", description = "Evento deletado com sucesso")
+    @ApiResponse(responseCode = "204", description = "Evento deletado com sucesso")
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<RestResponseMessage> apagarEvento(@PathVariable UUID id){
-       return ResponseEntity.status(HttpStatus.OK).body(eventoService.apagarEvento(id));
+       return ResponseEntity.status(HttpStatus.NO_CONTENT).body(eventoService.apagarEvento(id));
     }
 
     @ApiErrorsComuns
-    @ApiResponse(responseCode = "200", description = "Evento atualizado com sucesso")
-    @PutMapping("/{id}")
+    @ApiResponse(responseCode = "204", description = "Evento atualizado com sucesso")
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<RestResponseMessage> atualizarEvento(@RequestBody @Valid EventoUpdateDTO evento, @PathVariable("id") UUID id){
-        return ResponseEntity.status(HttpStatus.OK).body(eventoService.alterarEvento(evento, id));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(eventoService.alterarEvento(evento, id));
     }
 }
