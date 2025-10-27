@@ -45,8 +45,11 @@ public class SecurityConfig {
         http
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login/**","/api/v1/auth/**",  "/oauth2/**", "/register").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/login/**","/api/v1/auth/**",  "/oauth2/**", "/register/**").permitAll()
+                        .requestMatchers("/h2-console/**", "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf.disable())

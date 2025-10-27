@@ -55,7 +55,7 @@ public class EventoController {
     @ApiErrorsComuns
     @ApiResponse(responseCode = "201", description = "Evento criado com sucesso")
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+
     public ResponseEntity<RestResponseMessage> criarEvento(@RequestBody @Valid EventoCreateDTO request){
 
         RestResponseMessage response = eventoService.criarEvento(request);
@@ -66,7 +66,6 @@ public class EventoController {
     @ApiErrorsComuns
     @ApiResponse(responseCode = "204", description = "Evento deletado com sucesso")
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<RestResponseMessage> apagarEvento(@PathVariable UUID id){
        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(eventoService.apagarEvento(id));
     }
@@ -74,7 +73,6 @@ public class EventoController {
     @ApiErrorsComuns
     @ApiResponse(responseCode = "204", description = "Evento atualizado com sucesso")
     @PatchMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<RestResponseMessage> atualizarEvento(@RequestBody @Valid EventoUpdateDTO evento, @PathVariable("id") UUID id){
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(eventoService.alterarEvento(evento, id));
     }
