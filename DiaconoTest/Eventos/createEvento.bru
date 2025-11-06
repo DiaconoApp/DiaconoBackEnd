@@ -7,13 +7,17 @@ meta {
 post {
   url: http://localhost:8080/eventos
   body: json
-  auth: inherit
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{acessToken}}
 }
 
 body:json {
   {
     "fkIgreja": "550e8400-e29b-41d4-a716-446655440000",
-    "fkOrganizador": "550e8400-e29b-41d4-a716-446655440010",
+    "fkOrganizador": "8dcdaaf2-7533-4642-b897-425c087d6539",
     "fkMinisterios": [
       "550e8400-e29b-41d4-a716-446655440020",
       "550e8400-e29b-41d4-a716-446655440023"
@@ -33,9 +37,10 @@ body:json {
     "intervaloRecorrencia": 0,
     "endereco": {
       "idExterno": null,
-      "cep": "04000-000",
+      "cep": "04000000",
       "rua": "Rua da Igreja",
       "cidade": "São Paulo",
+      "estado": "São Paulo",
       "bairro": "Centro",
       "complemento": "Ao lado do prédio",
       "numero": "123",
@@ -46,4 +51,5 @@ body:json {
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

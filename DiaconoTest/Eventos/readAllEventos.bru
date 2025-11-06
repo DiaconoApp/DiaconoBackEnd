@@ -7,7 +7,7 @@ meta {
 get {
   url: http://localhost:8080/eventos?mes=12&ano=2025
   body: none
-  auth: inherit
+  auth: bearer
 }
 
 params:query {
@@ -15,6 +15,11 @@ params:query {
   ano: 2025
 }
 
+auth:bearer {
+  token: {{acessToken}}
+}
+
 settings {
   encodeUrl: true
+  timeout: 0
 }

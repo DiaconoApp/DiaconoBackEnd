@@ -4,9 +4,9 @@ import com.diacono.diacono.Igreja.model.entity.Igreja;
 import com.diacono.diacono.Igreja.service.IgrejaService;
 import com.diacono.diacono.cadastro.model.dto.CadastroExternoDTO;
 import com.diacono.diacono.global.dto.response.RestResponseMessage;
+import com.diacono.diacono.global.error.exceptions.ObjectExistsException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
-import com.diacono.diacono.membro.exceptions.MembroNaoEncontradoException;
 import com.diacono.diacono.membro.mapper.MembroMapper;
 import com.diacono.diacono.membro.model.dto.request.MembroCreateDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroResponseDTO;
@@ -23,7 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,12 +38,12 @@ public class MembroService {
 
     private final MembroRepository membroRepository;
     private final MembroMapper membroMapper;
-    private final PasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder;
     private final MinisterioService ministerioService;
     private final MembroMinisterioService membroMinisterioService;
     private final IgrejaService igrejaService;
 
-    public MembroService(MembroRepository membroRepository, MembroMapper membroMapper, PasswordEncoder passwordEncoder, MinisterioService ministerioService, MembroMinisterioService membroMinisterioService, IgrejaService igrejaService) {
+    public MembroService(MembroRepository membroRepository, MembroMapper membroMapper, BCryptPasswordEncoder passwordEncoder, MinisterioService ministerioService, MembroMinisterioService membroMinisterioService, IgrejaService igrejaService) {
         this.membroRepository = membroRepository;
         this.membroMapper = membroMapper;
         this.passwordEncoder = passwordEncoder;
@@ -123,8 +123,6 @@ public class MembroService {
             throw new ObjectSaveErrorException("Dados do membro não podem ser nulos.");
         }
 
-
-
         if (membroDTO.idExternoMinisterios() == null || membroDTO.idExternoMinisterios().isEmpty()) {
             Membro response = criarMembroSemMinisterio(membroDTO);
             return new RestResponseMessage(HttpStatus.CREATED, "Usuário cadastrado com sucesso");
@@ -135,10 +133,17 @@ public class MembroService {
 
     // METODOS AUXILIARES
 
+
     private Membro criarMembroSemMinisterio(MembroCreateDTO membroDTO) {
 
-        if (membroDTO.cargo().equals(EnumCargoMembro.LIDER_MINISTERIO)) {
+        if (membroDTO.cargo().equals(EnumCargoMembro.LIDER_MINISTERIO) && (membroDTO.idExternoMinisterios() == null || membroDTO.idExternoMinisterios().isEmpty())) {
             throw new ObjectSaveErrorException("Para cadastrar um líder de ministério, é necessário associar um ministério ao membro.");
+        }
+
+        Membro membroExistente = membroRepository.findByEmail(membroDTO.email());
+
+        if(membroExistente != null){
+            throw new ObjectExistsException("Email ja cadastrado");
         }
 
         Membro membro = membroMapper.paraMembro(membroDTO);
@@ -255,6 +260,12 @@ public class MembroService {
             throw new ObjectSaveErrorException("Dados do membro não podem ser nulos.");
         }
 
+        Membro membroExistente = membroRepository.findByEmail(membroDTO.email());
+
+        if(membroExistente != null){
+            throw new ObjectExistsException("Erro ao se cadastrar");
+        }
+
         Membro membro = membroMapper.paraMembro(membroDTO);
         Igreja igreja = igrejaService.buscarUUID(membroDTO.fkIgreja());
         membro.setStatus(EnumStatusMembro.ATIVO);
@@ -268,4 +279,18 @@ public class MembroService {
 
     }
 
+    //METODO Q SE RELACIONA COM LOGIN GOOGLE
+
+    @Transactional
+    public Membro buscarPorEmail(String email) {
+        Membro membro = membroRepository.findByEmail(email);
+        return membro;
+    }
+
+    @Transactional
+    public Membro salvarMembro(Membro membro) {
+        Membro membroD = membroRepository.save(membro);
+        membroRepository.flush();
+        return membroD;
+    }
 }

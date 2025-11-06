@@ -34,4 +34,6 @@ public interface MembroRepository extends JpaRepository<Membro, Long> {
     List<Membro> findAllWithFilter(
             @Param("buscaGeral") String buscaGeral
     );
+
+    Membro findByEmail(String email);
 }
