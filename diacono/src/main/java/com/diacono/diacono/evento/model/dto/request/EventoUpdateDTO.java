@@ -1,7 +1,5 @@
 package com.diacono.diacono.evento.model.dto.request;
 
-import com.diacono.diacono.endereco.model.dto.request.EnderecoEventoDTO;
-import com.diacono.diacono.evento.model.entity.DiasSemanaRecorrencia;
 import com.diacono.diacono.evento.model.entity.TipoRecorrencia;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -30,13 +28,6 @@ public record EventoUpdateDTO(
 
         @PositiveOrZero(message = "O custo deve ser um valor positivo.")
         BigDecimal custo,
-
-        TipoRecorrencia tipoRecorrencia,
-        LocalDate dataInicioRecorrencia,
-        LocalDate dataTerminoRecorrencia,
-        List<DiasSemanaRecorrencia> diasSemana,
-        LocalTime horarioRecorrencia,
-        int intervaloRecorrencia,
 
         EnderecoEventoDTO endereco
 

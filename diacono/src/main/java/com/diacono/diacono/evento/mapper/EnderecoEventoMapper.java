@@ -1,8 +1,8 @@
-package com.diacono.diacono.endereco.mapper;
+package com.diacono.diacono.evento.mapper;
 
-import com.diacono.diacono.endereco.model.dto.request.EnderecoEventoDTO;
-import com.diacono.diacono.endereco.model.dto.response.EnderecoEventoSimplificadoDTO;
-import com.diacono.diacono.endereco.model.entity.EnderecoEvento;
+import com.diacono.diacono.evento.model.dto.request.EnderecoEventoDTO;
+import com.diacono.diacono.evento.model.dto.response.EnderecoEventoSimplificadoDTO;
+import com.diacono.diacono.evento.model.entity.EnderecoEvento;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

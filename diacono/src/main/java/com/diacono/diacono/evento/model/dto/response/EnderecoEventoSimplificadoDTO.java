@@ -1,4 +1,4 @@
-package com.diacono.diacono.endereco.model.dto.response;
+package com.diacono.diacono.evento.model.dto.response;
 
 import java.util.UUID;
 

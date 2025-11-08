@@ -1,10 +1,13 @@
 package com.diacono.diacono.evento.service;
 
 import com.diacono.diacono.Igreja.service.IgrejaService;
-import com.diacono.diacono.endereco.mapper.EnderecoEventoMapper;
-import com.diacono.diacono.endereco.model.dto.request.EnderecoEventoDTO;
-import com.diacono.diacono.endereco.model.entity.EnderecoEvento;
-import com.diacono.diacono.endereco.service.EnderecoEventoService;
+import com.diacono.diacono.evento.mapper.EnderecoEventoMapper;
+import com.diacono.diacono.evento.mapper.RecorrenciaMapper;
+import com.diacono.diacono.evento.model.dto.request.EnderecoEventoDTO;
+import com.diacono.diacono.evento.model.dto.request.RecorrenciaCreateDTO;
+import com.diacono.diacono.evento.model.dto.response.EnderecoEventoSimplificadoDTO;
+import com.diacono.diacono.evento.model.entity.EnderecoEvento;
+import com.diacono.diacono.evento.model.entity.Recorrencia;
 import com.diacono.diacono.global.dto.response.RestResponseMessage;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.evento.exceptions.TimeInvalidException;
@@ -14,7 +17,6 @@ import com.diacono.diacono.evento.model.dto.request.EventoCreateDTO;
 import com.diacono.diacono.evento.model.dto.request.EventoUpdateDTO;
 import com.diacono.diacono.evento.model.dto.response.EventoCompletoDTO;
 import com.diacono.diacono.evento.model.dto.response.EventoSimplificadoDTO;
-import com.diacono.diacono.evento.model.entity.DiasSemanaRecorrencia;
 import com.diacono.diacono.evento.model.entity.Evento;
 import com.diacono.diacono.evento.model.entity.TipoRecorrencia;
 import com.diacono.diacono.evento.repository.EventoRepository;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,24 +41,23 @@ public class EventoService {
 
     private final EventoRepository eventoRepository;
     private final EventoMapper eventoMapper;
-    private final IgrejaService igrejaService;
+    private final EventoUpdateMapper eventoUpdateMapper;
+    private final EnderecoEventoService enderecoEventoService;
+    private final RecorrenciaService recorrenciaService;
     private final MinisterioService ministerioService;
     private final MembroService membroService;
-    private final OcorrenciaService ocorrenciaService;
-    private final EnderecoEventoMapper enderecoEventoMapper;
-    private final EnderecoEventoService enderecoEventoService;
-    private final EventoUpdateMapper eventoUpdateMapper;
+    private final IgrejaService igrejaService;
 
-    public EventoService(EventoRepository eventoRepository, EventoMapper eventoMapper, IgrejaService igrejaService, MinisterioService ministerioService, MembroService membroService, OcorrenciaService ocorrenciaService, EnderecoEventoMapper enderecoEventoMapper, EnderecoEventoService enderecoEventoService, EventoUpdateMapper eventoUpdateMapper) {
+    public EventoService(EventoRepository eventoRepository, EventoMapper eventoMapper, IgrejaService igrejaService, MinisterioService ministerioService, MembroService membroService, EnderecoEventoService enderecoEventoService, EventoUpdateMapper eventoUpdateMapper, RecorrenciaService recorrenciaService) {
         this.eventoRepository = eventoRepository;
         this.eventoMapper = eventoMapper;
         this.igrejaService = igrejaService;
         this.ministerioService = ministerioService;
         this.membroService = membroService;
-        this.ocorrenciaService = ocorrenciaService;
-        this.enderecoEventoMapper = enderecoEventoMapper;
         this.enderecoEventoService = enderecoEventoService;
         this.eventoUpdateMapper = eventoUpdateMapper;
+
+        this.recorrenciaService = recorrenciaService;
     }
 
     public EventoSimplificadoDTO buscarEventosPorMesEAno(int mes, int ano){
@@ -74,71 +76,23 @@ public class EventoService {
         LocalDate inicioMes = anoMes.atDay(1);
         LocalDate fimMes = anoMes.atEndOfMonth();
 
-        Year anoAtual = Year.of(ano);
-        LocalDate fimAno = anoAtual.atDay(anoAtual.length());
-        LocalDate inicioAno = Year.of(ano).atDay(1);
-
         List<Evento> todosOsEventosMes = new ArrayList<>();
-        List<Evento> eventosAno = eventoRepository.findByPeriodo(inicioAno, fimAno);
+        List<Evento> eventosAno = eventoRepository.findByPeriodo(inicioMes, fimMes);
 
         if(eventosAno.isEmpty() || eventosAno == null){
             throw new ObjectNotFoundException("Nenhum evento encontrado para o mês e ano informados");
         }
 
-        int totalAno = 0;
-        int totalSemana = calcularTotalSemana();
-
-        for(Evento evento: eventosAno){
-
-            if(evento.getTipoRecorrencia() == TipoRecorrencia.NAO_REPETE){
-                if (!evento.getData().isBefore(inicioMes) && !evento.getData().isAfter(fimMes)) {
-                    todosOsEventosMes.add(evento);
-                }
-                totalAno++;
-            }else{
-                todosOsEventosMes.addAll(ocorrenciaService.gerarEvento(evento, inicioMes, fimMes));
-                totalAno += ocorrenciaService.contarOcorrencias(evento, inicioAno, fimAno);
-            }
-
-        }
-
-        if(todosOsEventosMes.isEmpty() || todosOsEventosMes == null){
-            throw new ObjectNotFoundException("Nenhum evento encontrado para o mês e ano informados");
-        }
-
-        int totalMes = todosOsEventosMes.size();
-
-        EventoSimplificadoDTO eventoResponse = eventoMapper.paraEventoSimplificado(todosOsEventosMes, totalSemana, totalMes, totalAno);
+        EventoSimplificadoDTO eventoResponse = eventoMapper.paraEventoSimplificado(todosOsEventosMes);
         return eventoResponse;
     }
 
-    public EventoCompletoDTO buscarEventoEspecifico(UUID id, LocalDate dataHoje){
+    public EventoCompletoDTO buscarEventoEspecifico(UUID id){
 
         //completo
-
         validarIdExternoPreenchido(id);
-        if(dataHoje == null){
-            throw new FieldInvalidException("A data precisa ser informada");
-        }
         Evento evento = eventoRepository.findByIdExterno(id);
-        if(evento == null){
-            throw new ObjectNotFoundException("Evento não encontrado");
-        }
-
-        Evento eventoOcorrencia;
-
-        if (evento.getTipoRecorrencia() == TipoRecorrencia.NAO_REPETE) {
-            if (!evento.getData().isEqual(dataHoje)) {
-                throw new ObjectNotFoundException("Evento não encontrado para a data informada");
-            }
-            eventoOcorrencia = evento;
-        } else {
-            eventoOcorrencia = ocorrenciaService.criarOcorrencia(evento, dataHoje);
-        }
-
-        //ajustar o mapper para trazer o endereço do evento, mapper complexo
-
-        EventoCompletoDTO eventoResponse = eventoMapper.paraEventoCompletoDTO(eventoOcorrencia);
+        EventoCompletoDTO eventoResponse = eventoMapper.paraEventoCompletoDTO(evento);
 
         return eventoResponse;
     }
@@ -146,34 +100,33 @@ public class EventoService {
     @Transactional
     public RestResponseMessage criarEvento(EventoCreateDTO request){
 
-        /*EM UM FUTURO MELHOR AS QUERYS DE BUSCA DE MINISTERIO E ORGANIZADOR, LEVANDO-SE
-        * EM CONSIDERAÇÃO A IGREJA DONA*/
+       //CONCLUÍDO
 
-        // completo, fazer ajuste no futuro para encontrar com fk igreja
-        validarHoraFuturo(request.data(),request.horaInicio(), request.horaFim());
+        //VALIDAR PRIMEIROS TODOS OS CAMPOS PREENCHIDOS
+
+        recorrenciaService.validarRecorrencia(request.recorrencia());
+        enderecoEventoService.validarEnderecoEvento(request.endereco());
         validaHoraInicioMenorHoraFim(request.horaInicio(), request.horaFim());
+        validarHoraFuturo(request.data(),request.horaInicio(), request.horaFim());
 
-        if (request.tipoRecorrencia() != TipoRecorrencia.NAO_REPETE) {
-            validarDatasDeRecorrencia(request.dataInicioRecorrencia(), request.dataTerminoRecorrencia());
-            validarHoraRecorrencia(request.horarioRecorrencia());
-            validarIntervaloRecorrencia(request.intervaloRecorrencia());
+        //CRIAR EVENTO SEM RECORRENCIA
+
+        if(request.recorrencia().tipoRecorrencia().equals(TipoRecorrencia.NAO_REPETE)){
+            criarEventoSemRecorrencia(request);
+            return new RestResponseMessage(HttpStatus.CREATED, "Evento sem recorrência criado com sucesso");
         }
 
-        if (request.tipoRecorrencia() == TipoRecorrencia.SEMANAL) {
-            validarDiasSemanaRecorrencia(request.diasSemana());
+        if(request.recorrencia().tipoRecorrencia().equals(TipoRecorrencia.SEMANAL)){
+            return criarEventoRecorrenciaSemanal(request);
         }
 
-        Evento evento = eventoMapper.paraEvento(request);
-        EnderecoEvento enderecoEvento = criarEnderecoEvento(request.endereco());
+        if(request.recorrencia().tipoRecorrencia().equals(TipoRecorrencia.MENSAL)){
+            return criarEventoRecorrenciaMensal(request);
+        }
 
-        evento.setEnderecoEvento(enderecoEvento);
-        evento.setIgreja(igrejaService.buscarUUID(request.fkIgreja()));
-        evento.setOrganizador(membroService.buscarPorUUID(request.fkOrganizador()));
-        evento.setMinisterios(ministerioService.buscarPorUUID(request.fkMinisterios()));
-
-        return criarEventoMestre(evento);
-
+        return new RestResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR, "Motivo não mapeado -> Criação do Evento");
     }
+
 
     @Transactional
     public RestResponseMessage apagarEvento(UUID idExterno){
@@ -195,6 +148,30 @@ public class EventoService {
     }
 
     @Transactional
+    public RestResponseMessage apagarEventosMultiplos(UUID idEvento){
+
+        validarIdExternoPreenchido(idEvento);
+
+        Evento evento = eventoRepository.findByIdExterno(idEvento);
+        if (evento == null) {
+            throw new ObjectNotFoundException("Não foi possível apagar o evento, verifique se o evento existe");
+        }
+
+        List<Evento> eventos = eventoRepository.findByPeriodoAndRecorrencia(evento.getRecorrencia(), evento.getData());
+
+        if (!eventos.contains(evento)) {
+            eventos.add(evento);
+        }
+
+        eventoRepository.deleteAll(eventos);
+
+        RestResponseMessage message = new RestResponseMessage(HttpStatus.OK, "Evento apagado com sucesso");
+
+        return message;
+
+    }
+
+  /*  @Transactional
     public RestResponseMessage alterarEvento(EventoUpdateDTO request, UUID idExterno){
 
         //completo
@@ -230,9 +207,19 @@ public class EventoService {
         }
 
         return new RestResponseMessage(HttpStatus.OK, "Evento atualizado com sucesso");
+    }*/
+
+    public EnderecoEventoSimplificadoDTO buscarEnderecoEvento(){
+        return enderecoEventoService.buscarEnderecoIgreja();
     }
 
-    /*MÉTODOS AUXILIARES -> CONTEM LÓGICAS PARA UTILIZAR EM OUTROS MÉTODOS*/
+    //metodos para validar
+
+    private void validarEventoExistente(Evento evento){
+        if(evento == null){
+            throw new ObjectSaveErrorException("Evento não encontrado");
+        }
+    }
 
     private void validaHoraInicioMenorHoraFim(LocalTime inicio, LocalTime fim){
         if(fim.isBefore(inicio)){
@@ -249,105 +236,119 @@ public class EventoService {
         }
     }
 
-    private void validarDatasDeRecorrencia(LocalDate inicio, LocalDate fim) {
-        if (fim.isBefore(inicio)) {
-            throw new DateTimeException("A data final da recorrência precisa ser maior ou igual à data de início.");
-        }
-    }
-
-    private void validarDiasSemanaRecorrencia(List<DiasSemanaRecorrencia> dias){
-
-        if (dias == null || dias.isEmpty()) {
-            throw new FieldInvalidException("Para recorrências semanais, é obrigatório informar os dias da semana.");
-        }
-
-        for(DiasSemanaRecorrencia dia : dias){
-            if(dia == null){
-                throw new FieldInvalidException("Para recorrências semanais, é obrigatório informar os dias da semana.");
-            }
-        }
-
-    }
-
-    private void validarHoraRecorrencia(LocalTime horarioRecorrencia){
-
-        if (Objects.isNull(horarioRecorrencia)) {
-            throw new TimeInvalidException("Para eventos com recorrência é obrigatório selecionar o horário da recorrência.");
-        }
-    }
-
-    private void validarIntervaloRecorrencia(int value){
-
-        if (value < 0){
-            throw new FieldInvalidException("Para eventos com recorrência, é obrigatório selecionar um intervalo maior que zero.");
-        }
-    }
-
     private void validarIdExternoPreenchido(UUID idExterno){
         if(idExterno == null){
             throw new FieldInvalidException("O id do evento precisa ser informado");
         }
     }
 
-    private void validarEventoExistente(Evento evento){
-        if(evento == null){
-            throw new ObjectSaveErrorException("Evento não encontrado");
-        }
-    }
+// metodos para auxiliar
 
-    private EnderecoEvento criarEnderecoEvento(EnderecoEventoDTO endereco){
-        EnderecoEvento enderecoEvento;
+    @Transactional
+    private Evento criarEventoSemRecorrencia(EventoCreateDTO request){
 
-        if (endereco.idExterno() != null) {
-            enderecoEvento = enderecoEventoService.buscarPorUUID(endereco.idExterno());
+        //CRIAR RECORRENCIA
+
+        Recorrencia recorrencia = recorrenciaService.converterDtoToRecorrencia(request.recorrencia());
+
+        //CRIAR ENDERECO
+
+        EnderecoEvento endereco;
+        if (request.endereco().idExterno() == null) {
+            endereco = enderecoEventoService.converterDtoToEndereco(request.endereco());
         } else {
-            enderecoEvento = enderecoEventoMapper.paraEndereco(endereco);
-            enderecoEventoService.salvarEnderecoEvento(enderecoEvento);
+            endereco = enderecoEventoService.buscarPorUUID(request.endereco().idExterno());
         }
 
-        if(enderecoEvento == null){
-            throw new ObjectSaveErrorException("Não foi possível criar o endereço do evento");
-        }
+        //CRIAR EVENTO
 
-        return enderecoEvento;
-    }
+        Evento evento = eventoMapper.paraEvento(request);
 
-    private RestResponseMessage criarEventoMestre(Evento evento){
-        /*VALIDAR SE FOI POSSÍVEL CRIAR OU NÃO -- GERA EXCEÇÃO*/
-        /*MELHORAR O RETORNO DO MÉTODO*/
+        evento.setEnderecoEvento(endereco);
+        evento.setRecorrencia(recorrencia);
+        evento.setOrganizador(membroService.buscarPorUUID(request.fkOrganizador()));
+        evento.setIgreja(igrejaService.buscarUUID(request.fkIgreja()));
+        evento.setMinisterios(ministerioService.buscarPorUUID(request.fkMinisterios()));
 
-        Evento salvo = eventoRepository.save(evento);
+        Evento eventoSalvo = eventoRepository.save(evento);
 
-        if(salvo == null){
-            throw new ObjectSaveErrorException("Não foi possível criar o evento");
-        }
-
-        RestResponseMessage message = new RestResponseMessage(HttpStatus.CREATED, "Evento criado com sucesso");
-
-        return message;
+        return eventoSalvo;
 
     }
 
-    private int calcularTotalSemana() {
-        LocalDate hoje = LocalDate.now();
+    @Transactional
+    private RestResponseMessage criarEventoRecorrenciaSemanal(EventoCreateDTO request){
 
-        LocalDate inicioSemana = hoje.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-        LocalDate fimSemana = hoje.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        //CRIAR EVENTO
 
-        ArrayList<Evento> eventosMestres = eventoRepository.findByPeriodo(inicioSemana, fimSemana);
+        Evento evento = criarEventoSemRecorrencia(request);
 
-        int totalSemana = 0;
+        List<Evento> eventos = new ArrayList<>();
 
-        for (Evento evento : eventosMestres) {
+        LocalDate dataInicio = request.recorrencia().dataInicioRecorrencia();
+        LocalDate dataFim = request.recorrencia().dataTerminoRecorrencia();
 
-            if (evento.getTipoRecorrencia() == TipoRecorrencia.NAO_REPETE) {
-                if (!evento.getData().isBefore(inicioSemana) && !evento.getData().isAfter(fimSemana)) {
-                    totalSemana++;
-                }
-            } else {
-                totalSemana += ocorrenciaService.contarOcorrencias(evento, inicioSemana, fimSemana);
-            }
+        long semanas = ChronoUnit.WEEKS.between(dataInicio, dataFim);
+
+        for (int i = 1; i <= semanas; i++) {
+            Evento novoEvento = new Evento();
+
+            novoEvento.setIgreja(evento.getIgreja());
+            novoEvento.setOrganizador(evento.getOrganizador());
+            novoEvento.setEnderecoEvento(evento.getEnderecoEvento());
+            novoEvento.setMinisterios(evento.getMinisterios());
+            novoEvento.setRecorrencia(evento.getRecorrencia());
+            novoEvento.setNome(evento.getNome());
+            novoEvento.setDescricao(evento.getDescricao());
+            novoEvento.setPublicoAlvo(evento.getPublicoAlvo());
+            novoEvento.setData(dataInicio.plusWeeks(i));
+            novoEvento.setHoraInicio(evento.getHoraInicio());
+            novoEvento.setHoraFim(evento.getHoraFim());
+            novoEvento.setCusto(evento.getCusto());
+            eventos.add(novoEvento);
         }
-        return totalSemana;
+
+        eventoRepository.saveAll(eventos);
+
+        return new RestResponseMessage(HttpStatus.CREATED, "Evento sem recorrência criado com sucesso");
+
     }
+
+    @Transactional
+    private RestResponseMessage criarEventoRecorrenciaMensal(EventoCreateDTO request) {
+
+        //CRIAR EVENTO
+
+        Evento eventoBase = criarEventoSemRecorrencia(request);
+
+        List<Evento> eventos = new ArrayList<>();
+
+        LocalDate dataInicio = request.recorrencia().dataInicioRecorrencia();
+        LocalDate dataFim = request.recorrencia().dataTerminoRecorrencia();
+
+        long meses = ChronoUnit.MONTHS.between(dataInicio, dataFim);
+
+        for (int i = 1; i <= meses; i++) {
+            Evento novoEvento = new Evento();
+            novoEvento.setIgreja(eventoBase.getIgreja());
+            novoEvento.setOrganizador(eventoBase.getOrganizador());
+            novoEvento.setEnderecoEvento(eventoBase.getEnderecoEvento());
+            novoEvento.setMinisterios(eventoBase.getMinisterios());
+            novoEvento.setRecorrencia(eventoBase.getRecorrencia());
+            novoEvento.setNome(eventoBase.getNome());
+            novoEvento.setDescricao(eventoBase.getDescricao());
+            novoEvento.setPublicoAlvo(eventoBase.getPublicoAlvo());
+            novoEvento.setData(dataInicio.plusMonths(i));
+            novoEvento.setHoraInicio(eventoBase.getHoraInicio());
+            novoEvento.setHoraFim(eventoBase.getHoraFim());
+            novoEvento.setCusto(eventoBase.getCusto());
+            eventos.add(novoEvento);
+        }
+
+        eventoRepository.saveAll(eventos);
+
+        return new RestResponseMessage(HttpStatus.CREATED, "Eventos mensais criados com sucesso");
+    }
+
+
 }

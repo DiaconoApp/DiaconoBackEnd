@@ -1,6 +1,5 @@
 package com.diacono.diacono.evento.model.entity;
 
-import com.diacono.diacono.endereco.model.entity.EnderecoEvento;
 import com.diacono.diacono.Igreja.model.entity.Igreja;
 
 import com.diacono.diacono.global.util.IdEntityUtils;
@@ -34,7 +33,7 @@ public class Evento extends IdEntityUtils {
     )
     private Membro organizador;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "fk_endereco", unique = false, nullable = true)
     private EnderecoEvento enderecoEvento;
 
@@ -46,6 +45,14 @@ public class Evento extends IdEntityUtils {
     )
     private Set<Ministerio> ministerios;
 
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(
+            name = "fk_recorrencia",
+            nullable = true,
+            unique = false
+    )
+    private Recorrencia recorrencia;
+
     private String nome;
     private String descricao;
     private String publicoAlvo;
@@ -53,17 +60,6 @@ public class Evento extends IdEntityUtils {
     private LocalTime horaInicio;
     private LocalTime horaFim;
     private BigDecimal custo;
-
-    @Enumerated(EnumType.STRING)
-    private TipoRecorrencia tipoRecorrencia;
-    private LocalDate dataInicioRecorrencia;
-    private LocalDate dataTerminoRecorrencia;
-
-    @ElementCollection
-    @Enumerated(EnumType.STRING)
-    private List<DiasSemanaRecorrencia> diasSemana;
-    private int intervaloRecorrencia;
-
 
     public void setIgreja(Igreja igreja) {
         this.igreja = igreja;
@@ -79,6 +75,10 @@ public class Evento extends IdEntityUtils {
 
     public void setMinisterios(Set<Ministerio> ministerios) {
         this.ministerios = ministerios;
+    }
+
+    public void setRecorrencia(Recorrencia recorrencia) {
+        this.recorrencia = recorrencia;
     }
 
     public void setNome(String nome) {
@@ -107,25 +107,5 @@ public class Evento extends IdEntityUtils {
 
     public void setCusto(BigDecimal custo) {
         this.custo = custo;
-    }
-
-    public void setTipoRecorrencia(TipoRecorrencia tipoRecorrencia) {
-        this.tipoRecorrencia = tipoRecorrencia;
-    }
-
-    public void setDataInicioRecorrencia(LocalDate dataInicioRecorrencia) {
-        this.dataInicioRecorrencia = dataInicioRecorrencia;
-    }
-
-    public void setDataTerminoRecorrencia(LocalDate dataTerminoRecorrencia) {
-        this.dataTerminoRecorrencia = dataTerminoRecorrencia;
-    }
-
-    public void setDiasSemana(List<DiasSemanaRecorrencia> diasSemana) {
-        this.diasSemana = diasSemana;
-    }
-
-    public void setIntervaloRecorrencia(int intervaloRecorrencia) {
-        this.intervaloRecorrencia = intervaloRecorrencia;
     }
 }

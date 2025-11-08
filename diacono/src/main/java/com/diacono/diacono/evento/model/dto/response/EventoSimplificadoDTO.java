@@ -3,5 +3,5 @@ package com.diacono.diacono.evento.model.dto.response;
 
 import java.util.List;
 
-public record EventoSimplificadoDTO(List<EventoUnicoSimplificadoDTO> eventosMes, int totalSemana, int totalMes, int totalAno) {
+public record EventoSimplificadoDTO(List<EventoUnicoSimplificadoDTO> eventosMes) {
 }

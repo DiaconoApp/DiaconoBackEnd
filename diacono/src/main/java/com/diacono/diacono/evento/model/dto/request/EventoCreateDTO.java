@@ -1,8 +1,6 @@
 package com.diacono.diacono.evento.model.dto.request;
 
-import com.diacono.diacono.evento.model.entity.DiasSemanaRecorrencia;
 import com.diacono.diacono.evento.model.entity.TipoRecorrencia;
-import com.diacono.diacono.endereco.model.dto.request.EnderecoEventoDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
@@ -23,6 +21,14 @@ public record EventoCreateDTO(
         @NotNull
         @Size(min = 1, message = "O evento deve ter ao menos um ministério participando.")
         List<UUID> fkMinisterios,
+
+        @NotNull(message = "É necessário que o evento tenha um endereço vinculado a ele.")
+        @Valid
+        EnderecoEventoDTO endereco,
+
+        @NotNull(message = "É necessário que o evento tenha algum tipo de recorrência.")
+        @Valid
+        RecorrenciaCreateDTO recorrencia,
 
         @NotBlank
         @Size(max = 100, message = "O nome deve ter no máximo 100 caracteres.")
@@ -47,28 +53,6 @@ public record EventoCreateDTO(
 
         @NotNull
         @PositiveOrZero(message = "O valor para participar do evento não deve ser negativo.")
-        BigDecimal custo,
-
-
-
-        @NotNull(message = "Mesmo que o evento não seja recorrente, é necessário selecionar.")
-        TipoRecorrencia tipoRecorrencia,
-
-        @FutureOrPresent(message = "A data não pode ser anterior ao dia de hoje.")
-        LocalDate dataInicioRecorrencia,
-        @FutureOrPresent(message = "A data não pode ser anterior ao dia de hoje.")
-        LocalDate dataTerminoRecorrencia,
-
-        // Sem @NotNull, para ser validado no Service
-        List<DiasSemanaRecorrencia> diasSemana,
-
-        LocalTime horarioRecorrencia,
-
-        @PositiveOrZero
-        int intervaloRecorrencia,
-
-        @NotNull(message = "É necessário que o evento tenha um endereço vinculado a ele.")
-        @Valid
-        EnderecoEventoDTO endereco
+        BigDecimal custo
 ) {
 }
