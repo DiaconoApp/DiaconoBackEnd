@@ -79,16 +79,11 @@ public class EventoController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(eventoService.apagarEventosMultiplos(id));
     }
 
+    @ApiErrorsComuns
+    @ApiResponse(responseCode = "204", description = "Evento atualizado com sucesso")
+    @PatchMapping("/{id}")
+    public ResponseEntity<RestResponseMessage> atualizarEvento(@RequestBody @Valid EventoUpdateDTO evento, @PathVariable("id") UUID id){
 
-    //FALTA ATUALIZAR RECORRENCIA E ATUALIZAR ENDERECO
-
-//    @ApiErrorsComuns
-//    @ApiResponse(responseCode = "204", description = "Evento atualizado com sucesso")
-//    @PatchMapping("/{id}")
-//    public ResponseEntity<RestResponseMessage> atualizarEvento(@RequestBody @Valid EventoUpdateDTO evento, @PathVariable("id") UUID id){
-//
-//        //ALTERAR REGRA DE  NEGÓCIO
-//
-//        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(eventoService.alterarEvento(evento, id));
-//    }
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(eventoService.alterarEvento(evento, id));
+    }
 }

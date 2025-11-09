@@ -6,6 +6,7 @@ VALUES
   (1, '550e8400-e29b-41d4-a716-446655440000', 'Igreja Central da Fé', '12.345.678/0001-90'),
   (2, '550e8400-e29b-41d4-a716-446655440001', 'Assembleia da Graça Eterna', '98.765.432/0001-10');
 
+
 -- ========================================
 -- MEMBROS
 -- ========================================
@@ -29,6 +30,26 @@ VALUES
   (3, '550e8400-e29b-41d4-a716-446655440022', 'Missão Esperança', '2023-11-20', 'Pedro Santos', 'ATIVO'),
   (4, '550e8400-e29b-41d4-a716-446655440023', 'Streaming & Mídia', '2024-03-10', 'Ana Pereira', 'ATIVO');
 
+
+INSERT INTO endereco_igreja (
+    id_externo,
+    cep,
+    estado,
+    cidade,
+    bairro,
+    rua,
+    complemento,
+    numero
+) VALUES (
+    UUID(),           -- ou 'generated uuid' se seu banco gerar automaticamente
+    '12345-678',      -- cep
+    'SP',             -- estado
+    'São Paulo',      -- cidade
+    'Centro',         -- bairro
+    'Rua das Flores', -- rua
+    'Apto 101',       -- complemento
+    '250'             -- número
+);
 -- ========================================
 -- ENDEREÇOS DE EVENTOS
 -- ========================================

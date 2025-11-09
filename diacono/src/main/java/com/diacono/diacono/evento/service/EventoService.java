@@ -22,7 +22,9 @@ import com.diacono.diacono.evento.model.entity.TipoRecorrencia;
 import com.diacono.diacono.evento.repository.EventoRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
+import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.membro.service.MembroService;
+import com.diacono.diacono.ministerio.model.entity.Ministerio;
 import com.diacono.diacono.ministerio.service.MinisterioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -31,10 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class EventoService {
@@ -47,8 +46,9 @@ public class EventoService {
     private final MinisterioService ministerioService;
     private final MembroService membroService;
     private final IgrejaService igrejaService;
+    private final JwtUtils jwtUtils;
 
-    public EventoService(EventoRepository eventoRepository, EventoMapper eventoMapper, IgrejaService igrejaService, MinisterioService ministerioService, MembroService membroService, EnderecoEventoService enderecoEventoService, EventoUpdateMapper eventoUpdateMapper, RecorrenciaService recorrenciaService) {
+    public EventoService(EventoRepository eventoRepository, EventoMapper eventoMapper, IgrejaService igrejaService, MinisterioService ministerioService, MembroService membroService, EnderecoEventoService enderecoEventoService, EventoUpdateMapper eventoUpdateMapper, RecorrenciaService recorrenciaService, JwtUtils jwtUtils) {
         this.eventoRepository = eventoRepository;
         this.eventoMapper = eventoMapper;
         this.igrejaService = igrejaService;
@@ -58,6 +58,7 @@ public class EventoService {
         this.eventoUpdateMapper = eventoUpdateMapper;
 
         this.recorrenciaService = recorrenciaService;
+        this.jwtUtils = jwtUtils;
     }
 
     public EventoSimplificadoDTO buscarEventosPorMesEAno(int mes, int ano){
@@ -171,43 +172,67 @@ public class EventoService {
 
     }
 
-  /*  @Transactional
+    @Transactional
     public RestResponseMessage alterarEvento(EventoUpdateDTO request, UUID idExterno){
 
         //completo
 
         validarIdExternoPreenchido(idExterno);
-        Evento evento = eventoRepository.findByIdExterno(idExterno);
-        validarEventoExistente(evento);
+        Evento evento = buscarEventoPorUUID(idExterno);
+
+        //validar endereço e ver diferenças -> para atualizar apenas se houver mudanças
+
+        if(request.endereco() != null && validarEnderecoDiferente(evento.getEnderecoEvento(), request.endereco())){
+            EnderecoEvento enderecoAtualizado;
+            if(request.endereco().idExterno() == null){
+                enderecoAtualizado = enderecoEventoService.converterDtoToEndereco(request.endereco());
+            } else {
+                enderecoAtualizado = enderecoEventoService.buscarPorUUID(request.endereco().idExterno());
+            }
+            evento.setEnderecoEvento(enderecoAtualizado);
+        }
+
+        //validar outros campos que precisam ser atualizados
 
         if(request.fkMinisterios() != null && !request.fkMinisterios().isEmpty()){
-            evento.setMinisterios(ministerioService.buscarPorUUID(request.fkMinisterios()));
-        }
-        if(request.endereco().idExterno() != null){
-            evento.setEnderecoEvento(enderecoEventoService.buscarPorUUID(request.endereco().idExterno()));
-        }
-
-        eventoUpdateMapper.updateEventoDTO(request, evento);
-
-        if(request.horaInicio() != null && request.horaFim() != null){
-            validaHoraInicioMenorHoraFim(request.horaInicio(), request.horaFim());
-            validarHoraFuturo(evento.getData(), request.horaInicio(), request.horaFim());
-        } else if(request.horaInicio() != null){
-            validaHoraInicioMenorHoraFim(request.horaInicio(), evento.getHoraFim());
-            validarHoraFuturo(evento.getData(), request.horaInicio(), evento.getHoraFim());
-        } else if(request.horaFim() != null){
-            validaHoraInicioMenorHoraFim(evento.getHoraInicio(), request.horaFim());
-            validarHoraFuturo(evento.getData(), evento.getHoraInicio(), request.horaFim());
+            Set<Ministerio> ministerios = new HashSet<>(ministerioService.buscarPorUUID(request.fkMinisterios()));
+            evento.getMinisterios().clear();
+            evento.getMinisterios().addAll(ministerios);
         }
 
-        Evento eventoAtualizado = eventoRepository.save(evento);
-
-        if(eventoAtualizado == null){
-            throw new ObjectSaveErrorException("Não foi possível atualizar o evento");
+        if (request.nome() != null) {
+            evento.setNome(request.nome());
         }
+
+        if (request.descricao() != null) {
+            evento.setDescricao(request.descricao());
+        }
+
+        if (request.publicoAlvo() != null) {
+            evento.setPublicoAlvo(request.publicoAlvo());
+        }
+
+        if (request.data() != null) {
+            evento.setData(request.data());
+        }
+
+        if (request.horaInicio() != null) {
+            evento.setHoraInicio(request.horaInicio());
+        }
+
+        if (request.horaFim() != null) {
+            evento.setHoraFim(request.horaFim());
+        }
+
+        if (request.custo() != null) {
+            evento.setCusto(request.custo());
+        }
+
+        eventoRepository.save(evento);
 
         return new RestResponseMessage(HttpStatus.OK, "Evento atualizado com sucesso");
-    }*/
+
+    }
 
     public EnderecoEventoSimplificadoDTO buscarEnderecoEvento(){
         return enderecoEventoService.buscarEnderecoIgreja();
@@ -215,10 +240,15 @@ public class EventoService {
 
     //metodos para validar
 
-    private void validarEventoExistente(Evento evento){
+    private Evento buscarEventoPorUUID(UUID idExterno){
+
+        Evento evento = eventoRepository.findByIdExterno(idExterno);
+
         if(evento == null){
             throw new ObjectSaveErrorException("Evento não encontrado");
         }
+
+        return evento;
     }
 
     private void validaHoraInicioMenorHoraFim(LocalTime inicio, LocalTime fim){
@@ -240,6 +270,21 @@ public class EventoService {
         if(idExterno == null){
             throw new FieldInvalidException("O id do evento precisa ser informado");
         }
+    }
+
+    private boolean validarEnderecoDiferente(EnderecoEvento endereco, EnderecoEventoDTO enderecoEventoDTO){
+
+        if(enderecoEventoDTO.idExterno() == null){
+
+            if(enderecoEventoDTO.cep() == null){
+                return false;
+            }
+
+            return !enderecoEventoDTO.cep().equals(endereco.getCep()) || enderecoEventoDTO.numero() == null || !enderecoEventoDTO.numero().equals(endereco.getNumero());
+
+        }
+
+        return !enderecoEventoDTO.idExterno().equals(endereco.getIdExterno());
     }
 
 // metodos para auxiliar
@@ -266,8 +311,8 @@ public class EventoService {
 
         evento.setEnderecoEvento(endereco);
         evento.setRecorrencia(recorrencia);
-        evento.setOrganizador(membroService.buscarPorUUID(request.fkOrganizador()));
-        evento.setIgreja(igrejaService.buscarUUID(request.fkIgreja()));
+        evento.setOrganizador(membroService.buscarPorUUID(jwtUtils.getSubject()));
+        evento.setIgreja(igrejaService.buscarUUID(jwtUtils.getIgrejaId()));
         evento.setMinisterios(ministerioService.buscarPorUUID(request.fkMinisterios()));
 
         Evento eventoSalvo = eventoRepository.save(evento);

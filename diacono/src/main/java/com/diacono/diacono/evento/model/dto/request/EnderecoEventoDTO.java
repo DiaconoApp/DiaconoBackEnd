@@ -2,8 +2,6 @@ package com.diacono.diacono.evento.model.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-
 import java.util.Locale;
 import java.util.UUID;
 

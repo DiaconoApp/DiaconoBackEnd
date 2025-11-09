@@ -1,8 +1,8 @@
 package com.diacono.diacono.evento.model.dto.request;
 
 import com.diacono.diacono.evento.model.entity.TipoRecorrencia;
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -13,23 +13,24 @@ import java.util.UUID;
 public record EventoUpdateDTO(
 
         List<UUID> fkMinisterios,
-        
+
+        @Valid
+        EnderecoEventoDTO endereco,
+
         String nome,
 
         String descricao,
+
         String publicoAlvo,
 
-        @FutureOrPresent(message = "A data do evento deve ser hoje ou uma data futura.")
+        @FutureOrPresent(message = "Não é possível cadastrar eventos com datas passadas.")
         LocalDate data,
 
-
         LocalTime horaInicio,
+
         LocalTime horaFim,
 
-        @PositiveOrZero(message = "O custo deve ser um valor positivo.")
-        BigDecimal custo,
-
-        EnderecoEventoDTO endereco
+        BigDecimal custo
 
 ) {
 }
