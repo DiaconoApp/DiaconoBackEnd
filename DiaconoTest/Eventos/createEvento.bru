@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: http://localhost:8080/eventos
+  url: http://localhost:8080/api/v1/eventos
   body: json
   auth: bearer
 }
@@ -28,10 +28,12 @@ body:json {
     "data": "2025-12-31",
     "horaInicio": "19:30:00",
     "horaFim": "22:00:00",
+    "recorrencia": {
+      "tipoRecorrencia": "NAO_REPETE",
+      "dataInicioRecorrencia": "2025-11-10",
+      "dataTerminoRecorrencia": "2025-11-10"
+    },
     "custo": 0.00,
-    "tipoRecorrencia": "NAO_REPETE",
-    "dataInicioRecorrencia": null,
-    "dataTerminoRecorrencia": null,
     "diasSemana": null,
     "horarioRecorrencia": null,
     "intervaloRecorrencia": 0,
