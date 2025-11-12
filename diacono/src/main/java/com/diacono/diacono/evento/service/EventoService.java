@@ -74,17 +74,15 @@ public class EventoService {
         }
 
         YearMonth anoMes = YearMonth.of(ano, mes);
-        LocalDate inicioMes = anoMes.atDay(1);
-        LocalDate fimMes = anoMes.atEndOfMonth();
+        LocalDateTime inicioMes = anoMes.atDay(1).atStartOfDay(); // 1º dia às 00:00
+        LocalDateTime fimMes = anoMes.atEndOfMonth().atTime(23, 59, 59);
 
-        List<Evento> todosOsEventosMes = new ArrayList<>();
         List<Evento> eventosAno = eventoRepository.findByPeriodo(inicioMes, fimMes);
-
         if(eventosAno.isEmpty() || eventosAno == null){
             throw new ObjectNotFoundException("Nenhum evento encontrado para o mês e ano informados");
         }
 
-        EventoSimplificadoDTO eventoResponse = eventoMapper.paraEventoSimplificado(todosOsEventosMes);
+        EventoSimplificadoDTO eventoResponse = eventoMapper.paraEventoSimplificado(eventosAno);
         return eventoResponse;
     }
 
@@ -105,10 +103,10 @@ public class EventoService {
 
         //VALIDAR PRIMEIROS TODOS OS CAMPOS PREENCHIDOS
 
-        recorrenciaService.validarRecorrencia(request.recorrencia());
+        recorrenciaService.validarRecorrencia(request.recorrencia(), request.dataHoraInicio());
         enderecoEventoService.validarEnderecoEvento(request.endereco());
-        validaHoraInicioMenorHoraFim(request.horaInicio(), request.horaFim());
-        validarHoraFuturo(request.data(),request.horaInicio(), request.horaFim());
+        validaHoraInicioMenorHoraFim(request.dataHoraInicio(), request.dataHoraFim());
+        validarHoraFuturo(request.dataHoraInicio(), request.dataHoraFim());
 
         //CRIAR EVENTO SEM RECORRENCIA
 
@@ -158,8 +156,8 @@ public class EventoService {
             throw new ObjectNotFoundException("Não foi possível apagar o evento, verifique se o evento existe");
         }
 
-        List<Evento> eventos = eventoRepository.findByPeriodoAndRecorrencia(evento.getRecorrencia(), evento.getData());
-
+        List<Evento> eventos = eventoRepository.findByPeriodoAndRecorrencia(evento.getRecorrencia(), evento.getDataHoraInicio());
+        System.out.println(eventos);
         if (!eventos.contains(evento)) {
             eventos.add(evento);
         }
@@ -212,16 +210,12 @@ public class EventoService {
             evento.setPublicoAlvo(request.publicoAlvo());
         }
 
-        if (request.data() != null) {
-            evento.setData(request.data());
+        if (request.dataHoraInicio() != null) {
+            evento.setDataHoraInicio(request.dataHoraInicio());
         }
 
-        if (request.horaInicio() != null) {
-            evento.setHoraInicio(request.horaInicio());
-        }
-
-        if (request.horaFim() != null) {
-            evento.setHoraFim(request.horaFim());
+        if (request.dataHoraFim() != null) {
+            evento.setDataHoraFim(request.dataHoraFim());
         }
 
         if (request.custo() != null) {
@@ -251,17 +245,17 @@ public class EventoService {
         return evento;
     }
 
-    private void validaHoraInicioMenorHoraFim(LocalTime inicio, LocalTime fim){
+    private void validaHoraInicioMenorHoraFim(LocalDateTime inicio, LocalDateTime fim){
         if(fim.isBefore(inicio)){
             throw new TimeInvalidException("O horário de término do evento precisa ser maior que o horário de início");
         }
     }
 
-    private void validarHoraFuturo(LocalDate data,LocalTime inicio, LocalTime fim){
-        LocalDate hoje = LocalDate.now();
-        LocalTime agora = LocalTime.now();
-        LocalTime agoraComMargem = agora.minusMinutes(3);
-        if(hoje.isEqual(data) && (inicio.isBefore(agoraComMargem) || fim.isBefore(agoraComMargem))){
+    private void validarHoraFuturo(LocalDateTime inicio, LocalDateTime fim){
+
+        LocalDateTime hojeDataHora = LocalDateTime.now();
+        LocalDateTime hojeComMargem = hojeDataHora.plusMinutes(1);
+        if(inicio.isBefore(hojeComMargem) && fim.isBefore(hojeComMargem)){
             throw new TimeInvalidException("Não é possível cadastrar eventos com horários passados.");
         }
     }
@@ -332,7 +326,8 @@ public class EventoService {
 
         LocalDate dataInicio = request.recorrencia().dataInicioRecorrencia();
         LocalDate dataFim = request.recorrencia().dataTerminoRecorrencia();
-
+        LocalTime horarioInicio = request.dataHoraInicio().toLocalTime();
+        LocalTime horarioFim = request.dataHoraFim().toLocalTime();
         long semanas = ChronoUnit.WEEKS.between(dataInicio, dataFim);
 
         for (int i = 1; i <= semanas; i++) {
@@ -341,21 +336,20 @@ public class EventoService {
             novoEvento.setIgreja(evento.getIgreja());
             novoEvento.setOrganizador(evento.getOrganizador());
             novoEvento.setEnderecoEvento(evento.getEnderecoEvento());
-            novoEvento.setMinisterios(evento.getMinisterios());
+            novoEvento.setMinisterios(new HashSet<>(evento.getMinisterios()));
             novoEvento.setRecorrencia(evento.getRecorrencia());
             novoEvento.setNome(evento.getNome());
             novoEvento.setDescricao(evento.getDescricao());
             novoEvento.setPublicoAlvo(evento.getPublicoAlvo());
-            novoEvento.setData(dataInicio.plusWeeks(i));
-            novoEvento.setHoraInicio(evento.getHoraInicio());
-            novoEvento.setHoraFim(evento.getHoraFim());
+            novoEvento.setDataHoraInicio(evento.getDataHoraInicio().plusWeeks(i));
+            novoEvento.setDataHoraFim(evento.getDataHoraFim().plusWeeks(i));
             novoEvento.setCusto(evento.getCusto());
             eventos.add(novoEvento);
         }
 
         eventoRepository.saveAll(eventos);
 
-        return new RestResponseMessage(HttpStatus.CREATED, "Evento sem recorrência criado com sucesso");
+        return new RestResponseMessage(HttpStatus.CREATED, "Eventos com recorrência semanal criado com sucesso");
 
     }
 
@@ -370,7 +364,8 @@ public class EventoService {
 
         LocalDate dataInicio = request.recorrencia().dataInicioRecorrencia();
         LocalDate dataFim = request.recorrencia().dataTerminoRecorrencia();
-
+        LocalTime horarioInicio = request.dataHoraInicio().toLocalTime();
+        LocalTime horarioFim = request.dataHoraFim().toLocalTime();
         long meses = ChronoUnit.MONTHS.between(dataInicio, dataFim);
 
         for (int i = 1; i <= meses; i++) {
@@ -378,21 +373,20 @@ public class EventoService {
             novoEvento.setIgreja(eventoBase.getIgreja());
             novoEvento.setOrganizador(eventoBase.getOrganizador());
             novoEvento.setEnderecoEvento(eventoBase.getEnderecoEvento());
-            novoEvento.setMinisterios(eventoBase.getMinisterios());
+            novoEvento.setMinisterios(new HashSet<>(eventoBase.getMinisterios()));
             novoEvento.setRecorrencia(eventoBase.getRecorrencia());
             novoEvento.setNome(eventoBase.getNome());
             novoEvento.setDescricao(eventoBase.getDescricao());
             novoEvento.setPublicoAlvo(eventoBase.getPublicoAlvo());
-            novoEvento.setData(dataInicio.plusMonths(i));
-            novoEvento.setHoraInicio(eventoBase.getHoraInicio());
-            novoEvento.setHoraFim(eventoBase.getHoraFim());
+            novoEvento.setDataHoraInicio(eventoBase.getDataHoraInicio().plusMonths(i));
+            novoEvento.setDataHoraFim(eventoBase.getDataHoraFim().plusMonths(i));
             novoEvento.setCusto(eventoBase.getCusto());
             eventos.add(novoEvento);
         }
 
         eventoRepository.saveAll(eventos);
 
-        return new RestResponseMessage(HttpStatus.CREATED, "Eventos mensais criados com sucesso");
+        return new RestResponseMessage(HttpStatus.CREATED, "Eventos com recorrência mensal criados com sucesso");
     }
 
 

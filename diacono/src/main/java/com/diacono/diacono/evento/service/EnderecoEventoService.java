@@ -71,36 +71,36 @@ public class EnderecoEventoService {
         }
 
         if(endereco.idExterno() == null){
-            if(endereco.cep().isBlank()){
+            if(endereco.cep() == null || endereco.cep().isBlank()){
                 throw  new FieldInvalidException("Você precisa preencher o CEP");
             }
         }
 
-        if (endereco.cep().isBlank()) {
+        if (endereco.cep() == null || endereco.cep().isBlank()) {
             throw new FieldInvalidException("Você precisa preencher o CEP");
         }
 
-        if (endereco.estado().isBlank()) {
+        if (endereco.estado() == null  || endereco.estado().isBlank()) {
             throw new FieldInvalidException("Você precisa preencher o estado");
         }
 
-        if (endereco.cidade().isBlank()) {
+        if (endereco.cidade() == null  ||  endereco.cidade().isBlank()) {
             throw new FieldInvalidException("Você precisa preencher a cidade");
         }
 
-        if (endereco.bairro().isBlank()) {
+        if (endereco.bairro() == null  ||  endereco.bairro().isBlank()) {
             throw new FieldInvalidException("Você precisa preencher o bairro");
         }
 
-        if (endereco.rua().isBlank()) {
+        if (endereco.rua() == null  || endereco.rua().isBlank()) {
             throw new FieldInvalidException("Você precisa preencher a rua");
         }
 
-        if (endereco.numero().isBlank()) {
+        if (endereco.numero() == null  || endereco.numero().isBlank()) {
             throw new FieldInvalidException("Você precisa preencher o número");
         }
 
-        if (endereco.apelido().isBlank()) {
+        if (endereco.apelido() == null  ||  endereco.apelido().isBlank()) {
             throw new FieldInvalidException("Você precisa preencher o apelido");
         }
 

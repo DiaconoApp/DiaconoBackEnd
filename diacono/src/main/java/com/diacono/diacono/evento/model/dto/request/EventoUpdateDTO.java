@@ -6,6 +6,7 @@ import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
@@ -24,11 +25,10 @@ public record EventoUpdateDTO(
         String publicoAlvo,
 
         @FutureOrPresent(message = "Não é possível cadastrar eventos com datas passadas.")
-        LocalDate data,
+        LocalDateTime dataHoraInicio,
 
-        LocalTime horaInicio,
-
-        LocalTime horaFim,
+        @FutureOrPresent(message = "Não é possível cadastrar eventos com datas passadas.")
+        LocalDateTime dataHoraFim,
 
         BigDecimal custo
 

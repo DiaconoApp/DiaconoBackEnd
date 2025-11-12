@@ -11,6 +11,7 @@ import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
@@ -56,9 +57,10 @@ public class Evento extends IdEntityUtils {
     private String nome;
     private String descricao;
     private String publicoAlvo;
-    private LocalDate data;
-    private LocalTime horaInicio;
-    private LocalTime horaFim;
+    @Column(name = "data_hora_inicio")
+    private LocalDateTime dataHoraInicio;
+    @Column(name = "data_hora_fim")
+    private LocalDateTime dataHoraFim;
     private BigDecimal custo;
 
     public void setIgreja(Igreja igreja) {
@@ -93,16 +95,12 @@ public class Evento extends IdEntityUtils {
         this.publicoAlvo = publicoAlvo;
     }
 
-    public void setData(LocalDate data) {
-        this.data = data;
+    public void setDataHoraInicio(LocalDateTime dataHoraInicio) {
+        this.dataHoraInicio = dataHoraInicio;
     }
 
-    public void setHoraInicio(LocalTime horaInicio) {
-        this.horaInicio = horaInicio;
-    }
-
-    public void setHoraFim(LocalTime horaFim) {
-        this.horaFim = horaFim;
+    public void setDataHoraFim(LocalDateTime dataHoraFim) {
+        this.dataHoraFim = dataHoraFim;
     }
 
     public void setCusto(BigDecimal custo) {

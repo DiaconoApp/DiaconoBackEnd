@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -18,13 +19,11 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
 
     @Query("""
     SELECT e FROM Evento e 
-    WHERE (e.data BETWEEN :inicio AND :fim)
-    ORDER BY e.data ASC
+    WHERE (e.dataHoraInicio BETWEEN :dataInicio AND :dataFim)
+    ORDER BY e.dataHoraInicio ASC
     """)
-    ArrayList<Evento> findByPeriodo(@Param("inicio") LocalDate inicio, @Param("fim") LocalDate fim);
+    ArrayList<Evento> findByPeriodo(@Param("dataInicio") LocalDateTime dataInicio, @Param("dataFim") LocalDateTime dataFim);
 
-    @Query("SELECT COUNT(e) FROM Evento e WHERE e.data BETWEEN :inicio AND :fim")
-    int countEventosNoPeriodo(@Param("inicio") LocalDate inicio, @Param("fim") LocalDate fim);
 
    Evento findByIdExterno(UUID idExterno);
 
@@ -33,8 +32,8 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
 
     @Query("""
     SELECT e FROM Evento e 
-    WHERE (e.recorrencia = :recorrencia) AND (e.data >= :data) 
-    ORDER BY e.data ASC
+    WHERE (e.recorrencia = :recorrencia) AND (e.dataHoraInicio >= :dataInicio) 
+    ORDER BY e.dataHoraInicio ASC
     """)
-    List<Evento> findByPeriodoAndRecorrencia(@Param("recorrencia") Recorrencia recorrencia, @Param("data") LocalDate data);
+    List<Evento> findByPeriodoAndRecorrencia(@Param("recorrencia") Recorrencia recorrencia, @Param("dataInicio") LocalDateTime dataInicio);
 }

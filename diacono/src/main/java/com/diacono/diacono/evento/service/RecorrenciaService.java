@@ -10,6 +10,7 @@ import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import org.springframework.stereotype.Service;
 
 import java.time.DateTimeException;
+import java.time.LocalDateTime;
 
 @Service
 public class RecorrenciaService {
@@ -27,7 +28,7 @@ public class RecorrenciaService {
     }
 
     // metodos para validacoes
-    public void validarRecorrencia(RecorrenciaCreateDTO recorrencia){
+    public void validarRecorrencia(RecorrenciaCreateDTO recorrencia, LocalDateTime comparativoEvento){
 
         if(!recorrencia.tipoRecorrencia().equals(TipoRecorrencia.NAO_REPETE)){
 
@@ -36,11 +37,15 @@ public class RecorrenciaService {
             }
 
             if(!recorrencia.dataTerminoRecorrencia().isAfter(recorrencia.dataInicioRecorrencia())){
-                throw new DateTimeException("A data final da recorrência precisa ser maior ou igual à data de início.");
+                throw new FieldInvalidException("A data final da recorrência precisa ser maior que a data de início, para eventos com recorrência.");
             }
 
-            if(recorrencia.dataInicioRecorrencia().plusDays(365).isBefore(recorrencia.dataInicioRecorrencia())){
+            if(recorrencia.dataInicioRecorrencia().plusDays(365).isBefore(recorrencia.dataTerminoRecorrencia())){
                 throw  new FieldInvalidException("A data final da recorrência precisar estar dentro do período de um ano");
+            }
+
+            if(!recorrencia.dataInicioRecorrencia().isEqual(comparativoEvento.toLocalDate())){
+                throw new FieldInvalidException("A data de início da recorrência precisa ser igual à data de início do evento.");
             }
 
         }

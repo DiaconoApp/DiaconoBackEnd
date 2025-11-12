@@ -6,6 +6,7 @@ import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
@@ -26,24 +27,25 @@ public record EventoCreateDTO(
 
         @NotBlank
         @Size(max = 100, message = "O nome deve ter no máximo 100 caracteres.")
+        @Pattern(regexp = "^[A-Za-zÀ-ÿ ]+$", message = "Deve conter apenas letras e espaços")
         String nome,
 
         @NotBlank
         @Size(max = 400, message = "A descrição deve ter no máximo 400 caracteres.")
+        @Pattern(regexp = "^[A-Za-zÀ-ÿ ]+$", message = "Deve conter apenas letras e espaços")
         String descricao,
 
         @NotBlank(message = "O evento precisa ter um público-alvo.")
+        @Pattern(regexp = "^[A-Za-zÀ-ÿ ]+$", message = "Deve conter apenas letras e espaços")
         String publicoAlvo,
 
-        @NotNull(message = "É necessário que o evento tenha uma data.")
-        @FutureOrPresent(message = "Não é possível cadastrar eventos com datas passadas.")
-        LocalDate data,
-
         @NotNull(message = "É necessário que o evento tenha um horário de início.")
-        LocalTime horaInicio,
+        @FutureOrPresent(message = "Não é possível cadastrar eventos com datas passadas.")
+        LocalDateTime dataHoraInicio,
 
         @NotNull(message = "É necessário que o evento tenha um horário de finalização.")
-        LocalTime horaFim,
+        @FutureOrPresent(message = "Não é possível cadastrar eventos com datas passadas.")
+        LocalDateTime dataHoraFim,
 
         @NotNull
         @PositiveOrZero(message = "O valor para participar do evento não deve ser negativo.")
