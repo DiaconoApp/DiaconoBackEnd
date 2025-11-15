@@ -35,7 +35,9 @@ public class TokenService {
                 .expiresAt(now.plusSeconds(this.expiresIn)) // Usa a propriedade injetada
                 .claim("scope", scopeString)
                 .claim("nome", membro.getNome())
-                // Adicione outros claims aqui
+                .claim("idade", membro.getDataNascimento().toString())
+                .claim("fk_igreja", membro.getIgreja().getIdExterno())
+                .claim("igreja", membro.getIgreja().getNome())
                 .build();
 
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();

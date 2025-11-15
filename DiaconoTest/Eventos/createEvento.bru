@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: http://localhost:8080/eventos
+  url: http://localhost:8080/api/v1/eventos
   body: json
   auth: bearer
 }
@@ -18,27 +18,30 @@ body:json {
   {
     "fkIgreja": "550e8400-e29b-41d4-a716-446655440000",
     "fkOrganizador": "8dcdaaf2-7533-4642-b897-425c087d6539",
-    "fkMinisterios": [
+     "fkMinisterios": [
       "550e8400-e29b-41d4-a716-446655440020",
-      "550e8400-e29b-41d4-a716-446655440023"
+      "550e8400-e29b-41d4-a716-446655440020",
+      "550e8400-e29b-41d4-a716-446655440020",
+      "550e8400-e29b-41d4-a716-446655440020"
     ],
     "nome": "Culto da Virada e Batismo",
-    "descricao": "Culto de adoração especial com celebração de batismos e ceia.",
+    "descricao": "Culto de adoração especial com celebração de batismos e ceia",
     "publicoAlvo": "Membros e visitantes",
-    "data": "2025-12-31",
-    "horaInicio": "19:30:00",
-    "horaFim": "22:00:00",
+    "dataHoraInicio": "2025-11-12T23:30:00",
+    "dataHoraFim": "2025-11-13T01:30:00",
+    "recorrencia": {
+      "tipoRecorrencia": "SEMANAL",
+      "dataInicioRecorrencia": "2025-11-12",
+      "dataTerminoRecorrencia": "2026-11-11"
+    },
     "custo": 0.00,
-    "tipoRecorrencia": "NAO_REPETE",
-    "dataInicioRecorrencia": null,
-    "dataTerminoRecorrencia": null,
     "diasSemana": null,
     "horarioRecorrencia": null,
     "intervaloRecorrencia": 0,
     "endereco": {
       "idExterno": null,
       "cep": "04000000",
-      "rua": "Rua da Igreja",
+      "rua": 123,
       "cidade": "São Paulo",
       "estado": "São Paulo",
       "bairro": "Centro",
@@ -47,6 +50,7 @@ body:json {
       "apelido": "Salão Principal"
     }
   }
+  
 }
 
 settings {

@@ -1,0 +1,27 @@
+meta {
+  name: editarMinisterioGoverno
+  type: http
+  seq: 3
+}
+
+patch {
+  url: http://localhost:8080/api/v1/ministerios/governo/26c055e3-47d3-4b93-945d-bf59502b2338
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{acessToken}}
+}
+
+body:json {
+  {
+    "nome": "mudei nome e lider",
+    "idLider": "bcfa0157-c8f6-48e5-b5dc-554c7f904a45"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

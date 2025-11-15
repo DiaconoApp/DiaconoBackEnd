@@ -2,9 +2,13 @@ package com.diacono.diacono.ministerio.model.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
 
-import java.time.LocalDate;
+import java.util.UUID;
 
-public record MinisterioCreateDTO(@NotBlank String nome, @PastOrPresent @NotNull LocalDate dataCriacao, @NotBlank String nomeLider, @NotBlank String status) {
+public record MinisterioCreateDTO(
+        @NotNull(message = "É obrigatório informar o id do líder do membro")
+        UUID idLider,
+        @NotBlank(message = "É obrigatório informar o nome do ministério")
+        String nome
+) {
 }

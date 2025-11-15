@@ -8,7 +8,13 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface MembroMinisterioMapper {
 
-    @Mapping(source = "ministerio.nome", target = "nomeMinisterio")
+
+    @Mapping(target = "nome", source = "membro.nome")
+    @Mapping(target = "email", source = "membro.email")
+    @Mapping(target = "telefone", source = "membro.celular")
+    @Mapping(target = "status", source = "membro.status")
+    @Mapping(target = "dataNascimento", source = "membro.dataNascimento")
+    @Mapping(target = "cargo", source = "cargoMembro")
     MembroMinisterioDTO paraMembroMinisterioDTO(MembroMinisterio membroMinisterio);
 
 }

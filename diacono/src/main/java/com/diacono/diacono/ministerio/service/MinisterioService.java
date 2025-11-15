@@ -1,101 +1,204 @@
 package com.diacono.diacono.ministerio.service;
 
+import com.diacono.diacono.global.dto.response.RestResponseMessage;
+import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
+import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
+import com.diacono.diacono.membro.model.entity.Membro;
+import com.diacono.diacono.membro.repository.MembroRepository;
+import com.diacono.diacono.membroministerio.model.dto.request.MembroMinisterioCreateDTO;
+import com.diacono.diacono.membroministerio.model.dto.response.MembroMinisterioDTO;
+import com.diacono.diacono.membroministerio.model.entity.EnumCargoMembroMinisterio;
+import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
+import com.diacono.diacono.membroministerio.service.MembroMinisterioService;
+import com.diacono.diacono.ministerio.mapper.MinisterioMapper;
 import com.diacono.diacono.ministerio.model.dto.MinisterioCreateDTO;
-import com.diacono.diacono.ministerio.model.dto.MinisterioResponseDTO;
 import com.diacono.diacono.ministerio.model.dto.MinisterioUpdateDTO;
+import com.diacono.diacono.ministerio.model.dto.response.MinisterioSimplificadoDTO;
+import com.diacono.diacono.ministerio.model.entity.EnumStatusMinisterio;
 import com.diacono.diacono.ministerio.model.entity.Ministerio;
 import com.diacono.diacono.ministerio.repository.MinisteriosRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
 public class MinisterioService {
 
     private final MinisteriosRepository ministerios;
+    private final MinisterioMapper mapper;
+    private final MembroMinisterioService membroMinisterio;
+    private final MembroRepository membro;
 
-    public MinisterioService(MinisteriosRepository ministerios) {
+    public MinisterioService(MinisteriosRepository ministerios, MinisterioMapper mapper, MembroMinisterioService membroMinisterio, MembroRepository membro) {
         this.ministerios = ministerios;
+        this.mapper = mapper;
+        this.membroMinisterio = membroMinisterio;
+        this.membro = membro;
     }
 
-    public MinisterioResponseDTO createMinisterio(MinisterioCreateDTO ministerioDTO){
+    //METODOS PRINCIPAIS
 
-        Ministerio response = new Ministerio(ministerioDTO.nome(), ministerioDTO.dataCriacao(), ministerioDTO.nomeLider(), ministerioDTO.status());
-        ministerios.save(response);
+    //VISAO GOVERNO
 
-        return new MinisterioResponseDTO(response.getIdExterno(),response.getNome(), response.getDataCriacao(), response.getNomeLider(), response.getStatus());
+    public List<MinisterioSimplificadoDTO> buscarMinisteriosGoverno(Pageable pageable){
 
-    }
-
-    public List<MinisterioResponseDTO> getAllMinisterios(){
-
-        List<Ministerio> ministerio = ministerios.findAll();
-
-        if(ministerio.isEmpty()){
+        Page<Ministerio> ministeriosPage = ministerios.findAll(pageable);
+        if(ministeriosPage.isEmpty()){
             throw new ObjectNotFoundException("Nenhum ministério encontrado");
         }
 
-        List<MinisterioResponseDTO> ministeriosDTO = ministerio.stream()
-                .map(m -> new MinisterioResponseDTO(m.getIdExterno(),m.getNome(), m.getDataCriacao(), m.getNomeLider(), m.getStatus()))
+        //mapper::paraMinisterioSimplificadoDTO == (m -> mapper.paraMinisterioSimplificadoDTO(m))
+        List<MinisterioSimplificadoDTO> responses = ministeriosPage.stream()
+                .map(mapper::paraMinisterioSimplificadoDTO)
                 .toList();
 
-        return ministeriosDTO;
+        return responses;
 
     }
 
-    public MinisterioResponseDTO getForIDMinisterio (Long id){
+    public List<MinisterioSimplificadoDTO> buscarMinisteriosGovernoComFiltro(Pageable pageable, String buscaGeral, EnumStatusMinisterio status){
 
-        if(ministerios.existsById(id)){
+        String stringBusca = "%" + buscaGeral.trim().toUpperCase() + "%";
 
-            Ministerio encontrado = ministerios.findById(id).get();
-            return new MinisterioResponseDTO(encontrado.getIdExterno(),encontrado.getNome(), encontrado.getDataCriacao(), encontrado.getNomeLider(), encontrado.getStatus());
-
+        Page<Ministerio> ministeriosPage = ministerios.buscarComFiltros(pageable, stringBusca, status);
+        if(ministeriosPage.isEmpty()){
+            throw new ObjectNotFoundException("Nenhum ministério encontrado");
         }
 
-        return null;
+        //mapper::paraMinisterioSimplificadoDTO == (m -> mapper.paraMinisterioSimplificadoDTO(m))
+        List<MinisterioSimplificadoDTO> responses = ministeriosPage.stream()
+                .map(mapper::paraMinisterioSimplificadoDTO)
+                .toList();
+
+        return responses;
 
     }
 
-    public Boolean deleteMinisterio(Long id){
+    @Transactional
+    public RestResponseMessage criarMinisterio(MinisterioCreateDTO ministerioDTO){
 
-        if(ministerios.existsById(id)){
+        //buscar lider primeiro para adicionar como membro do ministério
+        Membro liderMinisterio = membro.findByIdExterno(ministerioDTO.idLider());
 
-            ministerios.deleteById(id);
-            return true;
-
+        if(liderMinisterio == null){
+            throw new ObjectNotFoundException("Líder do ministério não encontrado");
         }
 
-        return false;
 
-    }
+        LocalDate data = LocalDate.now();
+        EnumStatusMinisterio status = EnumStatusMinisterio.ATIVO;
 
-    public MinisterioResponseDTO updateMinisterio(MinisterioUpdateDTO ministerioDTO, Long id){
+        Ministerio novoMinisterio = Ministerio.builder()
+                        .nome(ministerioDTO.nome())
+                        .dataCriacao(data)
+                        .nomeLider(liderMinisterio.getNome())
+                        .status(status)
+                        .build();
 
-        if(ministerios.existsById(id)){
+        MembroMinisterio membroLider = MembroMinisterio.builder()
+                .membro(liderMinisterio)
+                .ministerio(novoMinisterio)
+                .cargoMembro(EnumCargoMembroMinisterio.LIDER_MINISTERIO)
+                .nomeMinisterio(novoMinisterio.getNome())
+                .build();
 
-            Ministerio encontrado = ministerios.findById(id).get();
+        Set<MembroMinisterio> membroMinisterios = novoMinisterio.getMembros();
 
-            if(ministerioDTO.nome() != null){
-                encontrado.setNome(ministerioDTO.nome());
-            }
-
-            if(ministerioDTO.status() != null){
-                encontrado.setStatus(ministerioDTO.status());
-            }
-
-            ministerios.save(encontrado);
-
-
-            return new MinisterioResponseDTO(encontrado.getIdExterno(),encontrado.getNome(), encontrado.getDataCriacao(), encontrado.getNomeLider(), encontrado.getStatus());
+        if(membroMinisterios == null){
+            membroMinisterios = new HashSet<>();
         }
 
-        return null;
+        membroMinisterios.add(membroLider);
+        novoMinisterio.setMembros(membroMinisterios);
+        ministerios.save(novoMinisterio);
+
+        return new RestResponseMessage(HttpStatus.CREATED, "Ministério criado com sucesso");
 
     }
 
+    @Transactional
+    public RestResponseMessage editarMinisterio(MinisterioUpdateDTO ministerioDTO, UUID idMinisterio){
 
-    /*ESSE MÉTODO SE RELACIONA COM EVENTO*/
+        Ministerio ministerioExistente = ministerios.findByIdExterno(idMinisterio);
+
+        if(ministerioExistente == null){
+            throw new ObjectNotFoundException("Ministério não encontrado");
+        }
+
+        if(ministerioDTO.idLider() != null) {
+            Membro liderNovo = membro.findByIdExterno(ministerioDTO.idLider());
+            MembroMinisterio atual = ministerioExistente.getMembros().stream()
+                    .filter(m -> m.getCargoMembro() == EnumCargoMembroMinisterio.LIDER_MINISTERIO)
+                    .findFirst()
+                    .orElseThrow(() -> new ObjectNotFoundException("Líder do ministério não encontrado"));
+            atual.setMembro(liderNovo);
+            ministerioExistente.setNomeLider(liderNovo.getNome());
+        }
+
+        if(ministerioDTO.nome() != null && !ministerioDTO.nome().isBlank()){
+            ministerioExistente.setNome(ministerioDTO.nome());
+        }
+
+        if(ministerioDTO.status() != null){
+            ministerioExistente.setStatus(ministerioDTO.status());
+        }
+
+        ministerios.save(ministerioExistente);
+
+        return new RestResponseMessage(HttpStatus.OK, "Ministério atualizado com sucesso");
+    }
+
+    //VISAO LIDER MINISTERIO
+
+    public List<MembroMinisterioDTO> buscarMembroMinisterioLiderMinisterio(UUID idMinisterio, Pageable page){
+        return membroMinisterio.buscarPorMembroMinisterioSemFiltro(idMinisterio, page);
+    }
+
+    public List<MembroMinisterioDTO> buscarMembroMinisterioLiderMinisterioComFiltro(UUID idMinisterio, Pageable page, String texto, EnumStatusMembro status){
+        return membroMinisterio.buscarPorMembroMinisterioComFiltro(idMinisterio, page, texto, status);
+    }
+
+    @Transactional
+    public RestResponseMessage adicionarMembroMinisterioLiderMinisterio(UUID idMinisterio, MembroMinisterioCreateDTO dto){
+
+        if(dto == null){
+            throw new FieldInvalidException("Dados do membro do ministério não podem ser nulos");
+        }
+
+        Long idMinisterioNovo = ministerios.buscarIdPorUUID(idMinisterio);
+
+        if(idMinisterioNovo == null){
+            throw new ObjectNotFoundException("Ministério não encontrado");
+        }
+
+        Long idMembroNovo = membro.buscarIdPorUUID(dto.idExterno());
+
+        if(idMembroNovo == null){
+            throw new ObjectNotFoundException("Membro não encontrado");
+        }
+
+        membroMinisterio.adicionarMembroMinisterioLiderMinisterio(idMinisterioNovo, idMembroNovo);
+
+        return new RestResponseMessage(HttpStatus.OK, "Membro adicionado ao ministério com sucesso");
+    }
+
+    @Transactional
+    public RestResponseMessage removerMembroMinisterioLiderMinisterio(UUID idMinisterio, UUID idMembroMinisterio){
+
+        membroMinisterio.removerMembroMinisterioLiderMinisterio(idMinisterio, idMembroMinisterio);
+
+        return new RestResponseMessage(HttpStatus.OK, "Membro removido do ministério com sucesso");
+    }
+
+
+    /*ESSE METODO SE RELACIONA COM EVENTO*/
+
     public Set<Ministerio> buscarPorUUID(List<UUID> idExterno){
         Set<Ministerio> ministerios = this.ministerios.findAllByIdExternoIn(idExterno);
 

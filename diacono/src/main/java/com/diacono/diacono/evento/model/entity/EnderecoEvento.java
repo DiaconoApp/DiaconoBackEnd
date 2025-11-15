@@ -1,10 +1,7 @@
-package com.diacono.diacono.endereco.model.entity;
+package com.diacono.diacono.evento.model.entity;
 
 import com.diacono.diacono.global.util.IdEntityUtils;
 import jakarta.persistence.Entity;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

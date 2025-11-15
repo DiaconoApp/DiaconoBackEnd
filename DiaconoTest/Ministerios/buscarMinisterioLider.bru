@@ -1,18 +1,13 @@
 meta {
-  name: readAllEventos
+  name: buscarMinisterioLider
   type: http
-  seq: 2
+  seq: 4
 }
 
 get {
-  url: http://localhost:8080/api/v1/eventos?mes=11&ano=2025
+  url: http://localhost:8080/api/v1/ministerios/lider-ministerio/45a8725d-a7f3-4667-bc5d-51ac8f9c67d6
   body: none
   auth: bearer
-}
-
-params:query {
-  mes: 11
-  ano: 2025
 }
 
 auth:bearer {

@@ -1,6 +1,5 @@
 package com.diacono.diacono.evento.model.entity;
 
-import com.diacono.diacono.endereco.model.entity.EnderecoEvento;
 import com.diacono.diacono.Igreja.model.entity.Igreja;
 
 import com.diacono.diacono.global.util.IdEntityUtils;
@@ -12,6 +11,7 @@ import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
@@ -34,7 +34,7 @@ public class Evento extends IdEntityUtils {
     )
     private Membro organizador;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "fk_endereco", unique = false, nullable = true)
     private EnderecoEvento enderecoEvento;
 
@@ -46,24 +46,22 @@ public class Evento extends IdEntityUtils {
     )
     private Set<Ministerio> ministerios;
 
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(
+            name = "fk_recorrencia",
+            nullable = true,
+            unique = false
+    )
+    private Recorrencia recorrencia;
+
     private String nome;
     private String descricao;
     private String publicoAlvo;
-    private LocalDate data;
-    private LocalTime horaInicio;
-    private LocalTime horaFim;
+    @Column(name = "data_hora_inicio")
+    private LocalDateTime dataHoraInicio;
+    @Column(name = "data_hora_fim")
+    private LocalDateTime dataHoraFim;
     private BigDecimal custo;
-
-    @Enumerated(EnumType.STRING)
-    private TipoRecorrencia tipoRecorrencia;
-    private LocalDate dataInicioRecorrencia;
-    private LocalDate dataTerminoRecorrencia;
-
-    @ElementCollection
-    @Enumerated(EnumType.STRING)
-    private List<DiasSemanaRecorrencia> diasSemana;
-    private int intervaloRecorrencia;
-
 
     public void setIgreja(Igreja igreja) {
         this.igreja = igreja;
@@ -81,6 +79,10 @@ public class Evento extends IdEntityUtils {
         this.ministerios = ministerios;
     }
 
+    public void setRecorrencia(Recorrencia recorrencia) {
+        this.recorrencia = recorrencia;
+    }
+
     public void setNome(String nome) {
         this.nome = nome;
     }
@@ -93,39 +95,15 @@ public class Evento extends IdEntityUtils {
         this.publicoAlvo = publicoAlvo;
     }
 
-    public void setData(LocalDate data) {
-        this.data = data;
+    public void setDataHoraInicio(LocalDateTime dataHoraInicio) {
+        this.dataHoraInicio = dataHoraInicio;
     }
 
-    public void setHoraInicio(LocalTime horaInicio) {
-        this.horaInicio = horaInicio;
-    }
-
-    public void setHoraFim(LocalTime horaFim) {
-        this.horaFim = horaFim;
+    public void setDataHoraFim(LocalDateTime dataHoraFim) {
+        this.dataHoraFim = dataHoraFim;
     }
 
     public void setCusto(BigDecimal custo) {
         this.custo = custo;
-    }
-
-    public void setTipoRecorrencia(TipoRecorrencia tipoRecorrencia) {
-        this.tipoRecorrencia = tipoRecorrencia;
-    }
-
-    public void setDataInicioRecorrencia(LocalDate dataInicioRecorrencia) {
-        this.dataInicioRecorrencia = dataInicioRecorrencia;
-    }
-
-    public void setDataTerminoRecorrencia(LocalDate dataTerminoRecorrencia) {
-        this.dataTerminoRecorrencia = dataTerminoRecorrencia;
-    }
-
-    public void setDiasSemana(List<DiasSemanaRecorrencia> diasSemana) {
-        this.diasSemana = diasSemana;
-    }
-
-    public void setIntervaloRecorrencia(int intervaloRecorrencia) {
-        this.intervaloRecorrencia = intervaloRecorrencia;
     }
 }
