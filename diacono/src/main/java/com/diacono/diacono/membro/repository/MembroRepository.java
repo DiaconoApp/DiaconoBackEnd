@@ -36,4 +36,10 @@ public interface MembroRepository extends JpaRepository<Membro, Long> {
     );
 
     Membro findByEmail(String email);
+
+    @Query("""
+        SELECT m.id FROM Membro m
+        WHERE m.idExterno = :idExterno
+    """)
+    Long buscarIdPorUUID(UUID idExterno);
 }

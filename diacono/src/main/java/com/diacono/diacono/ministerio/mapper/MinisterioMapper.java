@@ -9,4 +9,5 @@ public interface MinisterioMapper {
 
     MinisterioSimplificadoDTO paraMinisterioSimplificadoDTO(Ministerio ministerio);
 
+
 }

@@ -239,10 +239,9 @@ public class MembroService {
         return passwordEncoder.encode(senha);
     }
 
-    /*MÉTODO QUE SE RELACIONA COM A ENTIDADE EVENTO*/
+    /*METODO QUE SE RELACIONA COM A ENTIDADE EVENTO E MINISTERIO*/
 
     public Membro buscarPorUUID(UUID idExterno) {
-        /*FAZER VALIDAÇÃO DE PRESENÇA -- LANÇAR EXCEÇÃO*/
         Membro membro = membroRepository.findByIdExterno(idExterno);
 
         if(membro == null){
@@ -293,4 +292,6 @@ public class MembroService {
         membroRepository.flush();
         return membroD;
     }
+
+
 }
