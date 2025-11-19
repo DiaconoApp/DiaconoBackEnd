@@ -12,6 +12,7 @@ import com.diacono.diacono.ministerio.model.entity.EnumStatusMinisterio;
 import com.diacono.diacono.ministerio.service.MinisterioService;
 import jakarta.validation.Valid;
 import org.apache.coyote.Response;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,21 +31,36 @@ public class MinisteriosController {
         this.ministerio = ministerio;
     }
 
+    //USO GERAL
+
+    @GetMapping
+    public ResponseEntity<List<MinisterioSimplificadoDTO>> buscarMinisteriosGerais(){
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ministerio.buscarMinisteriosGerais()
+        );
+
+    }
+
     //VISAO GOVERNO
 
     @GetMapping("/governo")
-    public ResponseEntity<List<MinisterioSimplificadoDTO>> buscarMinisteriosGoverno(Pageable pageable, @RequestParam(required = false, defaultValue = "") String buscaGeral,
+    public ResponseEntity<Page<MinisterioSimplificadoDTO>> buscarMinisteriosGoverno(Pageable pageable, @RequestParam(required = false, defaultValue = "") String buscaGeral,
                                                                                     @RequestParam(required = false) EnumStatusMinisterio status){
 
         boolean semBusca = (buscaGeral == null || buscaGeral.isBlank());
         boolean semStatus = (status == null);
 
+        Page pagina;
+
         if (semBusca && semStatus) {
-            return ResponseEntity.status(HttpStatus.OK).body(ministerio.buscarMinisteriosGoverno(pageable));
+            pagina = ministerio.buscarMinisteriosGoverno(pageable);
+            return ResponseEntity.status(HttpStatus.OK).body(pagina);
         }
 
+        pagina = ministerio.buscarMinisteriosGovernoComFiltro(pageable, buscaGeral, status);
         return ResponseEntity.status(HttpStatus.OK).body(
-                ministerio.buscarMinisteriosGovernoComFiltro(pageable, buscaGeral, status)
+                pagina
         );
 
     }
@@ -64,7 +80,7 @@ public class MinisteriosController {
     //VISAO  LIDER MINISTERIO
 
     @GetMapping("/lider-ministerio/{idMinisterio}")
-    public ResponseEntity<List<MembroMinisterioDTO>> buscarMembroMinisterioLiderMinisterio(@PathVariable UUID idMinisterio, Pageable pageable, @RequestParam(required = false, defaultValue = "") String buscaGeral,
+    public ResponseEntity<Page<MembroMinisterioDTO>> buscarMembroMinisterioLiderMinisterio(@PathVariable UUID idMinisterio, Pageable pageable, @RequestParam(required = false, defaultValue = "") String buscaGeral,
                                                                                             @RequestParam(required = false) EnumStatusMembro status){
 
         if(idMinisterio == null || idMinisterio.toString().isBlank()){
@@ -73,13 +89,16 @@ public class MinisteriosController {
         boolean semBusca = (buscaGeral == null || buscaGeral.isBlank());
         boolean semStatus = (status == null);
 
+        Page<MembroMinisterioDTO> pagina;
+
         if (semBusca && semStatus) {
-            return ResponseEntity.status(HttpStatus.OK).body(ministerio.buscarMembroMinisterioLiderMinisterio(idMinisterio, pageable));
+            pagina = ministerio.buscarMembroMinisterioLiderMinisterio(idMinisterio, pageable);
+            return ResponseEntity.status(HttpStatus.OK).body(pagina);
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body(
-                ministerio.buscarMembroMinisterioLiderMinisterioComFiltro(idMinisterio, pageable, buscaGeral, status)
-        );
+        pagina = ministerio.buscarMembroMinisterioLiderMinisterioComFiltro(idMinisterio, pageable, buscaGeral, status);
+
+        return ResponseEntity.status(HttpStatus.OK).body(pagina);
 
     }
 

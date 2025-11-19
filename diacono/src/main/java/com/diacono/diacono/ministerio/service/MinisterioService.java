@@ -3,6 +3,7 @@ package com.diacono.diacono.ministerio.service;
 import com.diacono.diacono.global.dto.response.RestResponseMessage;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
+import com.diacono.diacono.membro.model.entity.EnumCargoMembro;
 import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
 import com.diacono.diacono.membro.model.entity.Membro;
 import com.diacono.diacono.membro.repository.MembroRepository;
@@ -44,17 +45,17 @@ public class MinisterioService {
 
     //METODOS PRINCIPAIS
 
-    //VISAO GOVERNO
+    //USO GERAL
 
-    public List<MinisterioSimplificadoDTO> buscarMinisteriosGoverno(Pageable pageable){
+    public List<MinisterioSimplificadoDTO> buscarMinisteriosGerais(){
 
-        Page<Ministerio> ministeriosPage = ministerios.findAll(pageable);
-        if(ministeriosPage.isEmpty()){
+        List<Ministerio> ministeriosResponse = ministerios.findAll();
+        if(ministeriosResponse.isEmpty()){
             throw new ObjectNotFoundException("Nenhum ministério encontrado");
+
         }
 
-        //mapper::paraMinisterioSimplificadoDTO == (m -> mapper.paraMinisterioSimplificadoDTO(m))
-        List<MinisterioSimplificadoDTO> responses = ministeriosPage.stream()
+        List<MinisterioSimplificadoDTO> responses = ministeriosResponse.stream()
                 .map(mapper::paraMinisterioSimplificadoDTO)
                 .toList();
 
@@ -62,7 +63,23 @@ public class MinisterioService {
 
     }
 
-    public List<MinisterioSimplificadoDTO> buscarMinisteriosGovernoComFiltro(Pageable pageable, String buscaGeral, EnumStatusMinisterio status){
+    //VISAO GOVERNO
+
+    public Page<MinisterioSimplificadoDTO> buscarMinisteriosGoverno(Pageable pageable){
+
+        Page<Ministerio> ministeriosPage = ministerios.findAll(pageable);
+        if(ministeriosPage.isEmpty()){
+            throw new ObjectNotFoundException("Nenhum ministério encontrado");
+        }
+
+        //mapper::paraMinisterioSimplificadoDTO == (m -> mapper.paraMinisterioSimplificadoDTO(m))
+        Page<MinisterioSimplificadoDTO> responses = ministeriosPage.map(mapper::paraMinisterioSimplificadoDTO);
+
+        return responses;
+
+    }
+
+    public Page<MinisterioSimplificadoDTO> buscarMinisteriosGovernoComFiltro(Pageable pageable, String buscaGeral, EnumStatusMinisterio status){
 
         String stringBusca = "%" + buscaGeral.trim().toUpperCase() + "%";
 
@@ -72,9 +89,8 @@ public class MinisterioService {
         }
 
         //mapper::paraMinisterioSimplificadoDTO == (m -> mapper.paraMinisterioSimplificadoDTO(m))
-        List<MinisterioSimplificadoDTO> responses = ministeriosPage.stream()
-                .map(mapper::paraMinisterioSimplificadoDTO)
-                .toList();
+        Page<MinisterioSimplificadoDTO> responses = ministeriosPage
+                .map(mapper::paraMinisterioSimplificadoDTO);
 
         return responses;
 
@@ -90,6 +106,9 @@ public class MinisterioService {
             throw new ObjectNotFoundException("Líder do ministério não encontrado");
         }
 
+        if(liderMinisterio.getCargoMembro() != EnumCargoMembro.LIDER_MINISTERIO){
+            liderMinisterio.setCargoMembro(EnumCargoMembro.LIDER_MINISTERIO);
+        }
 
         LocalDate data = LocalDate.now();
         EnumStatusMinisterio status = EnumStatusMinisterio.ATIVO;
@@ -133,12 +152,35 @@ public class MinisterioService {
 
         if(ministerioDTO.idLider() != null) {
             Membro liderNovo = membro.findByIdExterno(ministerioDTO.idLider());
+            if (liderNovo == null) {
+                throw new ObjectNotFoundException("Novo líder não encontrado");
+            }
             MembroMinisterio atual = ministerioExistente.getMembros().stream()
                     .filter(m -> m.getCargoMembro() == EnumCargoMembroMinisterio.LIDER_MINISTERIO)
                     .findFirst()
                     .orElseThrow(() -> new ObjectNotFoundException("Líder do ministério não encontrado"));
+
+            Membro liderAntigo = atual.getMembro();
+
             atual.setMembro(liderNovo);
             ministerioExistente.setNomeLider(liderNovo.getNome());
+
+            if (liderNovo.getCargoMembro() != EnumCargoMembro.LIDER_MINISTERIO) {
+                liderNovo.setCargoMembro(EnumCargoMembro.LIDER_MINISTERIO);
+            }
+
+
+
+            boolean aindaELiderDeAlgumMinisterio = liderAntigo.getMinisterios().stream()
+                    .anyMatch(mm ->
+                            mm.getCargoMembro() == EnumCargoMembroMinisterio.LIDER_MINISTERIO
+                                    && !mm.getMinisterio().getIdExterno().equals(ministerioExistente.getIdExterno())
+                    );
+
+            if (!aindaELiderDeAlgumMinisterio) {
+                liderAntigo.setCargoMembro(EnumCargoMembro.MEMBRO);
+            }
+
         }
 
         if(ministerioDTO.nome() != null && !ministerioDTO.nome().isBlank()){
@@ -156,11 +198,11 @@ public class MinisterioService {
 
     //VISAO LIDER MINISTERIO
 
-    public List<MembroMinisterioDTO> buscarMembroMinisterioLiderMinisterio(UUID idMinisterio, Pageable page){
+    public Page<MembroMinisterioDTO> buscarMembroMinisterioLiderMinisterio(UUID idMinisterio, Pageable page){
         return membroMinisterio.buscarPorMembroMinisterioSemFiltro(idMinisterio, page);
     }
 
-    public List<MembroMinisterioDTO> buscarMembroMinisterioLiderMinisterioComFiltro(UUID idMinisterio, Pageable page, String texto, EnumStatusMembro status){
+    public Page<MembroMinisterioDTO> buscarMembroMinisterioLiderMinisterioComFiltro(UUID idMinisterio, Pageable page, String texto, EnumStatusMembro status){
         return membroMinisterio.buscarPorMembroMinisterioComFiltro(idMinisterio, page, texto, status);
     }
 

@@ -18,8 +18,22 @@ VALUES
 --  (4, '550e8400-e29b-41d4-a716-446655440013', 'Ana Pereira', 'ana.pereira@exemplo.com', '1995-02-14', '369.258.147-00', '04000-000', 99, 'temp123', '$2a$10$HASHED_SENHA_4'),
 --  (5, '550e8400-e29b-41d4-a716-446655440014', 'Carla Souza', 'carla.souza@exemplo.com', '1990-09-10', '159.753.486-00', '05000-000', 500, 'temp123', '$2a$10$HASHED_SENHA_5');
 
-
-
+-- COM BASE NA ENTIDADE MEMBROS, CRIAR TRÊS REGISTRADOS DE MEMBROS PARA UMA IGREJA ESPECÍFICA PASSANDO CARGOS DIFERENTES
+INSERT INTO membro (
+    id_externo,
+    fk_igreja,
+    nome,
+    cpf,
+    data_nascimento,
+    email,
+    celular,
+    senha,
+    status,
+    cargo_membro
+) VALUES
+    ('550e8400-e29b-41d4-a716-446655440001', 1, 'João da Silva', '11111111111', '1990-05-10', 'joao@example.com', '11999990000', 'senha1', 'ATIVO', 'GOVERNO'),
+    ('550e8400-e29b-41d4-a716-446655440002', 1, 'Maria Santos', '22222222222', '1988-08-20', 'maria@example.com', '11988880000', 'senha2', 'ATIVO', 'LIDER_MINISTERIO'),
+    ('550e8400-e29b-41d4-a716-446655440003', 1, 'Pedro Souza', '33333333333', '1995-12-01', 'pedro@example.com', '11977770000', 'senha3', 'ATIVO', 'MEMBRO');
 -- ========================================
 -- MINISTÉRIOS
 -- ========================================
