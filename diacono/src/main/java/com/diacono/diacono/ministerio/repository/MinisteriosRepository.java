@@ -20,7 +20,7 @@ public interface MinisteriosRepository extends JpaRepository<Ministerio, Long> {
 
     @Query("""
     SELECT m FROM Ministerio m
-    WHERE (:busca IS NULL OR nome LIKE :busca OR nomeLider LIKE :busca) AND
+    WHERE (:busca IS NULL OR UPPER(nome) LIKE :busca OR UPPER(nomeLider) LIKE :busca) AND
     (:status IS NULL OR m.status = :status)
     """)
     Page<Ministerio> buscarComFiltros(Pageable pageable,

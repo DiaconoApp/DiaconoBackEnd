@@ -42,7 +42,7 @@ public class MembroMinisterioService {
 
     }
 
-    public List<MembroMinisterioDTO> buscarPorMembroMinisterioComFiltro(UUID idMinisterio, Pageable pageable, String texto, EnumStatusMembro status){
+    public Page<MembroMinisterioDTO> buscarPorMembroMinisterioComFiltro(UUID idMinisterio, Pageable pageable, String texto, EnumStatusMembro status){
 
         String textoFormatado =  "%" + texto.toUpperCase() + "%" ;
 
@@ -53,14 +53,13 @@ public class MembroMinisterioService {
         }
 
         //fazer o mapper para MembroMinisterioDTO
-        List<MembroMinisterioDTO> response = page.stream()
-                .map(mapper::paraMembroMinisterioDTO)
-                .toList();
+        Page<MembroMinisterioDTO> response = page.map(mapper::paraMembroMinisterioDTO);
+
 
         return response;
     }
 
-    public List<MembroMinisterioDTO> buscarPorMembroMinisterioSemFiltro(UUID idMinisterio, Pageable pageable){
+    public Page<MembroMinisterioDTO> buscarPorMembroMinisterioSemFiltro(UUID idMinisterio, Pageable pageable){
 
 
         Page<MembroMinisterio> page = membroMinisterioRepository.buscarPorMembroMinisterioSemFiltro(pageable, idMinisterio);
@@ -70,9 +69,7 @@ public class MembroMinisterioService {
         }
 
         //fazer o mapper para MembroMinisterioDTO
-        List<MembroMinisterioDTO> response = page.stream()
-                .map(mapper::paraMembroMinisterioDTO)
-                .toList();
+        Page<MembroMinisterioDTO> response = page.map(mapper::paraMembroMinisterioDTO);
 
         return response;
     }
