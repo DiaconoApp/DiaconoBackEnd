@@ -95,12 +95,12 @@ class MinisterioServiceTest {
         when(ministerioMapper.paraMinisterioSimplificadoDTO(ministerio1)).thenReturn(dto1);
         when(ministerioMapper.paraMinisterioSimplificadoDTO(ministerio2)).thenReturn(dto2);
 
-        List<MinisterioSimplificadoDTO> result = ministerioService.buscarMinisteriosGoverno(pageable);
+        Page<MinisterioSimplificadoDTO> result = ministerioService.buscarMinisteriosGoverno(pageable);
 
         assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals("Ministério de Louvor", result.getFirst().nome());
-        assertEquals("Ministério de Diaconia", result.get(1).nome());
+        assertEquals(2, result.getTotalElements());
+        assertEquals("Ministério de Louvor", result.getContent().get(0).nome());
+        assertEquals("Ministério de Diaconia", result.getContent().get(1).nome());
         verify(ministeriosRepository).findAll(pageable);
     }
 
@@ -136,11 +136,11 @@ class MinisterioServiceTest {
         when(ministeriosRepository.buscarComFiltros(pageable, stringBusca, status)).thenReturn(ministeriosPage);
         when(ministerioMapper.paraMinisterioSimplificadoDTO(ministerio)).thenReturn(dto);
 
-        List<MinisterioSimplificadoDTO> result = ministerioService.buscarMinisteriosGovernoComFiltro(pageable, buscaGeral, status);
+        Page<MinisterioSimplificadoDTO> result = ministerioService.buscarMinisteriosGovernoComFiltro(pageable, buscaGeral, status);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("Ministério de Louvor", result.getFirst().nome());
+        assertEquals(1, result.getTotalElements());
+        assertEquals("Ministério de Louvor", result.getContent().get(0).nome());
         verify(ministeriosRepository).buscarComFiltros(pageable, stringBusca, status);
     }
 
@@ -251,15 +251,16 @@ class MinisterioServiceTest {
     void buscarMembroMinisterioLiderMinisterioSucesso() {
         MembroMinisterioDTO dto1 = mock(MembroMinisterioDTO.class);
         MembroMinisterioDTO dto2 = mock(MembroMinisterioDTO.class);
-        List<MembroMinisterioDTO> expectedResult = Arrays.asList(dto1, dto2);
+        List<MembroMinisterioDTO> dtos = Arrays.asList(dto1, dto2);
+        Page<MembroMinisterioDTO> expectedResult = new PageImpl<>(dtos, pageable, dtos.size());
 
         when(membroMinisterioService.buscarPorMembroMinisterioSemFiltro(ministerioId, pageable))
-            .thenReturn(expectedResult);
+            .thenReturn((Page<MembroMinisterioDTO>) expectedResult);
 
-        List<MembroMinisterioDTO> result = ministerioService.buscarMembroMinisterioLiderMinisterio(ministerioId, pageable);
+        Page<MembroMinisterioDTO> result = ministerioService.buscarMembroMinisterioLiderMinisterio(ministerioId, pageable);
 
         assertNotNull(result);
-        assertEquals(2, result.size());
+        assertEquals(2, result.getTotalElements());
         verify(membroMinisterioService).buscarPorMembroMinisterioSemFiltro(ministerioId, pageable);
     }
 
@@ -270,17 +271,18 @@ class MinisterioServiceTest {
         EnumStatusMembro status = EnumStatusMembro.ATIVO;
         
         MembroMinisterioDTO dto = mock(MembroMinisterioDTO.class);
-        List<MembroMinisterioDTO> expectedResult = Collections.singletonList(dto);
+        List<MembroMinisterioDTO> dtos = Collections.singletonList(dto);
+        Page<MembroMinisterioDTO> expectedResult = new PageImpl<>(dtos, pageable, dtos.size());
 
         when(membroMinisterioService.buscarPorMembroMinisterioComFiltro(ministerioId, pageable, texto, status))
-            .thenReturn(expectedResult);
+            .thenReturn((Page<MembroMinisterioDTO>) expectedResult);
 
-        List<MembroMinisterioDTO> result = ministerioService.buscarMembroMinisterioLiderMinisterioComFiltro(
+        Page<MembroMinisterioDTO> result = ministerioService.buscarMembroMinisterioLiderMinisterioComFiltro(
             ministerioId, pageable, texto, status
         );
 
         assertNotNull(result);
-        assertEquals(1, result.size());
+        assertEquals(1, result.getTotalElements());
         verify(membroMinisterioService).buscarPorMembroMinisterioComFiltro(ministerioId, pageable, texto, status);
     }
 
