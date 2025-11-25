@@ -3,6 +3,7 @@ package com.diacono.diacono.ministerio.service;
 import com.diacono.diacono.global.dto.response.RestResponseMessage;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
+import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.membro.model.entity.EnumCargoMembro;
 import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
 import com.diacono.diacono.membro.model.entity.Membro;
@@ -35,12 +36,14 @@ public class MinisterioService {
     private final MinisterioMapper mapper;
     private final MembroMinisterioService membroMinisterio;
     private final MembroRepository membro;
+    private final JwtUtils jwtUtils;
 
-    public MinisterioService(MinisteriosRepository ministerios, MinisterioMapper mapper, MembroMinisterioService membroMinisterio, MembroRepository membro) {
+    public MinisterioService(MinisteriosRepository ministerios, MinisterioMapper mapper, MembroMinisterioService membroMinisterio, MembroRepository membro, JwtUtils jwtUtils) {
         this.ministerios = ministerios;
         this.mapper = mapper;
         this.membroMinisterio = membroMinisterio;
         this.membro = membro;
+        this.jwtUtils = jwtUtils;
     }
 
     //METODOS PRINCIPAIS
@@ -49,7 +52,7 @@ public class MinisterioService {
 
     public List<MinisterioSimplificadoDTO> buscarMinisteriosGerais(){
 
-        List<Ministerio> ministeriosResponse = ministerios.findAll();
+        List<Ministerio> ministeriosResponse = ministerios.findByIgreja_IdExterno(jwtUtils.getIgrejaId());
         if(ministeriosResponse.isEmpty()){
             throw new ObjectNotFoundException("Nenhum ministério encontrado");
 
@@ -67,7 +70,7 @@ public class MinisterioService {
 
     public Page<MinisterioSimplificadoDTO> buscarMinisteriosGoverno(Pageable pageable){
 
-        Page<Ministerio> ministeriosPage = ministerios.findAll(pageable);
+        Page<Ministerio> ministeriosPage = ministerios.findByIgreja_IdExterno(jwtUtils.getIgrejaId(),pageable);
         if(ministeriosPage.isEmpty()){
             throw new ObjectNotFoundException("Nenhum ministério encontrado");
         }
@@ -83,7 +86,7 @@ public class MinisterioService {
 
         String stringBusca = "%" + buscaGeral.trim().toUpperCase() + "%";
 
-        Page<Ministerio> ministeriosPage = ministerios.buscarComFiltros(pageable, stringBusca, status);
+        Page<Ministerio> ministeriosPage = ministerios.buscarComFiltros(pageable, stringBusca, status, jwtUtils.getIgrejaId());
         if(ministeriosPage.isEmpty()){
             throw new ObjectNotFoundException("Nenhum ministério encontrado");
         }

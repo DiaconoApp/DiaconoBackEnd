@@ -1,5 +1,6 @@
 package com.diacono.diacono.ministerio.model.entity;
 
+import com.diacono.diacono.Igreja.model.entity.Igreja;
 import com.diacono.diacono.global.util.IdEntityUtils;
 import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
 import jakarta.persistence.*;
@@ -19,7 +20,9 @@ import java.util.Set;
 @Setter
 public class Ministerio extends IdEntityUtils{
 
-
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn (name = "fk_igreja")
+    private Igreja igreja;
     private String nome;
     private LocalDate dataCriacao;
     private String nomeLider;

@@ -19,10 +19,10 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
 
     @Query("""
     SELECT e FROM Evento e 
-    WHERE (e.dataHoraInicio BETWEEN :dataInicio AND :dataFim)
+    WHERE (e.dataHoraInicio BETWEEN :dataInicio AND :dataFim) AND (e.igreja.idExterno = :igrejaFk)
     ORDER BY e.dataHoraInicio ASC
     """)
-    ArrayList<Evento> findByPeriodo(@Param("dataInicio") LocalDateTime dataInicio, @Param("dataFim") LocalDateTime dataFim);
+    ArrayList<Evento> findByPeriodo(@Param("dataInicio") LocalDateTime dataInicio, @Param("dataFim") LocalDateTime dataFim, @Param("igrejaFk") UUID igrejaFk);
 
 
    Evento findByIdExterno(UUID idExterno);
@@ -32,8 +32,8 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
 
     @Query("""
     SELECT e FROM Evento e 
-    WHERE (e.recorrencia = :recorrencia) AND (e.dataHoraInicio >= :dataInicio) 
+    WHERE (e.recorrencia = :recorrencia) AND (e.dataHoraInicio >= :dataInicio) AND  (e.igreja.idExterno = :igrejaFk)
     ORDER BY e.dataHoraInicio ASC
     """)
-    List<Evento> findByPeriodoAndRecorrencia(@Param("recorrencia") Recorrencia recorrencia, @Param("dataInicio") LocalDateTime dataInicio);
+    List<Evento> findByPeriodoAndRecorrencia(@Param("recorrencia") Recorrencia recorrencia, @Param("dataInicio") LocalDateTime dataInicio, @Param("igrejaFk") UUID igrejaFk);
 }

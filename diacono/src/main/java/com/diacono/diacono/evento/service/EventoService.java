@@ -48,6 +48,7 @@ public class EventoService {
     private final IgrejaService igrejaService;
     private final JwtUtils jwtUtils;
 
+
     public EventoService(EventoRepository eventoRepository, EventoMapper eventoMapper, IgrejaService igrejaService, MinisterioService ministerioService, MembroService membroService, EnderecoEventoService enderecoEventoService, EventoUpdateMapper eventoUpdateMapper, RecorrenciaService recorrenciaService, JwtUtils jwtUtils) {
         this.eventoRepository = eventoRepository;
         this.eventoMapper = eventoMapper;
@@ -77,7 +78,7 @@ public class EventoService {
         LocalDateTime inicioMes = anoMes.atDay(1).atStartOfDay(); // 1º dia às 00:00
         LocalDateTime fimMes = anoMes.atEndOfMonth().atTime(23, 59, 59);
 
-        List<Evento> eventosAno = eventoRepository.findByPeriodo(inicioMes, fimMes);
+        List<Evento> eventosAno = eventoRepository.findByPeriodo(inicioMes, fimMes, jwtUtils.getIgrejaId());
         if(eventosAno.isEmpty() || eventosAno == null){
             throw new ObjectNotFoundException("Nenhum evento encontrado para o mês e ano informados");
         }
@@ -156,7 +157,7 @@ public class EventoService {
             throw new ObjectNotFoundException("Não foi possível apagar o evento, verifique se o evento existe");
         }
 
-        List<Evento> eventos = eventoRepository.findByPeriodoAndRecorrencia(evento.getRecorrencia(), evento.getDataHoraInicio());
+        List<Evento> eventos = eventoRepository.findByPeriodoAndRecorrencia(evento.getRecorrencia(), evento.getDataHoraInicio(), jwtUtils.getIgrejaId());
         System.out.println(eventos);
         if (!eventos.contains(evento)) {
             eventos.add(evento);

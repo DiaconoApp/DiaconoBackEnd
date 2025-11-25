@@ -7,6 +7,7 @@ import com.diacono.diacono.global.dto.response.RestResponseMessage;
 import com.diacono.diacono.global.error.exceptions.ObjectExistsException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
+import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.membro.mapper.MembroMapper;
 import com.diacono.diacono.membro.model.dto.request.MembroCreateDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroResponseDTO;
@@ -30,8 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
-// REMOVIDO: Este import era desnecessário e poderia causar conflitos.
-// import static java.util.stream.Nodes.collect;
+
 
 @Service
 public class MembroService {
@@ -42,21 +42,23 @@ public class MembroService {
     private final MinisterioService ministerioService;
     private final MembroMinisterioService membroMinisterioService;
     private final IgrejaService igrejaService;
+    private final JwtUtils jwtUtils;
 
-    public MembroService(MembroRepository membroRepository, MembroMapper membroMapper, BCryptPasswordEncoder passwordEncoder, MinisterioService ministerioService, MembroMinisterioService membroMinisterioService, IgrejaService igrejaService) {
+    public MembroService(MembroRepository membroRepository, MembroMapper membroMapper, BCryptPasswordEncoder passwordEncoder, MinisterioService ministerioService, MembroMinisterioService membroMinisterioService, IgrejaService igrejaService, JwtUtils jwtUtils) {
         this.membroRepository = membroRepository;
         this.membroMapper = membroMapper;
         this.passwordEncoder = passwordEncoder;
         this.ministerioService = ministerioService;
         this.membroMinisterioService = membroMinisterioService;
         this.igrejaService = igrejaService;
+        this.jwtUtils = jwtUtils;
     }
 
 
     @Transactional(readOnly = true)
     public Page<MembroResponseDTO> buscarTodosSemFiltro(Pageable pageable) {
 
-        Page<Membro> membrosPage = membroRepository.findAll(pageable);
+        Page<Membro> membrosPage = membroRepository.findByIgreja_IdExterno(jwtUtils.getIgrejaId(),pageable);
         validarMembrosEncontradosPage(membrosPage);
 
         return membrosPage.map(membroMapper::paraMembroResponseDTO);
@@ -140,7 +142,7 @@ public class MembroService {
             throw new ObjectSaveErrorException("Para cadastrar um líder de ministério, é necessário associar um ministério ao membro.");
         }
 
-        Membro membroExistente = membroRepository.findByEmail(membroDTO.email());
+        Membro membroExistente = membroRepository.findByEmailOrCelular(membroDTO.email(), membroDTO.celular());
 
         if(membroExistente != null){
             throw new ObjectExistsException("Email ja cadastrado");
@@ -200,7 +202,7 @@ public class MembroService {
     private List<Membro> buscaMembros(String busca) {
 
         String buscaFormatada = "%" + busca.toUpperCase() + "%";
-        List<Membro> membros = membroRepository.findAllWithFilter(buscaFormatada);
+        List<Membro> membros = membroRepository.findAllWithFilter(buscaFormatada, jwtUtils.getIgrejaId());
 
         if(membros.isEmpty() || membros == null){
             throw new ObjectNotFoundException("Nenhum membro encontrado");
@@ -259,7 +261,7 @@ public class MembroService {
             throw new ObjectSaveErrorException("Dados do membro não podem ser nulos.");
         }
 
-        Membro membroExistente = membroRepository.findByEmail(membroDTO.email());
+        Membro membroExistente = membroRepository.findByEmailOrCelular(membroDTO.email(), membroDTO.celular());
 
         if(membroExistente != null){
             throw new ObjectExistsException("Erro ao se cadastrar");

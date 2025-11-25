@@ -14,6 +14,10 @@ import java.util.*;
 @Repository
 public interface MinisteriosRepository extends JpaRepository<Ministerio, Long> {
 
+    List<Ministerio> findByIgreja_IdExterno(UUID idExterno);
+
+    Page<Ministerio> findByIgreja_IdExterno(UUID idExterno, Pageable pageable);
+
     Ministerio findByIdExterno(UUID idExterno);
 
     Set<Ministerio> findAllByIdExternoIn(List<UUID> idExterno);
@@ -21,11 +25,11 @@ public interface MinisteriosRepository extends JpaRepository<Ministerio, Long> {
     @Query("""
     SELECT m FROM Ministerio m
     WHERE (:busca IS NULL OR UPPER(nome) LIKE :busca OR UPPER(nomeLider) LIKE :busca) AND
-    (:status IS NULL OR m.status = :status)
+    (:status IS NULL OR m.status = :status) AND (m.igreja.idExterno = :fkIgreja)
     """)
     Page<Ministerio> buscarComFiltros(Pageable pageable,
                                       @Param("busca") String busca,
-                                      @Param("status") EnumStatusMinisterio status);
+                                      @Param("status") EnumStatusMinisterio status, @Param("fkIgreja") UUID fkIgreja);
 
     @Query("""
         SELECT m.id FROM Ministerio m
