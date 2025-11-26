@@ -105,14 +105,14 @@ class EventoServiceTest {
         eventos.add(evento);
         EventoSimplificadoDTO eventoResponseDTO = mock(EventoSimplificadoDTO.class);
 
-        when(eventoRepository.findByPeriodo(any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(eventos);
+        when(eventoRepository.findByPeriodo(any(LocalDateTime.class), any(LocalDateTime.class), eq(igrejaId))).thenReturn(eventos);
         when(eventoMapper.paraEventoSimplificado(eventos)).thenReturn(eventoResponseDTO);
 
         EventoSimplificadoDTO result = eventoService.buscarEventosPorMesEAno(mes, ano);
 
         assertNotNull(result);
         assertEquals(eventoResponseDTO, result);
-        verify(eventoRepository).findByPeriodo(any(LocalDateTime.class), any(LocalDateTime.class));
+        verify(eventoRepository).findByPeriodo(any(LocalDateTime.class), any(LocalDateTime.class), eq(igrejaId));
         verify(eventoMapper).paraEventoSimplificado(eventos);
     }
 
@@ -142,7 +142,7 @@ class EventoServiceTest {
         int mes = 12;
         int ano = 2024;
 
-        when(eventoRepository.findByPeriodo(any(LocalDateTime.class), any(LocalDateTime.class)))
+        when(eventoRepository.findByPeriodo(any(LocalDateTime.class), any(LocalDateTime.class), eq(igrejaId)))
             .thenReturn(new ArrayList<>());
 
         assertThrows(ObjectNotFoundException.class,
@@ -375,7 +375,7 @@ class EventoServiceTest {
         List<Evento> eventos = Arrays.asList(evento);
 
         when(eventoRepository.findByIdExterno(eventoId)).thenReturn(evento);
-        when(eventoRepository.findByPeriodoAndRecorrencia(recorrencia, dataHoraInicio)).thenReturn(eventos);
+        when(eventoRepository.findByPeriodoAndRecorrencia(recorrencia, dataHoraInicio, igrejaId)).thenReturn(eventos);
 
         RestResponseMessage result = eventoService.apagarEventosMultiplos(eventoId);
 

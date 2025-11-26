@@ -3,6 +3,7 @@ package com.diacono.diacono.ministerio.service;
 import com.diacono.diacono.global.dto.response.RestResponseMessage;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
+import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
 import com.diacono.diacono.membro.model.entity.Membro;
 import com.diacono.diacono.membro.repository.MembroRepository;
@@ -41,6 +42,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class MinisterioServiceTest {
+
+    @Mock
+    private JwtUtils jwtUtils;
 
     @Mock
     private MinisteriosRepository ministeriosRepository;
@@ -121,6 +125,7 @@ class MinisterioServiceTest {
         String buscaGeral = "Louvor";
         EnumStatusMinisterio status = EnumStatusMinisterio.ATIVO;
         String stringBusca = "%" + buscaGeral.trim().toUpperCase() + "%";
+        UUID igrejaId = UUID.randomUUID();
 
         Ministerio ministerio = new Ministerio();
         ministerio.setNome("Ministério de Louvor");
@@ -133,7 +138,8 @@ class MinisterioServiceTest {
             EnumStatusMinisterio.ATIVO, LocalDate.now()
         );
 
-        when(ministeriosRepository.buscarComFiltros(pageable, stringBusca, status)).thenReturn(ministeriosPage);
+        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
+        when(ministeriosRepository.buscarComFiltros(pageable, stringBusca, status, igrejaId)).thenReturn(ministeriosPage);
         when(ministerioMapper.paraMinisterioSimplificadoDTO(ministerio)).thenReturn(dto);
 
         Page<MinisterioSimplificadoDTO> result = ministerioService.buscarMinisteriosGovernoComFiltro(pageable, buscaGeral, status);
@@ -141,7 +147,7 @@ class MinisterioServiceTest {
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
         assertEquals("Ministério de Louvor", result.getContent().get(0).nome());
-        verify(ministeriosRepository).buscarComFiltros(pageable, stringBusca, status);
+        verify(ministeriosRepository).buscarComFiltros(pageable, stringBusca, status, igrejaId);
     }
 
     @Test
@@ -150,9 +156,11 @@ class MinisterioServiceTest {
         String buscaGeral = "Inexistente";
         EnumStatusMinisterio status = EnumStatusMinisterio.ATIVO;
         String stringBusca = "%" + buscaGeral.trim().toUpperCase() + "%";
+        UUID igrejaId = UUID.randomUUID();
+
         Page<Ministerio> ministeriosPageVazia = new PageImpl<>(Collections.emptyList(), pageable, 0);
 
-        when(ministeriosRepository.buscarComFiltros(pageable, stringBusca, status)).thenReturn(ministeriosPageVazia);
+        when(ministeriosRepository.buscarComFiltros(pageable, stringBusca, status, igrejaId)).thenReturn(ministeriosPageVazia);
 
         assertThrows(ObjectNotFoundException.class,
             () -> ministerioService.buscarMinisteriosGovernoComFiltro(pageable, buscaGeral, status));

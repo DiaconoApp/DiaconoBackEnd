@@ -7,6 +7,7 @@ import com.diacono.diacono.global.dto.response.RestResponseMessage;
 import com.diacono.diacono.global.error.exceptions.ObjectExistsException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
+import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.membro.mapper.MembroMapper;
 import com.diacono.diacono.membro.model.dto.request.MembroCreateDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroResponseDTO;
@@ -44,6 +45,9 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MembroServiceTest {
+
+    @Mock
+    private JwtUtils jwtUtils;
 
     @Mock
     private MembroRepository membroRepository;
@@ -120,6 +124,7 @@ class MembroServiceTest {
         String termoBusca = "João";
         EnumStatusMembro status = EnumStatusMembro.ATIVO;
         UUID fkMinisterio = UUID.randomUUID();
+        UUID igrejaId = UUID.randomUUID();
 
         Membro membro1 = new Membro();
         membro1.setStatus(EnumStatusMembro.ATIVO);
@@ -160,7 +165,7 @@ class MembroServiceTest {
 
         String buscaFormatada = "%" + termoBusca.toUpperCase() + "%";
 
-        when(membroRepository.findAllWithFilter(buscaFormatada)).thenReturn(membrosEncontrados);
+        when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
         when(membroMapper.paraMembrosResponseDTO(membrosEncontrados)).thenReturn(responseDTOs);
 
         Page<MembroResponseDTO> result = membroService.buscarTodosComFiltro(pageable, termoBusca, status, fkMinisterio);
@@ -169,7 +174,7 @@ class MembroServiceTest {
         assertEquals(2, result.getTotalElements());
         assertEquals(dto1, result.getContent().get(0));
         assertEquals(dto2, result.getContent().get(1));
-        verify(membroRepository).findAllWithFilter(buscaFormatada);
+        verify(membroRepository).findAllWithFilter(buscaFormatada, igrejaId);
         verify(membroMapper).paraMembrosResponseDTO(membrosEncontrados);
     }
 
@@ -264,7 +269,7 @@ class MembroServiceTest {
                 "joao@email.com",
                 "123456789",
                 "123456",
-                List.of(ministerioId),
+                ministerioId,
                 EnumCargoMembro.MEMBRO,
                 null
         );
@@ -285,7 +290,7 @@ class MembroServiceTest {
         when(igrejaService.buscarUUID(fkIgreja)).thenReturn(igreja);
         when(passwordEncoder.encode(membroCreateDTO.senha())).thenReturn("senhaHasheada");
         when(membroRepository.save(membro)).thenReturn(membroSalvo);
-        when(ministerioService.buscarPorUUID(membroCreateDTO.idExternoMinisterios())).thenReturn(Set.of(ministerio));
+        when(ministerioService.buscarPorUUID(membroCreateDTO.idExternoMinisterios())).thenReturn(ministerio);
 
         RestResponseMessage result = membroService.criarMembro(membroCreateDTO);
 
@@ -493,19 +498,20 @@ class MembroServiceTest {
     void buscaMembrosComResultadosSucesso() {
         String termoBusca = "João";
         String buscaFormatada = "%" + termoBusca.toUpperCase() + "%";
+        UUID igrejaId = UUID.randomUUID();
 
         Membro membro1 = new Membro();
         membro1.setNome("João Silva");
         List<Membro> membrosEncontrados = List.of(membro1);
 
-        when(membroRepository.findAllWithFilter(buscaFormatada)).thenReturn(membrosEncontrados);
+        when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
 
         List<Membro> result = (List<Membro>) ReflectionTestUtils.invokeMethod(membroService, "buscaMembros", termoBusca);
 
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(membro1, result.get(0));
-        verify(membroRepository).findAllWithFilter(buscaFormatada);
+        verify(membroRepository).findAllWithFilter(buscaFormatada, igrejaId);
     }
 
     @Test
@@ -513,8 +519,9 @@ class MembroServiceTest {
     void buscaMembrosSemFiltroNaoEncontrado() {
         String termoBusca = "Inexistente";
         String buscaFormatada = "%" + termoBusca.toUpperCase() + "%";
+        UUID igrejaId = UUID.randomUUID();
 
-        when(membroRepository.findAllWithFilter(buscaFormatada)).thenReturn(List.of());
+        when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(List.of());
 
         assertThrows(ObjectNotFoundException.class, () ->
             ReflectionTestUtils.invokeMethod(membroService, "buscaMembros", termoBusca));
@@ -526,6 +533,7 @@ class MembroServiceTest {
         String termoBusca = "João";
         EnumStatusMembro status = null;
         UUID fkMinisterio = UUID.randomUUID();
+        UUID igrejaId = UUID.randomUUID();
 
         Membro membro1 = new Membro();
         membro1.setStatus(EnumStatusMembro.ATIVO);
@@ -552,7 +560,7 @@ class MembroServiceTest {
 
         String buscaFormatada = "%" + termoBusca.toUpperCase() + "%";
 
-        when(membroRepository.findAllWithFilter(buscaFormatada)).thenReturn(membrosEncontrados);
+        when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
         when(membroMapper.paraMembrosResponseDTO(membrosEncontrados)).thenReturn(responseDTOs);
 
         Page<MembroResponseDTO> result = membroService.buscarTodosComFiltro(pageable, termoBusca, status, fkMinisterio);
@@ -560,7 +568,7 @@ class MembroServiceTest {
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
         assertEquals(dto1, result.getContent().get(0));
-        verify(membroRepository).findAllWithFilter(buscaFormatada);
+        verify(membroRepository).findAllWithFilter(buscaFormatada, igrejaId);
         verify(membroMapper).paraMembrosResponseDTO(membrosEncontrados);
     }
 
@@ -570,6 +578,7 @@ class MembroServiceTest {
         String termoBusca = "João";
         EnumStatusMembro status = EnumStatusMembro.INATIVO;
         UUID fkMinisterio = UUID.randomUUID();
+        UUID igrejaId = UUID.randomUUID();
 
         Membro membro1 = new Membro();
         membro1.setStatus(EnumStatusMembro.ATIVO);
@@ -578,7 +587,7 @@ class MembroServiceTest {
         List<Membro> membrosEncontrados = List.of(membro1);
         String buscaFormatada = "%" + termoBusca.toUpperCase() + "%";
 
-        when(membroRepository.findAllWithFilter(buscaFormatada)).thenReturn(membrosEncontrados);
+        when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
 
         assertThrows(ObjectNotFoundException.class, () ->
             membroService.buscarTodosComFiltro(pageable, termoBusca, status, fkMinisterio));
