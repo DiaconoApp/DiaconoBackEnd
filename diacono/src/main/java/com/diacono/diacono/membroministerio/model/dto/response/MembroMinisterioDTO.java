@@ -6,6 +6,6 @@ import com.diacono.diacono.membroministerio.model.entity.EnumCargoMembroMinister
 import java.time.LocalDate;
 
 public record MembroMinisterioDTO(
-        String nome, String email, String telefone, EnumStatusMembro status, LocalDate dataNascimento, EnumCargoMembroMinisterio cargo
+        String nome, String email, String telefone, EnumStatusMembro status, LocalDate dataNascimento, EnumCargoMembroMinisterio cargo, String nomeMinisterio
 ) {
 }
