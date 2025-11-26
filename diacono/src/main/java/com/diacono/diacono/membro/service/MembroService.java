@@ -142,7 +142,7 @@ public class MembroService {
             throw new ObjectSaveErrorException("Para cadastrar um líder de ministério, é necessário associar um ministério ao membro.");
         }
 
-        Membro membroExistente = membroRepository.findByEmailOrCelular(membroDTO.email(), membroDTO.celular());
+        Membro membroExistente = membroRepository.findByEmailOrCpf(membroDTO.email(), membroDTO.cpf());
 
         if(membroExistente != null){
             throw new ObjectExistsException("Email ja cadastrado");
@@ -261,7 +261,7 @@ public class MembroService {
             throw new ObjectSaveErrorException("Dados do membro não podem ser nulos.");
         }
 
-        Membro membroExistente = membroRepository.findByEmailOrCelular(membroDTO.email(), membroDTO.celular());
+        Membro membroExistente = membroRepository.findByEmailOrCpf(membroDTO.email(), membroDTO.cpf());
 
         if(membroExistente != null){
             throw new ObjectExistsException("Erro ao se cadastrar");

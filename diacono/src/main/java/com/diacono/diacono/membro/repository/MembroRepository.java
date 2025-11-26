@@ -38,7 +38,7 @@ public interface MembroRepository extends JpaRepository<Membro, Long> {
             @Param("buscaGeral") String buscaGeral, @Param("fkIgreja") UUID fkIgreja
     );
 
-    Membro findByEmailOrCelular(String email, String celular);
+    Membro findByEmailOrCpf(String email, String cpf);
     Membro findByEmail(String email);
 
     @Query("""
