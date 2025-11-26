@@ -105,6 +105,7 @@ class EventoServiceTest {
         eventos.add(evento);
         EventoSimplificadoDTO eventoResponseDTO = mock(EventoSimplificadoDTO.class);
 
+        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
         when(eventoRepository.findByPeriodo(any(LocalDateTime.class), any(LocalDateTime.class), eq(igrejaId))).thenReturn(eventos);
         when(eventoMapper.paraEventoSimplificado(eventos)).thenReturn(eventoResponseDTO);
 
@@ -142,11 +143,16 @@ class EventoServiceTest {
         int mes = 12;
         int ano = 2024;
 
-        when(eventoRepository.findByPeriodo(any(LocalDateTime.class), any(LocalDateTime.class), eq(igrejaId)))
-            .thenReturn(new ArrayList<>());
+        when(jwtUtils.getIgrejaId()).thenReturn(null);
+
+        when(eventoRepository.findByPeriodo(
+                any(LocalDateTime.class),
+                any(LocalDateTime.class),
+                isNull()
+        )).thenReturn(new ArrayList<>());
 
         assertThrows(ObjectNotFoundException.class,
-            () -> eventoService.buscarEventosPorMesEAno(mes, ano));
+                () -> eventoService.buscarEventosPorMesEAno(mes, ano));
     }
 
     @Test
@@ -374,6 +380,7 @@ class EventoServiceTest {
 
         List<Evento> eventos = Arrays.asList(evento);
 
+        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
         when(eventoRepository.findByIdExterno(eventoId)).thenReturn(evento);
         when(eventoRepository.findByPeriodoAndRecorrencia(recorrencia, dataHoraInicio, igrejaId)).thenReturn(eventos);
 
