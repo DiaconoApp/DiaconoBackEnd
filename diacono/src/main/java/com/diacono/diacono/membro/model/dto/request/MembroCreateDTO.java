@@ -47,7 +47,7 @@ public record MembroCreateDTO(
 ) {
 
     public MembroCreateDTO {
-        nome = nome.toUpperCase(Locale.ROOT);
-        email = email.toUpperCase(Locale.ROOT);
+        nome = nome.toLowerCase(Locale.ROOT);
+        email = email.toLowerCase(Locale.ROOT);
     }
 }

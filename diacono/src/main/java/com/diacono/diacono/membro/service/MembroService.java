@@ -192,7 +192,7 @@ public class MembroService {
 
     private List<Membro> buscaMembros(String busca) {
 
-        String buscaFormatada = "%" + busca.toUpperCase() + "%";
+        String buscaFormatada = "%" + busca.toLowerCase() + "%";
         List<Membro> membros = membroRepository.findAllWithFilter(buscaFormatada, jwtUtils.getIgrejaId());
 
         if(membros.isEmpty() || membros == null){
