@@ -33,10 +33,10 @@ public class MembroMinisterioService {
 
     }
 
-    public void salvarTodos(List<MembroMinisterio> membrosMinisterios){
-        List<MembroMinisterio> membroMinisterios = membroMinisterioRepository.saveAll(membrosMinisterios);
+    public void salvarTodos(MembroMinisterio membrosMinisterios){
+        MembroMinisterio membroMinisterios = membroMinisterioRepository.save(membrosMinisterios);
 
-        if(membroMinisterios.isEmpty()){
+        if(membroMinisterios == null || membroMinisterios.getIdInterno() == null){
             throw new ObjectSaveErrorException("Nenhum membro_ministerio foi salvo.");
         }
 

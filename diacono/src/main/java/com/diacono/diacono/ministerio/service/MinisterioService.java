@@ -255,6 +255,16 @@ public class MinisterioService {
         return ministerios;
     }
 
+    public Ministerio buscarPorUUID(UUID idExterno){
+        Ministerio ministerios = this.ministerios.findByIdExterno(idExterno);
+
+        if (ministerios == null) {
+            throw new ObjectNotFoundException("Ministérios não encontrados");
+        }
+
+        return ministerios;
+    }
+
 
 
 

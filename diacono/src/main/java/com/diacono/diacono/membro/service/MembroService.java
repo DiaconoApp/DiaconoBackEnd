@@ -125,7 +125,7 @@ public class MembroService {
             throw new ObjectSaveErrorException("Dados do membro não podem ser nulos.");
         }
 
-        if (membroDTO.idExternoMinisterios() == null || membroDTO.idExternoMinisterios().isEmpty()) {
+        if (membroDTO.idExternoMinisterios() == null) {
             Membro response = criarMembroSemMinisterio(membroDTO);
             return new RestResponseMessage(HttpStatus.CREATED, "Usuário cadastrado com sucesso");
         }
@@ -138,7 +138,7 @@ public class MembroService {
 
     private Membro criarMembroSemMinisterio(MembroCreateDTO membroDTO) {
 
-        if (membroDTO.cargo().equals(EnumCargoMembro.LIDER_MINISTERIO) && (membroDTO.idExternoMinisterios() == null || membroDTO.idExternoMinisterios().isEmpty())) {
+        if (membroDTO.cargo().equals(EnumCargoMembro.LIDER_MINISTERIO) && (membroDTO.idExternoMinisterios() == null)) {
             throw new ObjectSaveErrorException("Para cadastrar um líder de ministério, é necessário associar um ministério ao membro.");
         }
 
@@ -163,30 +163,21 @@ public class MembroService {
 
 
     private RestResponseMessage criarMembroComMinisterio(MembroCreateDTO membroDTO) {
-        Set<Ministerio> ministerios = ministerioService.buscarPorUUID(membroDTO.idExternoMinisterios());
+        Ministerio ministerios = ministerioService.buscarPorUUID(membroDTO.idExternoMinisterios());
 
         Membro membro = criarMembroSemMinisterio(membroDTO);
         membroMinisterioService.apagarMembroMinisterioPorMembro(membro);
 
-        List<MembroMinisterio> novasAssociacoes = ministerios.stream()
-                .map(ministerio -> {
 
-                    MembroMinisterio associaco = new MembroMinisterio();
 
-                    associaco.setMembro(membro);
-                    associaco.setMinisterio(ministerio);
-                    associaco.setNomeMinisterio(ministerio.getNome());
+        MembroMinisterio membroMinisterio = MembroMinisterio.builder()
+                .membro(membro)
+                .ministerio(ministerios)
+                .cargoMembro(EnumCargoMembroMinisterio.MEMBRO_MINISTERIO)
+                .nomeMinisterio(ministerios.getNome())
+                .build();
 
-                    if (membro.getCargoMembro().equals(EnumCargoMembro.LIDER_MINISTERIO)) {
-                        associaco.setCargoMembro(EnumCargoMembroMinisterio.LIDER_MINISTERIO);
-                    }
-
-                    return associaco;
-
-                })
-                .collect(Collectors.toList());
-
-        membroMinisterioService.salvarTodos(novasAssociacoes);
+        membroMinisterioService.salvarTodos(membroMinisterio);
 
         return new RestResponseMessage(HttpStatus.CREATED, "Usuário cadastrado com sucesso");
 

@@ -37,7 +37,7 @@ public record MembroCreateDTO(
         String senha,
 
 
-        List<UUID> idExternoMinisterios,
+        UUID idExternoMinisterios,
 
         @NotNull(message = "O cargo do membro deve ser informado.")
         EnumCargoMembro cargo,
