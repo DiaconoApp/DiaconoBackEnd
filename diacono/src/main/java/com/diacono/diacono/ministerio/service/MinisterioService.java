@@ -119,6 +119,7 @@ public class MinisterioService {
         Ministerio novoMinisterio = Ministerio.builder()
                         .nome(ministerioDTO.nome())
                         .dataCriacao(data)
+                        .igreja(liderMinisterio.getIgreja())
                         .nomeLider(liderMinisterio.getNome())
                         .status(status)
                         .build();
