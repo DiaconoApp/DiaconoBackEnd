@@ -156,9 +156,11 @@ public class MinisterioService {
 
         if(ministerioDTO.idLider() != null) {
             Membro liderNovo = membro.findByIdExterno(ministerioDTO.idLider());
+
             if (liderNovo == null) {
                 throw new ObjectNotFoundException("Novo líder não encontrado");
             }
+
             MembroMinisterio atual = ministerioExistente.getMembros().stream()
                     .filter(m -> m.getCargoMembro() == EnumCargoMembroMinisterio.LIDER_MINISTERIO)
                     .findFirst()
@@ -166,14 +168,29 @@ public class MinisterioService {
 
             Membro liderAntigo = atual.getMembro();
 
-            atual.setMembro(liderNovo);
-            ministerioExistente.setNomeLider(liderNovo.getNome());
+            MembroMinisterio liderNovoExisteNoMinisterio = ministerioExistente.getMembros().stream()
+                    .filter(m -> m.getMembro().getIdExterno().equals(liderNovo.getIdExterno()))
+                    .findFirst()
+                    .orElse(null);
 
-            if (liderNovo.getCargoMembro() != EnumCargoMembro.LIDER_MINISTERIO) {
-                liderNovo.setCargoMembro(EnumCargoMembro.LIDER_MINISTERIO);
+
+            if(liderNovoExisteNoMinisterio == null){
+
+                MembroMinisterio novoMembroMinisterio = MembroMinisterio.builder()
+                        .membro(liderNovo)
+                        .ministerio(ministerioExistente)
+                        .cargoMembro(EnumCargoMembroMinisterio.LIDER_MINISTERIO)
+                        .nomeMinisterio(ministerioExistente.getNome())
+                        .build();
+
+                ministerioExistente.getMembros().add(novoMembroMinisterio);
+
+            }else{
+                liderNovoExisteNoMinisterio.setCargoMembro(EnumCargoMembroMinisterio.LIDER_MINISTERIO);
+                atual.setCargoMembro(EnumCargoMembroMinisterio.MEMBRO_MINISTERIO);
             }
 
-
+            ministerioExistente.setNomeLider(liderNovo.getNome());
 
             boolean aindaELiderDeAlgumMinisterio = liderAntigo.getMinisterios().stream()
                     .anyMatch(mm ->
