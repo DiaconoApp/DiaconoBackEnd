@@ -12,6 +12,7 @@ import com.diacono.diacono.membro.mapper.MembroMapper;
 import com.diacono.diacono.membro.model.dto.request.MembroCreateDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroResponseDTO;
 import com.diacono.diacono.membro.model.entity.EnumCargoMembro;
+import com.diacono.diacono.membro.model.entity.EnumGeneroMembro;
 import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
 import com.diacono.diacono.membro.model.entity.Membro;
 import com.diacono.diacono.membro.repository.MembroRepository;
@@ -196,6 +197,7 @@ class MembroServiceTest {
                 "123456",
                 null,
                 EnumCargoMembro.MEMBRO,
+                EnumGeneroMembro.FEMININO,
                 null
         );
 
@@ -235,6 +237,7 @@ class MembroServiceTest {
                 "123456",
                 null,
                 EnumCargoMembro.MEMBRO,
+                EnumGeneroMembro.FEMININO,
                 null
         );
 
@@ -275,6 +278,7 @@ class MembroServiceTest {
                 "123456",
                 ministerioId,
                 EnumCargoMembro.MEMBRO,
+                EnumGeneroMembro.FEMININO,
                 null
         );
 
@@ -326,6 +330,7 @@ class MembroServiceTest {
                 "123456",
                 null,
                 EnumCargoMembro.MEMBRO,
+                EnumGeneroMembro.FEMININO,
                 null
         );
 
@@ -350,6 +355,7 @@ class MembroServiceTest {
                 "123456",
                 null,
                 EnumCargoMembro.LIDER_MINISTERIO,
+                EnumGeneroMembro.FEMININO,
                 null
         );
 
@@ -394,6 +400,7 @@ class MembroServiceTest {
                 "joao@email.com",
                 "123456789",
                 "123456",
+                EnumGeneroMembro.FEMININO,
                 null
         );
 
@@ -438,6 +445,7 @@ class MembroServiceTest {
                 "joao@email.com",
                 "123456789",
                 "123456",
+                EnumGeneroMembro.FEMININO,
                 null
         );
 

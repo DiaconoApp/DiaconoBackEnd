@@ -28,6 +28,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -148,10 +149,13 @@ public class MembroService {
             throw new ObjectExistsException("Email ja cadastrado");
         }
 
+        LocalDate dataHoje = LocalDate.now();
+
         Membro membro = membroMapper.paraMembro(membroDTO);
         Igreja igreja = igrejaService.buscarUUID(membroDTO.fkIgreja());
         membro.setStatus(EnumStatusMembro.ATIVO);
         membro.setIgreja(igreja);
+        membro.setDataRegistro(dataHoje);
         membro.setCargoMembro(membroDTO.cargo());
         membro.setSenha(hashSenha(membroDTO.senha()));
         Membro membroSalvo = membroRepository.save(membro);
@@ -258,11 +262,14 @@ public class MembroService {
             throw new ObjectExistsException("Erro ao se cadastrar");
         }
 
+        LocalDate dataHoje = LocalDate.now();
+
         Membro membro = membroMapper.paraMembro(membroDTO);
         Igreja igreja = igrejaService.buscarUUID(membroDTO.fkIgreja());
         membro.setStatus(EnumStatusMembro.ATIVO);
         membro.setIgreja(igreja);
         membro.setCargoMembro(EnumCargoMembro.MEMBRO);
+        membro.setDataRegistro(dataHoje);
         membro.setSenha(hashSenha(membroDTO.senha()));
         Membro membroSalvo = membroRepository.save(membro);
         validaCriacao(membroSalvo);

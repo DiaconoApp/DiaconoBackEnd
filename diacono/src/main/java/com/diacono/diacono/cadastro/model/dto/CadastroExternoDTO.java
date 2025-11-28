@@ -2,6 +2,7 @@ package com.diacono.diacono.cadastro.model.dto;
 
 import com.diacono.diacono.membro.model.dto.request.EnderecoMembroDTO;
 import com.diacono.diacono.membro.model.entity.EnumCargoMembro;
+import com.diacono.diacono.membro.model.entity.EnumGeneroMembro;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.br.CPF;
@@ -36,6 +37,10 @@ public record CadastroExternoDTO(
 
         @NotBlank(message = "O campo senha não pode estar vazio")
         String senha,
+
+
+        @NotNull(message = "O gênero do membro deve ser informado.")
+        EnumGeneroMembro generoMembro,
 
         @Valid
         EnderecoMembroDTO membroEnderecoDTO

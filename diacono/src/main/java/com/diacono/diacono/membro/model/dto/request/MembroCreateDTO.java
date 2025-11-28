@@ -1,6 +1,7 @@
 package com.diacono.diacono.membro.model.dto.request;
 
 import com.diacono.diacono.membro.model.entity.EnumCargoMembro;
+import com.diacono.diacono.membro.model.entity.EnumGeneroMembro;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.br.CPF;
@@ -41,6 +42,10 @@ public record MembroCreateDTO(
 
         @NotNull(message = "O cargo do membro deve ser informado.")
         EnumCargoMembro cargo,
+
+
+        @NotNull(message = "O gênero do membro deve ser informado.")
+        EnumGeneroMembro generoMembro,
 
         @Valid
         EnderecoMembroDTO membroEnderecoDTO
