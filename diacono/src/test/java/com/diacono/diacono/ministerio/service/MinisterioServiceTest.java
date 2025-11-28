@@ -65,6 +65,7 @@ class MinisterioServiceTest {
     private UUID ministerioId;
     private UUID liderId;
     private UUID membroId;
+    private UUID igrejaId;
 
     @BeforeEach
     void setUp() {
@@ -72,6 +73,7 @@ class MinisterioServiceTest {
         ministerioId = UUID.randomUUID();
         liderId = UUID.randomUUID();
         membroId = UUID.randomUUID();
+        igrejaId = UUID.randomUUID();
     }
 
     @Test
@@ -95,7 +97,8 @@ class MinisterioServiceTest {
             EnumStatusMinisterio.ATIVO, LocalDate.now()
         );
 
-        when(ministeriosRepository.findAll(pageable)).thenReturn(ministeriosPage);
+        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
+        when(ministeriosRepository.findByIgreja_IdExterno(igrejaId, pageable)).thenReturn(ministeriosPage);
         when(ministerioMapper.paraMinisterioSimplificadoDTO(ministerio1)).thenReturn(dto1);
         when(ministerioMapper.paraMinisterioSimplificadoDTO(ministerio2)).thenReturn(dto2);
 
@@ -105,7 +108,7 @@ class MinisterioServiceTest {
         assertEquals(2, result.getTotalElements());
         assertEquals("Ministério de Louvor", result.getContent().get(0).nome());
         assertEquals("Ministério de Diaconia", result.getContent().get(1).nome());
-        verify(ministeriosRepository).findAll(pageable);
+        verify(ministeriosRepository).findByIgreja_IdExterno(igrejaId, pageable);
     }
 
     @Test
@@ -113,7 +116,8 @@ class MinisterioServiceTest {
     void buscarMinisteriosGovernoNenhumEncontradoDeveRetornarErro() {
         Page<Ministerio> ministeriosPageVazia = new PageImpl<>(Collections.emptyList(), pageable, 0);
 
-        when(ministeriosRepository.findAll(pageable)).thenReturn(ministeriosPageVazia);
+        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
+        when(ministeriosRepository.findByIgreja_IdExterno(igrejaId, pageable)).thenReturn(ministeriosPageVazia);
 
         assertThrows(ObjectNotFoundException.class,
             () -> ministerioService.buscarMinisteriosGoverno(pageable));
@@ -160,6 +164,7 @@ class MinisterioServiceTest {
 
         Page<Ministerio> ministeriosPageVazia = new PageImpl<>(Collections.emptyList(), pageable, 0);
 
+        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
         when(ministeriosRepository.buscarComFiltros(pageable, stringBusca, status, igrejaId)).thenReturn(ministeriosPageVazia);
 
         assertThrows(ObjectNotFoundException.class,
@@ -215,6 +220,7 @@ class MinisterioServiceTest {
 
         Membro liderAtual = new Membro();
         liderAtual.setNome("Líder Atual");
+        ReflectionTestUtils.setField(liderAtual, "idExterno", UUID.randomUUID());
 
         MembroMinisterio membroMinisterioLider = new MembroMinisterio();
         membroMinisterioLider.setMembro(liderAtual);
@@ -226,6 +232,7 @@ class MinisterioServiceTest {
 
         Membro novoLider = new Membro();
         novoLider.setNome("Novo Líder");
+        ReflectionTestUtils.setField(novoLider, "idExterno", novoLiderId);
 
         when(ministeriosRepository.findByIdExterno(ministerioId)).thenReturn(ministerioExistente);
         when(membroRepository.findByIdExterno(novoLiderId)).thenReturn(novoLider);

@@ -4,6 +4,7 @@ import com.diacono.diacono.global.dto.response.RestResponseMessage;
 import com.diacono.diacono.membro.model.dto.request.MembroCreateDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroResponseDTO;
 import com.diacono.diacono.membro.model.entity.EnumCargoMembro;
+import com.diacono.diacono.membro.model.entity.EnumGeneroMembro;
 import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
 import com.diacono.diacono.membro.service.MembroService;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,6 +60,7 @@ class MembroControllerTest {
                 "123456",
                 null,
                 EnumCargoMembro.MEMBRO,
+                EnumGeneroMembro.FEMININO,
                 null
         );
 

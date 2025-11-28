@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -84,11 +85,14 @@ public class MembroMinisterioService {
                 .idInterno(idMembro)
                 .build();
 
+        LocalDate dataHoje = LocalDate.now();
+
         MembroMinisterio membroMinisterio = MembroMinisterio.builder()
                 .ministerio(ministerio)
                 .membro(membro)
                 .cargoMembro(EnumCargoMembroMinisterio.MEMBRO_MINISTERIO)
                 .nomeMinisterio(ministerio.getNome())
+                .dataRegistro(dataHoje)
                 .build();
 
         MembroMinisterio membroMinisterioSalvo = membroMinisterioRepository.save(membroMinisterio);

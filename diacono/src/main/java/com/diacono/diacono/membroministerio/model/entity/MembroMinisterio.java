@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "membro_ministerio", uniqueConstraints = @UniqueConstraint(columnNames = {"fk_membro", "fk_ministerio"}))
 @SuperBuilder(toBuilder = true)
@@ -32,4 +34,6 @@ public class MembroMinisterio extends IdEntityUtils{
 
     @Column(name="nome_ministerio")
     private String nomeMinisterio;
+
+    private LocalDate dataRegistro;
 }

@@ -12,6 +12,7 @@ import com.diacono.diacono.membro.mapper.MembroMapper;
 import com.diacono.diacono.membro.model.dto.request.MembroCreateDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroResponseDTO;
 import com.diacono.diacono.membro.model.entity.EnumCargoMembro;
+import com.diacono.diacono.membro.model.entity.EnumGeneroMembro;
 import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
 import com.diacono.diacono.membro.model.entity.Membro;
 import com.diacono.diacono.membro.repository.MembroRepository;
@@ -71,10 +72,12 @@ class MembroServiceTest {
     private MembroService membroService;
 
     private Pageable pageable;
+    private UUID igrejaId;
 
     @BeforeEach
     void setUp() {
         pageable = PageRequest.of(0, 10);
+        igrejaId = UUID.randomUUID();
     }
 
     @Test
@@ -104,8 +107,9 @@ class MembroServiceTest {
 
         List<Membro> membros = List.of(membro1, membro2);
         Page<Membro> membroPage = new PageImpl<>(membros, pageable, membros.size());
-        when(membroRepository.findAll(pageable)).thenReturn(membroPage);
 
+        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
+        when(membroRepository.findByIgreja_IdExterno(igrejaId, pageable)).thenReturn(membroPage);
         when(membroMapper.paraMembroResponseDTO(membro1)).thenReturn(dto1);
         when(membroMapper.paraMembroResponseDTO(membro2)).thenReturn(dto2);
 
@@ -115,7 +119,7 @@ class MembroServiceTest {
         assertEquals(2, result.getTotalElements());
         assertEquals(dto1, result.getContent().get(0));
         assertEquals(dto2, result.getContent().get(1));
-        verify(membroRepository).findAll(pageable);
+        verify(membroRepository).findByIgreja_IdExterno(igrejaId, pageable);
     }
 
     @Test
@@ -165,6 +169,7 @@ class MembroServiceTest {
 
         String buscaFormatada = "%" + termoBusca.toUpperCase() + "%";
 
+        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
         when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
         when(membroMapper.paraMembrosResponseDTO(membrosEncontrados)).thenReturn(responseDTOs);
 
@@ -192,6 +197,7 @@ class MembroServiceTest {
                 "123456",
                 null,
                 EnumCargoMembro.MEMBRO,
+                EnumGeneroMembro.FEMININO,
                 null
         );
 
@@ -200,7 +206,7 @@ class MembroServiceTest {
         Membro membroSalvo = new Membro();
         ReflectionTestUtils.setField(membroSalvo, "idExterno", UUID.randomUUID());
 
-        when(membroRepository.findByEmail(membroCreateDTO.email())).thenReturn(null);
+        when(membroRepository.findByEmailOrCpf(membroCreateDTO.email(), membroCreateDTO.cpf())).thenReturn(null);
         when(membroMapper.paraMembro(membroCreateDTO)).thenReturn(membro);
         when(igrejaService.buscarUUID(fkIgreja)).thenReturn(igreja);
         when(passwordEncoder.encode(membroCreateDTO.senha())).thenReturn("senhaHasheada");
@@ -210,7 +216,7 @@ class MembroServiceTest {
 
         assertNotNull(result);
         assertEquals("Usuário cadastrado com sucesso", result.getMessage());
-        verify(membroRepository).findByEmail(membroCreateDTO.email());
+        verify(membroRepository).findByEmailOrCpf(membroCreateDTO.email(), membroCreateDTO.cpf());
         verify(membroMapper).paraMembro(membroCreateDTO);
         verify(igrejaService).buscarUUID(fkIgreja);
         verify(passwordEncoder).encode(membroCreateDTO.senha());
@@ -231,6 +237,7 @@ class MembroServiceTest {
                 "123456",
                 null,
                 EnumCargoMembro.MEMBRO,
+                EnumGeneroMembro.FEMININO,
                 null
         );
 
@@ -239,7 +246,7 @@ class MembroServiceTest {
         Membro membroSalvo = new Membro();
         ReflectionTestUtils.setField(membroSalvo, "idExterno", UUID.randomUUID());
 
-        when(membroRepository.findByEmail(membroCreateDTO.email())).thenReturn(null);
+        when(membroRepository.findByEmailOrCpf(membroCreateDTO.email(), membroCreateDTO.cpf())).thenReturn(null);
         when(membroMapper.paraMembro(membroCreateDTO)).thenReturn(membro);
         when(igrejaService.buscarUUID(fkIgreja)).thenReturn(igreja);
         when(passwordEncoder.encode(membroCreateDTO.senha())).thenReturn("senhaHasheada");
@@ -249,7 +256,7 @@ class MembroServiceTest {
 
         assertNotNull(result);
         assertEquals("Usuário cadastrado com sucesso", result.getMessage());
-        verify(membroRepository).findByEmail(membroCreateDTO.email());
+        verify(membroRepository).findByEmailOrCpf(membroCreateDTO.email(), membroCreateDTO.cpf());
         verify(membroMapper).paraMembro(membroCreateDTO);
         verify(igrejaService).buscarUUID(fkIgreja);
         verify(passwordEncoder).encode(membroCreateDTO.senha());
@@ -271,6 +278,7 @@ class MembroServiceTest {
                 "123456",
                 ministerioId,
                 EnumCargoMembro.MEMBRO,
+                EnumGeneroMembro.FEMININO,
                 null
         );
 
@@ -285,7 +293,7 @@ class MembroServiceTest {
         ReflectionTestUtils.setField(ministerio, "idExterno", ministerioId);
         ministerio.setNome("Ministério de Louvor");
 
-        when(membroRepository.findByEmail(membroCreateDTO.email())).thenReturn(null);
+        when(membroRepository.findByEmailOrCpf(membroCreateDTO.email(), membroCreateDTO.cpf())).thenReturn(null);
         when(membroMapper.paraMembro(membroCreateDTO)).thenReturn(membro);
         when(igrejaService.buscarUUID(fkIgreja)).thenReturn(igreja);
         when(passwordEncoder.encode(membroCreateDTO.senha())).thenReturn("senhaHasheada");
@@ -322,12 +330,13 @@ class MembroServiceTest {
                 "123456",
                 null,
                 EnumCargoMembro.MEMBRO,
+                EnumGeneroMembro.FEMININO,
                 null
         );
 
         Membro membroExistente = new Membro();
 
-        when(membroRepository.findByEmail(membroCreateDTO.email())).thenReturn(membroExistente);
+        when(membroRepository.findByEmailOrCpf(membroCreateDTO.email(), membroCreateDTO.cpf())).thenReturn(membroExistente);
 
         assertThrows(ObjectExistsException.class, () -> membroService.criarMembro(membroCreateDTO));
     }
@@ -346,6 +355,7 @@ class MembroServiceTest {
                 "123456",
                 null,
                 EnumCargoMembro.LIDER_MINISTERIO,
+                EnumGeneroMembro.FEMININO,
                 null
         );
 
@@ -390,6 +400,7 @@ class MembroServiceTest {
                 "joao@email.com",
                 "123456789",
                 "123456",
+                EnumGeneroMembro.FEMININO,
                 null
         );
 
@@ -398,7 +409,7 @@ class MembroServiceTest {
         Membro membroSalvo = new Membro();
         ReflectionTestUtils.setField(membroSalvo, "idExterno", UUID.randomUUID());
 
-        when(membroRepository.findByEmail(cadastroDTO.email())).thenReturn(null);
+        when(membroRepository.findByEmailOrCpf(cadastroDTO.email(), cadastroDTO.cpf())).thenReturn(null);
         when(membroMapper.paraMembro(cadastroDTO)).thenReturn(membro);
         when(igrejaService.buscarUUID(fkIgreja)).thenReturn(igreja);
         when(passwordEncoder.encode(cadastroDTO.senha())).thenReturn("senhaHasheada");
@@ -408,7 +419,7 @@ class MembroServiceTest {
 
         assertNotNull(result);
         assertEquals(membroSalvo, result);
-        verify(membroRepository).findByEmail(cadastroDTO.email());
+        verify(membroRepository).findByEmailOrCpf(cadastroDTO.email(), cadastroDTO.cpf());
         verify(membroMapper).paraMembro(cadastroDTO);
         verify(igrejaService).buscarUUID(fkIgreja);
         verify(passwordEncoder).encode(cadastroDTO.senha());
@@ -434,12 +445,13 @@ class MembroServiceTest {
                 "joao@email.com",
                 "123456789",
                 "123456",
+                EnumGeneroMembro.FEMININO,
                 null
         );
 
         Membro membroExistente = new Membro();
 
-        when(membroRepository.findByEmail(cadastroDTO.email())).thenReturn(membroExistente);
+        when(membroRepository.findByEmailOrCpf(cadastroDTO.email(), cadastroDTO.cpf())).thenReturn(membroExistente);
 
         assertThrows(ObjectExistsException.class, () -> membroService.criarMembroExterno(cadastroDTO));
     }
@@ -504,6 +516,7 @@ class MembroServiceTest {
         membro1.setNome("João Silva");
         List<Membro> membrosEncontrados = List.of(membro1);
 
+        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
         when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
 
         List<Membro> result = (List<Membro>) ReflectionTestUtils.invokeMethod(membroService, "buscaMembros", termoBusca);
@@ -521,6 +534,7 @@ class MembroServiceTest {
         String buscaFormatada = "%" + termoBusca.toUpperCase() + "%";
         UUID igrejaId = UUID.randomUUID();
 
+        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
         when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(List.of());
 
         assertThrows(ObjectNotFoundException.class, () ->
@@ -560,6 +574,7 @@ class MembroServiceTest {
 
         String buscaFormatada = "%" + termoBusca.toUpperCase() + "%";
 
+        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
         when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
         when(membroMapper.paraMembrosResponseDTO(membrosEncontrados)).thenReturn(responseDTOs);
 
@@ -587,6 +602,7 @@ class MembroServiceTest {
         List<Membro> membrosEncontrados = List.of(membro1);
         String buscaFormatada = "%" + termoBusca.toUpperCase() + "%";
 
+        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
         when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
 
         assertThrows(ObjectNotFoundException.class, () ->
