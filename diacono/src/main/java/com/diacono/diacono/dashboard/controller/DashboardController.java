@@ -3,13 +3,13 @@ package com.diacono.diacono.dashboard.controller;
 
 
 import com.diacono.diacono.dashboard.Service.DashboardService;
+import com.diacono.diacono.dashboard.model.response.membro.DashboardFaixaEtariaMembroDTO;
+import com.diacono.diacono.dashboard.model.response.membro.DashboardGeneroMembroDTO;
 import com.diacono.diacono.dashboard.model.response.membro.KpisMembrosDTO;
-import com.diacono.diacono.evento.model.dto.response.EventoSimplificadoDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroDashEvolucaoDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,11 +40,21 @@ public class DashboardController {
 
     }
 
-//    @GetMapping("/membros/faixa-etaria")
-//    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
-//    public ResponseEntity<> buscarDashFaixaEtaria(@RequestParam int anoInicio, @RequestParam int anoFim) {
-//
-//        return ResponseEntity.status(HttpStatus.OK).body(dashboardService.);
-//
-//    }
+    @GetMapping("/membros/faixa-etaria")
+    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    public ResponseEntity<DashboardFaixaEtariaMembroDTO> buscarDashFaixaEtaria(@RequestParam int anoInicio, @RequestParam int anoFim) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(dashboardService.buscarDashFaixaEtaria(anoInicio, anoFim));
+
+    }
+
+    @GetMapping("/membros/genero")
+    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    public ResponseEntity<DashboardGeneroMembroDTO> buscarDashGenero(@RequestParam int anoInicio, @RequestParam int anoFim) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(dashboardService.buscarDashGenero(anoInicio, anoFim));
+
+    }
+
+
 }

@@ -1,7 +1,11 @@
 package com.diacono.diacono.dashboard.Service;
 
+import com.diacono.diacono.dashboard.model.response.membro.DashboardFaixaEtariaMembroDTO;
+import com.diacono.diacono.dashboard.model.response.membro.DashboardGeneroMembroDTO;
 import com.diacono.diacono.dashboard.model.response.membro.KpisMembrosDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroDashEvolucaoDTO;
+import com.diacono.diacono.membro.model.dto.response.MembroDashFaixaEtariaDTO;
+import com.diacono.diacono.membro.model.dto.response.MembroDashGeneroDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroKpiResponseDTO;
 import com.diacono.diacono.membro.service.MembroService;
 import org.springframework.stereotype.Service;
@@ -60,6 +64,40 @@ public class DashboardService {
         }
         
         return completo;
+
+    }
+
+    public DashboardFaixaEtariaMembroDTO buscarDashFaixaEtaria(int anoInicio, int anoFim) {
+
+        MembroDashFaixaEtariaDTO faixaEtaria = membroService.buscarDashFaixaEtaria(anoInicio, anoFim);
+
+        long total = faixaEtaria.criancas() + faixaEtaria.adolescentes() + faixaEtaria.jovens()
+                + faixaEtaria.adultos() + faixaEtaria.idosos();
+
+        DashboardFaixaEtariaMembroDTO faixaEtariaDTO = new DashboardFaixaEtariaMembroDTO(
+                faixaEtaria.criancas()/total * 100,
+                faixaEtaria.adolescentes()/total * 100,
+                faixaEtaria.jovens()/total * 100,
+                faixaEtaria.adultos()/total * 100,
+                faixaEtaria.idosos()/total * 100
+        );
+
+        return faixaEtariaDTO;
+
+    }
+
+    public DashboardGeneroMembroDTO buscarDashGenero(int anoInicio, int anoFim) {
+
+        MembroDashGeneroDTO genero = membroService.buscarDashGenero(anoInicio, anoFim);
+
+        long total = genero.masculino() + genero.feminino();
+
+        DashboardGeneroMembroDTO response = new DashboardGeneroMembroDTO(
+                genero.masculino()/total * 100,
+                genero.feminino()/total * 100
+        );
+
+        return response;
 
     }
 

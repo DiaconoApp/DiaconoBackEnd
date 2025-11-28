@@ -1,6 +1,8 @@
 package com.diacono.diacono.membro.repository;
 
 import com.diacono.diacono.membro.model.dto.response.MembroDashEvolucaoDTO;
+import com.diacono.diacono.membro.model.dto.response.MembroDashFaixaEtariaDTO;
+import com.diacono.diacono.membro.model.dto.response.MembroDashGeneroDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroKpiResponseDTO;
 import com.diacono.diacono.membro.model.entity.Membro;
 import org.springframework.data.domain.Page;
@@ -79,6 +81,37 @@ public interface MembroRepository extends JpaRepository<Membro, Long> {
             @Param("idExternoIgreja") UUID idExternoIgreja,
             @Param("anoInicio") int anoInicio,
             @Param("anoFim") int anoFim
+    );
+
+    @Query("""
+    SELECT new com.diacono.diacono.membro.model.dto.response.MembroDashFaixaEtariaDTO(
+        SUM(CASE WHEN (:anoFim - YEAR(m.dataNascimento)) BETWEEN 0 AND 11 THEN 1 ELSE 0 END),
+        SUM(CASE WHEN (:anoFim - YEAR(m.dataNascimento)) BETWEEN 12 AND 17 THEN 1 ELSE 0 END),
+        SUM(CASE WHEN (:anoFim - YEAR(m.dataNascimento)) BETWEEN 18 AND 29 THEN 1 ELSE 0 END),
+        SUM(CASE WHEN (:anoFim - YEAR(m.dataNascimento)) BETWEEN 30 AND 59 THEN 1 ELSE 0 END),
+        SUM(CASE WHEN (:anoFim - YEAR(m.dataNascimento)) >= 60 THEN 1 ELSE 0 END)
+    )
+    FROM Membro m
+        WHERE m.igreja.idExterno = :idExternoIgreja AND FUNCTION('YEAR', m.dataRegistro) BETWEEN :anoInicio AND :anoFim
+    """)
+    MembroDashFaixaEtariaDTO buscarMembrosPorFaixaEtaria(
+            @Param("idExternoIgreja") UUID idExternoIgreja,
+            @Param("anoFim") int anoFim,
+            @Param("anoInicio") int anoInicio
+    );
+
+    @Query("""
+    SELECT new com.diacono.diacono.membro.model.dto.response.MembroDashGeneroDTO(
+        SUM(CASE WHEN m.generoMembro = 'MASCULINO' THEN 1 ELSE 0 END),
+        SUM(CASE WHEN m.generoMembro = 'FEMININO' THEN 1 ELSE 0 END)
+    )
+    FROM Membro m
+        WHERE m.igreja.idExterno = :idExternoIgreja AND FUNCTION('YEAR', m.dataRegistro) BETWEEN :anoInicio AND :anoFim
+    """)
+    MembroDashGeneroDTO buscarMembrosPorGenero(
+            @Param("idExternoIgreja") UUID idExternoIgreja,
+            @Param("anoFim") int anoFim,
+            @Param("anoInicio") int anoInicio
     );
 
 }
