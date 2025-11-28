@@ -1,5 +1,7 @@
 package com.diacono.diacono.membro.repository;
 
+import com.diacono.diacono.membro.model.dto.response.MembroDashEvolucaoDTO;
+import com.diacono.diacono.membro.model.dto.response.MembroKpiResponseDTO;
 import com.diacono.diacono.membro.model.entity.Membro;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,7 +11,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -49,4 +50,35 @@ public interface MembroRepository extends JpaRepository<Membro, Long> {
 
 
     Membro findAllByIgreja_IdExterno(UUID idExterno);
+
+    //dashboards
+
+    @Query("""
+    SELECT new com.diacono.diacono.membro.model.dto.response.MembrosKpiResponseDTO(
+        SUM(CASE WHEN m.status = com.diacono.diacono.membro.model.entity.EnumStatusMembro.ATIVO THEN 1 ELSE 0 END),
+        SUM(CASE WHEN FUNCTION('YEAR', m.dataCadastro) = :anoInicio THEN 1 ELSE 0 END),
+        SUM(CASE WHEN FUNCTION('YEAR', m.dataCadastro) = :anoFim THEN 1 ELSE 0 END)
+    )
+    FROM Membro m
+    WHERE m.igreja.idExterno = :idExternoIgreja
+    """)
+    MembroKpiResponseDTO buscarKpisMembros(UUID idExternoIgreja, int anoInicio, int anoFim);
+
+    @Query("""
+    SELECT new com.diacono.diacono.membro.model.dto.response.MembroDashEvolucaoDTO(
+        FUNCTION('YEAR', m.dataCadastro),
+        COUNT(m)
+    )
+    FROM Membro m
+        WHERE m.igreja.idExterno = :idExternoIgreja
+        AND FUNCTION('YEAR', m.dataCadastro) BETWEEN :anoInicio AND :anoFim
+    GROUP BY FUNCTION('YEAR', m.dataCadastro)
+    ORDER BY FUNCTION('YEAR', m.dataCadastro)
+    """)
+    List<MembroDashEvolucaoDTO> buscarMembrosPorAno(
+            UUID idExternoIgreja,
+            int anoInicio,
+            int anoFim
+    );
+
 }

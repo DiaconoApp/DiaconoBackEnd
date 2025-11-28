@@ -10,7 +10,9 @@ import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
 import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.membro.mapper.MembroMapper;
 import com.diacono.diacono.membro.model.dto.request.MembroCreateDTO;
+import com.diacono.diacono.membro.model.dto.response.MembroDashEvolucaoDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroResponseDTO;
+import com.diacono.diacono.membro.model.dto.response.MembroKpiResponseDTO;
 import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
 import com.diacono.diacono.membro.model.entity.Membro;
 import com.diacono.diacono.membro.repository.MembroRepository;
@@ -286,5 +288,22 @@ public class MembroService {
         return membroD;
     }
 
+
+    //METODO QUE SE RELACIONA COM DASHBARDS
+
+    public MembroKpiResponseDTO buscarKpis(int anoInicio, int anoFim){
+
+        UUID idExternoIgreja = jwtUtils.getIgrejaId();
+
+        return membroRepository.buscarKpisMembros(idExternoIgreja, anoInicio, anoFim);
+
+    }
+
+    public List<MembroDashEvolucaoDTO> buscarDashEvolucao(int anoInicio, int anoFim) {
+
+        UUID idExternoIgreja = jwtUtils.getIgrejaId();
+
+        return membroRepository.buscarMembrosPorAno(idExternoIgreja, anoInicio, anoFim);
+    }
 
 }
