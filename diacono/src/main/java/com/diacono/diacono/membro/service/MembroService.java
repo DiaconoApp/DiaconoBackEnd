@@ -72,6 +72,8 @@ public class MembroService {
             EnumStatusMembro status,
             UUID fkMinisterio) {
 
+        //REFATORAR
+
         List<Membro> membrosBrutos = buscaMembros(termoBusca);
 
         List<Membro> membrosFiltrados = membrosBrutos.stream()
@@ -88,6 +90,11 @@ public class MembroService {
                         boolean pertenceAoMinisterio = membro.getMinisterios().stream()
                                 .anyMatch(mm -> mm.getMinisterio().getIdExterno().equals(fkMinisterio));
                         if (!pertenceAoMinisterio) {
+                            passaNoFiltro = false;
+                        }
+                    }else if(passaNoFiltro && (fkMinisterio == null)){
+                        boolean naoTemMinisterio = membro.getMinisterios() == null || membro.getMinisterios().isEmpty();
+                        if (!naoTemMinisterio) {
                             passaNoFiltro = false;
                         }
                     }
