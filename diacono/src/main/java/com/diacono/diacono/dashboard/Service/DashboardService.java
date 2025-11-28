@@ -4,12 +4,14 @@ import com.diacono.diacono.dashboard.model.response.membro.KpisMembrosDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroDashEvolucaoDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroKpiResponseDTO;
 import com.diacono.diacono.membro.service.MembroService;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Service
 public class DashboardService {
 
     private final MembroService membroService;
@@ -46,8 +48,8 @@ public class DashboardService {
 
         Map<Integer, Long> mapa = bruto.stream()
                 .collect(Collectors.toMap(
-                        MembroDashEvolucaoDTO::ano,
-                        MembroDashEvolucaoDTO::quantidade
+                        MembroDashEvolucaoDTO::getAno,
+                        MembroDashEvolucaoDTO::getQuantidade
                 ));
 
         List<MembroDashEvolucaoDTO> completo = new ArrayList<>();

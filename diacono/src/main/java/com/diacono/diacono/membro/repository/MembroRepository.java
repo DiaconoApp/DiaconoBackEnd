@@ -54,10 +54,10 @@ public interface MembroRepository extends JpaRepository<Membro, Long> {
     //dashboards
 
     @Query("""
-    SELECT new com.diacono.diacono.membro.model.dto.response.MembrosKpiResponseDTO(
+    SELECT new com.diacono.diacono.membro.model.dto.response.MembroKpiResponseDTO(
         SUM(CASE WHEN m.status = com.diacono.diacono.membro.model.entity.EnumStatusMembro.ATIVO THEN 1 ELSE 0 END),
-        SUM(CASE WHEN FUNCTION('YEAR', m.dataCadastro) = :anoInicio THEN 1 ELSE 0 END),
-        SUM(CASE WHEN FUNCTION('YEAR', m.dataCadastro) = :anoFim THEN 1 ELSE 0 END)
+        SUM(CASE WHEN FUNCTION('YEAR', m.dataRegistro) = :anoInicio THEN 1 ELSE 0 END),
+        SUM(CASE WHEN FUNCTION('YEAR', m.dataRegistro) = :anoFim THEN 1 ELSE 0 END)
     )
     FROM Membro m
     WHERE m.igreja.idExterno = :idExternoIgreja
@@ -66,19 +66,19 @@ public interface MembroRepository extends JpaRepository<Membro, Long> {
 
     @Query("""
     SELECT new com.diacono.diacono.membro.model.dto.response.MembroDashEvolucaoDTO(
-        FUNCTION('YEAR', m.dataCadastro),
+        CAST(FUNCTION('YEAR', m.dataRegistro) AS integer),
         COUNT(m)
     )
     FROM Membro m
         WHERE m.igreja.idExterno = :idExternoIgreja
-        AND FUNCTION('YEAR', m.dataCadastro) BETWEEN :anoInicio AND :anoFim
-    GROUP BY FUNCTION('YEAR', m.dataCadastro)
-    ORDER BY FUNCTION('YEAR', m.dataCadastro)
+        AND FUNCTION('YEAR', m.dataRegistro) BETWEEN :anoInicio AND :anoFim
+    GROUP BY FUNCTION('YEAR', m.dataRegistro)
+    ORDER BY FUNCTION('YEAR', m.dataRegistro)
     """)
     List<MembroDashEvolucaoDTO> buscarMembrosPorAno(
-            UUID idExternoIgreja,
-            int anoInicio,
-            int anoFim
+            @Param("idExternoIgreja") UUID idExternoIgreja,
+            @Param("anoInicio") int anoInicio,
+            @Param("anoFim") int anoFim
     );
 
 }
