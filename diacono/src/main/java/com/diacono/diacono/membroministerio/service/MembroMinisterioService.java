@@ -112,4 +112,16 @@ public class MembroMinisterioService {
 
     }
 
+    // Metodo usado na escala service
+    public List<MembroMinisterio> buscarMembroMinisterioPorId(List<UUID> idsExternoMembroMinisterio) {
+        List<MembroMinisterio> membrosMinisterio = membroMinisterioRepository
+                .findAllByIdExternoIn(idsExternoMembroMinisterio);
+
+        if(membrosMinisterio.isEmpty()){
+            throw new ObjectNotFoundException("Nenhum membro_ministerio encontrado para os IDs fornecidos.");
+        }
+
+        return membrosMinisterio;
+    }
+
 }
