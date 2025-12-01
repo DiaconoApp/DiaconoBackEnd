@@ -8,6 +8,7 @@ import com.diacono.diacono.membroministerio.repository.MembroMinisterioRepositor
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class MembroMinisterioService {
@@ -31,6 +32,18 @@ public class MembroMinisterioService {
         }
 
 
+    }
+
+    // Metodo usado na escala service
+    public List<MembroMinisterio> buscarMembroMinisterioPorId(List<UUID> idsExternoMembroMinisterio) {
+        List<MembroMinisterio> membrosMinisterio = membroMinisterioRepository
+                .findAllByIdExternoIn(idsExternoMembroMinisterio);
+
+        if(membrosMinisterio.isEmpty()){
+            throw new ObjectNotFoundException("Nenhum membro_ministerio encontrado para os IDs fornecidos.");
+        }
+
+        return membrosMinisterio;
     }
 
 }

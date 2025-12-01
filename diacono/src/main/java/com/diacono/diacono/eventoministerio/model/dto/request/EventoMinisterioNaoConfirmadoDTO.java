@@ -1,11 +1,9 @@
-package com.diacono.diacono.evento.model.dto.response;
+package com.diacono.diacono.eventoministerio.model.dto.request;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.UUID;
 
-public record EventoUnicoSimplificadoDTO(
+public record EventoMinisterioNaoConfirmadoDTO(
         UUID idExterno,
         String nome,
         LocalDateTime dataHoraFim,
