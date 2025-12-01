@@ -8,6 +8,7 @@ import com.diacono.diacono.global.dto.response.RestResponseMessage;
 import com.diacono.diacono.global.error.exceptions.ObjectExistsException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
+import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.membro.mapper.MembroMapper;
 import com.diacono.diacono.membro.model.dto.request.MembroCreateDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroResponseDTO;
@@ -30,11 +31,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-// REMOVIDO: Este import era desnecessário e poderia causar conflitos.
-// import static java.util.stream.Nodes.collect;
+
 
 @Service
 public class MembroService {
@@ -45,21 +46,23 @@ public class MembroService {
     private final MinisterioService ministerioService;
     private final MembroMinisterioService membroMinisterioService;
     private final IgrejaService igrejaService;
+    private final JwtUtils jwtUtils;
 
-    public MembroService(MembroRepository membroRepository, MembroMapper membroMapper, BCryptPasswordEncoder passwordEncoder, MinisterioService ministerioService, MembroMinisterioService membroMinisterioService, IgrejaService igrejaService) {
+    public MembroService(MembroRepository membroRepository, MembroMapper membroMapper, BCryptPasswordEncoder passwordEncoder, MinisterioService ministerioService, MembroMinisterioService membroMinisterioService, IgrejaService igrejaService, JwtUtils jwtUtils) {
         this.membroRepository = membroRepository;
         this.membroMapper = membroMapper;
         this.passwordEncoder = passwordEncoder;
         this.ministerioService = ministerioService;
         this.membroMinisterioService = membroMinisterioService;
         this.igrejaService = igrejaService;
+        this.jwtUtils = jwtUtils;
     }
 
 
     @Transactional(readOnly = true)
     public Page<MembroResponseDTO> buscarTodosSemFiltro(Pageable pageable) {
 
-        Page<Membro> membrosPage = membroRepository.findAll(pageable);
+        Page<Membro> membrosPage = membroRepository.findByIgreja_IdExterno(jwtUtils.getIgrejaId(),pageable);
         validarMembrosEncontradosPage(membrosPage);
 
         return membrosPage.map(membroMapper::paraMembroResponseDTO);
@@ -71,6 +74,8 @@ public class MembroService {
             String termoBusca,
             EnumStatusMembro status,
             UUID fkMinisterio) {
+
+        //REFATORAR
 
         List<Membro> membrosBrutos = buscaMembros(termoBusca);
 
@@ -88,6 +93,11 @@ public class MembroService {
                         boolean pertenceAoMinisterio = membro.getMinisterios().stream()
                                 .anyMatch(mm -> mm.getMinisterio().getIdExterno().equals(fkMinisterio));
                         if (!pertenceAoMinisterio) {
+                            passaNoFiltro = false;
+                        }
+                    }else if(passaNoFiltro && (fkMinisterio == null)){
+                        boolean naoTemMinisterio = membro.getMinisterios() == null || membro.getMinisterios().isEmpty();
+                        if (!naoTemMinisterio) {
                             passaNoFiltro = false;
                         }
                     }
@@ -126,7 +136,7 @@ public class MembroService {
             throw new ObjectSaveErrorException("Dados do membro não podem ser nulos.");
         }
 
-        if (membroDTO.idExternoMinisterios() == null || membroDTO.idExternoMinisterios().isEmpty()) {
+        if (membroDTO.idExternoMinisterios() == null) {
             Membro response = criarMembroSemMinisterio(membroDTO);
             return new RestResponseMessage(HttpStatus.CREATED, "Usuário cadastrado com sucesso");
         }
@@ -139,20 +149,23 @@ public class MembroService {
 
     private Membro criarMembroSemMinisterio(MembroCreateDTO membroDTO) {
 
-        if (membroDTO.cargo().equals(EnumCargoMembro.LIDER_MINISTERIO) && (membroDTO.idExternoMinisterios() == null || membroDTO.idExternoMinisterios().isEmpty())) {
+        if (membroDTO.cargo().equals(EnumCargoMembro.LIDER_MINISTERIO) && (membroDTO.idExternoMinisterios() == null)) {
             throw new ObjectSaveErrorException("Para cadastrar um líder de ministério, é necessário associar um ministério ao membro.");
         }
 
-        Membro membroExistente = membroRepository.findByEmail(membroDTO.email());
+        Membro membroExistente = membroRepository.findByEmailOrCpf(membroDTO.email(), membroDTO.cpf());
 
         if(membroExistente != null){
             throw new ObjectExistsException("Email ja cadastrado");
         }
 
+        LocalDate dataHoje = LocalDate.now();
+
         Membro membro = membroMapper.paraMembro(membroDTO);
         Igreja igreja = igrejaService.buscarUUID(membroDTO.fkIgreja());
         membro.setStatus(EnumStatusMembro.ATIVO);
         membro.setIgreja(igreja);
+        membro.setDataRegistro(dataHoje);
         membro.setCargoMembro(membroDTO.cargo());
         membro.setSenha(hashSenha(membroDTO.senha()));
         Membro membroSalvo = membroRepository.save(membro);
@@ -164,30 +177,21 @@ public class MembroService {
 
 
     private RestResponseMessage criarMembroComMinisterio(MembroCreateDTO membroDTO) {
-        Set<Ministerio> ministerios = ministerioService.buscarPorUUID(membroDTO.idExternoMinisterios());
+        Ministerio ministerios = ministerioService.buscarPorUUID(membroDTO.idExternoMinisterios());
 
         Membro membro = criarMembroSemMinisterio(membroDTO);
         membroMinisterioService.apagarMembroMinisterioPorMembro(membro);
 
-        List<MembroMinisterio> novasAssociacoes = ministerios.stream()
-                .map(ministerio -> {
 
-                    MembroMinisterio associaco = new MembroMinisterio();
 
-                    associaco.setMembro(membro);
-                    associaco.setMinisterio(ministerio);
-                    associaco.setNomeMinisterio(ministerio.getNome());
+        MembroMinisterio membroMinisterio = MembroMinisterio.builder()
+                .membro(membro)
+                .ministerio(ministerios)
+                .cargoMembro(EnumCargoMembroMinisterio.MEMBRO_MINISTERIO)
+                .nomeMinisterio(ministerios.getNome())
+                .build();
 
-                    if (membro.getCargoMembro().equals(EnumCargoMembro.LIDER_MINISTERIO)) {
-                        associaco.setCargoMembro(EnumCargoMembroMinisterio.LIDER_MINISTERIO);
-                    }
-
-                    return associaco;
-
-                })
-                .collect(Collectors.toList());
-
-        membroMinisterioService.salvarTodos(novasAssociacoes);
+        membroMinisterioService.salvarTodos(membroMinisterio);
 
         return new RestResponseMessage(HttpStatus.CREATED, "Usuário cadastrado com sucesso");
 
@@ -202,8 +206,8 @@ public class MembroService {
 
     private List<Membro> buscaMembros(String busca) {
 
-        String buscaFormatada = "%" + busca.toUpperCase() + "%";
-        List<Membro> membros = membroRepository.findAllWithFilter(buscaFormatada);
+        String buscaFormatada = "%" + busca.toLowerCase() + "%";
+        List<Membro> membros = membroRepository.findAllWithFilter(buscaFormatada, jwtUtils.getIgrejaId());
 
         if(membros.isEmpty() || membros == null){
             throw new ObjectNotFoundException("Nenhum membro encontrado");
@@ -242,10 +246,9 @@ public class MembroService {
         return passwordEncoder.encode(senha);
     }
 
-    /*MÉTODO QUE SE RELACIONA COM A ENTIDADE EVENTO*/
+    /*METODO QUE SE RELACIONA COM A ENTIDADE EVENTO E MINISTERIO*/
 
     public Membro buscarPorUUID(UUID idExterno) {
-        /*FAZER VALIDAÇÃO DE PRESENÇA -- LANÇAR EXCEÇÃO*/
         Membro membro = membroRepository.findByIdExterno(idExterno);
 
         if(membro == null){
@@ -263,17 +266,20 @@ public class MembroService {
             throw new ObjectSaveErrorException("Dados do membro não podem ser nulos.");
         }
 
-        Membro membroExistente = membroRepository.findByEmail(membroDTO.email());
+        Membro membroExistente = membroRepository.findByEmailOrCpf(membroDTO.email(), membroDTO.cpf());
 
         if(membroExistente != null){
             throw new ObjectExistsException("Erro ao se cadastrar");
         }
+
+        LocalDate dataHoje = LocalDate.now();
 
         Membro membro = membroMapper.paraMembro(membroDTO);
         Igreja igreja = igrejaService.buscarUUID(membroDTO.fkIgreja());
         membro.setStatus(EnumStatusMembro.ATIVO);
         membro.setIgreja(igreja);
         membro.setCargoMembro(EnumCargoMembro.MEMBRO);
+        membro.setDataRegistro(dataHoje);
         membro.setSenha(hashSenha(membroDTO.senha()));
         Membro membroSalvo = membroRepository.save(membro);
         validaCriacao(membroSalvo);
@@ -309,4 +315,5 @@ public class MembroService {
         }
         return membrosMinisteriosLivres;
     }
+
 }

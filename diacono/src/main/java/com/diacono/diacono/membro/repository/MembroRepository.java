@@ -20,6 +20,8 @@ public interface MembroRepository extends JpaRepository<Membro, Long> {
 
     Membro findByIdExterno(UUID idExterno);
 
+    Page<Membro> findByIgreja_IdExterno(UUID fkIgreja, Pageable pageable);
+
     @Query("SELECT COUNT(m) FROM Membro m WHERE m.status = 'ATIVO'")
     Long countMembroStatusIgualAtivo();
 
@@ -30,14 +32,16 @@ public interface MembroRepository extends JpaRepository<Membro, Long> {
     Long countMembrosDiscipulados();
 
     @Query("SELECT m FROM Membro m " +
-            "WHERE nome LIKE :buscaGeral " +
+            "WHERE (nome LIKE :buscaGeral " +
             "OR email LIKE :buscaGeral " +
-            "OR celular LIKE :buscaGeral"
+            "OR celular LIKE :buscaGeral)" +
+            "AND m.igreja.idExterno = :fkIgreja "
             )
     List<Membro> findAllWithFilter(
-            @Param("buscaGeral") String buscaGeral
+            @Param("buscaGeral") String buscaGeral, @Param("fkIgreja") UUID fkIgreja
     );
 
+    Membro findByEmailOrCpf(String email, String cpf);
     Membro findByEmail(String email);
 
 
@@ -58,4 +62,12 @@ public interface MembroRepository extends JpaRepository<Membro, Long> {
     List<MembroSimplificadoDTO> findMembrosMinisteriosSemEscala(@Param("ministerioId") UUID ministerioId,
                                                                 @Param("horarioInicio") LocalDateTime horarioInicio,
                                                                 @Param("horarioFim") LocalDateTime horarioFim);
+    @Query("""
+        SELECT m.id FROM Membro m
+        WHERE m.idExterno = :idExterno
+    """)
+    Long buscarIdPorUUID(UUID idExterno);
+
+
+    Membro findAllByIgreja_IdExterno(UUID idExterno);
 }

@@ -28,15 +28,31 @@ VALUES
 --   (2, '550e8400-e29b-41d4-a716-446655440051', 2, 2),
 --   (3, '550e8400-e29b-41d4-a716-446655440052', 3, 3);
 
+-- COM BASE NA ENTIDADE MEMBROS, CRIAR TRÊS REGISTRADOS DE MEMBROS PARA UMA IGREJA ESPECÍFICA PASSANDO CARGOS DIFERENTES
+--INSERT INTO membro (
+--    id_externo,
+--    fk_igreja,
+--    nome,
+--    cpf,
+--    data_nascimento,
+--    email,
+--    celular,
+--    senha,
+--    status,
+--    cargo_membro
+--) VALUES
+--    ('550e8400-e29b-41d4-a716-446655440001', 1, 'João da Silva', '11111111111', '1990-05-10', 'joao@example.com', '11999990000', 'senha1', 'ATIVO', 'GOVERNO'),
+--    ('550e8400-e29b-41d4-a716-446655440002', 1, 'Maria Santos', '22222222222', '1988-08-20', 'maria@example.com', '11988880000', 'senha2', 'ATIVO', 'LIDER_MINISTERIO'),
+--    ('550e8400-e29b-41d4-a716-446655440003', 1, 'Pedro Souza', '33333333333', '1995-12-01', 'pedro@example.com', '11977770000', 'senha3', 'ATIVO', 'MEMBRO');
 -- ========================================
 -- MINISTÉRIOS
 -- ========================================
-INSERT INTO ministerio (id_interno, id_externo, nome, data_criacao, nome_lider, status)
-VALUES
-  (1, '550e8400-e29b-41d4-a716-446655440020', 'Ministério de Louvor Adoração', '2022-01-01', 'Maria Oliveira', 'ATIVO'),
-  (2, '550e8400-e29b-41d4-a716-446655440021', 'Kids Church', '2021-05-15', 'Carla Souza', 'ATIVO'),
-  (3, '550e8400-e29b-41d4-a716-446655440022', 'Missão Esperança', '2023-11-20', 'Pedro Santos', 'ATIVO'),
-  (4, '550e8400-e29b-41d4-a716-446655440023', 'Streaming & Mídia', '2024-03-10', 'Ana Pereira', 'ATIVO');
+--INSERT INTO ministerio (id_interno, id_externo, nome, data_criacao, nome_lider, status)
+--VALUES
+--  (1, '550e8400-e29b-41d4-a716-446655440020', 'Ministério de Louvor Adoração', '2022-01-01', 'Maria Oliveira', 'ATIVO'),
+--  (2, '550e8400-e29b-41d4-a716-446655440021', 'Kids Church', '2021-05-15', 'Carla Souza', 'ATIVO'),
+--  (3, '550e8400-e29b-41d4-a716-446655440022', 'Missão Esperança', '2023-11-20', 'Pedro Santos', 'ATIVO'),
+--  (4, '550e8400-e29b-41d4-a716-446655440023', 'Streaming & Mídia', '2024-03-10', 'Ana Pereira', 'ATIVO');
 
 
 INSERT INTO endereco_igreja (

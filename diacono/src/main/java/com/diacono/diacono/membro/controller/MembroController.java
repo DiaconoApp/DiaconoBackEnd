@@ -16,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -47,7 +46,7 @@ public class MembroController {
                                                                         @RequestParam(required = false) EnumStatusMembro status,
                                                                         @RequestParam(required = false) UUID fkMinisterio) {
 
-        if(buscaGeral == null && buscaGeral.isEmpty() && fkMinisterio == null && status == null){
+        if((buscaGeral == null || buscaGeral.isBlank()) && fkMinisterio == null && status == null){
             Page<MembroResponseDTO> response = membrosService.buscarTodosSemFiltro(pageable);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         }
