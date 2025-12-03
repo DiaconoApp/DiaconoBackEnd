@@ -1,10 +1,15 @@
 package com.diacono.diacono.membro.repository;
 
+<<<<<<< HEAD
 import com.diacono.diacono.membro.model.dto.response.MembroDashEvolucaoDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroDashFaixaEtariaDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroDashGeneroDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroKpiResponseDTO;
+=======
+import com.diacono.diacono.membro.model.dto.response.MembroSimplificadoDTO;
+>>>>>>> dc17664dcfb8076eb7297f094b34a048c0bed446
 import com.diacono.diacono.membro.model.entity.Membro;
+import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +17,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,6 +50,24 @@ public interface MembroRepository extends JpaRepository<Membro, Long> {
     Membro findByEmailOrCpf(String email, String cpf);
     Membro findByEmail(String email);
 
+
+    @Query("""
+            SELECT new com.diacono.diacono.membro.model.dto.response.MembroSimplificadoDTO(
+                mm.membro.idExterno,
+                mm.membro.nome
+            )
+            FROM MembroMinisterio mm
+            WHERE mm.ministerio.idExterno = :ministerioId
+            AND mm.membro.idExterno NOT IN (
+                SELECT escala.membroMinisterio.membro.idExterno
+                FROM Escala escala
+                WHERE escala.eventoMinisterio.evento.dataHoraInicio < :horarioFim
+                AND escala.eventoMinisterio.evento.dataHoraFim > :horarioInicio
+            )
+            """)
+    List<MembroSimplificadoDTO> findMembrosMinisteriosSemEscala(@Param("ministerioId") UUID ministerioId,
+                                                                @Param("horarioInicio") LocalDateTime horarioInicio,
+                                                                @Param("horarioFim") LocalDateTime horarioFim);
     @Query("""
         SELECT m.id FROM Membro m
         WHERE m.idExterno = :idExterno

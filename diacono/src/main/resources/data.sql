@@ -18,6 +18,16 @@ VALUES
 --  (4, '550e8400-e29b-41d4-a716-446655440013', 'Ana Pereira', 'ana.pereira@exemplo.com', '1995-02-14', '369.258.147-00', '04000-000', 99, 'temp123', '$2a$10$HASHED_SENHA_4'),
 --  (5, '550e8400-e29b-41d4-a716-446655440014', 'Carla Souza', 'carla.souza@exemplo.com', '1990-09-10', '159.753.486-00', '05000-000', 500, 'temp123', '$2a$10$HASHED_SENHA_5');
 
+
+-- ========================================
+-- ESCALAS
+-- ========================================
+-- INSERT INTO escala (id_interno, id_externo, fk_evento_ministerio, fk_membro_ministerio)
+-- VALUES
+--   (1, '550e8400-e29b-41d4-a716-446655440050', 1, 1),
+--   (2, '550e8400-e29b-41d4-a716-446655440051', 2, 2),
+--   (3, '550e8400-e29b-41d4-a716-446655440052', 3, 3);
+
 -- COM BASE NA ENTIDADE MEMBROS, CRIAR TRÊS REGISTRADOS DE MEMBROS PARA UMA IGREJA ESPECÍFICA PASSANDO CARGOS DIFERENTES
 --INSERT INTO membro (
 --    id_externo,
