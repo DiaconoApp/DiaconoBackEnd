@@ -4,6 +4,7 @@ import com.diacono.diacono.Igreja.model.dto.response.IgrejaSemiCompletoDTO;
 import com.diacono.diacono.Igreja.service.IgrejaService;
 import com.diacono.diacono.cadastro.model.dto.CadastroExternoDTO;
 import com.diacono.diacono.global.dto.response.RestResponseMessage;
+import com.diacono.diacono.membro.model.entity.EnumGeneroMembro;
 import com.diacono.diacono.membro.model.entity.Membro;
 import com.diacono.diacono.membro.service.MembroService;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,6 +53,7 @@ class CadastroServiceTest {
             "joao@email.com",
             "11999999999",
             "123456",
+            EnumGeneroMembro.FEMININO,
             null
         );
 

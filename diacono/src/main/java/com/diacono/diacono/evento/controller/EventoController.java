@@ -4,6 +4,7 @@ package com.diacono.diacono.evento.controller;
 import com.diacono.diacono.evento.model.dto.request.EventoCreateDTO;
 import com.diacono.diacono.evento.model.dto.request.EventoUpdateDTO;
 import com.diacono.diacono.evento.model.dto.response.EnderecoEventoSimplificadoDTO;
+import com.diacono.diacono.evento.model.dto.response.EventoComEventoMinisterioDTO;
 import com.diacono.diacono.evento.model.dto.response.EventoCompletoDTO;
 import com.diacono.diacono.evento.model.dto.response.EventoSimplificadoDTO;
 import com.diacono.diacono.evento.service.EventoService;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -86,4 +88,17 @@ public class EventoController {
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(eventoService.alterarEvento(evento, id));
     }
+
+    // Utilizado para escalas
+    @ApiErrorsComuns
+    @ApiResponse(responseCode = "200", description = "Eventos encontrados com sucesso")
+    @GetMapping("/evento-ministerio")
+    public ResponseEntity<List<EventoComEventoMinisterioDTO>> buscarEventosComEventoMinisterioPorMesAno(
+            @RequestParam int mes,
+            @RequestParam int ano
+    ) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(eventoService.buscarEventosComEventoMinisterioPorMesAno(mes, ano));
+    }
+
 }

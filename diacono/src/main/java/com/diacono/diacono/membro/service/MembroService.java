@@ -3,6 +3,7 @@ package com.diacono.diacono.membro.service;
 import com.diacono.diacono.Igreja.model.entity.Igreja;
 import com.diacono.diacono.Igreja.service.IgrejaService;
 import com.diacono.diacono.cadastro.model.dto.CadastroExternoDTO;
+import com.diacono.diacono.evento.model.dto.response.EventoUnicoSimplificadoDTO;
 import com.diacono.diacono.global.dto.response.RestResponseMessage;
 import com.diacono.diacono.global.error.exceptions.ObjectExistsException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
@@ -11,6 +12,7 @@ import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.membro.mapper.MembroMapper;
 import com.diacono.diacono.membro.model.dto.request.MembroCreateDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroResponseDTO;
+import com.diacono.diacono.membro.model.dto.response.MembroSimplificadoDTO;
 import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
 import com.diacono.diacono.membro.model.entity.Membro;
 import com.diacono.diacono.membro.repository.MembroRepository;
@@ -28,6 +30,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -71,6 +75,8 @@ public class MembroService {
             EnumStatusMembro status,
             UUID fkMinisterio) {
 
+        //REFATORAR
+
         List<Membro> membrosBrutos = buscaMembros(termoBusca);
 
         List<Membro> membrosFiltrados = membrosBrutos.stream()
@@ -87,6 +93,11 @@ public class MembroService {
                         boolean pertenceAoMinisterio = membro.getMinisterios().stream()
                                 .anyMatch(mm -> mm.getMinisterio().getIdExterno().equals(fkMinisterio));
                         if (!pertenceAoMinisterio) {
+                            passaNoFiltro = false;
+                        }
+                    }else if(passaNoFiltro && (fkMinisterio == null)){
+                        boolean naoTemMinisterio = membro.getMinisterios() == null || membro.getMinisterios().isEmpty();
+                        if (!naoTemMinisterio) {
                             passaNoFiltro = false;
                         }
                     }
@@ -148,10 +159,13 @@ public class MembroService {
             throw new ObjectExistsException("Email ja cadastrado");
         }
 
+        LocalDate dataHoje = LocalDate.now();
+
         Membro membro = membroMapper.paraMembro(membroDTO);
         Igreja igreja = igrejaService.buscarUUID(membroDTO.fkIgreja());
         membro.setStatus(EnumStatusMembro.ATIVO);
         membro.setIgreja(igreja);
+        membro.setDataRegistro(dataHoje);
         membro.setCargoMembro(membroDTO.cargo());
         membro.setSenha(hashSenha(membroDTO.senha()));
         Membro membroSalvo = membroRepository.save(membro);
@@ -192,7 +206,7 @@ public class MembroService {
 
     private List<Membro> buscaMembros(String busca) {
 
-        String buscaFormatada = "%" + busca.toUpperCase() + "%";
+        String buscaFormatada = "%" + busca.toLowerCase() + "%";
         List<Membro> membros = membroRepository.findAllWithFilter(buscaFormatada, jwtUtils.getIgrejaId());
 
         if(membros.isEmpty() || membros == null){
@@ -258,11 +272,14 @@ public class MembroService {
             throw new ObjectExistsException("Erro ao se cadastrar");
         }
 
+        LocalDate dataHoje = LocalDate.now();
+
         Membro membro = membroMapper.paraMembro(membroDTO);
         Igreja igreja = igrejaService.buscarUUID(membroDTO.fkIgreja());
         membro.setStatus(EnumStatusMembro.ATIVO);
         membro.setIgreja(igreja);
         membro.setCargoMembro(EnumCargoMembro.MEMBRO);
+        membro.setDataRegistro(dataHoje);
         membro.setSenha(hashSenha(membroDTO.senha()));
         Membro membroSalvo = membroRepository.save(membro);
         validaCriacao(membroSalvo);
@@ -286,5 +303,17 @@ public class MembroService {
         return membroD;
     }
 
+    // Metodo que se relaciona com Escala
+    public List<MembroSimplificadoDTO> buscarMembrosDisponiveisParaEscala(UUID idExternoMinisterio, EventoUnicoSimplificadoDTO eventoUnicoSimplificadoDTO) {
+        LocalDateTime horarioInicio = eventoUnicoSimplificadoDTO.dataHoraInicio();
+        LocalDateTime horarioFim = eventoUnicoSimplificadoDTO.dataHoraFim();
+
+        List<MembroSimplificadoDTO> membrosMinisteriosLivres = membroRepository.findMembrosMinisteriosSemEscala(idExternoMinisterio, horarioInicio, horarioFim);
+
+        if (membrosMinisteriosLivres.isEmpty()) {
+            throw new ObjectNotFoundException("Nenhum membro disponível para escala encontrado.");
+        }
+        return membrosMinisteriosLivres;
+    }
 
 }
