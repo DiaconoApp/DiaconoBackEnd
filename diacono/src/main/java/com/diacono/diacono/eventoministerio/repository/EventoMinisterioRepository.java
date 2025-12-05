@@ -39,4 +39,5 @@ public interface EventoMinisterioRepository extends JpaRepository<EventoMinister
 
     EventoMinisterio findByIdExterno (UUID idExterno);
 
+
 }
