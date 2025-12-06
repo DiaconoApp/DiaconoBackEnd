@@ -33,6 +33,13 @@ public class EventoMinisterioService {
         return eventosMinisterio;
     }
 
+    public List<EventoMinisterioEscalaDTO> buscarEventosMinisteriosPorMesAno (Integer mes, Integer ano) {
+        List<EventoMinisterioEscalaDTO> eventosMinisterio = eventoMinisterioRepository
+                .findByMesAndAno(mes, ano);
+
+        return eventosMinisterio;
+    }
+
     @Transactional
     public EventoMinisterio salvarEventoMinisterio (EventoMinisterio eventoMinisterio) {
         return eventoMinisterioRepository.save(eventoMinisterio);

@@ -37,6 +37,19 @@ public class EventoMinisterioController {
     }
 
     @ApiErrorsComuns
+    @ApiResponse(responseCode = "200", description = "EventoMinisterio buscados com sucesso")
+    @GetMapping("/evento-ministerio/governo")
+    public ResponseEntity<List<EventoMinisterioEscalaDTO>> buscarEventosMinisteriosPorMesAno(
+            @RequestParam int mes,
+            @RequestParam int ano
+    ){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(eventoMinisterioService.buscarEventosMinisteriosPorMesAno(mes, ano));
+    }
+
+
+    @ApiErrorsComuns
     @ApiResponse(responseCode = "200", description = "EventoMinisterio salvado com sucesso")
     @PostMapping("/evento-ministerio")
     public ResponseEntity<EventoMinisterio> salvarEventoMinisterio (

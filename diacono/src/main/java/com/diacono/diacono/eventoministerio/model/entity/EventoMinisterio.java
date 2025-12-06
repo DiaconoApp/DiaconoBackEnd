@@ -25,5 +25,5 @@ public class EventoMinisterio extends IdEntityUtils {
     private Ministerio ministerio;
 
     @NotNull
-    private Boolean IsConfirmado;
+    private Boolean isConfirmado;
 }

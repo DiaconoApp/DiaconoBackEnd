@@ -1,117 +1,18 @@
--- ========================================
--- IGREJAS
--- ========================================
-INSERT INTO igreja (id_interno, id_externo, nome, cnpj)
-VALUES
-  (1, '550e8400-e29b-41d4-a716-446655440000', 'Igreja Central da Fé', '12.345.678/0001-90'),
-  (2, '550e8400-e29b-41d4-a716-446655440001', 'Assembleia da Graça Eterna', '98.765.432/0001-10');
-
-
--- ========================================
--- MEMBROS
--- ========================================
---INSERT INTO membro (id_interno, id_externo, nome, email, data_nascimento, cpf, cep, numero_casa, senha_temporaria, senha)
---VALUES
---  (1, '550e8400-e29b-41d4-a716-446655440010', 'João da Silva', 'joao.silva@exemplo.com', '1985-10-15', '123.456.789-01', '01000-000', 105, 'temp123', '$2a$10$HASHED_SENHA_1'),
---  (2, '550e8400-e29b-41d4-a716-446655440011', 'Maria Oliveira', 'maria.oliver@exemplo.com', '1992-05-20', '987.654.321-02', '02000-000', 25, 'temp123', '$2a$10$HASHED_SENHA_2'),
---  (3, '550e8400-e29b-41d4-a716-446655440012', 'Pedro Santos', 'pedro.santos@exemplo.com', '1989-07-30', '741.852.963-00', '03000-000', 12, 'temp123', '$2a$10$HASHED_SENHA_3'),
---  (4, '550e8400-e29b-41d4-a716-446655440013', 'Ana Pereira', 'ana.pereira@exemplo.com', '1995-02-14', '369.258.147-00', '04000-000', 99, 'temp123', '$2a$10$HASHED_SENHA_4'),
---  (5, '550e8400-e29b-41d4-a716-446655440014', 'Carla Souza', 'carla.souza@exemplo.com', '1990-09-10', '159.753.486-00', '05000-000', 500, 'temp123', '$2a$10$HASHED_SENHA_5');
-
-
--- ========================================
--- ESCALAS
--- ========================================
--- INSERT INTO escala (id_interno, id_externo, fk_evento_ministerio, fk_membro_ministerio)
--- VALUES
---   (1, '550e8400-e29b-41d4-a716-446655440050', 1, 1),
---   (2, '550e8400-e29b-41d4-a716-446655440051', 2, 2),
---   (3, '550e8400-e29b-41d4-a716-446655440052', 3, 3);
-
--- COM BASE NA ENTIDADE MEMBROS, CRIAR TRÊS REGISTRADOS DE MEMBROS PARA UMA IGREJA ESPECÍFICA PASSANDO CARGOS DIFERENTES
---INSERT INTO membro (
---    id_externo,
---    fk_igreja,
---    nome,
---    cpf,
---    data_nascimento,
---    email,
---    celular,
---    senha,
---    status,
---    cargo_membro
---) VALUES
---    ('550e8400-e29b-41d4-a716-446655440001', 1, 'João da Silva', '11111111111', '1990-05-10', 'joao@example.com', '11999990000', 'senha1', 'ATIVO', 'GOVERNO'),
---    ('550e8400-e29b-41d4-a716-446655440002', 1, 'Maria Santos', '22222222222', '1988-08-20', 'maria@example.com', '11988880000', 'senha2', 'ATIVO', 'LIDER_MINISTERIO'),
---    ('550e8400-e29b-41d4-a716-446655440003', 1, 'Pedro Souza', '33333333333', '1995-12-01', 'pedro@example.com', '11977770000', 'senha3', 'ATIVO', 'MEMBRO');
--- ========================================
--- MINISTÉRIOS
--- ========================================
---INSERT INTO ministerio (id_interno, id_externo, nome, data_criacao, nome_lider, status)
---VALUES
---  (1, '550e8400-e29b-41d4-a716-446655440020', 'Ministério de Louvor Adoração', '2022-01-01', 'Maria Oliveira', 'ATIVO'),
---  (2, '550e8400-e29b-41d4-a716-446655440021', 'Kids Church', '2021-05-15', 'Carla Souza', 'ATIVO'),
---  (3, '550e8400-e29b-41d4-a716-446655440022', 'Missão Esperança', '2023-11-20', 'Pedro Santos', 'ATIVO'),
---  (4, '550e8400-e29b-41d4-a716-446655440023', 'Streaming & Mídia', '2024-03-10', 'Ana Pereira', 'ATIVO');
-
-
+-- ENDERECO IGREJA
 INSERT INTO endereco_igreja (
-    id_externo,
-    cep,
-    estado,
-    cidade,
-    bairro,
-    rua,
-    complemento,
-    numero
-) VALUES (
-    UUID(),           -- ou 'generated uuid' se seu banco gerar automaticamente
-    '12345-678',      -- cep
-    'SP',             -- estado
-    'São Paulo',      -- cidade
-    'Centro',         -- bairro
-    'Rua das Flores', -- rua
-    'Apto 101',       -- complemento
-    '250'             -- número
-);
--- ========================================
--- ENDEREÇOS DE EVENTOS
--- ========================================
---INSERT INTO endereco_evento (id_interno, id_externo, cep, rua, cidade, bairro, complemento, numero, apelido)
---VALUES
---  (1, '550e8400-e29b-41d4-a716-446655440030', '13000-000', 'Rua das Graças', 'Campinas', 'Centro', 'Ao lado do teatro', '1234', 'Salão Principal'),
---  (2, '550e8400-e29b-41d4-a716-446655440031', '13100-000', 'Av. da Esperança', 'Campinas', 'Jardim das Flores', 'Próximo à praça', '567', 'Anexo Jovem');
---
----- ========================================
----- EVENTOS (Corrigido: Adicionado fk_igreja e fk_organizador, removido ministerio_id)
----- ========================================
---INSERT INTO evento (id_interno, id_externo, nome, fk_igreja, fk_organizador, fk_endereco, tipo_recorrencia, descricao, publico_alvo, data, hora_inicio, hora_fim, custo, data_inicio_recorrencia, data_termino_recorrencia, intervalo_recorrencia)
---VALUES
---  -- Evento 1: Ensaio de Louvor (Recorrente)
---  (1, '550e8400-e29b-41d4-a716-446655440040', 'Ensaio de Louvor', 1, 1, 1, 'SEMANAL', 'Ensaio semanal do ministério de louvor.', 'Músicos', '2025-10-14', '19:00:00', '21:00:00', 0.00, '2025-10-14', '2025-12-31', 1),
---  -- Evento 2: Culto Kids (Recorrente)
---  (2, '550e8400-e29b-41d4-a716-446655440041', 'Culto Kids', 2, 2, 2, 'SEMANAL', 'Culto especial para crianças.', 'Crianças 5-10 anos', '2025-10-19', '09:00:00', '11:00:00', 0.00, '2025-10-19', '2026-06-30', 1),
---  -- Evento 3: Ação Social (Recorrente)
---  (3, '550e8400-e29b-41d4-a716-446655440042', 'Ação Social - Doação de Roupas', 1, 1, 1, 'MENSAL', 'Arrecadação de roupas e alimentos.', 'Voluntários e comunidade', '2025-10-26', '08:00:00', '14:00:00', 0.00, '2025-10-26', '2026-10-26', 1),
---  -- Evento 4: Treinamento de Mídia (Único)
---  (4, '550e8400-e29b-41d4-a716-446655440043', 'Treinamento de Mídia', 2, 2, 2, 'UNICO', 'Treinamento para a equipe de streaming e multimídia.', 'Equipe de Mídia', '2025-11-02', '10:00:00', '13:00:00', 50.00, NULL, NULL, 0);
---
----- ========================================
----- TABELA DE ASSOCIAÇÃO EVENTO_MINISTERIO (ManyToMany)
----- ========================================
---INSERT INTO evento_ministerio (fk_evento, fk_ministerio)
---VALUES
---  (1, 1), -- Ensaio de Louvor -> Louvor Adoração
---  (2, 2), -- Culto Kids -> Kids Church
---  (3, 3), -- Ação Social -> Missão Esperança
---  (4, 4); -- Treinamento de Mídia -> Streaming & Mídia
---
----- ========================================
----- DIAS DA SEMANA (coleção de enums dos eventos recorrentes)
----- ========================================
---INSERT INTO evento_dias_semana (evento_id, dias_semana)
---VALUES
---  (1, 'TUESDAY'),  -- Ensaio de Louvor: Terça
---  (1, 'THURSDAY'), -- Ensaio de Louvor: Quinta
---  (2, 'SUNDAY'),   -- Culto Kids: Domingo
---  (3, 'SATURDAY'); -- Ação Social: Sábado
+    id_externo, bairro, cep, cidade, complemento, estado, numero, rua
+)
+VALUES
+('d1f5e8b2-3c4a-4f6b-9e2d-5f7b8c9d0e1f', 'Centro', '12345-678', 'São Paulo', 'Apto 101', 'SP', '250', 'Rua das Flores'), -- id_interno 1
+('a2b4c6d8-e0f1-2345-6789-0a1b2c3d4e5f', 'Jardim América', '87654-321', 'São Paulo', '', 'SP', '75', 'Avenida Brasil'), -- id_interno 2
+('b7c3e2c3-8c37-43c9-9d0e-1f5b4c8b2c32', 'Centro', '01000-000', 'São Paulo', '', 'SP', '100', 'Rua Principal'); -- id_interno 3
+
+-- IGREJA
+INSERT INTO igreja (
+    id_externo, fk_endereco, cnpj, nome
+)
+VALUES
+('550e8400-e29b-41d4-a716-446655440000', 1, '12.345.678/0001-90', 'Igreja Central da Fé'), -- id_interno 1
+('550e8400-e29b-41d4-a716-446655440001', 2, '98.765.432/0001-10', 'Assembleia da Graça Eterna'), -- id_interno 2
+('f84aa4ac-0158-4ef0-9b5f-1762c4a86e53', 3, '12.345.678/0001-10', 'Igreja Congregação'); -- id_interno 3
+

@@ -1,5 +1,6 @@
 package com.diacono.diacono.evento.repository;
 
+import com.diacono.diacono.evento.model.dto.response.EventoComEventoMinisterioDTO;
 import com.diacono.diacono.evento.model.entity.Evento;
 import com.diacono.diacono.evento.model.entity.Recorrencia;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -36,4 +37,26 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
     ORDER BY e.dataHoraInicio ASC
     """)
     List<Evento> findByPeriodoAndRecorrencia(@Param("recorrencia") Recorrencia recorrencia, @Param("dataInicio") LocalDateTime dataInicio, @Param("igrejaFk") UUID igrejaFk);
+
+    @Query ("""
+    SELECT new com.diacono.diacono.evento.model.dto.response.EventoComEventoMinisterioDTO(
+        e.idExterno,
+        e.nome,
+        e.dataHoraFim,
+        e.dataHoraInicio,
+        COUNT(em.idExterno),
+        SUM(CASE WHEN em.isConfirmado = true THEN 1 ELSE 0 END)
+    )
+    FROM Evento e
+    LEFT JOIN com.diacono.diacono.eventoministerio.model.entity.EventoMinisterio em ON em.evento.idExterno = e.idExterno
+    WHERE MONTH(e.dataHoraInicio) = :mes AND YEAR(e.dataHoraInicio) = :ano 
+    AND e.igreja.idExterno = :igrejaFk
+    GROUP BY e.idExterno, e.nome, e.dataHoraFim, e.dataHoraInicio
+    ORDER BY e.dataHoraInicio ASC
+    """)
+    List<EventoComEventoMinisterioDTO> findEventosComEventoMinisterioPorMesAno (
+            @Param("mes") int mes,
+            @Param("ano") int ano,
+            @Param("igrejaFk") UUID igrejaFk
+    );
 }

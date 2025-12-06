@@ -29,6 +29,15 @@ public interface EventoMinisterioRepository extends JpaRepository<EventoMinister
             """)
     List<EventoMinisterioEscalaDTO> findByEventoMinisterioAndMesAndAno(UUID ministerioId, Integer mes, Integer ano);
 
+    @Query("""
+            SELECT escala FROM Escala escala
+            WHERE 
+            FUNCTION('MONTH', escala.eventoMinisterio.evento.dataHoraInicio) = :mes
+            AND FUNCTION('YEAR', escala.eventoMinisterio.evento.dataHoraInicio) = :ano
+            """)
+    List<EventoMinisterioEscalaDTO> findByMesAndAno(Integer mes, Integer ano);
+
     EventoMinisterio findByIdExterno (UUID idExterno);
+
 
 }
