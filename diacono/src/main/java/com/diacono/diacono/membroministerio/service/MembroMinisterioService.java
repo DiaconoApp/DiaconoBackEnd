@@ -9,6 +9,7 @@ import com.diacono.diacono.membroministerio.model.dto.response.MembroMinisterioD
 import com.diacono.diacono.membroministerio.model.entity.EnumCargoMembroMinisterio;
 import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
 import com.diacono.diacono.membroministerio.repository.MembroMinisterioRepository;
+import com.diacono.diacono.ministerio.model.dto.response.MinisterioSuperSimplificadoDTO;
 import com.diacono.diacono.ministerio.model.entity.Ministerio;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -110,6 +111,17 @@ public class MembroMinisterioService {
             throw new ObjectNotFoundException("Membro do ministério não encontrado para remoção.");
         }
 
+    }
+
+    public List<MinisterioSuperSimplificadoDTO> buscarMinisterioLider(UUID idMembro, UUID idIgreja){
+
+        List<MinisterioSuperSimplificadoDTO> ministerios = membroMinisterioRepository.buscarMinisterioLider(idMembro, idIgreja);
+
+        if(ministerios.isEmpty()){
+            throw new ObjectNotFoundException("Nenhum ministério encontrado para o líder informado.");
+        }
+
+        return ministerios;
     }
 
     // Metodo usado na escala service

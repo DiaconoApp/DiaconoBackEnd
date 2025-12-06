@@ -3,6 +3,7 @@ package com.diacono.diacono.membroministerio.repository;
 import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
 import com.diacono.diacono.membro.model.entity.Membro;
 import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
+import com.diacono.diacono.ministerio.model.dto.response.MinisterioSuperSimplificadoDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,23 +19,41 @@ public interface MembroMinisterioRepository extends JpaRepository<MembroMinister
     int deleteByMembro(Membro membro);
 
     List<MembroMinisterio> findAllByIdExternoIn(List<UUID> idsExternoMembroMinisterio);
+
     @Query("""
-       SELECT mm FROM MembroMinisterio mm
-       JOIN mm.membro m
-       WHERE mm.ministerio.idExterno = :idMinisterio
-         AND (:status IS NULL OR m.status = :status)
-       AND (:busca IS NULL OR m.nome LIKE :busca
-            OR m.email LIKE :busca)
-       """)
+            SELECT mm FROM MembroMinisterio mm
+            JOIN mm.membro m
+            WHERE mm.ministerio.idExterno = :idMinisterio
+              AND (:status IS NULL OR m.status = :status)
+            AND (:busca IS NULL OR m.nome LIKE :busca
+                 OR m.email LIKE :busca)
+            """)
     Page<MembroMinisterio> buscarPorMembroMinisterioComFiltro(Pageable pageable, UUID idMinisterio, String texto, EnumStatusMembro status);
 
     @Query("""
-       SELECT mm FROM MembroMinisterio mm
-       JOIN mm.membro m
-       WHERE mm.ministerio.idExterno = :idMinisterio
-       """)
+            SELECT mm FROM MembroMinisterio mm
+            JOIN mm.membro m
+            WHERE mm.ministerio.idExterno = :idMinisterio
+            """)
     Page<MembroMinisterio> buscarPorMembroMinisterioSemFiltro(Pageable pageable, UUID idMinisterio);
 
     int deleteByMembroIdExternoAndMinisterioIdExterno(UUID membroIdExterno, UUID ministerioIdExterno);
+
+
+    @Query("""
+            
+            SELECT new com.diacono.diacono.ministerio.model.dto.response.MinisterioSuperSimplificadoDTO(
+                ms.idExterno,
+                ms.nome
+            )
+            FROM MembroMinisterio mm
+            JOIN mm.ministerio ms
+            JOIN mm.membro m
+            WHERE m.idExterno = :idExternoMembro
+            AND ms.igreja.idExterno = :idExternoIgreja
+            AND mm.cargoMembro = 'LIDER_MINISTERIO'
+           
+            """)
+    List<MinisterioSuperSimplificadoDTO> buscarMinisterioLider(UUID idExternoMembro, UUID idExternoIgreja);
 
 }
