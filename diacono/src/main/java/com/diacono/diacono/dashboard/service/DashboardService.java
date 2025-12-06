@@ -1,4 +1,4 @@
-package com.diacono.diacono.dashboard.Service;
+package com.diacono.diacono.dashboard.service;
 
 import com.diacono.diacono.dashboard.model.response.membro.DashboardFaixaEtariaMembroDTO;
 import com.diacono.diacono.dashboard.model.response.membro.DashboardGeneroMembroDTO;
@@ -8,6 +8,8 @@ import com.diacono.diacono.membro.model.dto.response.MembroDashFaixaEtariaDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroDashGeneroDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroKpiResponseDTO;
 import com.diacono.diacono.membro.service.MembroService;
+import com.diacono.diacono.ministerio.model.dto.response.MinisterioKpisResponseDTO;
+import com.diacono.diacono.ministerio.service.MinisterioService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 public class DashboardService {
 
     private final MembroService membroService;
+    private final MinisterioService ministerioService;
 
     public DashboardService(MembroService membroService) {
         this.membroService = membroService;
@@ -101,5 +104,15 @@ public class DashboardService {
 
     }
 
+    // Ministerios
+
+    public void ministerioBuscarKpis(int anoInicio, int anoFim) {
+
+        MinisterioKpisResponseDTO kpis = ministerioService.ministerioBuscarKpis(anoInicio, anoFim); //ministerioService.buscarKpis(anoInicio, anoFim);
+
+        long ativos = 0L;
+        long mediaMembrosPorMinisterio = 0L;
+        String ministerioMaisEngajado = "";
+    }
 
 }

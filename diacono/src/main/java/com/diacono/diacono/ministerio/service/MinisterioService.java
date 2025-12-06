@@ -16,6 +16,7 @@ import com.diacono.diacono.membroministerio.service.MembroMinisterioService;
 import com.diacono.diacono.ministerio.mapper.MinisterioMapper;
 import com.diacono.diacono.ministerio.model.dto.MinisterioCreateDTO;
 import com.diacono.diacono.ministerio.model.dto.MinisterioUpdateDTO;
+import com.diacono.diacono.ministerio.model.dto.response.MinisterioKpisResponseDTO;
 import com.diacono.diacono.ministerio.model.dto.response.MinisterioSimplificadoDTO;
 import com.diacono.diacono.ministerio.model.entity.EnumStatusMinisterio;
 import com.diacono.diacono.ministerio.model.entity.Ministerio;
@@ -282,7 +283,14 @@ public class MinisterioService {
         return ministerios;
     }
 
+    //usado para dashboards
 
+    public MinisterioKpisResponseDTO ministerioBuscarKpis(int anoInicio, int anoFim){
+
+
+
+        return null;
+    }
 
 
 }

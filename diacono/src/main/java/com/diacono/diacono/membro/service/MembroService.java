@@ -11,12 +11,9 @@ import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
 import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.membro.mapper.MembroMapper;
 import com.diacono.diacono.membro.model.dto.request.MembroCreateDTO;
-<<<<<<< HEAD
 import com.diacono.diacono.membro.model.dto.response.*;
-=======
 import com.diacono.diacono.membro.model.dto.response.MembroResponseDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroSimplificadoDTO;
->>>>>>> dc17664dcfb8076eb7297f094b34a048c0bed446
 import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
 import com.diacono.diacono.membro.model.entity.Membro;
 import com.diacono.diacono.membro.repository.MembroRepository;

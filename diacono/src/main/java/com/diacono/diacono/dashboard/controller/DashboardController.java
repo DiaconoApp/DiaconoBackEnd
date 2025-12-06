@@ -2,7 +2,7 @@ package com.diacono.diacono.dashboard.controller;
 
 
 
-import com.diacono.diacono.dashboard.Service.DashboardService;
+import com.diacono.diacono.dashboard.service.DashboardService;
 import com.diacono.diacono.dashboard.model.response.membro.DashboardFaixaEtariaMembroDTO;
 import com.diacono.diacono.dashboard.model.response.membro.DashboardGeneroMembroDTO;
 import com.diacono.diacono.dashboard.model.response.membro.KpisMembrosDTO;
@@ -53,6 +53,16 @@ public class DashboardController {
     public ResponseEntity<DashboardGeneroMembroDTO> buscarDashGenero(@RequestParam int anoInicio, @RequestParam int anoFim) {
 
         return ResponseEntity.status(HttpStatus.OK).body(dashboardService.buscarDashGenero(anoInicio, anoFim));
+
+    }
+
+    //Ministerios
+
+    @GetMapping("/ministerios/kpis")
+    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    public ResponseEntity<> ministerioBuscarKpis(@RequestParam int anoInicio, @RequestParam int anoFim) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(dashboardService.);
 
     }
 

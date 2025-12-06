@@ -1,13 +1,10 @@
 package com.diacono.diacono.membro.repository;
 
-<<<<<<< HEAD
 import com.diacono.diacono.membro.model.dto.response.MembroDashEvolucaoDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroDashFaixaEtariaDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroDashGeneroDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroKpiResponseDTO;
-=======
 import com.diacono.diacono.membro.model.dto.response.MembroSimplificadoDTO;
->>>>>>> dc17664dcfb8076eb7297f094b34a048c0bed446
 import com.diacono.diacono.membro.model.entity.Membro;
 import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
 import org.springframework.data.domain.Page;
