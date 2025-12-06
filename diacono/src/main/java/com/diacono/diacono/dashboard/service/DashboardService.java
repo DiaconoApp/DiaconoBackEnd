@@ -3,8 +3,10 @@ package com.diacono.diacono.dashboard.service;
 import com.diacono.diacono.dashboard.model.response.membro.DashboardFaixaEtariaMembroDTO;
 import com.diacono.diacono.dashboard.model.response.membro.DashboardGeneroMembroDTO;
 import com.diacono.diacono.dashboard.model.response.membro.KpisMembrosDTO;
+import com.diacono.diacono.dashboard.model.response.ministerio.KpisMinisteriosDTO;
 import com.diacono.diacono.evento.model.dto.response.EventoKpiDTO;
 import com.diacono.diacono.evento.service.EventoService;
+import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.membro.model.dto.response.MembroDashEvolucaoDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroDashFaixaEtariaDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroDashGeneroDTO;
@@ -34,15 +36,28 @@ public class DashboardService {
 
     public KpisMembrosDTO buscarKpisMembros(int anoInicio, int anoFim) {
 
+        validarAnoInicioEFim(anoInicio, anoFim);
+
         MembroKpiResponseDTO kpis = membroService.buscarKpis(anoInicio, anoFim);
 
         long membrosAtivos = kpis.membrosAtivos();
         long totalMembrosAnoInicio = kpis.totalAnoInicio();
         long totalMembrosAnoFim = kpis.totalAnoFim();
+        long totalMembros = totalMembrosAnoFim + totalMembrosAnoInicio;
 
-        long membrosNovos = totalMembrosAnoFim - totalMembrosAnoInicio;
+        long membrosNovos = totalMembros - totalMembrosAnoInicio;
 
-        long retencao = membrosAtivos == 0 ? 0 : (membrosAtivos - membrosNovos) * 100 / membrosAtivos;
+        if (anoInicio == anoFim) {
+            membrosNovos = totalMembrosAnoInicio;
+        }
+
+        long inativos = totalMembros - membrosAtivos;
+
+        double resultado = Math.round((membrosAtivos - inativos) * 100.0 / totalMembros);
+
+
+        double retencao = inativos == 0 ? 100 : resultado;
+
 
         KpisMembrosDTO kpisMembrosDTO = new KpisMembrosDTO(
                 membrosAtivos,
@@ -55,6 +70,8 @@ public class DashboardService {
     }
 
     public List<MembroDashEvolucaoDTO> buscarDashEvolucao(int anoInicio, int anoFim) {
+
+        validarAnoInicioEFim(anoInicio, anoFim);
 
         List<MembroDashEvolucaoDTO> bruto = membroService.buscarDashEvolucao(anoInicio, anoFim);
 
@@ -70,55 +87,90 @@ public class DashboardService {
             long qtd = mapa.getOrDefault(ano, 0L);
             completo.add(new MembroDashEvolucaoDTO(ano, qtd));
         }
-        
+
         return completo;
 
     }
 
     public DashboardFaixaEtariaMembroDTO buscarDashFaixaEtaria(int anoInicio, int anoFim) {
 
-        MembroDashFaixaEtariaDTO faixaEtaria = membroService.buscarDashFaixaEtaria(anoInicio, anoFim);
+        validarAnoInicioEFim(anoInicio, anoFim);
+
+        MembroDashFaixaEtariaDTO faixaEtaria = membroService.buscarDashFaixaEtaria(anoFim);
 
         long total = faixaEtaria.criancas() + faixaEtaria.adolescentes() + faixaEtaria.jovens()
                 + faixaEtaria.adultos() + faixaEtaria.idosos();
 
+
+        if (total == 0) {
+            return new DashboardFaixaEtariaMembroDTO(0, 0, 0, 0, 0);
+        }
+
         DashboardFaixaEtariaMembroDTO faixaEtariaDTO = new DashboardFaixaEtariaMembroDTO(
-                faixaEtaria.criancas()/total * 100,
-                faixaEtaria.adolescentes()/total * 100,
-                faixaEtaria.jovens()/total * 100,
-                faixaEtaria.adultos()/total * 100,
-                faixaEtaria.idosos()/total * 100
+                (faixaEtaria.criancas() * 100) / total,
+                (faixaEtaria.adolescentes() * 100) / total,
+                (faixaEtaria.jovens() * 100) / total,
+                (faixaEtaria.adultos() * 100) / total,
+                (faixaEtaria.idosos() * 100) / total
         );
 
         return faixaEtariaDTO;
-
     }
 
     public DashboardGeneroMembroDTO buscarDashGenero(int anoInicio, int anoFim) {
 
-        MembroDashGeneroDTO genero = membroService.buscarDashGenero(anoInicio, anoFim);
+        validarAnoInicioEFim(anoInicio, anoFim);
+
+        MembroDashGeneroDTO genero = membroService.buscarDashGenero(anoFim);
 
         long total = genero.masculino() + genero.feminino();
 
+        System.out.println(total);
+
+        if (total == 0) {
+            return new DashboardGeneroMembroDTO(0, 0);
+        }
+
+        double masculinoPercent = (double) genero.masculino() / total * 100;
+        double femininoPercent = (double) genero.feminino() / total * 100;
+
         DashboardGeneroMembroDTO response = new DashboardGeneroMembroDTO(
-                genero.masculino()/total * 100,
-                genero.feminino()/total * 100
+                masculinoPercent,
+                femininoPercent
         );
 
         return response;
-
     }
 
     // Ministerios
 
-    public String ministerioBuscarKpis(int anoInicio, int anoFim) {
+    public KpisMinisteriosDTO ministerioBuscarKpis(int anoInicio, int anoFim) {
+
+        validarAnoInicioEFim(anoInicio, anoFim);
 
         MinisterioKpisResponseDTO kpiMinisterio = ministerioService.ministerioBuscarKpis(anoInicio, anoFim); //ministerioService.buscarKpis(anoInicio, anoFim);
         List<EventoKpiDTO> kpiEvento = eventoService.buscarKpisEvento(anoInicio, anoFim);
 
+        EventoKpiDTO eventoRetido = kpiEvento.get(0);
 
+        KpisMinisteriosDTO response = new KpisMinisteriosDTO(
+                eventoRetido,
+                kpiMinisterio
+        );
 
-        return "";
+        return response;
+    }
+
+    //validacoes
+
+    private void validarAnoInicioEFim(int anoInicio, int anoFim) {
+        if (anoInicio > anoFim) {
+            throw new FieldInvalidException("Ano de início não pode ser maior que ano de fim.");
+        }
+
+        if (anoInicio <= 0 || anoFim <= 0) {
+            throw new FieldInvalidException("Ano de início e ano de fim devem ser informados.");
+        }
     }
 
 }

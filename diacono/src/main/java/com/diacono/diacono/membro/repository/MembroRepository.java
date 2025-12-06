@@ -39,12 +39,13 @@ public interface MembroRepository extends JpaRepository<Membro, Long> {
             "OR email LIKE :buscaGeral " +
             "OR celular LIKE :buscaGeral)" +
             "AND m.igreja.idExterno = :fkIgreja "
-            )
+    )
     List<Membro> findAllWithFilter(
             @Param("buscaGeral") String buscaGeral, @Param("fkIgreja") UUID fkIgreja
     );
 
     Membro findByEmailOrCpf(String email, String cpf);
+
     Membro findByEmail(String email);
 
 
@@ -65,10 +66,11 @@ public interface MembroRepository extends JpaRepository<Membro, Long> {
     List<MembroSimplificadoDTO> findMembrosMinisteriosSemEscala(@Param("ministerioId") UUID ministerioId,
                                                                 @Param("horarioInicio") LocalDateTime horarioInicio,
                                                                 @Param("horarioFim") LocalDateTime horarioFim);
+
     @Query("""
-        SELECT m.id FROM Membro m
-        WHERE m.idExterno = :idExterno
-    """)
+                SELECT m.id FROM Membro m
+                WHERE m.idExterno = :idExterno
+            """)
     Long buscarIdPorUUID(UUID idExterno);
 
 
@@ -77,27 +79,27 @@ public interface MembroRepository extends JpaRepository<Membro, Long> {
     //dashboards
 
     @Query("""
-    SELECT new com.diacono.diacono.membro.model.dto.response.MembroKpiResponseDTO(
-        SUM(CASE WHEN m.status = com.diacono.diacono.membro.model.entity.EnumStatusMembro.ATIVO THEN 1 ELSE 0 END),
-        SUM(CASE WHEN FUNCTION('YEAR', m.dataRegistro) = :anoInicio THEN 1 ELSE 0 END),
-        SUM(CASE WHEN FUNCTION('YEAR', m.dataRegistro) = :anoFim THEN 1 ELSE 0 END)
-    )
-    FROM Membro m
-    WHERE m.igreja.idExterno = :idExternoIgreja
-    """)
+            SELECT new com.diacono.diacono.membro.model.dto.response.MembroKpiResponseDTO(
+                SUM(CASE WHEN m.status = com.diacono.diacono.membro.model.entity.EnumStatusMembro.ATIVO THEN 1 ELSE 0 END),
+                SUM(CASE WHEN FUNCTION('YEAR', m.dataRegistro) = :anoInicio THEN 1 ELSE 0 END),
+                SUM(CASE WHEN FUNCTION('YEAR', m.dataRegistro) = :anoFim THEN 1 ELSE 0 END)
+            )
+            FROM Membro m
+            WHERE m.igreja.idExterno = :idExternoIgreja
+            """)
     MembroKpiResponseDTO buscarKpisMembros(UUID idExternoIgreja, int anoInicio, int anoFim);
 
     @Query("""
-    SELECT new com.diacono.diacono.membro.model.dto.response.MembroDashEvolucaoDTO(
-        CAST(FUNCTION('YEAR', m.dataRegistro) AS integer),
-        COUNT(m)
-    )
-    FROM Membro m
-        WHERE m.igreja.idExterno = :idExternoIgreja
-        AND FUNCTION('YEAR', m.dataRegistro) BETWEEN :anoInicio AND :anoFim
-    GROUP BY FUNCTION('YEAR', m.dataRegistro)
-    ORDER BY FUNCTION('YEAR', m.dataRegistro)
-    """)
+            SELECT new com.diacono.diacono.membro.model.dto.response.MembroDashEvolucaoDTO(
+                FUNCTION('YEAR', m.dataRegistro),
+                COUNT(m.idInterno)
+            )
+            FROM Membro m
+            WHERE m.igreja.idExterno = :idExternoIgreja
+              AND FUNCTION('YEAR', m.dataRegistro) BETWEEN :anoInicio AND :anoFim
+            GROUP BY FUNCTION('YEAR', m.dataRegistro)
+            ORDER BY FUNCTION('YEAR', m.dataRegistro)
+            """)
     List<MembroDashEvolucaoDTO> buscarMembrosPorAno(
             @Param("idExternoIgreja") UUID idExternoIgreja,
             @Param("anoInicio") int anoInicio,
@@ -105,34 +107,32 @@ public interface MembroRepository extends JpaRepository<Membro, Long> {
     );
 
     @Query("""
-    SELECT new com.diacono.diacono.membro.model.dto.response.MembroDashFaixaEtariaDTO(
-        SUM(CASE WHEN (:anoFim - YEAR(m.dataNascimento)) BETWEEN 0 AND 11 THEN 1 ELSE 0 END),
-        SUM(CASE WHEN (:anoFim - YEAR(m.dataNascimento)) BETWEEN 12 AND 17 THEN 1 ELSE 0 END),
-        SUM(CASE WHEN (:anoFim - YEAR(m.dataNascimento)) BETWEEN 18 AND 29 THEN 1 ELSE 0 END),
-        SUM(CASE WHEN (:anoFim - YEAR(m.dataNascimento)) BETWEEN 30 AND 59 THEN 1 ELSE 0 END),
-        SUM(CASE WHEN (:anoFim - YEAR(m.dataNascimento)) >= 60 THEN 1 ELSE 0 END)
-    )
-    FROM Membro m
-        WHERE m.igreja.idExterno = :idExternoIgreja AND FUNCTION('YEAR', m.dataRegistro) BETWEEN :anoInicio AND :anoFim
-    """)
+            SELECT new com.diacono.diacono.membro.model.dto.response.MembroDashFaixaEtariaDTO(
+                SUM(CASE WHEN (:anoFim - YEAR(m.dataNascimento)) BETWEEN 0 AND 11 THEN 1 ELSE 0 END),
+                SUM(CASE WHEN (:anoFim - YEAR(m.dataNascimento)) BETWEEN 12 AND 17 THEN 1 ELSE 0 END),
+                SUM(CASE WHEN (:anoFim - YEAR(m.dataNascimento)) BETWEEN 18 AND 29 THEN 1 ELSE 0 END),
+                SUM(CASE WHEN (:anoFim - YEAR(m.dataNascimento)) BETWEEN 30 AND 59 THEN 1 ELSE 0 END),
+                SUM(CASE WHEN (:anoFim - YEAR(m.dataNascimento)) >= 60 THEN 1 ELSE 0 END)
+            )
+            FROM Membro m
+                WHERE m.igreja.idExterno = :idExternoIgreja 
+            """)
     MembroDashFaixaEtariaDTO buscarMembrosPorFaixaEtaria(
             @Param("idExternoIgreja") UUID idExternoIgreja,
-            @Param("anoFim") int anoFim,
-            @Param("anoInicio") int anoInicio
+            @Param("anoFim") int anoFim
     );
 
     @Query("""
-    SELECT new com.diacono.diacono.membro.model.dto.response.MembroDashGeneroDTO(
-        SUM(CASE WHEN m.generoMembro = 'MASCULINO' THEN 1 ELSE 0 END),
-        SUM(CASE WHEN m.generoMembro = 'FEMININO' THEN 1 ELSE 0 END)
-    )
-    FROM Membro m
-        WHERE m.igreja.idExterno = :idExternoIgreja AND FUNCTION('YEAR', m.dataRegistro) BETWEEN :anoInicio AND :anoFim
-    """)
+            SELECT new com.diacono.diacono.membro.model.dto.response.MembroDashGeneroDTO(
+                SUM(CASE WHEN m.generoMembro = 'MASCULINO' THEN 1 ELSE 0 END),
+                SUM(CASE WHEN m.generoMembro = 'FEMININO' THEN 1 ELSE 0 END)
+            )
+            FROM Membro m
+                WHERE m.igreja.idExterno = :idExternoIgreja AND FUNCTION('YEAR', m.dataRegistro) <=  :anoFim
+            """)
     MembroDashGeneroDTO buscarMembrosPorGenero(
             @Param("idExternoIgreja") UUID idExternoIgreja,
-            @Param("anoFim") int anoFim,
-            @Param("anoInicio") int anoInicio
+            @Param("anoFim") int anoFim
     );
 
 }

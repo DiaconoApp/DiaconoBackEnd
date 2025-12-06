@@ -336,18 +336,31 @@ public class MembroService {
         return membroRepository.buscarMembrosPorAno(idExternoIgreja, anoInicio, anoFim);
     }
 
-    public MembroDashFaixaEtariaDTO buscarDashFaixaEtaria(int anoInicio, int anoFim) {
+    public MembroDashFaixaEtariaDTO buscarDashFaixaEtaria(int anoFim) {
 
         UUID idExternoIgreja = jwtUtils.getIgrejaId();
 
-        return membroRepository.buscarMembrosPorFaixaEtaria(idExternoIgreja, anoFim, anoInicio);
+        MembroDashFaixaEtariaDTO response = membroRepository.buscarMembrosPorFaixaEtaria(idExternoIgreja, anoFim);
+
+        System.out.println(response.adolescentes());
+        System.out.println(response.adultos());
+        System.out.println(response.criancas());
+        System.out.println(response.idosos());
+        System.out.println(response.jovens());
+
+        return response;
     }
 
-    public MembroDashGeneroDTO buscarDashGenero(int anoInicio, int anoFim) {
+    public MembroDashGeneroDTO buscarDashGenero(int anoFim) {
 
         UUID idExternoIgreja = jwtUtils.getIgrejaId();
 
-        return membroRepository.buscarMembrosPorGenero(idExternoIgreja, anoInicio, anoFim);
+        MembroDashGeneroDTO response = membroRepository.buscarMembrosPorGenero(idExternoIgreja, anoFim);
+
+        System.out.println(response.feminino());
+        System.out.println(response.masculino());
+
+        return response;
     }
 
 }

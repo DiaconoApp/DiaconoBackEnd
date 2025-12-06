@@ -1,12 +1,12 @@
 package com.diacono.diacono.membro.model.dto.response;
 
-public class MembroDashEvolucaoDTO{
+public class MembroDashEvolucaoDTO {
 
     private Integer ano;
     private Long quantidade;
 
-    public MembroDashEvolucaoDTO(Integer ano, Long quantidade) {
-        this.ano = ano;
+    public MembroDashEvolucaoDTO(Object ano, Long quantidade) {
+        this.ano = ano != null ? ((Number) ano).intValue() : null;
         this.quantidade = quantidade;
     }
 
@@ -17,5 +17,4 @@ public class MembroDashEvolucaoDTO{
     public Long getQuantidade() {
         return quantidade;
     }
-
 }

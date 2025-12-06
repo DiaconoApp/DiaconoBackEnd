@@ -1,0 +1,25 @@
+meta {
+  name: KpisMembros
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:8080/membros/kpis?anoInicio=2024&anoFim=2025
+  body: none
+  auth: bearer
+}
+
+params:query {
+  anoInicio: 2024
+  anoFim: 2025
+}
+
+auth:bearer {
+  token: {{acessToken}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
