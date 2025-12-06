@@ -1,6 +1,7 @@
 package com.diacono.diacono.evento.repository;
 
 import com.diacono.diacono.evento.model.dto.response.EventoComEventoMinisterioDTO;
+import com.diacono.diacono.evento.model.dto.response.EventoKpiDTO;
 import com.diacono.diacono.evento.model.entity.Evento;
 import com.diacono.diacono.evento.model.entity.Recorrencia;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -59,4 +60,21 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
             @Param("ano") int ano,
             @Param("igrejaFk") UUID igrejaFk
     );
+
+    //kpis
+
+    @Query("""
+            
+            sELECT new com.diacono.diacono.evento.model.dto.response.EventoKpiDTO(
+                m.nome,
+                COUNT(e.idExterno)
+            )
+            FROM Evento e
+            JOIN e.ministerios m
+            WHERE YEAR(e.dataHoraInicio) BETWEEN :anoInicio AND :anoFim
+            AND e.igreja.idExterno = :idIgreja
+            GROUP BY m.nome
+            ORDER BY COUNT(e.idExterno) DESC
+            """)
+    List<EventoKpiDTO> buscarKpisEvento(int anoInicio, int anoFim, UUID idIgreja);
 }

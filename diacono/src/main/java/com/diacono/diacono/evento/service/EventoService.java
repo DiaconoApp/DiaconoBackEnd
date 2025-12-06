@@ -5,8 +5,7 @@ import com.diacono.diacono.evento.mapper.EnderecoEventoMapper;
 import com.diacono.diacono.evento.mapper.RecorrenciaMapper;
 import com.diacono.diacono.evento.model.dto.request.EnderecoEventoDTO;
 import com.diacono.diacono.evento.model.dto.request.RecorrenciaCreateDTO;
-import com.diacono.diacono.evento.model.dto.response.EnderecoEventoSimplificadoDTO;
-import com.diacono.diacono.evento.model.dto.response.EventoComEventoMinisterioDTO;
+import com.diacono.diacono.evento.model.dto.response.*;
 import com.diacono.diacono.evento.model.entity.EnderecoEvento;
 import com.diacono.diacono.evento.model.entity.Recorrencia;
 import com.diacono.diacono.global.dto.response.RestResponseMessage;
@@ -16,8 +15,6 @@ import com.diacono.diacono.evento.mapper.EventoMapper;
 import com.diacono.diacono.evento.mapper.EventoUpdateMapper;
 import com.diacono.diacono.evento.model.dto.request.EventoCreateDTO;
 import com.diacono.diacono.evento.model.dto.request.EventoUpdateDTO;
-import com.diacono.diacono.evento.model.dto.response.EventoCompletoDTO;
-import com.diacono.diacono.evento.model.dto.response.EventoSimplificadoDTO;
 import com.diacono.diacono.evento.model.entity.Evento;
 import com.diacono.diacono.evento.model.entity.TipoRecorrencia;
 import com.diacono.diacono.evento.repository.EventoRepository;
@@ -410,5 +407,16 @@ public class EventoService {
         }
 
         return eventosEventoMinisterio;
+    }
+
+    //UTILIZADO PARA KPI
+
+    public List<EventoKpiDTO> buscarKpisEvento(int anoInicio, int anoFim) {
+
+        UUID idIgreja = jwtUtils.getIgrejaId();
+
+        List<EventoKpiDTO> kpisEvento = eventoRepository.buscarKpisEvento(anoInicio, anoFim, idIgreja);
+
+        return kpisEvento;
     }
 }

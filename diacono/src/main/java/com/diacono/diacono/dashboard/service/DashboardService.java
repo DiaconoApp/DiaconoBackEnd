@@ -3,6 +3,8 @@ package com.diacono.diacono.dashboard.service;
 import com.diacono.diacono.dashboard.model.response.membro.DashboardFaixaEtariaMembroDTO;
 import com.diacono.diacono.dashboard.model.response.membro.DashboardGeneroMembroDTO;
 import com.diacono.diacono.dashboard.model.response.membro.KpisMembrosDTO;
+import com.diacono.diacono.evento.model.dto.response.EventoKpiDTO;
+import com.diacono.diacono.evento.service.EventoService;
 import com.diacono.diacono.membro.model.dto.response.MembroDashEvolucaoDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroDashFaixaEtariaDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroDashGeneroDTO;
@@ -22,9 +24,12 @@ public class DashboardService {
 
     private final MembroService membroService;
     private final MinisterioService ministerioService;
+    private final EventoService eventoService;
 
-    public DashboardService(MembroService membroService) {
+    public DashboardService(MembroService membroService, MinisterioService ministerioService, EventoService eventoService) {
         this.membroService = membroService;
+        this.ministerioService = ministerioService;
+        this.eventoService = eventoService;
     }
 
     public KpisMembrosDTO buscarKpisMembros(int anoInicio, int anoFim) {
@@ -106,13 +111,14 @@ public class DashboardService {
 
     // Ministerios
 
-    public void ministerioBuscarKpis(int anoInicio, int anoFim) {
+    public String ministerioBuscarKpis(int anoInicio, int anoFim) {
 
-        MinisterioKpisResponseDTO kpis = ministerioService.ministerioBuscarKpis(anoInicio, anoFim); //ministerioService.buscarKpis(anoInicio, anoFim);
+        MinisterioKpisResponseDTO kpiMinisterio = ministerioService.ministerioBuscarKpis(anoInicio, anoFim); //ministerioService.buscarKpis(anoInicio, anoFim);
+        List<EventoKpiDTO> kpiEvento = eventoService.buscarKpisEvento(anoInicio, anoFim);
 
-        long ativos = 0L;
-        long mediaMembrosPorMinisterio = 0L;
-        String ministerioMaisEngajado = "";
+        
+
+        return "";
     }
 
 }

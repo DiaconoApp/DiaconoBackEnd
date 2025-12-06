@@ -60,9 +60,9 @@ public class DashboardController {
 
     @GetMapping("/ministerios/kpis")
     //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
-    public ResponseEntity<> ministerioBuscarKpis(@RequestParam int anoInicio, @RequestParam int anoFim) {
+    public ResponseEntity<String> ministerioBuscarKpis(@RequestParam int anoInicio, @RequestParam int anoFim) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(dashboardService.);
+        return ResponseEntity.status(HttpStatus.OK).body(dashboardService.ministerioBuscarKpis(anoInicio, anoFim));
 
     }
 

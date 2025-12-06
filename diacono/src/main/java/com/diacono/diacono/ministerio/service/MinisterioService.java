@@ -287,9 +287,13 @@ public class MinisterioService {
 
     public MinisterioKpisResponseDTO ministerioBuscarKpis(int anoInicio, int anoFim){
 
+        UUID igrejaId = jwtUtils.getIgrejaId();
 
 
-        return null;
+
+        MinisterioKpisResponseDTO response = ministerios.buscarKpis(igrejaId, anoInicio, anoFim);
+
+        return response;
     }
 
 
