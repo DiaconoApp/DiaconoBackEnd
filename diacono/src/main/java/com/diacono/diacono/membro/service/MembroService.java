@@ -157,7 +157,7 @@ public class MembroService {
         Membro membroExistente = membroRepository.findByEmailOrCpf(membroDTO.email(), membroDTO.cpf());
 
         if(membroExistente != null){
-            throw new ObjectExistsException("Email ja cadastrado");
+            throw new ObjectExistsException("Email ou CPF ja cadastrado");
         }
 
         LocalDate dataHoje = LocalDate.now();
@@ -167,6 +167,7 @@ public class MembroService {
         membro.setStatus(EnumStatusMembro.ATIVO);
         membro.setIgreja(igreja);
         membro.setDataRegistro(dataHoje);
+        membro.setGeneroMembro(membroDTO.generoMembro());
         membro.setCargoMembro(membroDTO.cargo());
         membro.setSenha(hashSenha(membroDTO.senha()));
         Membro membroSalvo = membroRepository.save(membro);
@@ -279,6 +280,7 @@ public class MembroService {
         Igreja igreja = igrejaService.buscarUUID(membroDTO.fkIgreja());
         membro.setStatus(EnumStatusMembro.ATIVO);
         membro.setIgreja(igreja);
+        membro.setGeneroMembro(membroDTO.generoMembro());
         membro.setCargoMembro(EnumCargoMembro.MEMBRO);
         membro.setDataRegistro(dataHoje);
         membro.setSenha(hashSenha(membroDTO.senha()));

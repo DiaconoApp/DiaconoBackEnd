@@ -116,7 +116,7 @@ public class DashboardService {
         MinisterioKpisResponseDTO kpiMinisterio = ministerioService.ministerioBuscarKpis(anoInicio, anoFim); //ministerioService.buscarKpis(anoInicio, anoFim);
         List<EventoKpiDTO> kpiEvento = eventoService.buscarKpisEvento(anoInicio, anoFim);
 
-        
+
 
         return "";
     }
