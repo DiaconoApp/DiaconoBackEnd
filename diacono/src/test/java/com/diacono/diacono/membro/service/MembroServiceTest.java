@@ -167,7 +167,7 @@ class MembroServiceTest {
         List<Membro> membrosEncontrados = List.of(membro1, membro2);
         List<MembroResponseDTO> responseDTOs = List.of(dto1, dto2);
 
-        String buscaFormatada = "%" + termoBusca.toUpperCase() + "%";
+        String buscaFormatada = "%" + termoBusca.toLowerCase() + "%";
 
         when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
         when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
@@ -509,7 +509,7 @@ class MembroServiceTest {
     @DisplayName("Deve buscar membros com resultados encontrados")
     void buscaMembrosComResultadosSucesso() {
         String termoBusca = "João";
-        String buscaFormatada = "%" + termoBusca.toUpperCase() + "%";
+        String buscaFormatada = "%" + termoBusca.toLowerCase() + "%";
         UUID igrejaId = UUID.randomUUID();
 
         Membro membro1 = new Membro();
@@ -531,7 +531,7 @@ class MembroServiceTest {
     @DisplayName("Deve lançar exceção quando busca de membros não retorna resultados")
     void buscaMembrosSemFiltroNaoEncontrado() {
         String termoBusca = "Inexistente";
-        String buscaFormatada = "%" + termoBusca.toUpperCase() + "%";
+        String buscaFormatada = "%" + termoBusca.toLowerCase() + "%";
         UUID igrejaId = UUID.randomUUID();
 
         when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
@@ -572,7 +572,7 @@ class MembroServiceTest {
         List<Membro> membrosEncontrados = List.of(membro1);
         List<MembroResponseDTO> responseDTOs = List.of(dto1);
 
-        String buscaFormatada = "%" + termoBusca.toUpperCase() + "%";
+        String buscaFormatada = "%" + termoBusca.toLowerCase() + "%";
 
         when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
         when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
@@ -600,7 +600,7 @@ class MembroServiceTest {
         membro1.setMinisterios(new HashSet<>());
 
         List<Membro> membrosEncontrados = List.of(membro1);
-        String buscaFormatada = "%" + termoBusca.toUpperCase() + "%";
+        String buscaFormatada = "%" + termoBusca.toLowerCase() + "%";
 
         when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
         when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
