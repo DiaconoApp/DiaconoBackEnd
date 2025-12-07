@@ -1,6 +1,6 @@
 package com.diacono.diacono.ministerio.repository;
 
-import com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashEvolucaoDTO;
+import com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashQuantidadeMembrosDTO;
 import com.diacono.diacono.ministerio.model.dto.response.MinisterioKpisResponseDTO;
 import com.diacono.diacono.ministerio.model.entity.EnumStatusMinisterio;
 import com.diacono.diacono.ministerio.model.entity.Ministerio;

@@ -11,6 +11,7 @@ import com.diacono.diacono.membroministerio.model.entity.EnumCargoMembroMinister
 import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
 import com.diacono.diacono.membroministerio.repository.MembroMinisterioRepository;
 import com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashEvolucaoDTO;
+import com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashQuantidadeMembrosDTO;
 import com.diacono.diacono.ministerio.model.dto.response.MinisterioSuperSimplificadoDTO;
 import com.diacono.diacono.ministerio.model.entity.Ministerio;
 import org.springframework.data.domain.Page;
@@ -153,6 +154,15 @@ public class MembroMinisterioService {
 
         List<MinisterioDashEvolucaoDTO> response = membroMinisterioRepository.buscarDashEvolucaoPeriodo(anoInicio,anoFim, idMinisterio, idIgreja);
 
+        return response;
+
+    }
+
+    public List<MinisterioDashQuantidadeMembrosDTO> ministerioBuscarDashQuantidadeMembro(int anoInicio, int anoFim){
+
+        UUID igrejaId = jwtUtils.getIgrejaId();
+
+        List<MinisterioDashQuantidadeMembrosDTO> response = membroMinisterioRepository.buscarQuantidadeMembros(anoInicio, anoFim, igrejaId);
         return response;
 
     }

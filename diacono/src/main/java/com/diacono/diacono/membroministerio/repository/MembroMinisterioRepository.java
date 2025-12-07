@@ -3,12 +3,14 @@ package com.diacono.diacono.membroministerio.repository;
 import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
 import com.diacono.diacono.membro.model.entity.Membro;
 import com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashEvolucaoDTO;
+import com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashQuantidadeMembrosDTO;
 import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
 import com.diacono.diacono.ministerio.model.dto.response.MinisterioSuperSimplificadoDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -93,5 +95,20 @@ public interface MembroMinisterioRepository extends JpaRepository<MembroMinister
             
             """)
     List<MinisterioDashEvolucaoDTO> buscarDashEvolucaoPeriodo(int anoInicio, int anoFim, UUID idMinisterio, UUID idIgreja);
+
+    @Query("""
+            
+            SELECT new com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashQuantidadeMembrosDTO(
+                m.nome,
+                COUNT(mb)
+            )
+            FROM MembroMinisterio mb        
+            JOIN mb.ministerio m          
+            WHERE m.igreja.idExterno = :idIgreja
+            AND FUNCTION('YEAR', mb.dataRegistro) BETWEEN :anoInicio AND :anoFim  
+            GROUP BY m.nome       
+            
+            """)
+    List<MinisterioDashQuantidadeMembrosDTO> buscarQuantidadeMembros(int anoInicio, int anoFim, @Param("idIgreja") UUID igrejaId);
 
 }

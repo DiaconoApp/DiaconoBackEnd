@@ -3,9 +3,11 @@ package com.diacono.diacono.eventoministerio.service;
 import com.diacono.diacono.escala.service.EscalaService;
 import com.diacono.diacono.eventoministerio.model.dto.request.EventoMinisterioNaoConfirmadoDTO;
 import com.diacono.diacono.eventoministerio.model.dto.response.EventoMinisterioEscalaDTO;
+import com.diacono.diacono.eventoministerio.model.dto.response.MinisterioEventoDashDTO;
 import com.diacono.diacono.eventoministerio.model.entity.EventoMinisterio;
 import com.diacono.diacono.eventoministerio.repository.EventoMinisterioRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
+import com.diacono.diacono.global.util.JwtUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,13 +19,15 @@ import java.util.*;
 public class EventoMinisterioService {
     private final EscalaService escalaService;
     private final EventoMinisterioRepository eventoMinisterioRepository;
+    private final JwtUtils jwtUtils;
 
     public EventoMinisterioService(
             @Lazy EscalaService escalaService,
-            EventoMinisterioRepository eventoMinisterioRepository
+            EventoMinisterioRepository eventoMinisterioRepository, JwtUtils jwtUtils
     ) {
         this.escalaService = escalaService;
         this.eventoMinisterioRepository = eventoMinisterioRepository;
+        this.jwtUtils = jwtUtils;
     }
 
     public List<EventoMinisterioEscalaDTO> buscarEventosMinisteriosPorMinisterioMesAno (UUID idExternoMinisterio, Integer mes, Integer ano) {
@@ -78,4 +82,17 @@ public class EventoMinisterioService {
         return eventoMinisterio;
     }
 
+    //DASHBOARDS
+
+    public List<MinisterioEventoDashDTO> ministerioBuscarDashQuantidadeEventos(int anoInicio, int anoFim){
+
+        UUID idIgreja = jwtUtils.getIgrejaId();
+
+        List<MinisterioEventoDashDTO> response = eventoMinisterioRepository.contarEventosPorMinisterioNoPeriodo(anoInicio, anoFim, idIgreja);
+
+        System.out.println(response);
+
+        return response;
+
+    }
 }

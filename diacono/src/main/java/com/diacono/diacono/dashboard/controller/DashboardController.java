@@ -1,14 +1,15 @@
 package com.diacono.diacono.dashboard.controller;
 
 
-
 import com.diacono.diacono.dashboard.model.response.ministerio.KpisMinisteriosDTO;
 import com.diacono.diacono.dashboard.service.DashboardService;
 import com.diacono.diacono.dashboard.model.response.membro.DashboardFaixaEtariaMembroDTO;
 import com.diacono.diacono.dashboard.model.response.membro.DashboardGeneroMembroDTO;
 import com.diacono.diacono.dashboard.model.response.membro.KpisMembrosDTO;
+import com.diacono.diacono.eventoministerio.model.dto.response.MinisterioEventoDashDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroDashEvolucaoDTO;
 import com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashEvolucaoDTO;
+import com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashQuantidadeMembrosDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -76,6 +77,21 @@ public class DashboardController {
 
     }
 
+    @GetMapping("/ministerios/quantidade-membros")
+    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    public ResponseEntity<List<MinisterioDashQuantidadeMembrosDTO>> ministerioBuscarDashQuantidadeMembro(@RequestParam int anoInicio, @RequestParam int anoFim) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(dashboardService.ministerioBuscarDashQuantidadeMembro(anoInicio, anoFim));
+
+    }
+
+    @GetMapping("/ministerios/quantidade-eventos")
+    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    public ResponseEntity<List<MinisterioEventoDashDTO>> ministerioBuscarDashQuantidadeEventos(@RequestParam int anoInicio, @RequestParam int anoFim) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(dashboardService.ministerioBuscarDashQuantidadeEventos(anoInicio, anoFim));
+
+    }
 
 
 }

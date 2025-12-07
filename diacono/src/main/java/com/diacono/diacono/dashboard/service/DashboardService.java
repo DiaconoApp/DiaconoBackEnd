@@ -6,6 +6,8 @@ import com.diacono.diacono.dashboard.model.response.membro.KpisMembrosDTO;
 import com.diacono.diacono.dashboard.model.response.ministerio.KpisMinisteriosDTO;
 import com.diacono.diacono.evento.model.dto.response.EventoKpiDTO;
 import com.diacono.diacono.evento.service.EventoService;
+import com.diacono.diacono.eventoministerio.model.dto.response.MinisterioEventoDashDTO;
+import com.diacono.diacono.eventoministerio.service.EventoMinisterioService;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.membro.model.dto.response.MembroDashEvolucaoDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroDashFaixaEtariaDTO;
@@ -13,12 +15,11 @@ import com.diacono.diacono.membro.model.dto.response.MembroDashGeneroDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroKpiResponseDTO;
 import com.diacono.diacono.membro.service.MembroService;
 import com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashEvolucaoDTO;
+import com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashQuantidadeMembrosDTO;
 import com.diacono.diacono.membroministerio.service.MembroMinisterioService;
 import com.diacono.diacono.ministerio.model.dto.response.MinisterioKpisResponseDTO;
 import com.diacono.diacono.ministerio.service.MinisterioService;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,12 +34,14 @@ public class DashboardService {
     private final MinisterioService ministerioService;
     private final EventoService eventoService;
     private final MembroMinisterioService membroMinisterioService;
+    private final EventoMinisterioService eventoMinisterioService;
 
-    public DashboardService(MembroService membroService, MinisterioService ministerioService, EventoService eventoService, MembroMinisterioService membroMinisterioService) {
+    public DashboardService(MembroService membroService, MinisterioService ministerioService, EventoService eventoService, MembroMinisterioService membroMinisterioService, EventoMinisterioService eventoMinisterioService) {
         this.membroService = membroService;
         this.ministerioService = ministerioService;
         this.eventoService = eventoService;
         this.membroMinisterioService = membroMinisterioService;
+        this.eventoMinisterioService = eventoMinisterioService;
     }
 
     public KpisMembrosDTO buscarKpisMembros(int anoInicio, int anoFim) {
@@ -186,6 +189,34 @@ public class DashboardService {
 
     }
 
+    public List<MinisterioDashQuantidadeMembrosDTO> ministerioBuscarDashQuantidadeMembro(int anoInicio, int anoFim){
+
+        validarAnoInicioEFim(anoInicio, anoFim);
+
+        List<MinisterioDashQuantidadeMembrosDTO> response = membroMinisterioService.ministerioBuscarDashQuantidadeMembro(anoInicio, anoFim);
+
+        if(response == null || response.isEmpty()){
+            throw new FieldInvalidException("Nenhum dado encontrado para o período informado.");
+        }
+
+        return response;
+
+    }
+
+    public List<MinisterioEventoDashDTO> ministerioBuscarDashQuantidadeEventos(int anoInicio, int anoFim){
+
+        validarAnoInicioEFim(anoInicio, anoFim);
+
+
+        List<MinisterioEventoDashDTO> response = eventoMinisterioService.ministerioBuscarDashQuantidadeEventos(anoInicio, anoFim);
+
+        if(response == null || response.isEmpty()){
+            throw new FieldInvalidException("Nenhum dado encontrado para o período informado.");
+        }
+
+        return response;
+
+    }
 
     //validacoes
 

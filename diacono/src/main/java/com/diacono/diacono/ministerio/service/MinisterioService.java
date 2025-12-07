@@ -301,6 +301,4 @@ public class MinisterioService {
         return response;
     }
 
-
-
 }
