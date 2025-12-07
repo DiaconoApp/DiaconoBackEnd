@@ -2,6 +2,7 @@ package com.diacono.diacono.membroministerio.repository;
 
 import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
 import com.diacono.diacono.membro.model.entity.Membro;
+import com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashEvolucaoDTO;
 import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
 import com.diacono.diacono.ministerio.model.dto.response.MinisterioSuperSimplificadoDTO;
 import org.springframework.data.domain.Page;
@@ -52,8 +53,45 @@ public interface MembroMinisterioRepository extends JpaRepository<MembroMinister
             WHERE m.idExterno = :idExternoMembro
             AND ms.igreja.idExterno = :idExternoIgreja
             AND mm.cargoMembro = 'LIDER_MINISTERIO'
-           
+            
             """)
     List<MinisterioSuperSimplificadoDTO> buscarMinisterioLider(UUID idExternoMembro, UUID idExternoIgreja);
+
+
+    //DASH
+
+    @Query("""
+            
+            SELECT new com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashEvolucaoDTO(
+                COUNT(mb),
+                mb.dataRegistro
+            )
+            FROM MembroMinisterio mb  
+            JOIN mb.ministerio m      
+            WHERE m.igreja.idExterno = :idIgreja
+            AND (:idMinisterio IS NULL OR m.idExterno = :idMinisterio)
+            AND FUNCTION('YEAR', mb.dataRegistro) = :anoFim  
+            GROUP BY mb.dataRegistro                       
+            ORDER BY mb.dataRegistro ASC
+            
+            """)
+    List<MinisterioDashEvolucaoDTO> buscarDashEvolucaoUmAno(int anoFim, UUID idMinisterio, UUID idIgreja);
+
+    @Query("""
+            
+            SELECT new com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashEvolucaoDTO(
+                COUNT(mb),
+                mb.dataRegistro
+            )
+            FROM MembroMinisterio mb  
+            JOIN mb.ministerio m      
+            WHERE m.igreja.idExterno = :idIgreja
+            AND (:idMinisterio IS NULL OR m.idExterno = :idMinisterio)
+            AND FUNCTION('YEAR', mb.dataRegistro) BETWEEN :anoInicio AND :anoFim 
+            GROUP BY mb.dataRegistro                       
+            ORDER BY mb.dataRegistro ASC
+            
+            """)
+    List<MinisterioDashEvolucaoDTO> buscarDashEvolucaoPeriodo(int anoInicio, int anoFim, UUID idMinisterio, UUID idIgreja);
 
 }

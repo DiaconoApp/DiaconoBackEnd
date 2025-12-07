@@ -12,13 +12,18 @@ import com.diacono.diacono.membro.model.dto.response.MembroDashFaixaEtariaDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroDashGeneroDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroKpiResponseDTO;
 import com.diacono.diacono.membro.service.MembroService;
+import com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashEvolucaoDTO;
+import com.diacono.diacono.membroministerio.service.MembroMinisterioService;
 import com.diacono.diacono.ministerio.model.dto.response.MinisterioKpisResponseDTO;
 import com.diacono.diacono.ministerio.service.MinisterioService;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,11 +32,13 @@ public class DashboardService {
     private final MembroService membroService;
     private final MinisterioService ministerioService;
     private final EventoService eventoService;
+    private final MembroMinisterioService membroMinisterioService;
 
-    public DashboardService(MembroService membroService, MinisterioService ministerioService, EventoService eventoService) {
+    public DashboardService(MembroService membroService, MinisterioService ministerioService, EventoService eventoService, MembroMinisterioService membroMinisterioService) {
         this.membroService = membroService;
         this.ministerioService = ministerioService;
         this.eventoService = eventoService;
+        this.membroMinisterioService = membroMinisterioService;
     }
 
     public KpisMembrosDTO buscarKpisMembros(int anoInicio, int anoFim) {
@@ -148,7 +155,7 @@ public class DashboardService {
 
         validarAnoInicioEFim(anoInicio, anoFim);
 
-        MinisterioKpisResponseDTO kpiMinisterio = ministerioService.ministerioBuscarKpis(anoInicio, anoFim); //ministerioService.buscarKpis(anoInicio, anoFim);
+        MinisterioKpisResponseDTO kpiMinisterio = ministerioService.ministerioBuscarKpis(anoFim);
         List<EventoKpiDTO> kpiEvento = eventoService.buscarKpisEvento(anoInicio, anoFim);
 
         EventoKpiDTO eventoRetido = kpiEvento.get(0);
@@ -160,6 +167,25 @@ public class DashboardService {
 
         return response;
     }
+
+    public List<MinisterioDashEvolucaoDTO> ministerioBuscarDashEvolucao(int anoInicio, int anoFim, UUID idMinisterio){
+
+        if(idMinisterio == null){
+            throw new FieldInvalidException("ID do ministério deve ser informado.");
+        }
+
+        validarAnoInicioEFim(anoInicio, anoFim);
+
+        List<MinisterioDashEvolucaoDTO> response = membroMinisterioService.ministerioBuscarDashEvolucao(anoInicio, anoFim, idMinisterio);
+
+        if(response == null || response.isEmpty()){
+            throw new FieldInvalidException("Nenhum dado encontrado para o período informado.");
+        }
+
+        return response;
+
+    }
+
 
     //validacoes
 

@@ -295,15 +295,12 @@ public class MinisterioService {
 
     //usado para dashboards
 
-    public MinisterioKpisResponseDTO ministerioBuscarKpis(int anoInicio, int anoFim) {
-
+    public MinisterioKpisResponseDTO ministerioBuscarKpis(int anoFim) {
         UUID igrejaId = jwtUtils.getIgrejaId();
-
-
-        MinisterioKpisResponseDTO response = ministerios.buscarKpis(igrejaId, anoInicio, anoFim);
-
+        MinisterioKpisResponseDTO response = ministerios.buscarKpis(igrejaId, anoFim);
         return response;
     }
+
 
 
 }

@@ -2,6 +2,7 @@ package com.diacono.diacono.membroministerio.service;
 
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
+import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
 import com.diacono.diacono.membro.model.entity.Membro;
 import com.diacono.diacono.membroministerio.mapper.MembroMinisterioMapper;
@@ -9,6 +10,7 @@ import com.diacono.diacono.membroministerio.model.dto.response.MembroMinisterioD
 import com.diacono.diacono.membroministerio.model.entity.EnumCargoMembroMinisterio;
 import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
 import com.diacono.diacono.membroministerio.repository.MembroMinisterioRepository;
+import com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashEvolucaoDTO;
 import com.diacono.diacono.ministerio.model.dto.response.MinisterioSuperSimplificadoDTO;
 import com.diacono.diacono.ministerio.model.entity.Ministerio;
 import org.springframework.data.domain.Page;
@@ -24,10 +26,12 @@ public class MembroMinisterioService {
 
     private final MembroMinisterioRepository membroMinisterioRepository;
     private final MembroMinisterioMapper mapper;
+    private final JwtUtils jwtUtils;
 
-    public MembroMinisterioService(MembroMinisterioRepository membroMinisterioRepository, MembroMinisterioMapper mapper) {
+    public MembroMinisterioService(MembroMinisterioRepository membroMinisterioRepository, MembroMinisterioMapper mapper, JwtUtils jwtUtils) {
         this.membroMinisterioRepository = membroMinisterioRepository;
         this.mapper = mapper;
+        this.jwtUtils = jwtUtils;
     }
 
     public void apagarMembroMinisterioPorMembro(Membro membro){
@@ -134,6 +138,23 @@ public class MembroMinisterioService {
         }
 
         return membrosMinisterio;
+    }
+
+
+    //Dash
+    public List<MinisterioDashEvolucaoDTO> ministerioBuscarDashEvolucao(int anoInicio, int anoFim, UUID idMinisterio){
+
+        UUID idIgreja = jwtUtils.getIgrejaId();
+
+        if(anoInicio == anoFim){
+            List<MinisterioDashEvolucaoDTO> response = membroMinisterioRepository.buscarDashEvolucaoUmAno(anoFim, idMinisterio, idIgreja);
+            return response;
+        }
+
+        List<MinisterioDashEvolucaoDTO> response = membroMinisterioRepository.buscarDashEvolucaoPeriodo(anoInicio,anoFim, idMinisterio, idIgreja);
+
+        return response;
+
     }
 
 }

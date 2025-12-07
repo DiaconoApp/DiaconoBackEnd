@@ -1,5 +1,6 @@
 package com.diacono.diacono.ministerio.repository;
 
+import com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashEvolucaoDTO;
 import com.diacono.diacono.ministerio.model.dto.response.MinisterioKpisResponseDTO;
 import com.diacono.diacono.ministerio.model.entity.EnumStatusMinisterio;
 import com.diacono.diacono.ministerio.model.entity.Ministerio;
@@ -46,7 +47,9 @@ public interface MinisteriosRepository extends JpaRepository<Ministerio, Long> {
             )
             FROM Ministerio m
             WHERE m.igreja.idExterno = :fkIgreja
-            AND FUNCTION('YEAR', m.dataCriacao) BETWEEN :dataInicio AND :dataFim 
+            AND FUNCTION('YEAR', m.dataCriacao) <= :dataFim 
             """)
-    MinisterioKpisResponseDTO buscarKpis(@Param("fkIgreja") UUID fkIgreja, int dataInicio, int dataFim);
+    MinisterioKpisResponseDTO buscarKpis(@Param("fkIgreja") UUID fkIgreja, int dataFim);
+
+
 }
