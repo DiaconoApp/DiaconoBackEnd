@@ -24,6 +24,7 @@ public class EventoMinisterio extends IdEntityUtils {
     @NotNull
     private Ministerio ministerio;
 
-    private boolean isConfirmado;
+    @Column(name = "is_confirmado", nullable = false)
+    private boolean isConfirmado = false;
 
 }
