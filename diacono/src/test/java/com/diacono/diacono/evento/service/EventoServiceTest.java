@@ -415,7 +415,7 @@ class EventoServiceTest {
         EnderecoEvento enderecoAtual = new EnderecoEvento();
         enderecoAtual.setCep("12345678");
         evento.setEnderecoEvento(enderecoAtual);
-        evento.setMinisterios(new HashSet<>());
+        evento.setEventoMinisterios(new HashSet<>());
 
         EnderecoEvento novoEndereco = new EnderecoEvento();
         Set<Ministerio> ministerios = new HashSet<>();

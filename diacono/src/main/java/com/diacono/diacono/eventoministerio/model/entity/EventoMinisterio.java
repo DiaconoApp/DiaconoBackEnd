@@ -7,9 +7,11 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "evento_ministerio")
+@SuperBuilder
 @Setter
 @Getter
 public class EventoMinisterio extends IdEntityUtils {
@@ -26,5 +28,6 @@ public class EventoMinisterio extends IdEntityUtils {
 
     @Column(name = "is_confirmado", nullable = false)
     private boolean isConfirmado = false;
+
 
 }

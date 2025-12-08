@@ -37,7 +37,6 @@ public interface EventoMapper {
     @Mapping(target = "idExterno", ignore = true)
     @Mapping(target = "igreja", ignore = true)
     @Mapping(target = "organizador", ignore = true)
-    @Mapping(target = "ministerios", ignore = true)
     @Mapping(target = "recorrencia", ignore = true)
     Evento paraEvento(EventoCreateDTO request);
 
@@ -45,6 +44,5 @@ public interface EventoMapper {
     @Mapping(target = "idExterno", ignore = true)
     @Mapping(target = "igreja", ignore = true)
     @Mapping(target = "organizador", ignore = true)
-    @Mapping(target = "ministerios", ignore = true)
     Evento paraEvento(EventoUpdateDTO request);
 }

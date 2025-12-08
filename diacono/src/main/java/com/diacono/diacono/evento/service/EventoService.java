@@ -1,13 +1,11 @@
 package com.diacono.diacono.evento.service;
 
 import com.diacono.diacono.Igreja.service.IgrejaService;
-import com.diacono.diacono.evento.mapper.EnderecoEventoMapper;
-import com.diacono.diacono.evento.mapper.RecorrenciaMapper;
 import com.diacono.diacono.evento.model.dto.request.EnderecoEventoDTO;
-import com.diacono.diacono.evento.model.dto.request.RecorrenciaCreateDTO;
 import com.diacono.diacono.evento.model.dto.response.*;
 import com.diacono.diacono.evento.model.entity.EnderecoEvento;
 import com.diacono.diacono.evento.model.entity.Recorrencia;
+import com.diacono.diacono.eventoministerio.model.entity.EventoMinisterio;
 import com.diacono.diacono.global.dto.response.RestResponseMessage;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.evento.exceptions.TimeInvalidException;
@@ -30,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
 @Service
@@ -193,8 +190,20 @@ public class EventoService {
 
         if(request.fkMinisterios() != null && !request.fkMinisterios().isEmpty()){
             Set<Ministerio> ministerios = new HashSet<>(ministerioService.buscarPorUUID(request.fkMinisterios()));
-            evento.getMinisterios().clear();
-            evento.getMinisterios().addAll(ministerios);
+            evento.getEventoMinisterios().clear();
+
+            Set<EventoMinisterio> eventoMinisterios = new HashSet<>();
+
+            for (Ministerio ministerio : ministerios) {
+                EventoMinisterio eventoMinisterio = EventoMinisterio.builder()
+                        .evento(evento)
+                        .ministerio(ministerio)
+                        .build();
+                eventoMinisterios.add(eventoMinisterio);
+            }
+
+            evento.getEventoMinisterios().addAll(eventoMinisterios);
+
         }
 
         if (request.nome() != null) {
@@ -306,7 +315,20 @@ public class EventoService {
         evento.setRecorrencia(recorrencia);
         evento.setOrganizador(membroService.buscarPorUUID(jwtUtils.getSubject()));
         evento.setIgreja(igrejaService.buscarUUID(jwtUtils.getIgrejaId()));
-        evento.setMinisterios(ministerioService.buscarPorUUID(request.fkMinisterios()));
+
+        Set<EventoMinisterio> eventoMinisterios = new HashSet<>();
+
+        for (UUID idMinisterio : request.fkMinisterios()) {
+            Ministerio ministerio = ministerioService.buscarPorUUID(idMinisterio);
+            EventoMinisterio eventoMinisterio = EventoMinisterio.builder()
+                    .evento(evento)
+                    .ministerio(ministerio)
+                    .isConfirmado(false)
+                    .build();
+            eventoMinisterios.add(eventoMinisterio);
+        }
+
+        evento.setEventoMinisterios(eventoMinisterios);
 
         Evento eventoSalvo = eventoRepository.save(evento);
 
@@ -335,7 +357,7 @@ public class EventoService {
             novoEvento.setIgreja(evento.getIgreja());
             novoEvento.setOrganizador(evento.getOrganizador());
             novoEvento.setEnderecoEvento(evento.getEnderecoEvento());
-            novoEvento.setMinisterios(new HashSet<>(evento.getMinisterios()));
+            novoEvento.setEventoMinisterios(new HashSet<>(evento.getEventoMinisterios()));
             novoEvento.setRecorrencia(evento.getRecorrencia());
             novoEvento.setNome(evento.getNome());
             novoEvento.setDescricao(evento.getDescricao());
@@ -372,7 +394,7 @@ public class EventoService {
             novoEvento.setIgreja(eventoBase.getIgreja());
             novoEvento.setOrganizador(eventoBase.getOrganizador());
             novoEvento.setEnderecoEvento(eventoBase.getEnderecoEvento());
-            novoEvento.setMinisterios(new HashSet<>(eventoBase.getMinisterios()));
+            novoEvento.setEventoMinisterios(new HashSet<>(eventoBase.getEventoMinisterios()));
             novoEvento.setRecorrencia(eventoBase.getRecorrencia());
             novoEvento.setNome(eventoBase.getNome());
             novoEvento.setDescricao(eventoBase.getDescricao());

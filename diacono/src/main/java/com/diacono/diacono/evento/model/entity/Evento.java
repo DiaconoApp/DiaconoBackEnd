@@ -2,18 +2,15 @@ package com.diacono.diacono.evento.model.entity;
 
 import com.diacono.diacono.Igreja.model.entity.Igreja;
 
+import com.diacono.diacono.eventoministerio.model.entity.EventoMinisterio;
 import com.diacono.diacono.global.util.IdEntityUtils;
 import com.diacono.diacono.membro.model.entity.Membro;
-import com.diacono.diacono.ministerio.model.entity.Ministerio;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -38,13 +35,8 @@ public class Evento extends IdEntityUtils {
     @JoinColumn(name = "fk_endereco", unique = false, nullable = true)
     private EnderecoEvento enderecoEvento;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "evento_ministerio",
-            joinColumns = @JoinColumn(name = "fk_evento"),
-            inverseJoinColumns = @JoinColumn(name = "fk_ministerio")
-    )
-    private Set<Ministerio> ministerios;
+    @OneToMany(mappedBy = "evento", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<EventoMinisterio> eventoMinisterios;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(
@@ -75,9 +67,7 @@ public class Evento extends IdEntityUtils {
         this.enderecoEvento = enderecoEvento;
     }
 
-    public void setMinisterios(Set<Ministerio> ministerios) {
-        this.ministerios = ministerios;
-    }
+    public void setEventoMinisterios(Set<EventoMinisterio> eventoMinisterios) {this.eventoMinisterios = eventoMinisterios;}
 
     public void setRecorrencia(Recorrencia recorrencia) {
         this.recorrencia = recorrencia;
