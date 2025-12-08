@@ -26,4 +26,8 @@ public class EventoMinisterio extends IdEntityUtils {
 
     @NotNull
     private Boolean isConfirmado;
+
+    public EventoMinisterio() {
+        this.isConfirmado = false;
+    }
 }
