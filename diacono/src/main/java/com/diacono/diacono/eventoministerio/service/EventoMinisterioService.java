@@ -57,7 +57,7 @@ public class EventoMinisterioService {
 
         if(eventoMinisterioAConfirmar == null) throw new ObjectNotFoundException("Evento do ministério não encontrado para o ID fornecido.");
 
-        eventoMinisterioAConfirmar.setIsConfirmado(true);
+        eventoMinisterioAConfirmar.setConfirmado(true);
 
         return eventoMinisterioRepository.save(eventoMinisterioAConfirmar);
     }
