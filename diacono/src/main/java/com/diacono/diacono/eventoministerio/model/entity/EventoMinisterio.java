@@ -25,7 +25,7 @@ public class EventoMinisterio extends IdEntityUtils {
     private Ministerio ministerio;
 
     @NotNull
-    private Boolean isConfirmado;
+    private boolean isConfirmado;
 
     public EventoMinisterio() {
         this.isConfirmado = false;
