@@ -342,11 +342,6 @@ public class MembroService {
 
         MembroDashFaixaEtariaDTO response = membroRepository.buscarMembrosPorFaixaEtaria(idExternoIgreja, anoFim);
 
-        System.out.println(response.adolescentes());
-        System.out.println(response.adultos());
-        System.out.println(response.criancas());
-        System.out.println(response.idosos());
-        System.out.println(response.jovens());
 
         return response;
     }

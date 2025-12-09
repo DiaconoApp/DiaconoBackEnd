@@ -21,6 +21,7 @@ import com.diacono.diacono.ministerio.model.dto.response.MinisterioKpisResponseD
 import com.diacono.diacono.ministerio.service.MinisterioService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -51,22 +52,22 @@ public class DashboardService {
         MembroKpiResponseDTO kpis = membroService.buscarKpis(anoInicio, anoFim);
 
         long membrosAtivos = kpis.membrosAtivos();
+        long membrosInativos = kpis.membrosInativos();
         long totalMembrosAnoInicio = kpis.totalAnoInicio();
-        long totalMembrosAnoFim = kpis.totalAnoFim();
-        long totalMembros = totalMembrosAnoFim + totalMembrosAnoInicio;
+        long totalMembros = membrosAtivos + membrosInativos;
 
-        long membrosNovos = totalMembros - totalMembrosAnoInicio;
+
+        long membrosNovos = totalMembros;
+
 
         if (anoInicio == anoFim) {
             membrosNovos = totalMembrosAnoInicio;
         }
 
-        long inativos = totalMembros - membrosAtivos;
-
-        double resultado = Math.round((membrosAtivos - inativos) * 100.0 / totalMembros);
+        double resultado = Math.round((membrosAtivos - membrosInativos) * 100.0 / totalMembros);
 
 
-        double retencao = inativos == 0 ? 100 : resultado;
+        double retencao = membrosInativos == 0 ? 100 : resultado;
 
 
         KpisMembrosDTO kpisMembrosDTO = new KpisMembrosDTO(
@@ -85,21 +86,11 @@ public class DashboardService {
 
         List<MembroDashEvolucaoDTO> bruto = membroService.buscarDashEvolucao(anoInicio, anoFim);
 
-        Map<Integer, Long> mapa = bruto.stream()
-                .collect(Collectors.toMap(
-                        MembroDashEvolucaoDTO::getAno,
-                        MembroDashEvolucaoDTO::getQuantidade
-                ));
-
-        List<MembroDashEvolucaoDTO> completo = new ArrayList<>();
-
-        for (int ano = anoInicio; ano <= anoFim; ano++) {
-            long qtd = mapa.getOrDefault(ano, 0L);
-            completo.add(new MembroDashEvolucaoDTO(ano, qtd));
+        if (bruto == null || bruto.isEmpty()) {
+            throw new FieldInvalidException("Nenhum dado encontrado para o período informado.");
         }
 
-        return completo;
-
+        return bruto;
     }
 
     public DashboardFaixaEtariaMembroDTO buscarDashFaixaEtaria(int anoInicio, int anoFim) {
@@ -171,9 +162,9 @@ public class DashboardService {
         return response;
     }
 
-    public List<MinisterioDashEvolucaoDTO> ministerioBuscarDashEvolucao(int anoInicio, int anoFim, UUID idMinisterio){
+    public List<MinisterioDashEvolucaoDTO> ministerioBuscarDashEvolucao(int anoInicio, int anoFim, UUID idMinisterio) {
 
-        if(idMinisterio == null){
+        if (idMinisterio == null) {
             throw new FieldInvalidException("ID do ministério deve ser informado.");
         }
 
@@ -181,7 +172,7 @@ public class DashboardService {
 
         List<MinisterioDashEvolucaoDTO> response = membroMinisterioService.ministerioBuscarDashEvolucao(anoInicio, anoFim, idMinisterio);
 
-        if(response == null || response.isEmpty()){
+        if (response == null || response.isEmpty()) {
             throw new FieldInvalidException("Nenhum dado encontrado para o período informado.");
         }
 
@@ -189,13 +180,13 @@ public class DashboardService {
 
     }
 
-    public List<MinisterioDashQuantidadeMembrosDTO> ministerioBuscarDashQuantidadeMembro(int anoInicio, int anoFim){
+    public List<MinisterioDashQuantidadeMembrosDTO> ministerioBuscarDashQuantidadeMembro(int anoInicio, int anoFim) {
 
         validarAnoInicioEFim(anoInicio, anoFim);
 
         List<MinisterioDashQuantidadeMembrosDTO> response = membroMinisterioService.ministerioBuscarDashQuantidadeMembro(anoInicio, anoFim);
 
-        if(response == null || response.isEmpty()){
+        if (response == null || response.isEmpty()) {
             throw new FieldInvalidException("Nenhum dado encontrado para o período informado.");
         }
 
@@ -203,14 +194,14 @@ public class DashboardService {
 
     }
 
-    public List<MinisterioEventoDashDTO> ministerioBuscarDashQuantidadeEventos(int anoInicio, int anoFim){
+    public List<MinisterioEventoDashDTO> ministerioBuscarDashQuantidadeEventos(int anoInicio, int anoFim) {
 
         validarAnoInicioEFim(anoInicio, anoFim);
 
 
         List<MinisterioEventoDashDTO> response = eventoMinisterioService.ministerioBuscarDashQuantidadeEventos(anoInicio, anoFim);
 
-        if(response == null || response.isEmpty()){
+        if (response == null || response.isEmpty()) {
             throw new FieldInvalidException("Nenhum dado encontrado para o período informado.");
         }
 

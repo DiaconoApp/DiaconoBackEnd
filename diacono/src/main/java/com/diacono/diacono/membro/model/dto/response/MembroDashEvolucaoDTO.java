@@ -1,20 +1,11 @@
 package com.diacono.diacono.membro.model.dto.response;
 
-public class MembroDashEvolucaoDTO {
+import java.time.LocalDate;
 
-    private Integer ano;
-    private Long quantidade;
+public record MembroDashEvolucaoDTO(
+        LocalDate data,
+        Long quantidade
+) {
 
-    public MembroDashEvolucaoDTO(Object ano, Long quantidade) {
-        this.ano = ano != null ? ((Number) ano).intValue() : null;
-        this.quantidade = quantidade;
-    }
 
-    public Integer getAno() {
-        return ano;
-    }
-
-    public Long getQuantidade() {
-        return quantidade;
-    }
 }
