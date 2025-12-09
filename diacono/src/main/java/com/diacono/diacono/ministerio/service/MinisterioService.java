@@ -152,11 +152,14 @@ public class MinisterioService {
 
         Ministerio ministerioExistente = ministerios.findByIdExterno(idMinisterio);
 
+
         if (ministerioExistente == null) {
             throw new ObjectNotFoundException("Ministério não encontrado");
         }
 
         if (ministerioDTO.idLider() != null) {
+
+
             Membro liderNovo = membro.findByIdExterno(ministerioDTO.idLider());
 
             if (liderNovo == null) {
@@ -168,7 +171,10 @@ public class MinisterioService {
                     .findFirst()
                     .orElseThrow(() -> new ObjectNotFoundException("Líder do ministério não encontrado"));
 
+
             Membro liderAntigo = atual.getMembro();
+
+
 
             MembroMinisterio liderNovoExisteNoMinisterio = ministerioExistente.getMembros().stream()
                     .filter(m -> m.getMembro().getIdExterno().equals(liderNovo.getIdExterno()))
@@ -177,6 +183,9 @@ public class MinisterioService {
 
 
             if (liderNovoExisteNoMinisterio == null) {
+
+
+                liderNovo.setCargoMembro(EnumCargoMembro.LIDER_MINISTERIO);
 
                 MembroMinisterio novoMembroMinisterio = MembroMinisterio.builder()
                         .membro(liderNovo)
@@ -187,7 +196,11 @@ public class MinisterioService {
 
                 ministerioExistente.getMembros().add(novoMembroMinisterio);
 
+
+
             } else {
+
+                liderNovo.setCargoMembro(EnumCargoMembro.LIDER_MINISTERIO);
                 liderNovoExisteNoMinisterio.setCargoMembro(EnumCargoMembroMinisterio.LIDER_MINISTERIO);
                 atual.setCargoMembro(EnumCargoMembroMinisterio.MEMBRO_MINISTERIO);
             }
@@ -199,6 +212,7 @@ public class MinisterioService {
                             mm.getCargoMembro() == EnumCargoMembroMinisterio.LIDER_MINISTERIO
                                     && !mm.getMinisterio().getIdExterno().equals(ministerioExistente.getIdExterno())
                     );
+
 
             if (!aindaELiderDeAlgumMinisterio) {
                 liderAntigo.setCargoMembro(EnumCargoMembro.MEMBRO);
@@ -213,6 +227,7 @@ public class MinisterioService {
         if (ministerioDTO.status() != null) {
             ministerioExistente.setStatus(ministerioDTO.status());
         }
+
 
         ministerios.save(ministerioExistente);
 
