@@ -27,9 +27,10 @@ public interface MembroMinisterioRepository extends JpaRepository<MembroMinister
             SELECT mm FROM MembroMinisterio mm
             JOIN mm.membro m
             WHERE mm.ministerio.idExterno = :idMinisterio
-              AND (:status IS NULL OR m.status = :status)
-            AND (:busca IS NULL OR m.nome LIKE :busca
-                 OR m.email LIKE :busca)
+            AND (:status IS NULL OR m.status = :status)
+            AND (:busca IS NULL OR
+            LOWER(m.nome) LIKE LOWER(:busca)
+            OR LOWER(m.email) LIKE LOWER(:busca))
             """)
     Page<MembroMinisterio> buscarPorMembroMinisterioComFiltro(Pageable pageable, UUID idMinisterio, String texto, EnumStatusMembro status);
 
