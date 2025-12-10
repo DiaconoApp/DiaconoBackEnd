@@ -8,7 +8,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface MembroMinisterioMapper {
 
-
+    @Mapping(target = "idExterno", source = "membro.idExterno")
     @Mapping(target = "nome", source = "membro.nome")
     @Mapping(target = "email", source = "membro.email")
     @Mapping(target = "telefone", source = "membro.celular")
