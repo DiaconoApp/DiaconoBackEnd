@@ -38,7 +38,7 @@ public interface MembroRepository extends JpaRepository<Membro, Long> {
             "WHERE (nome LIKE :buscaGeral " +
             "OR email LIKE :buscaGeral " +
             "OR celular LIKE :buscaGeral)" +
-            "AND m.igreja.idExterno = :fkIgreja +" +
+            "AND m.igreja.idExterno = :fkIgreja " +
             "ORDER BY nome"
     )
     List<Membro> findAllWithFilter(
