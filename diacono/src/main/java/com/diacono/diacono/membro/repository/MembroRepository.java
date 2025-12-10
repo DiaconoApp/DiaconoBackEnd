@@ -49,23 +49,23 @@ public interface MembroRepository extends JpaRepository<Membro, Long> {
     Membro findByEmail(String email);
 
 
-    @Query("""
-            SELECT new com.diacono.diacono.membro.model.dto.response.MembroSimplificadoDTO(
-                mm.membro.idExterno,
-                mm.membro.nome
-            )
-            FROM MembroMinisterio mm
-            WHERE mm.ministerio.idExterno = :ministerioId
-            AND mm.membro.idExterno NOT IN (
-                SELECT escala.membroMinisterio.membro.idExterno
-                FROM Escala escala
-                WHERE escala.eventoMinisterio.evento.dataHoraInicio < :horarioFim
-                AND escala.eventoMinisterio.evento.dataHoraFim > :horarioInicio
-            )
-            """)
-    List<MembroSimplificadoDTO> findMembrosMinisteriosSemEscala(@Param("ministerioId") UUID ministerioId,
-                                                                @Param("horarioInicio") LocalDateTime horarioInicio,
-                                                                @Param("horarioFim") LocalDateTime horarioFim);
+//    @Query("""
+//            SELECT new com.diacono.diacono.membro.model.dto.response.MembroSimplificadoDTO(
+//                mm.membro.idExterno,
+//                mm.membro.nome
+//            )
+//            FROM MembroMinisterio mm
+//            WHERE mm.ministerio.idExterno = :ministerioId
+//            AND mm.membro.idExterno NOT IN (
+//                SELECT escala.membroMinisterio.membro.idExterno
+//                FROM Escala escala
+//                WHERE escala.eventoMinisterio.evento.dataHoraInicio < :horarioFim
+//                AND escala.eventoMinisterio.evento.dataHoraFim > :horarioInicio
+//            )
+//            """)
+//    List<MembroSimplificadoDTO> findMembrosMinisteriosSemEscala(@Param("ministerioId") UUID ministerioId,
+//                                                                @Param("horarioInicio") LocalDateTime horarioInicio,
+//                                                                @Param("horarioFim") LocalDateTime horarioFim);
 
     @Query("""
                 SELECT m.id FROM Membro m

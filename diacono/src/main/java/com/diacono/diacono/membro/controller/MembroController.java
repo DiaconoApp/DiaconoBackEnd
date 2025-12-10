@@ -59,16 +59,16 @@ public class MembroController {
 
     }
 
-    @ApiErrorsComuns
-    @ApiResponse(responseCode = "200", description = "Membros encontrados com sucesso")
-    @GetMapping("/{idExternoMinisterio}")
-    public ResponseEntity<List<MembroSimplificadoDTO>> buscarMembrosPorMinisterioSemEscala(
-            @RequestParam UUID idExternoMinisterio,
-            @RequestBody EventoUnicoSimplificadoDTO eventoUnicoSimplificadoDTO
-            ) {
-        List<MembroSimplificadoDTO> membrosDisponiveisParaEscala = membrosService.buscarMembrosDisponiveisParaEscala(idExternoMinisterio, eventoUnicoSimplificadoDTO);
-        return ResponseEntity.status(HttpStatus.OK).body(membrosDisponiveisParaEscala);
-    }
+//    @ApiErrorsComuns
+//    @ApiResponse(responseCode = "200", description = "Membros encontrados com sucesso")
+//    @GetMapping("/{idExternoMinisterio}")
+//    public ResponseEntity<List<MembroSimplificadoDTO>> buscarMembrosPorMinisterioSemEscala(
+//            @RequestParam UUID idExternoMinisterio,
+//            @RequestBody EventoUnicoSimplificadoDTO eventoUnicoSimplificadoDTO
+//            ) {
+//        List<MembroSimplificadoDTO> membrosDisponiveisParaEscala = membrosService.buscarMembrosDisponiveisParaEscala(idExternoMinisterio, eventoUnicoSimplificadoDTO);
+//        return ResponseEntity.status(HttpStatus.OK).body(membrosDisponiveisParaEscala);
+//    }
 
 
 }

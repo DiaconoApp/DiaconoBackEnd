@@ -1,4 +1,4 @@
-package com.diacono.diacono.eventoministerio.model.dto.response;
+package com.diacono.diacono.evento.model.dto.response;
 
 public record MinisterioEventoDashDTO (
         String nomeMinisterio,

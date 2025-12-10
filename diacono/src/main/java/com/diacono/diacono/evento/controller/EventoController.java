@@ -90,15 +90,15 @@ public class EventoController {
     }
 
     // Utilizado para escalas
-    @ApiErrorsComuns
-    @ApiResponse(responseCode = "200", description = "Eventos encontrados com sucesso")
-    @GetMapping("/evento-ministerio")
-    public ResponseEntity<List<EventoComEventoMinisterioDTO>> buscarEventosComEventoMinisterioPorMesAno(
-            @RequestParam int mes,
-            @RequestParam int ano
-    ) {
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(eventoService.buscarEventosComEventoMinisterioPorMesAno(mes, ano));
-    }
+//    @ApiErrorsComuns
+//    @ApiResponse(responseCode = "200", description = "Eventos encontrados com sucesso")
+//    @GetMapping("/evento-ministerio")
+//    public ResponseEntity<List<EventoComEventoMinisterioDTO>> buscarEventosComEventoMinisterioPorMesAno(
+//            @RequestParam int mes,
+//            @RequestParam int ano
+//    ) {
+//        return ResponseEntity.status(HttpStatus.OK)
+//                .body(eventoService.buscarEventosComEventoMinisterioPorMesAno(mes, ano));
+//    }
 
 }

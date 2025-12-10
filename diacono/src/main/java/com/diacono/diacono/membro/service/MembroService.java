@@ -307,17 +307,17 @@ public class MembroService {
     }
 
     // Metodo que se relaciona com Escala
-    public List<MembroSimplificadoDTO> buscarMembrosDisponiveisParaEscala(UUID idExternoMinisterio, EventoUnicoSimplificadoDTO eventoUnicoSimplificadoDTO) {
-        LocalDateTime horarioInicio = eventoUnicoSimplificadoDTO.dataHoraInicio();
-        LocalDateTime horarioFim = eventoUnicoSimplificadoDTO.dataHoraFim();
-
-        List<MembroSimplificadoDTO> membrosMinisteriosLivres = membroRepository.findMembrosMinisteriosSemEscala(idExternoMinisterio, horarioInicio, horarioFim);
-
-        if (membrosMinisteriosLivres.isEmpty()) {
-            throw new ObjectNotFoundException("Nenhum membro disponível para escala encontrado.");
-        }
-        return membrosMinisteriosLivres;
-    }
+//    public List<MembroSimplificadoDTO> buscarMembrosDisponiveisParaEscala(UUID idExternoMinisterio, EventoUnicoSimplificadoDTO eventoUnicoSimplificadoDTO) {
+//        LocalDateTime horarioInicio = eventoUnicoSimplificadoDTO.dataHoraInicio();
+//        LocalDateTime horarioFim = eventoUnicoSimplificadoDTO.dataHoraFim();
+//
+//        List<MembroSimplificadoDTO> membrosMinisteriosLivres = membroRepository.findMembrosMinisteriosSemEscala(idExternoMinisterio, horarioInicio, horarioFim);
+//
+//        if (membrosMinisteriosLivres.isEmpty()) {
+//            throw new ObjectNotFoundException("Nenhum membro disponível para escala encontrado.");
+//        }
+//        return membrosMinisteriosLivres;
+//    }
 
     //METODO QUE SE RELACIONA COM DASHBARDS
 

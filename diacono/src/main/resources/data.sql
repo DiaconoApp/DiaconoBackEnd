@@ -151,25 +151,25 @@ INSERT INTO evento (
 -- 6. VINCULO EVENTO x MINISTERIO (CORRIGIDO: Inclusão das colunas ID_EXTERNO e IS_CONFIRMADO)
 -- ==================================================================================
 
-INSERT INTO evento_ministerio (id_externo, fk_evento, fk_ministerio, is_confirmado) VALUES
-('60000000-0000-0000-0000-000000000001', 1, 1, TRUE),  -- Culto Família / Louvor
-('60000000-0000-0000-0000-000000000002', 1, 2, TRUE),  -- Culto Família / Kids
-('60000000-0000-0000-0000-000000000003', 1, 3, TRUE),  -- Culto Família / Recepção
-('60000000-0000-0000-0000-000000000004', 1, 4, TRUE),  -- Culto Família / Multimídia
-('60000000-0000-0000-0000-000000000005', 1, 5, TRUE),  -- Culto Família / Intercessão
-('60000000-0000-0000-0000-000000000006', 2, 1, TRUE),  -- Sábado Jovem / Louvor
-('60000000-0000-0000-0000-000000000007', 2, 3, TRUE),  -- Sábado Jovem / Recepção
-('60000000-0000-0000-0000-000000000008', 2, 4, TRUE),  -- Sábado Jovem / Multimídia
-('60000000-0000-0000-0000-000000000009', 3, 2, TRUE),  -- Tarde Alegria / Kids
-('60000000-0000-0000-0000-000000000010', 4, 1, TRUE),  -- Acampamento / Louvor
-('60000000-0000-0000-0000-000000000011', 4, 2, TRUE),  -- Acampamento / Kids
-('60000000-0000-0000-0000-000000000012', 4, 3, TRUE),  -- Acampamento / Recepção
-('60000000-0000-0000-0000-000000000013', 4, 4, TRUE),  -- Acampamento / Multimídia
-('60000000-0000-0000-0000-000000000014', 4, 5, TRUE),  -- Acampamento / Intercessão
-('60000000-0000-0000-0000-000000000015', 5, 4, TRUE),  -- Workshop / Multimídia
-('60000000-0000-0000-0000-000000000016', 6, 1, TRUE),  -- Ide Praças / Louvor
-('60000000-0000-0000-0000-000000000017', 6, 5, TRUE),  -- Ide Praças / Intercessão
-('60000000-0000-0000-0000-000000000018', 7, 1, TRUE),  -- Vigília / Louvor
-('60000000-0000-0000-0000-000000000019', 7, 5, TRUE),  -- Vigília / Intercessão
-('60000000-0000-0000-0000-000000000020', 8, 2, TRUE),  -- Café Boas Vindas / Kids
-('60000000-0000-0000-0000-000000000021', 8, 3, TRUE); -- Café Boas Vindas / Recepção
+INSERT INTO evento_ministerio (fk_evento, fk_ministerio) VALUES
+(1, 1),  -- Culto Família / Louvor
+(1, 2),  -- Culto Família / Kids
+(1, 3),  -- Culto Família / Recepção
+(1, 4),  -- Culto Família / Multimídia
+(1, 5),  -- Culto Família / Intercessão
+(2, 1),  -- Sábado Jovem / Louvor
+(2, 3),  -- Sábado Jovem / Recepção
+(2, 4),  -- Sábado Jovem / Multimídia
+(3, 2),  -- Tarde Alegria / Kids
+(4, 1),  -- Acampamento / Louvor
+(4, 2),  -- Acampamento / Kids
+(4, 3),  -- Acampamento / Recepção
+(4, 4),  -- Acampamento / Multimídia
+(4, 5),  -- Acampamento / Intercessão
+(5, 4),  -- Workshop / Multimídia
+(6, 1),  -- Ide Praças / Louvor
+(6, 5),  -- Ide Praças / Intercessão
+(7, 1),  -- Vigília / Louvor
+(7, 5),  -- Vigília / Intercessão
+(8, 2),  -- Café Boas Vindas / Kids
+(8, 3); -- Café Boas Vindas / Recepção

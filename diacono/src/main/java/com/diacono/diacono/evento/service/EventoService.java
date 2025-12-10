@@ -390,24 +390,24 @@ public class EventoService {
 
 
     // Utilizado para escalas
-    public List<EventoComEventoMinisterioDTO> buscarEventosComEventoMinisterioPorMesAno(int mes, int ano) {
-
-        if(mes < 1 || mes > 12){
-            throw new FieldInvalidException("O mês precisa estar entre 1 e 12");
-        }
-
-        if(ano <= 0) {
-            throw new FieldInvalidException("O ano precisa ser maior que 0");
-        }
-
-        List<EventoComEventoMinisterioDTO> eventosEventoMinisterio =  eventoRepository.findEventosComEventoMinisterioPorMesAno(mes, ano, jwtUtils.getIgrejaId());
-
-        if (eventosEventoMinisterio.isEmpty()) {
-            throw new ObjectNotFoundException("Nenhum evento encontrado para o mês e ano informados");
-        }
-
-        return eventosEventoMinisterio;
-    }
+//    public List<EventoComEventoMinisterioDTO> buscarEventosComEventoMinisterioPorMesAno(int mes, int ano) {
+//
+//        if(mes < 1 || mes > 12){
+//            throw new FieldInvalidException("O mês precisa estar entre 1 e 12");
+//        }
+//
+//        if(ano <= 0) {
+//            throw new FieldInvalidException("O ano precisa ser maior que 0");
+//        }
+//
+//        List<EventoComEventoMinisterioDTO> eventosEventoMinisterio =  eventoRepository.findEventosComEventoMinisterioPorMesAno(mes, ano, jwtUtils.getIgrejaId());
+//
+//        if (eventosEventoMinisterio.isEmpty()) {
+//            throw new ObjectNotFoundException("Nenhum evento encontrado para o mês e ano informados");
+//        }
+//
+//        return eventosEventoMinisterio;
+//    }
 
     //UTILIZADO PARA KPI
 
@@ -418,5 +418,17 @@ public class EventoService {
         List<EventoKpiDTO> kpisEvento = eventoRepository.buscarKpisEvento(anoInicio, anoFim, idIgreja);
 
         return kpisEvento;
+    }
+
+    public List<MinisterioEventoDashDTO> ministerioBuscarDashQuantidadeEventos(int anoInicio, int anoFim){
+
+        UUID idIgreja = jwtUtils.getIgrejaId();
+
+        List<MinisterioEventoDashDTO> response = eventoRepository.contarEventosPorMinisterioNoPeriodo(anoInicio, anoFim, idIgreja);
+
+        System.out.println(response);
+
+        return response;
+
     }
 }

@@ -6,7 +6,7 @@ import com.diacono.diacono.dashboard.service.DashboardService;
 import com.diacono.diacono.dashboard.model.response.membro.DashboardFaixaEtariaMembroDTO;
 import com.diacono.diacono.dashboard.model.response.membro.DashboardGeneroMembroDTO;
 import com.diacono.diacono.dashboard.model.response.membro.KpisMembrosDTO;
-import com.diacono.diacono.eventoministerio.model.dto.response.MinisterioEventoDashDTO;
+import com.diacono.diacono.evento.model.dto.response.MinisterioEventoDashDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroDashEvolucaoDTO;
 import com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashEvolucaoDTO;
 import com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashQuantidadeMembrosDTO;
