@@ -8,6 +8,7 @@ import com.diacono.diacono.evento.model.dto.response.EventoKpiDTO;
 import com.diacono.diacono.evento.service.EventoService;
 import com.diacono.diacono.evento.model.dto.response.MinisterioEventoDashDTO;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
+import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.membro.model.dto.response.MembroDashEvolucaoDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroDashFaixaEtariaDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroDashGeneroDTO;
@@ -80,7 +81,7 @@ public class DashboardService {
         List<MembroDashEvolucaoDTO> bruto = membroService.buscarDashEvolucao(anoInicio, anoFim);
 
         if (bruto == null || bruto.isEmpty()) {
-            throw new FieldInvalidException("Nenhum dado encontrado para o período informado.");
+            throw new ObjectNotFoundException("Nenhum dado encontrado para o período informado.");
         }
 
         return bruto;
@@ -117,9 +118,12 @@ public class DashboardService {
 
         MembroDashGeneroDTO genero = membroService.buscarDashGenero(anoFim);
 
+        if (genero == null){
+            throw new ObjectNotFoundException("Nenhum dado encontrado para o período informado.");
+        }
+
         long total = genero.masculino() + genero.feminino();
 
-        System.out.println(total);
 
         if (total == 0) {
             return new DashboardGeneroMembroDTO(0, 0);
@@ -145,7 +149,12 @@ public class DashboardService {
         MinisterioKpisResponseDTO kpiMinisterio = ministerioService.ministerioBuscarKpis(anoFim);
         List<EventoKpiDTO> kpiEvento = eventoService.buscarKpisEvento(anoInicio, anoFim);
 
+        if (kpiMinisterio == null || kpiEvento == null || kpiEvento.isEmpty()){
+            throw new ObjectNotFoundException("Nenhum dado encontrado para o período informado.");
+        }
+
         EventoKpiDTO eventoRetido = kpiEvento.get(0);
+
 
         KpisMinisteriosDTO response = new KpisMinisteriosDTO(
                 eventoRetido,
@@ -158,7 +167,7 @@ public class DashboardService {
     public List<MinisterioDashEvolucaoDTO> ministerioBuscarDashEvolucao(int anoInicio, int anoFim, UUID idMinisterio) {
 
         if (idMinisterio == null) {
-            throw new FieldInvalidException("ID do ministério deve ser informado.");
+            throw new ObjectNotFoundException("Nenhum dado encontrado para o período informado.");
         }
 
         validarAnoInicioEFim(anoInicio, anoFim);
@@ -166,7 +175,7 @@ public class DashboardService {
         List<MinisterioDashEvolucaoDTO> response = membroMinisterioService.ministerioBuscarDashEvolucao(anoInicio, anoFim, idMinisterio);
 
         if (response == null || response.isEmpty()) {
-            throw new FieldInvalidException("Nenhum dado encontrado para o período informado.");
+            throw new ObjectNotFoundException("Nenhum dado encontrado para o período informado.");
         }
 
         return response;
@@ -180,7 +189,7 @@ public class DashboardService {
         List<MinisterioDashQuantidadeMembrosDTO> response = membroMinisterioService.ministerioBuscarDashQuantidadeMembro(anoInicio, anoFim);
 
         if (response == null || response.isEmpty()) {
-            throw new FieldInvalidException("Nenhum dado encontrado para o período informado.");
+            throw new ObjectNotFoundException("Nenhum dado encontrado para o período informado.");
         }
 
         return response;
@@ -195,7 +204,7 @@ public class DashboardService {
         List<MinisterioEventoDashDTO> response = eventoService.ministerioBuscarDashQuantidadeEventos(anoInicio, anoFim);
 
         if (response == null || response.isEmpty()) {
-            throw new FieldInvalidException("Nenhum dado encontrado para o período informado.");
+            throw new ObjectNotFoundException("Nenhum dado encontrado para o período informado.");
         }
 
         return response;
