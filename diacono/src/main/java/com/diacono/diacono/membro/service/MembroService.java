@@ -97,10 +97,7 @@ public class MembroService {
                             passaNoFiltro = false;
                         }
                     }else if(passaNoFiltro && (fkMinisterio == null)){
-                        boolean naoTemMinisterio = membro.getMinisterios() == null || membro.getMinisterios().isEmpty();
-                        if (!naoTemMinisterio) {
-                            passaNoFiltro = false;
-                        }
+                            passaNoFiltro = true;
                     }
 
                     return passaNoFiltro;
