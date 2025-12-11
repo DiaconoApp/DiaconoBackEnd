@@ -10,6 +10,7 @@ import com.diacono.diacono.membro.model.entity.Membro;
 import com.diacono.diacono.membro.repository.MembroRepository;
 import com.diacono.diacono.membroministerio.model.dto.request.MembroMinisterioCreateDTO;
 import com.diacono.diacono.membroministerio.model.dto.response.MembroMinisterioDTO;
+import com.diacono.diacono.membroministerio.model.dto.response.MembroMinisterioInfoMembroDTO;
 import com.diacono.diacono.membroministerio.model.entity.EnumCargoMembroMinisterio;
 import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
 import com.diacono.diacono.membroministerio.service.MembroMinisterioService;
@@ -236,11 +237,11 @@ public class MinisterioService {
 
     //VISAO LIDER MINISTERIO
 
-    public Page<MembroMinisterioDTO> buscarMembroMinisterioLiderMinisterio(UUID idMinisterio, Pageable page) {
+    public Page<MembroMinisterioInfoMembroDTO> buscarMembroMinisterioLiderMinisterio(UUID idMinisterio, Pageable page) {
         return membroMinisterio.buscarPorMembroMinisterioSemFiltro(idMinisterio, page);
     }
 
-    public Page<MembroMinisterioDTO> buscarMembroMinisterioLiderMinisterioComFiltro(UUID idMinisterio, Pageable page, String texto, EnumStatusMembro status) {
+    public Page<MembroMinisterioInfoMembroDTO> buscarMembroMinisterioLiderMinisterioComFiltro(UUID idMinisterio, Pageable page, String texto, EnumStatusMembro status) {
         return membroMinisterio.buscarPorMembroMinisterioComFiltro(idMinisterio, page, texto, status);
     }
 

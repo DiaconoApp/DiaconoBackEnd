@@ -5,6 +5,7 @@ import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
 import com.diacono.diacono.membroministerio.model.dto.request.MembroMinisterioCreateDTO;
 import com.diacono.diacono.membroministerio.model.dto.response.MembroMinisterioDTO;
+import com.diacono.diacono.membroministerio.model.dto.response.MembroMinisterioInfoMembroDTO;
 import com.diacono.diacono.ministerio.model.dto.MinisterioCreateDTO;
 import com.diacono.diacono.ministerio.model.dto.MinisterioUpdateDTO;
 import com.diacono.diacono.ministerio.model.dto.response.MinisterioSimplificadoDTO;
@@ -12,7 +13,6 @@ import com.diacono.diacono.ministerio.model.dto.response.MinisterioSuperSimplifi
 import com.diacono.diacono.ministerio.model.entity.EnumStatusMinisterio;
 import com.diacono.diacono.ministerio.service.MinisterioService;
 import jakarta.validation.Valid;
-import org.apache.coyote.Response;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -81,8 +81,8 @@ public class MinisteriosController {
     //VISAO  LIDER MINISTERIO
 
     @GetMapping("/lider-ministerio/{idMinisterio}")
-    public ResponseEntity<Page<MembroMinisterioDTO>> buscarMembroMinisterioLiderMinisterio(@PathVariable UUID idMinisterio, Pageable pageable, @RequestParam(required = false, defaultValue = "") String buscaGeral,
-                                                                                           @RequestParam(required = false) EnumStatusMembro status) {
+    public ResponseEntity<Page<MembroMinisterioInfoMembroDTO>> buscarMembroMinisterioLiderMinisterio(@PathVariable UUID idMinisterio, Pageable pageable, @RequestParam(required = false, defaultValue = "") String buscaGeral,
+                                                                                                     @RequestParam(required = false) EnumStatusMembro status) {
 
         if (idMinisterio == null || idMinisterio.toString().isBlank()) {
             throw new FieldInvalidException("ID do ministério não pode ser nulo");
@@ -90,7 +90,7 @@ public class MinisteriosController {
         boolean semBusca = (buscaGeral == null || buscaGeral.isBlank());
         boolean semStatus = (status == null);
 
-        Page<MembroMinisterioDTO> pagina;
+        Page<MembroMinisterioInfoMembroDTO> pagina;
 
         if (semBusca && semStatus) {
             pagina = ministerio.buscarMembroMinisterioLiderMinisterio(idMinisterio, pageable);

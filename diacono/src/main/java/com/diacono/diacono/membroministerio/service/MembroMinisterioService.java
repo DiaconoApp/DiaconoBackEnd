@@ -6,7 +6,7 @@ import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
 import com.diacono.diacono.membro.model.entity.Membro;
 import com.diacono.diacono.membroministerio.mapper.MembroMinisterioMapper;
-import com.diacono.diacono.membroministerio.model.dto.response.MembroMinisterioDTO;
+import com.diacono.diacono.membroministerio.model.dto.response.MembroMinisterioInfoMembroDTO;
 import com.diacono.diacono.membroministerio.model.entity.EnumCargoMembroMinisterio;
 import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
 import com.diacono.diacono.membroministerio.repository.MembroMinisterioRepository;
@@ -49,7 +49,7 @@ public class MembroMinisterioService {
 
     }
 
-    public Page<MembroMinisterioDTO> buscarPorMembroMinisterioComFiltro(UUID idMinisterio, Pageable pageable, String texto, EnumStatusMembro status){
+    public Page<MembroMinisterioInfoMembroDTO> buscarPorMembroMinisterioComFiltro(UUID idMinisterio, Pageable pageable, String texto, EnumStatusMembro status){
 
         String textoFormatado =  "%" + texto + "%" ;
 
@@ -60,13 +60,13 @@ public class MembroMinisterioService {
         }
 
         //fazer o mapper para MembroMinisterioDTO
-        Page<MembroMinisterioDTO> response = page.map(mapper::paraMembroMinisterioDTO);
+        Page<MembroMinisterioInfoMembroDTO> response = page.map(mapper::paraMembroMinisterioInfoMembroDTO);
 
 
         return response;
     }
 
-    public Page<MembroMinisterioDTO> buscarPorMembroMinisterioSemFiltro(UUID idMinisterio, Pageable pageable){
+    public Page<MembroMinisterioInfoMembroDTO> buscarPorMembroMinisterioSemFiltro(UUID idMinisterio, Pageable pageable){
 
 
         Page<MembroMinisterio> page = membroMinisterioRepository.buscarPorMembroMinisterioSemFiltro(pageable, idMinisterio);
@@ -76,7 +76,7 @@ public class MembroMinisterioService {
         }
 
         //fazer o mapper para MembroMinisterioDTO
-        Page<MembroMinisterioDTO> response = page.map(mapper::paraMembroMinisterioDTO);
+        Page<MembroMinisterioInfoMembroDTO> response = page.map(mapper::paraMembroMinisterioInfoMembroDTO);
 
         return response;
     }
