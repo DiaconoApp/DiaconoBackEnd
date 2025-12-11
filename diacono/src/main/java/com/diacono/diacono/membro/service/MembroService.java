@@ -11,6 +11,7 @@ import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
 import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.membro.mapper.MembroMapper;
 import com.diacono.diacono.membro.model.dto.request.MembroCreateDTO;
+import com.diacono.diacono.membro.model.dto.response.*;
 import com.diacono.diacono.membro.model.dto.response.MembroResponseDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroSimplificadoDTO;
 import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
@@ -96,10 +97,7 @@ public class MembroService {
                             passaNoFiltro = false;
                         }
                     }else if(passaNoFiltro && (fkMinisterio == null)){
-                        boolean naoTemMinisterio = membro.getMinisterios() == null || membro.getMinisterios().isEmpty();
-                        if (!naoTemMinisterio) {
-                            passaNoFiltro = false;
-                        }
+                            passaNoFiltro = true;
                     }
 
                     return passaNoFiltro;
@@ -156,7 +154,7 @@ public class MembroService {
         Membro membroExistente = membroRepository.findByEmailOrCpf(membroDTO.email(), membroDTO.cpf());
 
         if(membroExistente != null){
-            throw new ObjectExistsException("Email ja cadastrado");
+            throw new ObjectExistsException("Email ou CPF ja cadastrado");
         }
 
         LocalDate dataHoje = LocalDate.now();
@@ -166,6 +164,7 @@ public class MembroService {
         membro.setStatus(EnumStatusMembro.ATIVO);
         membro.setIgreja(igreja);
         membro.setDataRegistro(dataHoje);
+        membro.setGeneroMembro(membroDTO.generoMembro());
         membro.setCargoMembro(membroDTO.cargo());
         membro.setSenha(hashSenha(membroDTO.senha()));
         Membro membroSalvo = membroRepository.save(membro);
@@ -206,7 +205,12 @@ public class MembroService {
 
     private List<Membro> buscaMembros(String busca) {
 
-        String buscaFormatada = "%" + busca.toLowerCase() + "%";
+
+        String buscaFormatada = null;
+        if (busca != null && !busca.isBlank()) {
+            buscaFormatada = "%" + busca + "%";
+        }
+
         List<Membro> membros = membroRepository.findAllWithFilter(buscaFormatada, jwtUtils.getIgrejaId());
 
         if(membros.isEmpty() || membros == null){
@@ -278,6 +282,7 @@ public class MembroService {
         Igreja igreja = igrejaService.buscarUUID(membroDTO.fkIgreja());
         membro.setStatus(EnumStatusMembro.ATIVO);
         membro.setIgreja(igreja);
+        membro.setGeneroMembro(membroDTO.generoMembro());
         membro.setCargoMembro(EnumCargoMembro.MEMBRO);
         membro.setDataRegistro(dataHoje);
         membro.setSenha(hashSenha(membroDTO.senha()));
@@ -304,16 +309,55 @@ public class MembroService {
     }
 
     // Metodo que se relaciona com Escala
-    public List<MembroSimplificadoDTO> buscarMembrosDisponiveisParaEscala(UUID idExternoMinisterio, EventoUnicoSimplificadoDTO eventoUnicoSimplificadoDTO) {
-        LocalDateTime horarioInicio = eventoUnicoSimplificadoDTO.dataHoraInicio();
-        LocalDateTime horarioFim = eventoUnicoSimplificadoDTO.dataHoraFim();
+//    public List<MembroSimplificadoDTO> buscarMembrosDisponiveisParaEscala(UUID idExternoMinisterio, EventoUnicoSimplificadoDTO eventoUnicoSimplificadoDTO) {
+//        LocalDateTime horarioInicio = eventoUnicoSimplificadoDTO.dataHoraInicio();
+//        LocalDateTime horarioFim = eventoUnicoSimplificadoDTO.dataHoraFim();
+//
+//        List<MembroSimplificadoDTO> membrosMinisteriosLivres = membroRepository.findMembrosMinisteriosSemEscala(idExternoMinisterio, horarioInicio, horarioFim);
+//
+//        if (membrosMinisteriosLivres.isEmpty()) {
+//            throw new ObjectNotFoundException("Nenhum membro disponível para escala encontrado.");
+//        }
+//        return membrosMinisteriosLivres;
+//    }
 
-        List<MembroSimplificadoDTO> membrosMinisteriosLivres = membroRepository.findMembrosMinisteriosSemEscala(idExternoMinisterio, horarioInicio, horarioFim);
+    //METODO QUE SE RELACIONA COM DASHBARDS
 
-        if (membrosMinisteriosLivres.isEmpty()) {
-            throw new ObjectNotFoundException("Nenhum membro disponível para escala encontrado.");
-        }
-        return membrosMinisteriosLivres;
+    public MembroKpiResponseDTO buscarKpis(int anoInicio, int anoFim){
+
+        UUID idExternoIgreja = jwtUtils.getIgrejaId();
+
+        return membroRepository.buscarKpisMembros(idExternoIgreja, anoInicio, anoFim);
+
+    }
+
+    public List<MembroDashEvolucaoDTO> buscarDashEvolucao(int anoInicio, int anoFim) {
+
+        UUID idExternoIgreja = jwtUtils.getIgrejaId();
+
+        return membroRepository.buscarMembrosPorAno(idExternoIgreja, anoInicio, anoFim);
+    }
+
+    public MembroDashFaixaEtariaDTO buscarDashFaixaEtaria(int anoFim) {
+
+        UUID idExternoIgreja = jwtUtils.getIgrejaId();
+
+        MembroDashFaixaEtariaDTO response = membroRepository.buscarMembrosPorFaixaEtaria(idExternoIgreja, anoFim);
+
+
+        return response;
+    }
+
+    public MembroDashGeneroDTO buscarDashGenero(int anoFim) {
+
+        UUID idExternoIgreja = jwtUtils.getIgrejaId();
+
+        MembroDashGeneroDTO response = membroRepository.buscarMembrosPorGenero(idExternoIgreja, anoFim);
+
+        System.out.println(response.feminino());
+        System.out.println(response.masculino());
+
+        return response;
     }
 
 }

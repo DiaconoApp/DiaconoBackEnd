@@ -1,5 +1,7 @@
 package com.diacono.diacono.ministerio.repository;
 
+import com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashQuantidadeMembrosDTO;
+import com.diacono.diacono.ministerio.model.dto.response.MinisterioKpisResponseDTO;
 import com.diacono.diacono.ministerio.model.entity.EnumStatusMinisterio;
 import com.diacono.diacono.ministerio.model.entity.Ministerio;
 import org.springframework.data.domain.Page;
@@ -36,4 +38,18 @@ public interface MinisteriosRepository extends JpaRepository<Ministerio, Long> {
         WHERE m.idExterno = :idExterno
     """)
     Long buscarIdPorUUID(@Param("idExterno") UUID idExterno);
+
+    @Query("""
+            
+            SELECT new com.diacono.diacono.ministerio.model.dto.response.MinisterioKpisResponseDTO(
+                COUNT(m),
+                CASE WHEN COUNT(m) = 0 THEN 0 ELSE CAST(SUM(SIZE(m.membros)) AS double) / COUNT(m) END
+            )
+            FROM Ministerio m
+            WHERE m.igreja.idExterno = :fkIgreja
+            AND FUNCTION('YEAR', m.dataCriacao) <= :dataFim 
+            """)
+    MinisterioKpisResponseDTO buscarKpis(@Param("fkIgreja") UUID fkIgreja, int dataFim);
+
+
 }

@@ -5,8 +5,7 @@ import com.diacono.diacono.evento.mapper.EnderecoEventoMapper;
 import com.diacono.diacono.evento.mapper.RecorrenciaMapper;
 import com.diacono.diacono.evento.model.dto.request.EnderecoEventoDTO;
 import com.diacono.diacono.evento.model.dto.request.RecorrenciaCreateDTO;
-import com.diacono.diacono.evento.model.dto.response.EnderecoEventoSimplificadoDTO;
-import com.diacono.diacono.evento.model.dto.response.EventoComEventoMinisterioDTO;
+import com.diacono.diacono.evento.model.dto.response.*;
 import com.diacono.diacono.evento.model.entity.EnderecoEvento;
 import com.diacono.diacono.evento.model.entity.Recorrencia;
 import com.diacono.diacono.global.dto.response.RestResponseMessage;
@@ -16,8 +15,6 @@ import com.diacono.diacono.evento.mapper.EventoMapper;
 import com.diacono.diacono.evento.mapper.EventoUpdateMapper;
 import com.diacono.diacono.evento.model.dto.request.EventoCreateDTO;
 import com.diacono.diacono.evento.model.dto.request.EventoUpdateDTO;
-import com.diacono.diacono.evento.model.dto.response.EventoCompletoDTO;
-import com.diacono.diacono.evento.model.dto.response.EventoSimplificadoDTO;
 import com.diacono.diacono.evento.model.entity.Evento;
 import com.diacono.diacono.evento.model.entity.TipoRecorrencia;
 import com.diacono.diacono.evento.repository.EventoRepository;
@@ -393,22 +390,45 @@ public class EventoService {
 
 
     // Utilizado para escalas
-    public List<EventoComEventoMinisterioDTO> buscarEventosComEventoMinisterioPorMesAno(int mes, int ano) {
+//    public List<EventoComEventoMinisterioDTO> buscarEventosComEventoMinisterioPorMesAno(int mes, int ano) {
+//
+//        if(mes < 1 || mes > 12){
+//            throw new FieldInvalidException("O mês precisa estar entre 1 e 12");
+//        }
+//
+//        if(ano <= 0) {
+//            throw new FieldInvalidException("O ano precisa ser maior que 0");
+//        }
+//
+//        List<EventoComEventoMinisterioDTO> eventosEventoMinisterio =  eventoRepository.findEventosComEventoMinisterioPorMesAno(mes, ano, jwtUtils.getIgrejaId());
+//
+//        if (eventosEventoMinisterio.isEmpty()) {
+//            throw new ObjectNotFoundException("Nenhum evento encontrado para o mês e ano informados");
+//        }
+//
+//        return eventosEventoMinisterio;
+//    }
 
-        if(mes < 1 || mes > 12){
-            throw new FieldInvalidException("O mês precisa estar entre 1 e 12");
-        }
+    //UTILIZADO PARA KPI
 
-        if(ano <= 0) {
-            throw new FieldInvalidException("O ano precisa ser maior que 0");
-        }
+    public List<EventoKpiDTO> buscarKpisEvento(int anoInicio, int anoFim) {
 
-        List<EventoComEventoMinisterioDTO> eventosEventoMinisterio =  eventoRepository.findEventosComEventoMinisterioPorMesAno(mes, ano, jwtUtils.getIgrejaId());
+        UUID idIgreja = jwtUtils.getIgrejaId();
 
-        if (eventosEventoMinisterio.isEmpty()) {
-            throw new ObjectNotFoundException("Nenhum evento encontrado para o mês e ano informados");
-        }
+        List<EventoKpiDTO> kpisEvento = eventoRepository.buscarKpisEvento(anoInicio, anoFim, idIgreja);
 
-        return eventosEventoMinisterio;
+        return kpisEvento;
+    }
+
+    public List<MinisterioEventoDashDTO> ministerioBuscarDashQuantidadeEventos(int anoInicio, int anoFim){
+
+        UUID idIgreja = jwtUtils.getIgrejaId();
+
+        List<MinisterioEventoDashDTO> response = eventoRepository.contarEventosPorMinisterioNoPeriodo(anoInicio, anoFim, idIgreja);
+
+        System.out.println(response);
+
+        return response;
+
     }
 }

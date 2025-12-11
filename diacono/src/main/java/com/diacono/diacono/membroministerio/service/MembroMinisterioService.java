@@ -2,13 +2,17 @@ package com.diacono.diacono.membroministerio.service;
 
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
+import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
 import com.diacono.diacono.membro.model.entity.Membro;
 import com.diacono.diacono.membroministerio.mapper.MembroMinisterioMapper;
-import com.diacono.diacono.membroministerio.model.dto.response.MembroMinisterioDTO;
+import com.diacono.diacono.membroministerio.model.dto.response.MembroMinisterioInfoMembroDTO;
 import com.diacono.diacono.membroministerio.model.entity.EnumCargoMembroMinisterio;
 import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
 import com.diacono.diacono.membroministerio.repository.MembroMinisterioRepository;
+import com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashEvolucaoDTO;
+import com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashQuantidadeMembrosDTO;
+import com.diacono.diacono.ministerio.model.dto.response.MinisterioSuperSimplificadoDTO;
 import com.diacono.diacono.ministerio.model.entity.Ministerio;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,10 +27,12 @@ public class MembroMinisterioService {
 
     private final MembroMinisterioRepository membroMinisterioRepository;
     private final MembroMinisterioMapper mapper;
+    private final JwtUtils jwtUtils;
 
-    public MembroMinisterioService(MembroMinisterioRepository membroMinisterioRepository, MembroMinisterioMapper mapper) {
+    public MembroMinisterioService(MembroMinisterioRepository membroMinisterioRepository, MembroMinisterioMapper mapper, JwtUtils jwtUtils) {
         this.membroMinisterioRepository = membroMinisterioRepository;
         this.mapper = mapper;
+        this.jwtUtils = jwtUtils;
     }
 
     public void apagarMembroMinisterioPorMembro(Membro membro){
@@ -43,9 +49,12 @@ public class MembroMinisterioService {
 
     }
 
-    public Page<MembroMinisterioDTO> buscarPorMembroMinisterioComFiltro(UUID idMinisterio, Pageable pageable, String texto, EnumStatusMembro status){
+    public Page<MembroMinisterioInfoMembroDTO> buscarPorMembroMinisterioComFiltro(UUID idMinisterio, Pageable pageable, String texto, EnumStatusMembro status){
 
-        String textoFormatado =  "%" + texto.toUpperCase() + "%" ;
+        String textoFormatado = null;
+        if (texto != null && !texto.isBlank()) {
+            textoFormatado = "%" + texto + "%";
+        }
 
         Page<MembroMinisterio> page = membroMinisterioRepository.buscarPorMembroMinisterioComFiltro(pageable,idMinisterio, textoFormatado, status);
 
@@ -54,13 +63,13 @@ public class MembroMinisterioService {
         }
 
         //fazer o mapper para MembroMinisterioDTO
-        Page<MembroMinisterioDTO> response = page.map(mapper::paraMembroMinisterioDTO);
+        Page<MembroMinisterioInfoMembroDTO> response = page.map(mapper::paraMembroMinisterioInfoMembroDTO);
 
 
         return response;
     }
 
-    public Page<MembroMinisterioDTO> buscarPorMembroMinisterioSemFiltro(UUID idMinisterio, Pageable pageable){
+    public Page<MembroMinisterioInfoMembroDTO> buscarPorMembroMinisterioSemFiltro(UUID idMinisterio, Pageable pageable){
 
 
         Page<MembroMinisterio> page = membroMinisterioRepository.buscarPorMembroMinisterioSemFiltro(pageable, idMinisterio);
@@ -70,7 +79,7 @@ public class MembroMinisterioService {
         }
 
         //fazer o mapper para MembroMinisterioDTO
-        Page<MembroMinisterioDTO> response = page.map(mapper::paraMembroMinisterioDTO);
+        Page<MembroMinisterioInfoMembroDTO> response = page.map(mapper::paraMembroMinisterioInfoMembroDTO);
 
         return response;
     }
@@ -112,6 +121,17 @@ public class MembroMinisterioService {
 
     }
 
+    public List<MinisterioSuperSimplificadoDTO> buscarMinisterioLider(UUID idMembro, UUID idIgreja){
+
+        List<MinisterioSuperSimplificadoDTO> ministerios = membroMinisterioRepository.buscarMinisterioLider(idMembro, idIgreja);
+
+        if(ministerios.isEmpty()){
+            throw new ObjectNotFoundException("Nenhum ministério encontrado para o líder informado.");
+        }
+
+        return ministerios;
+    }
+
     // Metodo usado na escala service
     public List<MembroMinisterio> buscarMembroMinisterioPorId(List<UUID> idsExternoMembroMinisterio) {
         List<MembroMinisterio> membrosMinisterio = membroMinisterioRepository
@@ -122,6 +142,32 @@ public class MembroMinisterioService {
         }
 
         return membrosMinisterio;
+    }
+
+
+    //Dash
+    public List<MinisterioDashEvolucaoDTO> ministerioBuscarDashEvolucao(int anoInicio, int anoFim, UUID idMinisterio){
+
+        UUID idIgreja = jwtUtils.getIgrejaId();
+
+        if(anoInicio == anoFim){
+            List<MinisterioDashEvolucaoDTO> response = membroMinisterioRepository.buscarDashEvolucaoUmAno(anoFim, idMinisterio, idIgreja);
+            return response;
+        }
+
+        List<MinisterioDashEvolucaoDTO> response = membroMinisterioRepository.buscarDashEvolucaoPeriodo(anoInicio,anoFim, idMinisterio, idIgreja);
+
+        return response;
+
+    }
+
+    public List<MinisterioDashQuantidadeMembrosDTO> ministerioBuscarDashQuantidadeMembro(int anoInicio, int anoFim){
+
+        UUID igrejaId = jwtUtils.getIgrejaId();
+
+        List<MinisterioDashQuantidadeMembrosDTO> response = membroMinisterioRepository.buscarQuantidadeMembros(anoInicio, anoFim, igrejaId);
+        return response;
+
     }
 
 }

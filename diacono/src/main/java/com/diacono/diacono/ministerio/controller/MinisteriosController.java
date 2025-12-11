@@ -5,13 +5,14 @@ import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
 import com.diacono.diacono.membroministerio.model.dto.request.MembroMinisterioCreateDTO;
 import com.diacono.diacono.membroministerio.model.dto.response.MembroMinisterioDTO;
+import com.diacono.diacono.membroministerio.model.dto.response.MembroMinisterioInfoMembroDTO;
 import com.diacono.diacono.ministerio.model.dto.MinisterioCreateDTO;
 import com.diacono.diacono.ministerio.model.dto.MinisterioUpdateDTO;
 import com.diacono.diacono.ministerio.model.dto.response.MinisterioSimplificadoDTO;
+import com.diacono.diacono.ministerio.model.dto.response.MinisterioSuperSimplificadoDTO;
 import com.diacono.diacono.ministerio.model.entity.EnumStatusMinisterio;
 import com.diacono.diacono.ministerio.service.MinisterioService;
 import jakarta.validation.Valid;
-import org.apache.coyote.Response;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -34,7 +35,7 @@ public class MinisteriosController {
     //USO GERAL
 
     @GetMapping
-    public ResponseEntity<List<MinisterioSimplificadoDTO>> buscarMinisteriosGerais(){
+    public ResponseEntity<List<MinisterioSimplificadoDTO>> buscarMinisteriosGerais() {
 
         return ResponseEntity.status(HttpStatus.OK).body(
                 ministerio.buscarMinisteriosGerais()
@@ -46,7 +47,7 @@ public class MinisteriosController {
 
     @GetMapping("/governo")
     public ResponseEntity<Page<MinisterioSimplificadoDTO>> buscarMinisteriosGoverno(Pageable pageable, @RequestParam(required = false, defaultValue = "") String buscaGeral,
-                                                                                    @RequestParam(required = false) EnumStatusMinisterio status){
+                                                                                    @RequestParam(required = false) EnumStatusMinisterio status) {
 
         boolean semBusca = (buscaGeral == null || buscaGeral.isBlank());
         boolean semStatus = (status == null);
@@ -66,30 +67,30 @@ public class MinisteriosController {
     }
 
     @PostMapping("/governo")
-    public ResponseEntity<RestResponseMessage> adicionarMinisterio(@RequestBody @Valid MinisterioCreateDTO ministerioCreateDTO){
+    public ResponseEntity<RestResponseMessage> adicionarMinisterio(@RequestBody @Valid MinisterioCreateDTO ministerioCreateDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ministerio.criarMinisterio(ministerioCreateDTO)
         );
     }
 
     @PatchMapping("/governo/{idMinisterio}")
-    public ResponseEntity<RestResponseMessage> editarMinisterio (@PathVariable UUID idMinisterio, @RequestBody @Valid MinisterioUpdateDTO ministerioUpdateDTO){
+    public ResponseEntity<RestResponseMessage> editarMinisterio(@PathVariable UUID idMinisterio, @RequestBody @Valid MinisterioUpdateDTO ministerioUpdateDTO) {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ministerio.editarMinisterio(ministerioUpdateDTO, idMinisterio));
     }
 
     //VISAO  LIDER MINISTERIO
 
     @GetMapping("/lider-ministerio/{idMinisterio}")
-    public ResponseEntity<Page<MembroMinisterioDTO>> buscarMembroMinisterioLiderMinisterio(@PathVariable UUID idMinisterio, Pageable pageable, @RequestParam(required = false, defaultValue = "") String buscaGeral,
-                                                                                            @RequestParam(required = false) EnumStatusMembro status){
+    public ResponseEntity<Page<MembroMinisterioInfoMembroDTO>> buscarMembroMinisterioLiderMinisterio(@PathVariable UUID idMinisterio, Pageable pageable, @RequestParam(required = false, defaultValue = "") String buscaGeral,
+                                                                                                     @RequestParam(required = false) EnumStatusMembro status) {
 
-        if(idMinisterio == null || idMinisterio.toString().isBlank()){
+        if (idMinisterio == null || idMinisterio.toString().isBlank()) {
             throw new FieldInvalidException("ID do ministério não pode ser nulo");
         }
         boolean semBusca = (buscaGeral == null || buscaGeral.isBlank());
         boolean semStatus = (status == null);
 
-        Page<MembroMinisterioDTO> pagina;
+        Page<MembroMinisterioInfoMembroDTO> pagina;
 
         if (semBusca && semStatus) {
             pagina = ministerio.buscarMembroMinisterioLiderMinisterio(idMinisterio, pageable);
@@ -102,15 +103,25 @@ public class MinisteriosController {
 
     }
 
+    @GetMapping("/lider-ministerio")
+    public ResponseEntity<List<MinisterioSuperSimplificadoDTO>> buscarMinisteriosLiderMinisterio() {
+
+        List<MinisterioSuperSimplificadoDTO> listaMinisterios = ministerio.buscarMinisteriosLiderMinisterio();
+
+
+        return ResponseEntity.status(HttpStatus.OK).body(listaMinisterios);
+
+    }
+
     @PatchMapping("/lider-ministerio/{idMinisterio}")
-    public ResponseEntity<RestResponseMessage> adicionarMembroMinisterioLiderMinisterio (@PathVariable UUID idMinisterio, @RequestBody @Valid MembroMinisterioCreateDTO membroMinisterio){
+    public ResponseEntity<RestResponseMessage> adicionarMembroMinisterioLiderMinisterio(@PathVariable UUID idMinisterio, @RequestBody @Valid MembroMinisterioCreateDTO membroMinisterio) {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
                 ministerio.adicionarMembroMinisterioLiderMinisterio(idMinisterio, membroMinisterio)
         );
     }
 
     @DeleteMapping("/lider-ministerio/{idMinisterio}/{idMembroMinisterio}")
-    public ResponseEntity<RestResponseMessage> removerMembroMinisterioLiderMinisterio (@PathVariable UUID idMinisterio, @PathVariable UUID idMembroMinisterio){
+    public ResponseEntity<RestResponseMessage> removerMembroMinisterioLiderMinisterio(@PathVariable UUID idMinisterio, @PathVariable UUID idMembroMinisterio) {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
                 ministerio.removerMembroMinisterioLiderMinisterio(idMinisterio, idMembroMinisterio)
         );
