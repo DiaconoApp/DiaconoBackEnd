@@ -132,6 +132,7 @@ public class MinisterioService {
                 .ministerio(novoMinisterio)
                 .cargoMembro(EnumCargoMembroMinisterio.LIDER_MINISTERIO)
                 .nomeMinisterio(novoMinisterio.getNome())
+                .dataRegistro(data)
                 .build();
 
         Set<MembroMinisterio> membroMinisterios = novoMinisterio.getMembros();
