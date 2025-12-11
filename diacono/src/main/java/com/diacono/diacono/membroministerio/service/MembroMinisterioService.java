@@ -51,7 +51,10 @@ public class MembroMinisterioService {
 
     public Page<MembroMinisterioInfoMembroDTO> buscarPorMembroMinisterioComFiltro(UUID idMinisterio, Pageable pageable, String texto, EnumStatusMembro status){
 
-        String textoFormatado =  "%" + texto + "%" ;
+        String textoFormatado = null;
+        if (texto != null && !texto.isBlank()) {
+            textoFormatado = "%" + texto + "%";
+        }
 
         Page<MembroMinisterio> page = membroMinisterioRepository.buscarPorMembroMinisterioComFiltro(pageable,idMinisterio, textoFormatado, status);
 
