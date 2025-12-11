@@ -32,7 +32,7 @@ public interface MembroMinisterioRepository extends JpaRepository<MembroMinister
             LOWER(m.nome) LIKE LOWER(:busca)
             OR LOWER(m.email) LIKE LOWER(:busca))
             """)
-    Page<MembroMinisterio> buscarPorMembroMinisterioComFiltro(Pageable pageable, UUID idMinisterio, String texto, EnumStatusMembro status);
+    Page<MembroMinisterio> buscarPorMembroMinisterioComFiltro(Pageable pageable, UUID idMinisterio, @Param("busca") String texto, EnumStatusMembro status);
 
     @Query("""
             SELECT mm FROM MembroMinisterio mm

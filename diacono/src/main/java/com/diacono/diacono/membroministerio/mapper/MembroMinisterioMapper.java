@@ -22,6 +22,7 @@ public interface MembroMinisterioMapper {
     @Mapping(target = "dataNascimento", source = "membro.dataNascimento")
     @Mapping(target = "cargo", source = "cargoMembro")
     @Mapping(target = "nomeMinisterio", source = "ministerio.nome")
+    @Mapping(target = "status", source = "membro.status")
     MembroMinisterioInfoMembroDTO paraMembroMinisterioInfoMembroDTO(MembroMinisterio membroMinisterio);
 
 
