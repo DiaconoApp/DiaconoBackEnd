@@ -4,7 +4,7 @@ import com.diacono.diacono.global.dto.response.RestResponseMessage;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
 import com.diacono.diacono.membroministerio.model.dto.request.MembroMinisterioCreateDTO;
-import com.diacono.diacono.membroministerio.model.dto.response.MembroMinisterioDTO;
+import com.diacono.diacono.membroministerio.model.dto.response.MembroMinisterioInfoMembroDTO;
 import com.diacono.diacono.ministerio.model.dto.MinisterioCreateDTO;
 import com.diacono.diacono.ministerio.model.dto.MinisterioUpdateDTO;
 import com.diacono.diacono.ministerio.model.dto.response.MinisterioSimplificadoDTO;
@@ -201,14 +201,14 @@ class MinisteriosControllerTest {
     @Test
     @DisplayName("Deve buscar membros do ministério para líder sem filtros com sucesso")
     void buscarMembroMinisterioLiderMinisterioSemFiltrosSucesso() {
-        MembroMinisterioDTO dto1 = mock(MembroMinisterioDTO.class);
-        MembroMinisterioDTO dto2 = mock(MembroMinisterioDTO.class);
-        List<MembroMinisterioDTO> membros = Arrays.asList(dto1, dto2);
-        Page<MembroMinisterioDTO> membrosPage = new PageImpl<>(membros, pageable, membros.size());
+        MembroMinisterioInfoMembroDTO dto1 = mock(MembroMinisterioInfoMembroDTO.class);
+        MembroMinisterioInfoMembroDTO dto2 = mock(MembroMinisterioInfoMembroDTO.class);
+        List<MembroMinisterioInfoMembroDTO> membros = Arrays.asList(dto1, dto2);
+        Page<MembroMinisterioInfoMembroDTO> membrosPage = new PageImpl<>(membros, pageable, membros.size());
 
         when(ministerioService.buscarMembroMinisterioLiderMinisterio(ministerioId, pageable)).thenReturn(membrosPage);
 
-        ResponseEntity<Page<MembroMinisterioDTO>> response = ministeriosController.buscarMembroMinisterioLiderMinisterio(
+        ResponseEntity<Page<MembroMinisterioInfoMembroDTO>> response = ministeriosController.buscarMembroMinisterioLiderMinisterio(
                 ministerioId, pageable, "", null
         );
 
@@ -226,14 +226,14 @@ class MinisteriosControllerTest {
         String buscaGeral = "João";
         EnumStatusMembro status = EnumStatusMembro.ATIVO;
 
-        MembroMinisterioDTO dto = mock(MembroMinisterioDTO.class);
-        List<MembroMinisterioDTO> membros = Collections.singletonList(dto);
-        Page<MembroMinisterioDTO> membrosPage = new PageImpl<>(membros, pageable, membros.size());
+        MembroMinisterioInfoMembroDTO dto = mock(MembroMinisterioInfoMembroDTO.class);
+        List<MembroMinisterioInfoMembroDTO> membros = Collections.singletonList(dto);
+        Page<MembroMinisterioInfoMembroDTO> membrosPage = new PageImpl<>(membros, pageable, membros.size());
 
         when(ministerioService.buscarMembroMinisterioLiderMinisterioComFiltro(ministerioId, pageable, buscaGeral, status))
                 .thenReturn(membrosPage);
 
-        ResponseEntity<Page<MembroMinisterioDTO>> response = ministeriosController.buscarMembroMinisterioLiderMinisterio(
+        ResponseEntity<Page<MembroMinisterioInfoMembroDTO>> response = ministeriosController.buscarMembroMinisterioLiderMinisterio(
                 ministerioId, pageable, buscaGeral, status
         );
 

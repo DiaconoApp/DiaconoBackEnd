@@ -8,7 +8,7 @@ import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
 import com.diacono.diacono.membro.model.entity.Membro;
 import com.diacono.diacono.membro.repository.MembroRepository;
 import com.diacono.diacono.membroministerio.model.dto.request.MembroMinisterioCreateDTO;
-import com.diacono.diacono.membroministerio.model.dto.response.MembroMinisterioDTO;
+import com.diacono.diacono.membroministerio.model.dto.response.MembroMinisterioInfoMembroDTO;
 import com.diacono.diacono.membroministerio.model.entity.EnumCargoMembroMinisterio;
 import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
 import com.diacono.diacono.membroministerio.service.MembroMinisterioService;
@@ -264,15 +264,15 @@ class MinisterioServiceTest {
     @Test
     @DisplayName("Deve buscar membros do ministério para líder com sucesso")
     void buscarMembroMinisterioLiderMinisterioSucesso() {
-        MembroMinisterioDTO dto1 = mock(MembroMinisterioDTO.class);
-        MembroMinisterioDTO dto2 = mock(MembroMinisterioDTO.class);
-        List<MembroMinisterioDTO> dtos = Arrays.asList(dto1, dto2);
-        Page<MembroMinisterioDTO> expectedResult = new PageImpl<>(dtos, pageable, dtos.size());
+        MembroMinisterioInfoMembroDTO dto1 = mock(MembroMinisterioInfoMembroDTO.class);
+        MembroMinisterioInfoMembroDTO dto2 = mock(MembroMinisterioInfoMembroDTO.class);
+        List<MembroMinisterioInfoMembroDTO> dtos = Arrays.asList(dto1, dto2);
+        Page<MembroMinisterioInfoMembroDTO> expectedResult = new PageImpl<>(dtos, pageable, dtos.size());
 
         when(membroMinisterioService.buscarPorMembroMinisterioSemFiltro(ministerioId, pageable))
-            .thenReturn((Page<MembroMinisterioDTO>) expectedResult);
+            .thenReturn(expectedResult);
 
-        Page<MembroMinisterioDTO> result = ministerioService.buscarMembroMinisterioLiderMinisterio(ministerioId, pageable);
+        Page<MembroMinisterioInfoMembroDTO> result = ministerioService.buscarMembroMinisterioLiderMinisterio(ministerioId, pageable);
 
         assertNotNull(result);
         assertEquals(2, result.getTotalElements());
@@ -285,14 +285,14 @@ class MinisterioServiceTest {
         String texto = "João";
         EnumStatusMembro status = EnumStatusMembro.ATIVO;
         
-        MembroMinisterioDTO dto = mock(MembroMinisterioDTO.class);
-        List<MembroMinisterioDTO> dtos = Collections.singletonList(dto);
-        Page<MembroMinisterioDTO> expectedResult = new PageImpl<>(dtos, pageable, dtos.size());
+        MembroMinisterioInfoMembroDTO dto = mock(MembroMinisterioInfoMembroDTO.class);
+        List<MembroMinisterioInfoMembroDTO> dtos = Collections.singletonList(dto);
+        Page<MembroMinisterioInfoMembroDTO> expectedResult = new PageImpl<>(dtos, pageable, dtos.size());
 
         when(membroMinisterioService.buscarPorMembroMinisterioComFiltro(ministerioId, pageable, texto, status))
-            .thenReturn((Page<MembroMinisterioDTO>) expectedResult);
+            .thenReturn(expectedResult);
 
-        Page<MembroMinisterioDTO> result = ministerioService.buscarMembroMinisterioLiderMinisterioComFiltro(
+        Page<MembroMinisterioInfoMembroDTO> result = ministerioService.buscarMembroMinisterioLiderMinisterioComFiltro(
             ministerioId, pageable, texto, status
         );
 
