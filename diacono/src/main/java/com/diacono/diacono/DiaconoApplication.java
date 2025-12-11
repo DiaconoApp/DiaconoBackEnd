@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @SpringBootApplication
 public class DiaconoApplication {
@@ -24,22 +25,9 @@ public class DiaconoApplication {
     public CommandLineRunner demo(MembroRepository repository, IgrejaRepository igrejaRepository, BCryptPasswordEncoder passwordEncoder) {
         return (args) -> {
 
-            EnderecoIgreja enderecoIgreja = EnderecoIgreja.builder()
-                    .rua("Rua Palmeira de Vinho")
-                    .numero("584")
-                    .bairro("Jardim Elba")
-                    .cidade("São Paulo")
-                    .estado("São Paulo")
-                    .cep("03980070")
-                    .build();
+            UUID idExterno = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
 
-
-            Igreja igrejaIcf = Igreja.builder()
-                    .nome("ICF")
-                    .cnpj("96966954000122")
-                    .enderecoIgreja(enderecoIgreja)
-                    .build();
-
+            Igreja igrejaIcf = igrejaRepository.findByIdExterno(idExterno);
 
             EnderecoMembro enderecoMembro = EnderecoMembro.builder()
                     .rua("Rua Ibatiba")
@@ -72,7 +60,6 @@ public class DiaconoApplication {
                     .generoMembro(EnumGeneroMembro.MASCULINO)
                     .build();
 
-            igrejaRepository.save(igrejaIcf);
 
             repository.save(governo);
 
