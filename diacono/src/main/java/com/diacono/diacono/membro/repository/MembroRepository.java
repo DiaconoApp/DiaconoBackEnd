@@ -34,12 +34,16 @@ public interface MembroRepository extends JpaRepository<Membro, Long> {
     @Query("SELECT COUNT(m) FROM Membro m WHERE m.discipulador IS NOT NULL")
     Long countMembrosDiscipulados();
 
-    @Query("SELECT m FROM Membro m " +
-            "WHERE (nome LIKE :buscaGeral " +
-            "OR email LIKE :buscaGeral " +
-            "OR celular LIKE :buscaGeral)" +
-            "AND m.igreja.idExterno = :fkIgreja " +
-            "ORDER BY nome"
+    @Query("""
+            SELECT m FROM Membro m  
+            WHERE 
+            (:buscaGeral IS NULL OR
+            LOWER(nome) LIKE LOWER(:buscaGeral)  
+            OR LOWER(email) LIKE LOWER(:buscaGeral) 
+            OR LOWER(celular) LIKE LOWER(:buscaGeral)) 
+            AND m.igreja.idExterno = :fkIgreja  
+            ORDER BY nome
+            """
     )
     List<Membro> findAllWithFilter(
             @Param("buscaGeral") String buscaGeral, @Param("fkIgreja") UUID fkIgreja
