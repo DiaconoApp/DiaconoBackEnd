@@ -31,7 +31,6 @@ public record EnderecoMembroDTO(
         String rua,
 
         @Size(max = 100, message = "Complemento pode ter no máximo 100 caracteres")
-        @NotBlank(message = "O complemento do endereço não pode ser nulo")
         String complemento,
 
         @NotBlank(message = "O número da casa não pode ser nulo")

@@ -25,7 +25,6 @@ public class IgrejaService {
     public Igreja buscarUUID(UUID idExterno){
         //adicionar validação da existência da Igreja -- SE DER ERRO LANÇAR EXCEÇÃO
         Igreja igreja = igrejaRepository.findByIdExterno(idExterno);
-
         if(igreja == null){
             throw new ObjectNotFoundException("Igreja não encontrada");
         }

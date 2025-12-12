@@ -1,9 +1,11 @@
 package com.diacono.diacono.membro.controller;
 
+import com.diacono.diacono.evento.model.dto.response.EventoUnicoSimplificadoDTO;
 import com.diacono.diacono.global.dto.response.RestResponseMessage;
 import com.diacono.diacono.global.error.comuns.ApiErrorsComuns;
 import com.diacono.diacono.membro.model.dto.request.MembroCreateDTO;
 import com.diacono.diacono.membro.model.dto.response.MembroResponseDTO;
+import com.diacono.diacono.membro.model.dto.response.MembroSimplificadoDTO;
 import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
 import com.diacono.diacono.membro.service.MembroService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -45,7 +47,7 @@ public class MembroController {
                                                                         @RequestParam(required = false) EnumStatusMembro status,
                                                                         @RequestParam(required = false) UUID fkMinisterio) {
 
-        if(buscaGeral == null && buscaGeral.isEmpty() && fkMinisterio == null && status == null){
+        if((buscaGeral == null || buscaGeral.isBlank()) && fkMinisterio == null && status == null){
             Page<MembroResponseDTO> response = membrosService.buscarTodosSemFiltro(pageable);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         }
@@ -56,6 +58,17 @@ public class MembroController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
 
     }
+
+//    @ApiErrorsComuns
+//    @ApiResponse(responseCode = "200", description = "Membros encontrados com sucesso")
+//    @GetMapping("/{idExternoMinisterio}")
+//    public ResponseEntity<List<MembroSimplificadoDTO>> buscarMembrosPorMinisterioSemEscala(
+//            @RequestParam UUID idExternoMinisterio,
+//            @RequestBody EventoUnicoSimplificadoDTO eventoUnicoSimplificadoDTO
+//            ) {
+//        List<MembroSimplificadoDTO> membrosDisponiveisParaEscala = membrosService.buscarMembrosDisponiveisParaEscala(idExternoMinisterio, eventoUnicoSimplificadoDTO);
+//        return ResponseEntity.status(HttpStatus.OK).body(membrosDisponiveisParaEscala);
+//    }
 
 
 }

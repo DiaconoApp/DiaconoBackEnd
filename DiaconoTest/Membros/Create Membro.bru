@@ -7,7 +7,11 @@ meta {
 post {
   url: http://localhost:8080/membros
   body: json
-  auth: inherit
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{acessToken}}
 }
 
 body:json {
@@ -19,10 +23,10 @@ body:json {
     "email": "lucas.oliveira@email.com",
     "celular": "11912345678",
     "senha": "Senha@123",
-    "idExternoMinisterios": ["550e8400-e29b-41d4-a716-446655440020"],
+    "idExternoMinisterios": null,
     "cargo": "MEMBRO",
     "membroEnderecoDTO": {
-      "cep": "01310-100",
+      "cep": "01310100",
       "logradouro": "Avenida Paulista",
       "bairro": "Bela Vista",
       "cidade": "São Paulo",

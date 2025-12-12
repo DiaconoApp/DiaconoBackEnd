@@ -41,6 +41,8 @@ public class Membro extends IdEntityUtils {
 
     private LocalDate dataNascimento;
 
+    private LocalDate dataRegistro;
+
     private String email;
 
     private String celular;
@@ -53,5 +55,9 @@ public class Membro extends IdEntityUtils {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EnumCargoMembro cargoMembro;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EnumGeneroMembro generoMembro;
 
 }
