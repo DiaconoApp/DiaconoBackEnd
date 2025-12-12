@@ -1,91 +1,63 @@
 package com.diacono.diacono.membro.model.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.diacono.diacono.Igreja.model.entity.Igreja;
+import com.diacono.diacono.global.util.IdEntityUtils;
+import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-public class Membro  {
+@Getter
+@Setter
+@NoArgsConstructor
+@SuperBuilder(toBuilder = true)
+public class Membro extends IdEntityUtils {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn (name = "fk_igreja")
+    private Igreja igreja;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "discipulador_id")
+    private Membro discipulador;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "fk_endereco")
+    private EnderecoMembro enderecoMembro;
+
+    @OneToMany(mappedBy = "membro", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<MembroMinisterio> ministerios = new HashSet<>();
 
     private String nome;
-    private String email;
-    private LocalDate dataNascimento;
+
     private String cpf;
-    private String cep;
-    private Integer numeroCasa;
-    private String senhaTemporaria;
+
+    private LocalDate dataNascimento;
+
+    private LocalDate dataRegistro;
+
+    private String email;
+
+    private String celular;
+
     private String senha;
 
-    public Membro(String nome, String email, LocalDate dataNascimento, String cpf, String cep, Integer numeroCasa, String senhaTemporaria, String senha) {
-        this.nome = nome;
-        this.email = email;
-        this.dataNascimento = dataNascimento;
-        this.cpf = cpf;
-        this.cep = cep;
-        this.numeroCasa = numeroCasa;
-        this.senhaTemporaria = senhaTemporaria;
-        this.senha = senha;
-    }
+    @Enumerated(EnumType.STRING)
+    private EnumStatusMembro status;
 
-    public Membro() {
-    }
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EnumCargoMembro cargoMembro;
 
-    public Integer getId() {
-        return id;
-    }
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EnumGeneroMembro generoMembro;
 
-    public String getNome() {
-        return nome;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public LocalDate getDataNascimento() {
-        return dataNascimento;
-    }
-
-    public String getCpf() {
-        return cpf;
-    }
-
-    public String getCep() {
-        return cep;
-    }
-
-    public Integer getNumeroCasa() {
-        return numeroCasa;
-    }
-
-    public String getSenhaTemporaria() {
-        return senhaTemporaria;
-    }
-
-    public String getSenha() {
-        return senha;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setCep(String cep) {
-        this.cep = cep;
-    }
-
-    public void setNumeroCasa(Integer numeroCasa) {
-        this.numeroCasa = numeroCasa;
-    }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
-    }
 }

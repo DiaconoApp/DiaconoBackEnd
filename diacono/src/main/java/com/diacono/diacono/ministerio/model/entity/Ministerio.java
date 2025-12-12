@@ -1,72 +1,36 @@
 package com.diacono.diacono.ministerio.model.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.diacono.diacono.Igreja.model.entity.Igreja;
+import com.diacono.diacono.global.util.IdEntityUtils;
+import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-public class Ministerio {
+@SuperBuilder(toBuilder = true)
+@NoArgsConstructor
+@Getter
+@Setter
+public class Ministerio extends IdEntityUtils{
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn (name = "fk_igreja")
+    private Igreja igreja;
     private String nome;
     private LocalDate dataCriacao;
     private String nomeLider;
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private EnumStatusMinisterio status;
+    @OneToMany(mappedBy = "ministerio", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<MembroMinisterio> membros = new HashSet<>();
 
-    public Ministerio(String nome, LocalDate data, String nomeLider, String status) {
-        this.nome = nome;
-        this.dataCriacao = data;
-        this.nomeLider = nomeLider;
-        this.status = status;
-    }
 
-    public Ministerio() {
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public LocalDate getDataCriacao() {
-        return dataCriacao;
-    }
-
-    public void setDataCriacao(LocalDate dataCriacao) {
-        this.dataCriacao = dataCriacao;
-    }
-
-    public String getNomeLider() {
-        return nomeLider;
-    }
-
-    public void setNomeLider(String nomeLider) {
-        this.nomeLider = nomeLider;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
 }
 

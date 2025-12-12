@@ -1,15 +1,23 @@
 package com.diacono.diacono.evento.model.entity;
 
+import com.diacono.diacono.global.util.IdEntityUtils;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDate;
 
 @Entity
-public class Recorrencia {
+@Getter
+@NoArgsConstructor
+@SuperBuilder(toBuilder = true)
+public class Recorrencia extends IdEntityUtils {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fk_evento", nullable = false)
-    private Evento evento;
+    @Enumerated(EnumType.STRING)
+    private TipoRecorrencia tipoRecorrencia;
+    private LocalDate dataInicioRecorrencia;
+    private LocalDate dataTerminoRecorrencia;
 }

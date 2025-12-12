@@ -1,0 +1,20 @@
+meta {
+  name: removerMembroMinisterioLider
+  type: http
+  seq: 6
+}
+
+delete {
+  url: http://localhost:8080/api/v1/ministerios/lider-ministerio/45a8725d-a7f3-4667-bc5d-51ac8f9c67d6/18c9cedd-ad5b-46f4-90cb-ebc05ea99f63
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{acessToken}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
