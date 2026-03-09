@@ -5,13 +5,19 @@ import com.diacono.diacono.Igreja.model.dto.response.IgrejaSemiCompletoDTO;
 import com.diacono.diacono.Igreja.model.entity.Igreja;
 import com.diacono.diacono.Igreja.repository.IgrejaRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
 public class IgrejaService {
+
+    // OWASP A05: logging seguro sem expor dados sensiveis.
+    private static final Logger logger = LoggerFactory.getLogger(IgrejaService.class);
 
     private final IgrejaRepository igrejaRepository;
     private final IgrejaMapper igrejaMapper;
@@ -21,27 +27,40 @@ public class IgrejaService {
         this.igrejaMapper = igrejaMapper;
     }
 
-    /*ESSE MÉTODO SE RELACIONA COM EVENTO*/
-    public Igreja buscarUUID(UUID idExterno){
-        //adicionar validação da existência da Igreja -- SE DER ERRO LANÇAR EXCEÇÃO
+    /* ESSE METODO SE RELACIONA COM EVENTO */
+    @Transactional(readOnly = true)
+    public Igreja buscarUUID(UUID idExterno) {
+        // OWASP A01: validacao defensiva de identificador vindo da camada superior.
+        if (idExterno == null) {
+            logger.warn("Tentativa de busca de igreja com UUID nulo");
+            throw new ObjectNotFoundException("Igreja nao encontrada");
+        }
+
         Igreja igreja = igrejaRepository.findByIdExterno(idExterno);
-        if(igreja == null){
-            throw new ObjectNotFoundException("Igreja não encontrada");
+        if (igreja == null) {
+            logger.warn("Igreja nao encontrada para o UUID informado");
+            throw new ObjectNotFoundException("Igreja nao encontrada");
         }
 
         return igreja;
-
     }
 
-    public List<IgrejaSemiCompletoDTO> buscarIgrejas(){
-
+    @Transactional(readOnly = true)
+    public List<IgrejaSemiCompletoDTO> buscarIgrejas() {
         List<Igreja> igrejas = igrejaRepository.findAll();
 
-        if(igrejas == null || igrejas.isEmpty()){
-            throw new ObjectNotFoundException("Igrejas não encontradas");
+        if (igrejas.isEmpty()) {
+            logger.warn("Nenhuma igreja encontrada para listagem");
+            throw new ObjectNotFoundException("Igrejas nao encontradas");
         }
 
-        return igrejaMapper.paraListaIgrejaSemiCompletoDTO(igrejas);
+        // OWASP A05: fail-safe se o mapeamento retornar vazio/inconsistente.
+        List<IgrejaSemiCompletoDTO> resposta = igrejaMapper.paraListaIgrejaSemiCompletoDTO(igrejas);
+        if (resposta == null || resposta.isEmpty()) {
+            logger.warn("Falha de consistencia ao mapear igrejas para DTO");
+            throw new ObjectNotFoundException("Igrejas nao encontradas");
+        }
 
+        return resposta;
     }
 }
