@@ -1,24 +1,25 @@
 package com.diacono.diacono.ministerio.service;
 
-import com.diacono.diacono.global.dto.response.RestResponseMessage;
+import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.util.JwtUtils;
-import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
-import com.diacono.diacono.membro.model.entity.Membro;
-import com.diacono.diacono.membro.repository.MembroRepository;
-import com.diacono.diacono.membroministerio.model.dto.request.MembroMinisterioCreateDTO;
-import com.diacono.diacono.membroministerio.model.dto.response.MembroMinisterioInfoMembroDTO;
-import com.diacono.diacono.membroministerio.model.entity.EnumCargoMembroMinisterio;
-import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
-import com.diacono.diacono.membroministerio.service.MembroMinisterioService;
-import com.diacono.diacono.ministerio.mapper.MinisterioMapper;
-import com.diacono.diacono.ministerio.model.dto.MinisterioCreateDTO;
-import com.diacono.diacono.ministerio.model.dto.MinisterioUpdateDTO;
-import com.diacono.diacono.ministerio.model.dto.response.MinisterioSimplificadoDTO;
-import com.diacono.diacono.ministerio.model.entity.EnumStatusMinisterio;
-import com.diacono.diacono.ministerio.model.entity.Ministerio;
-import com.diacono.diacono.ministerio.repository.MinisteriosRepository;
+import com.diacono.diacono.domain.enums.EnumStatusMembro;
+import com.diacono.diacono.domain.entity.Membro;
+import com.diacono.diacono.infrastructure.persistence.MembroJpaRepository;
+import com.diacono.diacono.applications.dtos.membro.MembroMinisterioCreateDTO;
+import com.diacono.diacono.applications.dtos.membro.MembroMinisterioInfoMembroDTO;
+import com.diacono.diacono.domain.enums.EnumCargoMembroMinisterio;
+import com.diacono.diacono.domain.entity.MembroMinisterio;
+import com.diacono.diacono.use_cases.MembroMinisterioService;
+import com.diacono.diacono.applications.mappers.ministerio.MinisterioMapper;
+import com.diacono.diacono.applications.dtos.ministerio.MinisterioCreateDTO;
+import com.diacono.diacono.applications.dtos.ministerio.MinisterioUpdateDTO;
+import com.diacono.diacono.applications.dtos.ministerio.MinisterioSimplificadoDTO;
+import com.diacono.diacono.domain.enums.EnumStatusMinisterio;
+import com.diacono.diacono.domain.entity.Ministerio;
+import com.diacono.diacono.infrastructure.persistence.MinisteriosJpaRepository;
+import com.diacono.diacono.use_cases.MinisterioService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,7 +48,7 @@ class MinisterioServiceTest {
     private JwtUtils jwtUtils;
 
     @Mock
-    private MinisteriosRepository ministeriosRepository;
+    private MinisteriosJpaRepository ministeriosJpaRepository;
 
     @Mock
     private MinisterioMapper ministerioMapper;
@@ -56,7 +57,7 @@ class MinisterioServiceTest {
     private MembroMinisterioService membroMinisterioService;
 
     @Mock
-    private MembroRepository membroRepository;
+    private MembroJpaRepository membroJpaRepository;
 
     @InjectMocks
     private MinisterioService ministerioService;
@@ -98,7 +99,7 @@ class MinisterioServiceTest {
         );
 
         when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
-        when(ministeriosRepository.findByIgreja_IdExterno(igrejaId, pageable)).thenReturn(ministeriosPage);
+        when(ministeriosJpaRepository.findByIgreja_IdExterno(igrejaId, pageable)).thenReturn(ministeriosPage);
         when(ministerioMapper.paraMinisterioSimplificadoDTO(ministerio1)).thenReturn(dto1);
         when(ministerioMapper.paraMinisterioSimplificadoDTO(ministerio2)).thenReturn(dto2);
 
@@ -108,7 +109,7 @@ class MinisterioServiceTest {
         assertEquals(2, result.getTotalElements());
         assertEquals("Ministério de Louvor", result.getContent().get(0).nome());
         assertEquals("Ministério de Diaconia", result.getContent().get(1).nome());
-        verify(ministeriosRepository).findByIgreja_IdExterno(igrejaId, pageable);
+        verify(ministeriosJpaRepository).findByIgreja_IdExterno(igrejaId, pageable);
     }
 
     @Test
@@ -117,7 +118,7 @@ class MinisterioServiceTest {
         Page<Ministerio> ministeriosPageVazia = new PageImpl<>(Collections.emptyList(), pageable, 0);
 
         when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
-        when(ministeriosRepository.findByIgreja_IdExterno(igrejaId, pageable)).thenReturn(ministeriosPageVazia);
+        when(ministeriosJpaRepository.findByIgreja_IdExterno(igrejaId, pageable)).thenReturn(ministeriosPageVazia);
 
         assertThrows(ObjectNotFoundException.class,
             () -> ministerioService.buscarMinisteriosGoverno(pageable));
@@ -143,7 +144,7 @@ class MinisterioServiceTest {
         );
 
         when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
-        when(ministeriosRepository.buscarComFiltros(pageable, stringBusca, status, igrejaId)).thenReturn(ministeriosPage);
+        when(ministeriosJpaRepository.buscarComFiltros(pageable, stringBusca, status, igrejaId)).thenReturn(ministeriosPage);
         when(ministerioMapper.paraMinisterioSimplificadoDTO(ministerio)).thenReturn(dto);
 
         Page<MinisterioSimplificadoDTO> result = ministerioService.buscarMinisteriosGovernoComFiltro(pageable, buscaGeral, status);
@@ -151,7 +152,7 @@ class MinisterioServiceTest {
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
         assertEquals("Ministério de Louvor", result.getContent().get(0).nome());
-        verify(ministeriosRepository).buscarComFiltros(pageable, stringBusca, status, igrejaId);
+        verify(ministeriosJpaRepository).buscarComFiltros(pageable, stringBusca, status, igrejaId);
     }
 
     @Test
@@ -165,7 +166,7 @@ class MinisterioServiceTest {
         Page<Ministerio> ministeriosPageVazia = new PageImpl<>(Collections.emptyList(), pageable, 0);
 
         when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
-        when(ministeriosRepository.buscarComFiltros(pageable, stringBusca, status, igrejaId)).thenReturn(ministeriosPageVazia);
+        when(ministeriosJpaRepository.buscarComFiltros(pageable, stringBusca, status, igrejaId)).thenReturn(ministeriosPageVazia);
 
         assertThrows(ObjectNotFoundException.class,
             () -> ministerioService.buscarMinisteriosGovernoComFiltro(pageable, buscaGeral, status));
@@ -183,16 +184,16 @@ class MinisterioServiceTest {
         Ministerio novoMinisterio = new Ministerio();
         novoMinisterio.setMembros(new HashSet<>());
 
-        when(membroRepository.findByIdExterno(liderId)).thenReturn(liderMinisterio);
-        when(ministeriosRepository.save(any(Ministerio.class))).thenReturn(novoMinisterio);
+        when(membroJpaRepository.findByIdExterno(liderId)).thenReturn(liderMinisterio);
+        when(ministeriosJpaRepository.save(any(Ministerio.class))).thenReturn(novoMinisterio);
 
-        RestResponseMessage result = ministerioService.criarMinisterio(ministerioCreateDTO);
+        RestResponseMessageDTO result = ministerioService.criarMinisterio(ministerioCreateDTO);
 
         assertNotNull(result);
         assertEquals(HttpStatus.CREATED, result.getStatus());
         assertEquals("Ministério criado com sucesso", result.getMessage());
-        verify(membroRepository).findByIdExterno(liderId);
-        verify(ministeriosRepository).save(any(Ministerio.class));
+        verify(membroJpaRepository).findByIdExterno(liderId);
+        verify(ministeriosJpaRepository).save(any(Ministerio.class));
     }
 
     @Test
@@ -200,7 +201,7 @@ class MinisterioServiceTest {
     void criarMinisterioLiderNaoEncontradoDeveRetornarErro() {
         MinisterioCreateDTO ministerioCreateDTO = new MinisterioCreateDTO(liderId, "Ministério de Louvor");
 
-        when(membroRepository.findByIdExterno(liderId)).thenReturn(null);
+        when(membroJpaRepository.findByIdExterno(liderId)).thenReturn(null);
 
         assertThrows(ObjectNotFoundException.class,
             () -> ministerioService.criarMinisterio(ministerioCreateDTO));
@@ -234,18 +235,18 @@ class MinisterioServiceTest {
         novoLider.setNome("Novo Líder");
         ReflectionTestUtils.setField(novoLider, "idExterno", novoLiderId);
 
-        when(ministeriosRepository.findByIdExterno(ministerioId)).thenReturn(ministerioExistente);
-        when(membroRepository.findByIdExterno(novoLiderId)).thenReturn(novoLider);
-        when(ministeriosRepository.save(ministerioExistente)).thenReturn(ministerioExistente);
+        when(ministeriosJpaRepository.findByIdExterno(ministerioId)).thenReturn(ministerioExistente);
+        when(membroJpaRepository.findByIdExterno(novoLiderId)).thenReturn(novoLider);
+        when(ministeriosJpaRepository.save(ministerioExistente)).thenReturn(ministerioExistente);
 
-        RestResponseMessage result = ministerioService.editarMinisterio(ministerioUpdateDTO, ministerioId);
+        RestResponseMessageDTO result = ministerioService.editarMinisterio(ministerioUpdateDTO, ministerioId);
 
         assertNotNull(result);
         assertEquals(HttpStatus.OK, result.getStatus());
         assertEquals("Ministério atualizado com sucesso", result.getMessage());
         assertEquals("Novo Nome Ministério", ministerioExistente.getNome());
         assertEquals(EnumStatusMinisterio.INATIVO, ministerioExistente.getStatus());
-        verify(ministeriosRepository).save(ministerioExistente);
+        verify(ministeriosJpaRepository).save(ministerioExistente);
     }
 
     @Test
@@ -255,7 +256,7 @@ class MinisterioServiceTest {
             "Novo Nome", EnumStatusMinisterio.ATIVO, liderId
         );
 
-        when(ministeriosRepository.findByIdExterno(ministerioId)).thenReturn(null);
+        when(ministeriosJpaRepository.findByIdExterno(ministerioId)).thenReturn(null);
 
         assertThrows(ObjectNotFoundException.class,
             () -> ministerioService.editarMinisterio(ministerioUpdateDTO, ministerioId));
@@ -308,10 +309,10 @@ class MinisterioServiceTest {
         Long idMinisterioLong = 1L;
         Long idMembroLong = 2L;
 
-        when(ministeriosRepository.buscarIdPorUUID(ministerioId)).thenReturn(idMinisterioLong);
-        when(membroRepository.buscarIdPorUUID(membroId)).thenReturn(idMembroLong);
+        when(ministeriosJpaRepository.buscarIdPorUUID(ministerioId)).thenReturn(idMinisterioLong);
+        when(membroJpaRepository.buscarIdPorUUID(membroId)).thenReturn(idMembroLong);
 
-        RestResponseMessage result = ministerioService.adicionarMembroMinisterioLiderMinisterio(ministerioId, dto);
+        RestResponseMessageDTO result = ministerioService.adicionarMembroMinisterioLiderMinisterio(ministerioId, dto);
 
         assertNotNull(result);
         assertEquals(HttpStatus.OK, result.getStatus());
@@ -331,7 +332,7 @@ class MinisterioServiceTest {
     void adicionarMembroMinisterioLiderMinisterioMinisterioNaoEncontradoDeveRetornarErro() {
         MembroMinisterioCreateDTO dto = new MembroMinisterioCreateDTO(membroId);
 
-        when(ministeriosRepository.buscarIdPorUUID(ministerioId)).thenReturn(null);
+        when(ministeriosJpaRepository.buscarIdPorUUID(ministerioId)).thenReturn(null);
 
         assertThrows(ObjectNotFoundException.class,
             () -> ministerioService.adicionarMembroMinisterioLiderMinisterio(ministerioId, dto));
@@ -343,8 +344,8 @@ class MinisterioServiceTest {
         MembroMinisterioCreateDTO dto = new MembroMinisterioCreateDTO(membroId);
         Long idMinisterioLong = 1L;
 
-        when(ministeriosRepository.buscarIdPorUUID(ministerioId)).thenReturn(idMinisterioLong);
-        when(membroRepository.buscarIdPorUUID(membroId)).thenReturn(null);
+        when(ministeriosJpaRepository.buscarIdPorUUID(ministerioId)).thenReturn(idMinisterioLong);
+        when(membroJpaRepository.buscarIdPorUUID(membroId)).thenReturn(null);
 
         assertThrows(ObjectNotFoundException.class,
             () -> ministerioService.adicionarMembroMinisterioLiderMinisterio(ministerioId, dto));
@@ -355,7 +356,7 @@ class MinisterioServiceTest {
     void removerMembroMinisterioLiderMinisterioSucesso() {
         UUID idMembroMinisterio = UUID.randomUUID();
 
-        RestResponseMessage result = ministerioService.removerMembroMinisterioLiderMinisterio(ministerioId, idMembroMinisterio);
+        RestResponseMessageDTO result = ministerioService.removerMembroMinisterioLiderMinisterio(ministerioId, idMembroMinisterio);
 
         assertNotNull(result);
         assertEquals(HttpStatus.OK, result.getStatus());
@@ -376,7 +377,7 @@ class MinisterioServiceTest {
 
         Set<Ministerio> ministeriosEncontrados = new HashSet<>(Arrays.asList(ministerio1, ministerio2));
 
-        when(ministeriosRepository.findAllByIdExternoIn(idsExternos)).thenReturn(ministeriosEncontrados);
+        when(ministeriosJpaRepository.findAllByIdExternoIn(idsExternos)).thenReturn(ministeriosEncontrados);
 
         Set<Ministerio> result = ministerioService.buscarPorUUID(idsExternos);
 
@@ -384,7 +385,7 @@ class MinisterioServiceTest {
         assertEquals(2, result.size());
         assertTrue(result.contains(ministerio1));
         assertTrue(result.contains(ministerio2));
-        verify(ministeriosRepository).findAllByIdExternoIn(idsExternos);
+        verify(ministeriosJpaRepository).findAllByIdExternoIn(idsExternos);
     }
 
     @Test
@@ -393,7 +394,7 @@ class MinisterioServiceTest {
         List<UUID> idsExternos = Arrays.asList(ministerioId, UUID.randomUUID());
         Set<Ministerio> ministeriosVazios = new HashSet<>();
 
-        when(ministeriosRepository.findAllByIdExternoIn(idsExternos)).thenReturn(ministeriosVazios);
+        when(ministeriosJpaRepository.findAllByIdExternoIn(idsExternos)).thenReturn(ministeriosVazios);
 
         assertThrows(ObjectNotFoundException.class,
             () -> ministerioService.buscarPorUUID(idsExternos));

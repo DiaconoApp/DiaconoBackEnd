@@ -1,10 +1,12 @@
 package com.diacono.diacono.auth.service;
 
-import com.diacono.diacono.auth.model.dto.request.LoginRequestDTO;
-import com.diacono.diacono.auth.model.dto.response.LoginResponseDTO;
+import com.diacono.diacono.applications.dtos.login.LoginRequestDTO;
+import com.diacono.diacono.applications.dtos.login.LoginResponseDTO;
 import com.diacono.diacono.global.error.exceptions.BadCredentialsException;
-import com.diacono.diacono.membro.model.entity.Membro;
-import com.diacono.diacono.membro.service.MembroService;
+import com.diacono.diacono.domain.entity.Membro;
+import com.diacono.diacono.use_cases.LoginService;
+import com.diacono.diacono.use_cases.MembroService;
+import com.diacono.diacono.use_cases.TokenService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

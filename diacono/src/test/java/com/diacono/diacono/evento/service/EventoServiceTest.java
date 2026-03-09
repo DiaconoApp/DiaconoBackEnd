@@ -1,31 +1,29 @@
 package com.diacono.diacono.evento.service;
 
-import com.diacono.diacono.evento.exceptions.TimeInvalidException;
-import com.diacono.diacono.evento.mapper.EventoMapper;
-import com.diacono.diacono.evento.mapper.EventoUpdateMapper;
-import com.diacono.diacono.evento.model.dto.request.EnderecoEventoDTO;
-import com.diacono.diacono.evento.model.dto.request.EventoCreateDTO;
-import com.diacono.diacono.evento.model.dto.request.EventoUpdateDTO;
-import com.diacono.diacono.evento.model.dto.request.RecorrenciaCreateDTO;
-import com.diacono.diacono.evento.model.dto.response.EnderecoEventoSimplificadoDTO;
-import com.diacono.diacono.evento.model.dto.response.EventoCompletoDTO;
-import com.diacono.diacono.evento.model.dto.response.EventoSimplificadoDTO;
-import com.diacono.diacono.evento.model.entity.EnderecoEvento;
-import com.diacono.diacono.evento.model.entity.Evento;
-import com.diacono.diacono.evento.model.entity.Recorrencia;
-import com.diacono.diacono.evento.model.entity.TipoRecorrencia;
-import com.diacono.diacono.evento.repository.EventoRepository;
-import com.diacono.diacono.global.dto.response.RestResponseMessage;
+import com.diacono.diacono.infrastructure.exceptions.TimeInvalidException;
+import com.diacono.diacono.applications.mappers.evento.EventoMapper;
+import com.diacono.diacono.applications.mappers.evento.EventoUpdateMapper;
+import com.diacono.diacono.applications.dtos.evento.EnderecoEventoDTO;
+import com.diacono.diacono.applications.dtos.evento.EventoCreateDTO;
+import com.diacono.diacono.applications.dtos.evento.EventoUpdateDTO;
+import com.diacono.diacono.applications.dtos.recorrencia.RecorrenciaCreateDTO;
+import com.diacono.diacono.applications.dtos.evento.EnderecoEventoSimplificadoDTO;
+import com.diacono.diacono.applications.dtos.evento.EventoCompletoDTO;
+import com.diacono.diacono.applications.dtos.evento.EventoSimplificadoDTO;
+import com.diacono.diacono.domain.entity.EnderecoEvento;
+import com.diacono.diacono.domain.entity.Evento;
+import com.diacono.diacono.domain.entity.Recorrencia;
+import com.diacono.diacono.domain.enums.TipoRecorrencia;
+import com.diacono.diacono.infrastructure.persistence.EventoJpaRepository;
+import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
 import com.diacono.diacono.global.util.JwtUtils;
-import com.diacono.diacono.membro.model.entity.Membro;
-import com.diacono.diacono.membro.service.MembroService;
-import com.diacono.diacono.ministerio.model.entity.Ministerio;
-import com.diacono.diacono.ministerio.service.MinisterioService;
-import com.diacono.diacono.Igreja.model.entity.Igreja;
-import com.diacono.diacono.Igreja.service.IgrejaService;
+import com.diacono.diacono.domain.entity.Membro;
+import com.diacono.diacono.use_cases.*;
+import com.diacono.diacono.domain.entity.Ministerio;
+import com.diacono.diacono.domain.entity.Igreja;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,7 +46,7 @@ import static org.mockito.Mockito.*;
 class EventoServiceTest {
 
     @Mock
-    private EventoRepository eventoRepository;
+    private EventoJpaRepository eventoJpaRepository;
 
     @Mock
     private EventoMapper eventoMapper;
@@ -106,14 +104,14 @@ class EventoServiceTest {
         EventoSimplificadoDTO eventoResponseDTO = mock(EventoSimplificadoDTO.class);
 
         when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
-        when(eventoRepository.findByPeriodo(any(LocalDateTime.class), any(LocalDateTime.class), eq(igrejaId))).thenReturn(eventos);
+        when(eventoJpaRepository.findByPeriodo(any(LocalDateTime.class), any(LocalDateTime.class), eq(igrejaId))).thenReturn(eventos);
         when(eventoMapper.paraEventoSimplificado(eventos)).thenReturn(eventoResponseDTO);
 
         EventoSimplificadoDTO result = eventoService.buscarEventosPorMesEAno(mes, ano);
 
         assertNotNull(result);
         assertEquals(eventoResponseDTO, result);
-        verify(eventoRepository).findByPeriodo(any(LocalDateTime.class), any(LocalDateTime.class), eq(igrejaId));
+        verify(eventoJpaRepository).findByPeriodo(any(LocalDateTime.class), any(LocalDateTime.class), eq(igrejaId));
         verify(eventoMapper).paraEventoSimplificado(eventos);
     }
 
@@ -145,7 +143,7 @@ class EventoServiceTest {
 
         when(jwtUtils.getIgrejaId()).thenReturn(null);
 
-        when(eventoRepository.findByPeriodo(
+        when(eventoJpaRepository.findByPeriodo(
                 any(LocalDateTime.class),
                 any(LocalDateTime.class),
                 isNull()
@@ -161,14 +159,14 @@ class EventoServiceTest {
         Evento evento = new Evento();
         EventoCompletoDTO eventoCompletoDTO = mock(EventoCompletoDTO.class);
 
-        when(eventoRepository.findByIdExterno(eventoId)).thenReturn(evento);
+        when(eventoJpaRepository.findByIdExterno(eventoId)).thenReturn(evento);
         when(eventoMapper.paraEventoCompletoDTO(evento)).thenReturn(eventoCompletoDTO);
 
         EventoCompletoDTO result = eventoService.buscarEventoEspecifico(eventoId);
 
         assertNotNull(result);
         assertEquals(eventoCompletoDTO, result);
-        verify(eventoRepository).findByIdExterno(eventoId);
+        verify(eventoJpaRepository).findByIdExterno(eventoId);
         verify(eventoMapper).paraEventoCompletoDTO(evento);
     }
 
@@ -208,16 +206,16 @@ class EventoServiceTest {
         when(membroService.buscarPorUUID(membroId)).thenReturn(organizador);
         when(igrejaService.buscarUUID(igrejaId)).thenReturn(igreja);
         when(ministerioService.buscarPorUUID(eventoCreateDTO.fkMinisterios())).thenReturn(ministerios);
-        when(eventoRepository.save(evento)).thenReturn(evento);
+        when(eventoJpaRepository.save(evento)).thenReturn(evento);
 
-        RestResponseMessage result = eventoService.criarEvento(eventoCreateDTO);
+        RestResponseMessageDTO result = eventoService.criarEvento(eventoCreateDTO);
 
         assertNotNull(result);
         assertEquals(HttpStatus.CREATED, result.getStatus());
         assertEquals("Evento sem recorrência criado com sucesso", result.getMessage());
         verify(recorrenciaService).validarRecorrencia(recorrenciaDTO, dataHoraInicio);
         verify(enderecoEventoService).validarEnderecoEvento(enderecoDTO);
-        verify(eventoRepository).save(evento);
+        verify(eventoJpaRepository).save(evento);
     }
 
     @Test
@@ -251,15 +249,15 @@ class EventoServiceTest {
         when(membroService.buscarPorUUID(membroId)).thenReturn(organizador);
         when(igrejaService.buscarUUID(igrejaId)).thenReturn(igreja);
         when(ministerioService.buscarPorUUID(eventoCreateDTO.fkMinisterios())).thenReturn(ministerios);
-        when(eventoRepository.save(evento)).thenReturn(evento);
-        when(eventoRepository.saveAll(anyList())).thenReturn(new ArrayList<>());
+        when(eventoJpaRepository.save(evento)).thenReturn(evento);
+        when(eventoJpaRepository.saveAll(anyList())).thenReturn(new ArrayList<>());
 
-        RestResponseMessage result = eventoService.criarEvento(eventoCreateDTO);
+        RestResponseMessageDTO result = eventoService.criarEvento(eventoCreateDTO);
 
         assertNotNull(result);
         assertEquals(HttpStatus.CREATED, result.getStatus());
         assertEquals("Eventos com recorrência semanal criado com sucesso", result.getMessage());
-        verify(eventoRepository).saveAll(anyList());
+        verify(eventoJpaRepository).saveAll(anyList());
     }
 
     @Test
@@ -293,15 +291,15 @@ class EventoServiceTest {
         when(membroService.buscarPorUUID(membroId)).thenReturn(organizador);
         when(igrejaService.buscarUUID(igrejaId)).thenReturn(igreja);
         when(ministerioService.buscarPorUUID(eventoCreateDTO.fkMinisterios())).thenReturn(ministerios);
-        when(eventoRepository.save(evento)).thenReturn(evento);
-        when(eventoRepository.saveAll(anyList())).thenReturn(new ArrayList<>());
+        when(eventoJpaRepository.save(evento)).thenReturn(evento);
+        when(eventoJpaRepository.saveAll(anyList())).thenReturn(new ArrayList<>());
 
-        RestResponseMessage result = eventoService.criarEvento(eventoCreateDTO);
+        RestResponseMessageDTO result = eventoService.criarEvento(eventoCreateDTO);
 
         assertNotNull(result);
         assertEquals(HttpStatus.CREATED, result.getStatus());
         assertEquals("Eventos com recorrência mensal criados com sucesso", result.getMessage());
-        verify(eventoRepository).saveAll(anyList());
+        verify(eventoJpaRepository).saveAll(anyList());
     }
 
     @Test
@@ -346,14 +344,14 @@ class EventoServiceTest {
     @Test
     @DisplayName("Deve apagar evento com sucesso")
     void apagarEventoSucesso() {
-        when(eventoRepository.deleteByIdExterno(eventoId)).thenReturn(1L);
+        when(eventoJpaRepository.deleteByIdExterno(eventoId)).thenReturn(1L);
 
-        RestResponseMessage result = eventoService.apagarEvento(eventoId);
+        RestResponseMessageDTO result = eventoService.apagarEvento(eventoId);
 
         assertNotNull(result);
         assertEquals(HttpStatus.OK, result.getStatus());
         assertEquals("Evento apagado com sucesso", result.getMessage());
-        verify(eventoRepository).deleteByIdExterno(eventoId);
+        verify(eventoJpaRepository).deleteByIdExterno(eventoId);
     }
 
     @Test
@@ -365,7 +363,7 @@ class EventoServiceTest {
     @Test
     @DisplayName("Deve lançar exceção quando evento não existe ao apagar")
     void apagarEventoNaoExisteDeveRetornarErro() {
-        when(eventoRepository.deleteByIdExterno(eventoId)).thenReturn(0L);
+        when(eventoJpaRepository.deleteByIdExterno(eventoId)).thenReturn(0L);
 
         assertThrows(ObjectNotFoundException.class, () -> eventoService.apagarEvento(eventoId));
     }
@@ -381,21 +379,21 @@ class EventoServiceTest {
         List<Evento> eventos = Arrays.asList(evento);
 
         when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
-        when(eventoRepository.findByIdExterno(eventoId)).thenReturn(evento);
-        when(eventoRepository.findByPeriodoAndRecorrencia(recorrencia, dataHoraInicio, igrejaId)).thenReturn(eventos);
+        when(eventoJpaRepository.findByIdExterno(eventoId)).thenReturn(evento);
+        when(eventoJpaRepository.findByPeriodoAndRecorrencia(recorrencia, dataHoraInicio, igrejaId)).thenReturn(eventos);
 
-        RestResponseMessage result = eventoService.apagarEventosMultiplos(eventoId);
+        RestResponseMessageDTO result = eventoService.apagarEventosMultiplos(eventoId);
 
         assertNotNull(result);
         assertEquals(HttpStatus.OK, result.getStatus());
         assertEquals("Evento apagado com sucesso", result.getMessage());
-        verify(eventoRepository).deleteAll(anyList());
+        verify(eventoJpaRepository).deleteAll(anyList());
     }
 
     @Test
     @DisplayName("Deve lançar exceção quando evento não existe ao apagar múltiplos eventos")
     void apagarEventosMultiplosEventoNaoExisteDeveRetornarErro() {
-        when(eventoRepository.findByIdExterno(eventoId)).thenReturn(null);
+        when(eventoJpaRepository.findByIdExterno(eventoId)).thenReturn(null);
 
         assertThrows(ObjectNotFoundException.class, () -> eventoService.apagarEventosMultiplos(eventoId));
     }
@@ -420,17 +418,17 @@ class EventoServiceTest {
         EnderecoEvento novoEndereco = new EnderecoEvento();
         Set<Ministerio> ministerios = new HashSet<>();
 
-        when(eventoRepository.findByIdExterno(eventoId)).thenReturn(evento);
+        when(eventoJpaRepository.findByIdExterno(eventoId)).thenReturn(evento);
         when(enderecoEventoService.converterDtoToEndereco(enderecoDTO)).thenReturn(novoEndereco);
         when(ministerioService.buscarPorUUID(eventoUpdateDTO.fkMinisterios())).thenReturn(ministerios);
-        when(eventoRepository.save(evento)).thenReturn(evento);
+        when(eventoJpaRepository.save(evento)).thenReturn(evento);
 
-        RestResponseMessage result = eventoService.alterarEvento(eventoUpdateDTO, eventoId);
+        RestResponseMessageDTO result = eventoService.alterarEvento(eventoUpdateDTO, eventoId);
 
         assertNotNull(result);
         assertEquals(HttpStatus.OK, result.getStatus());
         assertEquals("Evento atualizado com sucesso", result.getMessage());
-        verify(eventoRepository).save(evento);
+        verify(eventoJpaRepository).save(evento);
     }
 
     @Test
@@ -451,7 +449,7 @@ class EventoServiceTest {
             null, null, "Novo Nome", null, null, null, null, null
         );
 
-        when(eventoRepository.findByIdExterno(eventoId)).thenReturn(null);
+        when(eventoJpaRepository.findByIdExterno(eventoId)).thenReturn(null);
 
         assertThrows(ObjectSaveErrorException.class,
             () -> eventoService.alterarEvento(eventoUpdateDTO, eventoId));

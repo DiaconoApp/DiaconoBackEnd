@@ -1,12 +1,13 @@
 package com.diacono.diacono.cadastro.service;
 
-import com.diacono.diacono.Igreja.model.dto.response.IgrejaSemiCompletoDTO;
-import com.diacono.diacono.Igreja.service.IgrejaService;
-import com.diacono.diacono.cadastro.model.dto.CadastroExternoDTO;
-import com.diacono.diacono.global.dto.response.RestResponseMessage;
-import com.diacono.diacono.membro.model.entity.EnumGeneroMembro;
-import com.diacono.diacono.membro.model.entity.Membro;
-import com.diacono.diacono.membro.service.MembroService;
+import com.diacono.diacono.applications.dtos.igreja.IgrejaSemiCompletoDTO;
+import com.diacono.diacono.use_cases.CadastroService;
+import com.diacono.diacono.use_cases.IgrejaService;
+import com.diacono.diacono.applications.dtos.CadastroExternoDTO;
+import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
+import com.diacono.diacono.domain.enums.EnumGeneroMembro;
+import com.diacono.diacono.domain.entity.Membro;
+import com.diacono.diacono.use_cases.MembroService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -109,7 +110,7 @@ class CadastroServiceTest {
 
         when(membroService.criarMembroExterno(cadastroExternoDTO)).thenReturn(membroSalvo);
 
-        RestResponseMessage result = cadastroService.cadastrarMembro(cadastroExternoDTO);
+        RestResponseMessageDTO result = cadastroService.cadastrarMembro(cadastroExternoDTO);
 
         assertNotNull(result);
         assertEquals(HttpStatus.CREATED, result.getStatus());

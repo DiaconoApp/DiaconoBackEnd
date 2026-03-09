@@ -1,15 +1,16 @@
 package com.diacono.diacono.ministerio.controller;
 
-import com.diacono.diacono.global.dto.response.RestResponseMessage;
+import com.diacono.diacono.infrastructure.controllers.MinisteriosController;
+import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
-import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
-import com.diacono.diacono.membroministerio.model.dto.request.MembroMinisterioCreateDTO;
-import com.diacono.diacono.membroministerio.model.dto.response.MembroMinisterioInfoMembroDTO;
-import com.diacono.diacono.ministerio.model.dto.MinisterioCreateDTO;
-import com.diacono.diacono.ministerio.model.dto.MinisterioUpdateDTO;
-import com.diacono.diacono.ministerio.model.dto.response.MinisterioSimplificadoDTO;
-import com.diacono.diacono.ministerio.model.entity.EnumStatusMinisterio;
-import com.diacono.diacono.ministerio.service.MinisterioService;
+import com.diacono.diacono.domain.enums.EnumStatusMembro;
+import com.diacono.diacono.applications.dtos.membro.MembroMinisterioCreateDTO;
+import com.diacono.diacono.applications.dtos.membro.MembroMinisterioInfoMembroDTO;
+import com.diacono.diacono.applications.dtos.ministerio.MinisterioCreateDTO;
+import com.diacono.diacono.applications.dtos.ministerio.MinisterioUpdateDTO;
+import com.diacono.diacono.applications.dtos.ministerio.MinisterioSimplificadoDTO;
+import com.diacono.diacono.domain.enums.EnumStatusMinisterio;
+import com.diacono.diacono.use_cases.MinisterioService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -157,14 +158,14 @@ class MinisteriosControllerTest {
                 "Ministério de Louvor"
         );
 
-        RestResponseMessage expectedResponse = new RestResponseMessage(
+        RestResponseMessageDTO expectedResponse = new RestResponseMessageDTO(
                 HttpStatus.CREATED,
                 "Ministério criado com sucesso"
         );
 
         when(ministerioService.criarMinisterio(createDTO)).thenReturn(expectedResponse);
 
-        ResponseEntity<RestResponseMessage> response = ministeriosController.adicionarMinisterio(createDTO);
+        ResponseEntity<RestResponseMessageDTO> response = ministeriosController.adicionarMinisterio(createDTO);
 
         assertNotNull(response);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -182,14 +183,14 @@ class MinisteriosControllerTest {
                 UUID.randomUUID()
         );
 
-        RestResponseMessage expectedResponse = new RestResponseMessage(
+        RestResponseMessageDTO expectedResponse = new RestResponseMessageDTO(
                 HttpStatus.NO_CONTENT,
                 "Ministério atualizado com sucesso"
         );
 
         when(ministerioService.editarMinisterio(updateDTO, ministerioId)).thenReturn(expectedResponse);
 
-        ResponseEntity<RestResponseMessage> response = ministeriosController.editarMinisterio(ministerioId, updateDTO);
+        ResponseEntity<RestResponseMessageDTO> response = ministeriosController.editarMinisterio(ministerioId, updateDTO);
 
         assertNotNull(response);
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
@@ -260,14 +261,14 @@ class MinisteriosControllerTest {
                 UUID.randomUUID()
         );
 
-        RestResponseMessage expectedResponse = new RestResponseMessage(
+        RestResponseMessageDTO expectedResponse = new RestResponseMessageDTO(
                 HttpStatus.NO_CONTENT,
                 "Membro adicionado ao ministério com sucesso"
         );
 
         when(ministerioService.adicionarMembroMinisterioLiderMinisterio(ministerioId, createDTO)).thenReturn(expectedResponse);
 
-        ResponseEntity<RestResponseMessage> response = ministeriosController.adicionarMembroMinisterioLiderMinisterio(
+        ResponseEntity<RestResponseMessageDTO> response = ministeriosController.adicionarMembroMinisterioLiderMinisterio(
                 ministerioId, createDTO
         );
 
@@ -283,14 +284,14 @@ class MinisteriosControllerTest {
     void removerMembroMinisterioLiderMinisterioSucesso() {
         UUID idMembroMinisterio = UUID.randomUUID();
 
-        RestResponseMessage expectedResponse = new RestResponseMessage(
+        RestResponseMessageDTO expectedResponse = new RestResponseMessageDTO(
                 HttpStatus.NO_CONTENT,
                 "Membro removido do ministério com sucesso"
         );
 
         when(ministerioService.removerMembroMinisterioLiderMinisterio(ministerioId, idMembroMinisterio)).thenReturn(expectedResponse);
 
-        ResponseEntity<RestResponseMessage> response = ministeriosController.removerMembroMinisterioLiderMinisterio(
+        ResponseEntity<RestResponseMessageDTO> response = ministeriosController.removerMembroMinisterioLiderMinisterio(
                 ministerioId, idMembroMinisterio
         );
 

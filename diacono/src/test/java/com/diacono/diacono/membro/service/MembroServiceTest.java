@@ -1,25 +1,26 @@
 package com.diacono.diacono.membro.service;
 
-import com.diacono.diacono.Igreja.model.entity.Igreja;
-import com.diacono.diacono.Igreja.service.IgrejaService;
-import com.diacono.diacono.cadastro.model.dto.CadastroExternoDTO;
-import com.diacono.diacono.global.dto.response.RestResponseMessage;
+import com.diacono.diacono.domain.entity.Igreja;
+import com.diacono.diacono.use_cases.IgrejaService;
+import com.diacono.diacono.applications.dtos.CadastroExternoDTO;
+import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
 import com.diacono.diacono.global.error.exceptions.ObjectExistsException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
 import com.diacono.diacono.global.util.JwtUtils;
-import com.diacono.diacono.membro.mapper.MembroMapper;
-import com.diacono.diacono.membro.model.dto.request.MembroCreateDTO;
-import com.diacono.diacono.membro.model.dto.response.MembroResponseDTO;
-import com.diacono.diacono.membro.model.entity.EnumCargoMembro;
-import com.diacono.diacono.membro.model.entity.EnumGeneroMembro;
-import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
-import com.diacono.diacono.membro.model.entity.Membro;
-import com.diacono.diacono.membro.repository.MembroRepository;
-import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
-import com.diacono.diacono.membroministerio.service.MembroMinisterioService;
-import com.diacono.diacono.ministerio.model.entity.Ministerio;
-import com.diacono.diacono.ministerio.service.MinisterioService;
+import com.diacono.diacono.applications.mappers.membro.MembroMapper;
+import com.diacono.diacono.applications.dtos.membro.MembroCreateDTO;
+import com.diacono.diacono.applications.dtos.membro.MembroResponseDTO;
+import com.diacono.diacono.domain.enums.EnumCargoMembro;
+import com.diacono.diacono.domain.enums.EnumGeneroMembro;
+import com.diacono.diacono.domain.enums.EnumStatusMembro;
+import com.diacono.diacono.domain.entity.Membro;
+import com.diacono.diacono.infrastructure.persistence.MembroJpaRepository;
+import com.diacono.diacono.domain.entity.MembroMinisterio;
+import com.diacono.diacono.use_cases.MembroMinisterioService;
+import com.diacono.diacono.domain.entity.Ministerio;
+import com.diacono.diacono.use_cases.MembroService;
+import com.diacono.diacono.use_cases.MinisterioService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -51,7 +51,7 @@ class MembroServiceTest {
     private JwtUtils jwtUtils;
 
     @Mock
-    private MembroRepository membroRepository;
+    private MembroJpaRepository membroJpaRepository;
 
     @Mock
     private MembroMapper membroMapper;
@@ -109,7 +109,7 @@ class MembroServiceTest {
         Page<Membro> membroPage = new PageImpl<>(membros, pageable, membros.size());
 
         when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
-        when(membroRepository.findByIgreja_IdExterno(igrejaId, pageable)).thenReturn(membroPage);
+        when(membroJpaRepository.findByIgreja_IdExterno(igrejaId, pageable)).thenReturn(membroPage);
         when(membroMapper.paraMembroResponseDTO(membro1)).thenReturn(dto1);
         when(membroMapper.paraMembroResponseDTO(membro2)).thenReturn(dto2);
 
@@ -119,7 +119,7 @@ class MembroServiceTest {
         assertEquals(2, result.getTotalElements());
         assertEquals(dto1, result.getContent().get(0));
         assertEquals(dto2, result.getContent().get(1));
-        verify(membroRepository).findByIgreja_IdExterno(igrejaId, pageable);
+        verify(membroJpaRepository).findByIgreja_IdExterno(igrejaId, pageable);
     }
 
     @Test
@@ -170,7 +170,7 @@ class MembroServiceTest {
         String buscaFormatada = "%" + termoBusca + "%";
 
         when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
-        when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
+        when(membroJpaRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
         when(membroMapper.paraMembrosResponseDTO(membrosEncontrados)).thenReturn(responseDTOs);
 
         Page<MembroResponseDTO> result = membroService.buscarTodosComFiltro(pageable, termoBusca, status, fkMinisterio);
@@ -179,7 +179,7 @@ class MembroServiceTest {
         assertEquals(2, result.getTotalElements());
         assertEquals(dto1, result.getContent().get(0));
         assertEquals(dto2, result.getContent().get(1));
-        verify(membroRepository).findAllWithFilter(buscaFormatada, igrejaId);
+        verify(membroJpaRepository).findAllWithFilter(buscaFormatada, igrejaId);
         verify(membroMapper).paraMembrosResponseDTO(membrosEncontrados);
     }
 
@@ -206,21 +206,21 @@ class MembroServiceTest {
         Membro membroSalvo = new Membro();
         ReflectionTestUtils.setField(membroSalvo, "idExterno", UUID.randomUUID());
 
-        when(membroRepository.findByEmailOrCpf(membroCreateDTO.email(), membroCreateDTO.cpf())).thenReturn(null);
+        when(membroJpaRepository.findByEmailOrCpf(membroCreateDTO.email(), membroCreateDTO.cpf())).thenReturn(null);
         when(membroMapper.paraMembro(membroCreateDTO)).thenReturn(membro);
         when(igrejaService.buscarUUID(fkIgreja)).thenReturn(igreja);
         when(passwordEncoder.encode(membroCreateDTO.senha())).thenReturn("senhaHasheada");
-        when(membroRepository.save(membro)).thenReturn(membroSalvo);
+        when(membroJpaRepository.save(membro)).thenReturn(membroSalvo);
 
-        RestResponseMessage result = membroService.criarMembro(membroCreateDTO);
+        RestResponseMessageDTO result = membroService.criarMembro(membroCreateDTO);
 
         assertNotNull(result);
         assertEquals("Usuário cadastrado com sucesso", result.getMessage());
-        verify(membroRepository).findByEmailOrCpf(membroCreateDTO.email(), membroCreateDTO.cpf());
+        verify(membroJpaRepository).findByEmailOrCpf(membroCreateDTO.email(), membroCreateDTO.cpf());
         verify(membroMapper).paraMembro(membroCreateDTO);
         verify(igrejaService).buscarUUID(fkIgreja);
         verify(passwordEncoder).encode(membroCreateDTO.senha());
-        verify(membroRepository).save(membro);
+        verify(membroJpaRepository).save(membro);
     }
 
     @Test
@@ -246,21 +246,21 @@ class MembroServiceTest {
         Membro membroSalvo = new Membro();
         ReflectionTestUtils.setField(membroSalvo, "idExterno", UUID.randomUUID());
 
-        when(membroRepository.findByEmailOrCpf(membroCreateDTO.email(), membroCreateDTO.cpf())).thenReturn(null);
+        when(membroJpaRepository.findByEmailOrCpf(membroCreateDTO.email(), membroCreateDTO.cpf())).thenReturn(null);
         when(membroMapper.paraMembro(membroCreateDTO)).thenReturn(membro);
         when(igrejaService.buscarUUID(fkIgreja)).thenReturn(igreja);
         when(passwordEncoder.encode(membroCreateDTO.senha())).thenReturn("senhaHasheada");
-        when(membroRepository.save(membro)).thenReturn(membroSalvo);
+        when(membroJpaRepository.save(membro)).thenReturn(membroSalvo);
 
-        RestResponseMessage result = membroService.criarMembro(membroCreateDTO);
+        RestResponseMessageDTO result = membroService.criarMembro(membroCreateDTO);
 
         assertNotNull(result);
         assertEquals("Usuário cadastrado com sucesso", result.getMessage());
-        verify(membroRepository).findByEmailOrCpf(membroCreateDTO.email(), membroCreateDTO.cpf());
+        verify(membroJpaRepository).findByEmailOrCpf(membroCreateDTO.email(), membroCreateDTO.cpf());
         verify(membroMapper).paraMembro(membroCreateDTO);
         verify(igrejaService).buscarUUID(fkIgreja);
         verify(passwordEncoder).encode(membroCreateDTO.senha());
-        verify(membroRepository).save(membro);
+        verify(membroJpaRepository).save(membro);
     }
 
     @Test
@@ -293,14 +293,14 @@ class MembroServiceTest {
         ReflectionTestUtils.setField(ministerio, "idExterno", ministerioId);
         ministerio.setNome("Ministério de Louvor");
 
-        when(membroRepository.findByEmailOrCpf(membroCreateDTO.email(), membroCreateDTO.cpf())).thenReturn(null);
+        when(membroJpaRepository.findByEmailOrCpf(membroCreateDTO.email(), membroCreateDTO.cpf())).thenReturn(null);
         when(membroMapper.paraMembro(membroCreateDTO)).thenReturn(membro);
         when(igrejaService.buscarUUID(fkIgreja)).thenReturn(igreja);
         when(passwordEncoder.encode(membroCreateDTO.senha())).thenReturn("senhaHasheada");
-        when(membroRepository.save(membro)).thenReturn(membroSalvo);
+        when(membroJpaRepository.save(membro)).thenReturn(membroSalvo);
         when(ministerioService.buscarPorUUID(membroCreateDTO.idExternoMinisterios())).thenReturn(ministerio);
 
-        RestResponseMessage result = membroService.criarMembro(membroCreateDTO);
+        RestResponseMessageDTO result = membroService.criarMembro(membroCreateDTO);
 
         assertNotNull(result);
         assertEquals("Usuário cadastrado com sucesso", result.getMessage());
@@ -336,7 +336,7 @@ class MembroServiceTest {
 
         Membro membroExistente = new Membro();
 
-        when(membroRepository.findByEmailOrCpf(membroCreateDTO.email(), membroCreateDTO.cpf())).thenReturn(membroExistente);
+        when(membroJpaRepository.findByEmailOrCpf(membroCreateDTO.email(), membroCreateDTO.cpf())).thenReturn(membroExistente);
 
         assertThrows(ObjectExistsException.class, () -> membroService.criarMembro(membroCreateDTO));
     }
@@ -369,13 +369,13 @@ class MembroServiceTest {
         Membro membro = new Membro();
         ReflectionTestUtils.setField(membro, "idExterno", idExterno);
 
-        when(membroRepository.findByIdExterno(idExterno)).thenReturn(membro);
+        when(membroJpaRepository.findByIdExterno(idExterno)).thenReturn(membro);
 
         Membro result = membroService.buscarPorUUID(idExterno);
 
         assertNotNull(result);
         assertEquals(membro, result);
-        verify(membroRepository).findByIdExterno(idExterno);
+        verify(membroJpaRepository).findByIdExterno(idExterno);
     }
 
     @Test
@@ -383,7 +383,7 @@ class MembroServiceTest {
     void buscarPorUUIDMembroNaoEncontradoDeveRetornarErro() {
         UUID idExterno = UUID.randomUUID();
 
-        when(membroRepository.findByIdExterno(idExterno)).thenReturn(null);
+        when(membroJpaRepository.findByIdExterno(idExterno)).thenReturn(null);
 
         assertThrows(ObjectNotFoundException.class, () -> membroService.buscarPorUUID(idExterno));
     }
@@ -409,21 +409,21 @@ class MembroServiceTest {
         Membro membroSalvo = new Membro();
         ReflectionTestUtils.setField(membroSalvo, "idExterno", UUID.randomUUID());
 
-        when(membroRepository.findByEmailOrCpf(cadastroDTO.email(), cadastroDTO.cpf())).thenReturn(null);
+        when(membroJpaRepository.findByEmailOrCpf(cadastroDTO.email(), cadastroDTO.cpf())).thenReturn(null);
         when(membroMapper.paraMembro(cadastroDTO)).thenReturn(membro);
         when(igrejaService.buscarUUID(fkIgreja)).thenReturn(igreja);
         when(passwordEncoder.encode(cadastroDTO.senha())).thenReturn("senhaHasheada");
-        when(membroRepository.save(membro)).thenReturn(membroSalvo);
+        when(membroJpaRepository.save(membro)).thenReturn(membroSalvo);
 
         Membro result = membroService.criarMembroExterno(cadastroDTO);
 
         assertNotNull(result);
         assertEquals(membroSalvo, result);
-        verify(membroRepository).findByEmailOrCpf(cadastroDTO.email(), cadastroDTO.cpf());
+        verify(membroJpaRepository).findByEmailOrCpf(cadastroDTO.email(), cadastroDTO.cpf());
         verify(membroMapper).paraMembro(cadastroDTO);
         verify(igrejaService).buscarUUID(fkIgreja);
         verify(passwordEncoder).encode(cadastroDTO.senha());
-        verify(membroRepository).save(membro);
+        verify(membroJpaRepository).save(membro);
     }
 
     @Test
@@ -451,7 +451,7 @@ class MembroServiceTest {
 
         Membro membroExistente = new Membro();
 
-        when(membroRepository.findByEmailOrCpf(cadastroDTO.email(), cadastroDTO.cpf())).thenReturn(membroExistente);
+        when(membroJpaRepository.findByEmailOrCpf(cadastroDTO.email(), cadastroDTO.cpf())).thenReturn(membroExistente);
 
         assertThrows(ObjectExistsException.class, () -> membroService.criarMembroExterno(cadastroDTO));
     }
@@ -463,12 +463,12 @@ class MembroServiceTest {
         Membro membro = new Membro();
         membro.setEmail(email);
 
-        when(membroRepository.findByEmail(email)).thenReturn(membro);
+        when(membroJpaRepository.findByEmail(email)).thenReturn(membro);
 
         Membro result = membroService.buscarPorEmail(email);
 
         assertEquals(membro, result);
-        verify(membroRepository).findByEmail(email);
+        verify(membroJpaRepository).findByEmail(email);
     }
 
     @Test
@@ -477,12 +477,12 @@ class MembroServiceTest {
 
         String email = "naoexiste@email.com";
 
-        when(membroRepository.findByEmail(email)).thenReturn(null);
+        when(membroJpaRepository.findByEmail(email)).thenReturn(null);
 
         Membro result = membroService.buscarPorEmail(email);
 
         assertNull(result);
-        verify(membroRepository).findByEmail(email);
+        verify(membroJpaRepository).findByEmail(email);
     }
 
     @Test
@@ -495,14 +495,14 @@ class MembroServiceTest {
         membroSalvo.setNome("João Silva");
         ReflectionTestUtils.setField(membroSalvo, "idExterno", UUID.randomUUID());
 
-        when(membroRepository.save(membro)).thenReturn(membroSalvo);
+        when(membroJpaRepository.save(membro)).thenReturn(membroSalvo);
 
         Membro result = membroService.salvarMembro(membro);
 
         assertNotNull(result);
         assertEquals(membroSalvo, result);
-        verify(membroRepository).save(membro);
-        verify(membroRepository).flush();
+        verify(membroJpaRepository).save(membro);
+        verify(membroJpaRepository).flush();
     }
 
     @Test
@@ -517,14 +517,14 @@ class MembroServiceTest {
         List<Membro> membrosEncontrados = List.of(membro1);
 
         when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
-        when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
+        when(membroJpaRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
 
         List<Membro> result = (List<Membro>) ReflectionTestUtils.invokeMethod(membroService, "buscaMembros", termoBusca);
 
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(membro1, result.get(0));
-        verify(membroRepository).findAllWithFilter(buscaFormatada, igrejaId);
+        verify(membroJpaRepository).findAllWithFilter(buscaFormatada, igrejaId);
     }
 
     @Test
@@ -535,7 +535,7 @@ class MembroServiceTest {
         UUID igrejaId = UUID.randomUUID();
 
         when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
-        when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(List.of());
+        when(membroJpaRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(List.of());
 
         assertThrows(ObjectNotFoundException.class, () ->
             ReflectionTestUtils.invokeMethod(membroService, "buscaMembros", termoBusca));
@@ -575,7 +575,7 @@ class MembroServiceTest {
         String buscaFormatada = "%" + termoBusca + "%";
 
         when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
-        when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
+        when(membroJpaRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
         when(membroMapper.paraMembrosResponseDTO(membrosEncontrados)).thenReturn(responseDTOs);
 
         Page<MembroResponseDTO> result = membroService.buscarTodosComFiltro(pageable, termoBusca, status, fkMinisterio);
@@ -583,7 +583,7 @@ class MembroServiceTest {
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
         assertEquals(dto1, result.getContent().get(0));
-        verify(membroRepository).findAllWithFilter(buscaFormatada, igrejaId);
+        verify(membroJpaRepository).findAllWithFilter(buscaFormatada, igrejaId);
         verify(membroMapper).paraMembrosResponseDTO(membrosEncontrados);
     }
 
@@ -603,7 +603,7 @@ class MembroServiceTest {
         String buscaFormatada = "%" + termoBusca + "%";
 
         when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
-        when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
+        when(membroJpaRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
 
         assertThrows(ObjectNotFoundException.class, () ->
             membroService.buscarTodosComFiltro(pageable, termoBusca, status, fkMinisterio));

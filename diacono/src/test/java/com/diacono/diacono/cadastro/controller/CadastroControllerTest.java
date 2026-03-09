@@ -1,10 +1,11 @@
 package com.diacono.diacono.cadastro.controller;
 
-import com.diacono.diacono.Igreja.model.dto.response.IgrejaSemiCompletoDTO;
-import com.diacono.diacono.cadastro.model.dto.CadastroExternoDTO;
-import com.diacono.diacono.cadastro.service.CadastroService;
-import com.diacono.diacono.global.dto.response.RestResponseMessage;
-import com.diacono.diacono.membro.model.entity.EnumGeneroMembro;
+import com.diacono.diacono.applications.dtos.igreja.IgrejaSemiCompletoDTO;
+import com.diacono.diacono.applications.dtos.CadastroExternoDTO;
+import com.diacono.diacono.infrastructure.controllers.CadastroController;
+import com.diacono.diacono.use_cases.CadastroService;
+import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
+import com.diacono.diacono.domain.enums.EnumGeneroMembro;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -110,7 +111,7 @@ class CadastroControllerTest {
     @Test
     @DisplayName("Deve cadastrar membro com sucesso")
     void cadastrarMembroSucesso() throws Exception {
-        RestResponseMessage response = new RestResponseMessage(HttpStatus.CREATED, "Usuário cadastrado com sucesso");
+        RestResponseMessageDTO response = new RestResponseMessageDTO(HttpStatus.CREATED, "Usuário cadastrado com sucesso");
 
         when(cadastroService.cadastrarMembro(any(CadastroExternoDTO.class))).thenReturn(response);
 

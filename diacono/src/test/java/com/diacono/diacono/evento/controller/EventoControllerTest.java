@@ -1,16 +1,17 @@
 package com.diacono.diacono.evento.controller;
 
-import com.diacono.diacono.evento.model.dto.request.EnderecoEventoDTO;
-import com.diacono.diacono.evento.model.dto.request.EventoCreateDTO;
-import com.diacono.diacono.evento.model.dto.request.EventoUpdateDTO;
-import com.diacono.diacono.evento.model.dto.request.RecorrenciaCreateDTO;
-import com.diacono.diacono.evento.model.dto.response.EnderecoEventoSimplificadoDTO;
-import com.diacono.diacono.evento.model.dto.response.EventoCompletoDTO;
-import com.diacono.diacono.evento.model.dto.response.EventoSimplificadoDTO;
-import com.diacono.diacono.evento.model.dto.response.EventoUnicoSimplificadoDTO;
-import com.diacono.diacono.evento.model.entity.TipoRecorrencia;
-import com.diacono.diacono.evento.service.EventoService;
-import com.diacono.diacono.global.dto.response.RestResponseMessage;
+import com.diacono.diacono.infrastructure.controllers.EventoController;
+import com.diacono.diacono.applications.dtos.evento.EnderecoEventoDTO;
+import com.diacono.diacono.applications.dtos.evento.EventoCreateDTO;
+import com.diacono.diacono.applications.dtos.evento.EventoUpdateDTO;
+import com.diacono.diacono.applications.dtos.recorrencia.RecorrenciaCreateDTO;
+import com.diacono.diacono.applications.dtos.evento.EnderecoEventoSimplificadoDTO;
+import com.diacono.diacono.applications.dtos.evento.EventoCompletoDTO;
+import com.diacono.diacono.applications.dtos.evento.EventoSimplificadoDTO;
+import com.diacono.diacono.applications.dtos.evento.EventoUnicoSimplificadoDTO;
+import com.diacono.diacono.domain.enums.TipoRecorrencia;
+import com.diacono.diacono.use_cases.EventoService;
+import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -164,14 +165,14 @@ class EventoControllerTest {
                 BigDecimal.ZERO
         );
 
-        RestResponseMessage expectedResponse = new RestResponseMessage(
+        RestResponseMessageDTO expectedResponse = new RestResponseMessageDTO(
                 HttpStatus.CREATED,
                 "Evento criado com sucesso"
         );
 
         when(eventoService.criarEvento(createDTO)).thenReturn(expectedResponse);
 
-        ResponseEntity<RestResponseMessage> response = eventoController.criarEvento(createDTO);
+        ResponseEntity<RestResponseMessageDTO> response = eventoController.criarEvento(createDTO);
 
         assertNotNull(response);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -183,14 +184,14 @@ class EventoControllerTest {
     @Test
     @DisplayName("Deve apagar evento único com sucesso")
     void apagarEventoUnicoSucesso() {
-        RestResponseMessage expectedResponse = new RestResponseMessage(
+        RestResponseMessageDTO expectedResponse = new RestResponseMessageDTO(
                 HttpStatus.NO_CONTENT,
                 "Evento deletado com sucesso"
         );
 
         when(eventoService.apagarEvento(eventoId)).thenReturn(expectedResponse);
 
-        ResponseEntity<RestResponseMessage> response = eventoController.apagarEventoUnico(eventoId);
+        ResponseEntity<RestResponseMessageDTO> response = eventoController.apagarEventoUnico(eventoId);
 
         assertNotNull(response);
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
@@ -202,14 +203,14 @@ class EventoControllerTest {
     @Test
     @DisplayName("Deve apagar eventos múltiplos com sucesso")
     void apagarEventosMultiplosSucesso() {
-        RestResponseMessage expectedResponse = new RestResponseMessage(
+        RestResponseMessageDTO expectedResponse = new RestResponseMessageDTO(
                 HttpStatus.NO_CONTENT,
                 "Eventos deletados com sucesso"
         );
 
         when(eventoService.apagarEventosMultiplos(eventoId)).thenReturn(expectedResponse);
 
-        ResponseEntity<RestResponseMessage> response = eventoController.apagarEventosMultiplos(eventoId);
+        ResponseEntity<RestResponseMessageDTO> response = eventoController.apagarEventosMultiplos(eventoId);
 
         assertNotNull(response);
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
@@ -232,14 +233,14 @@ class EventoControllerTest {
                 BigDecimal.valueOf(10.00)
         );
 
-        RestResponseMessage expectedResponse = new RestResponseMessage(
+        RestResponseMessageDTO expectedResponse = new RestResponseMessageDTO(
                 HttpStatus.NO_CONTENT,
                 "Evento atualizado com sucesso"
         );
 
         when(eventoService.alterarEvento(updateDTO, eventoId)).thenReturn(expectedResponse);
 
-        ResponseEntity<RestResponseMessage> response = eventoController.atualizarEvento(updateDTO, eventoId);
+        ResponseEntity<RestResponseMessageDTO> response = eventoController.atualizarEvento(updateDTO, eventoId);
 
         assertNotNull(response);
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());

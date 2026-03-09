@@ -1,12 +1,11 @@
 package com.diacono.diacono.auth.service;
 
 import com.diacono.diacono.auth.model.CustomMembroOAuth2User;
-import com.diacono.diacono.membro.model.entity.Membro;
-import com.diacono.diacono.membro.service.MembroService;
+import com.diacono.diacono.domain.entity.Membro;
+import com.diacono.diacono.use_cases.MembroService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;

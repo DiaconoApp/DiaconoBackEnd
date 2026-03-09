@@ -1,10 +1,11 @@
 package com.diacono.diacono.Igreja.service;
 
-import com.diacono.diacono.Igreja.mapper.IgrejaMapper;
-import com.diacono.diacono.Igreja.model.dto.response.IgrejaSemiCompletoDTO;
-import com.diacono.diacono.Igreja.model.entity.Igreja;
-import com.diacono.diacono.Igreja.repository.IgrejaRepository;
+import com.diacono.diacono.applications.mappers.igreja.IgrejaMapper;
+import com.diacono.diacono.applications.dtos.igreja.IgrejaSemiCompletoDTO;
+import com.diacono.diacono.domain.entity.Igreja;
+import com.diacono.diacono.infrastructure.persistence.IgrejaJpaRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
+import com.diacono.diacono.use_cases.IgrejaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,7 @@ import static org.mockito.Mockito.*;
 class IgrejaServiceTest {
 
     @Mock
-    private IgrejaRepository igrejaRepository;
+    private IgrejaJpaRepository igrejaJpaRepository;
 
     @Mock
     private IgrejaMapper igrejaMapper;
@@ -43,25 +44,25 @@ class IgrejaServiceTest {
         Igreja igreja = new Igreja();
         igreja.setNome("Igreja Batista Central");
 
-        when(igrejaRepository.findByIdExterno(igrejaId)).thenReturn(igreja);
+        when(igrejaJpaRepository.findByIdExterno(igrejaId)).thenReturn(igreja);
 
         Igreja result = igrejaService.buscarUUID(igrejaId);
 
         assertNotNull(result);
         assertEquals(igreja, result);
         assertEquals("Igreja Batista Central", result.getNome());
-        verify(igrejaRepository).findByIdExterno(igrejaId);
+        verify(igrejaJpaRepository).findByIdExterno(igrejaId);
     }
 
     @Test
     @DisplayName("Deve lançar exceção quando igreja não é encontrada por UUID")
     void buscarUUIDIgrejaNaoEncontradaDeveRetornarErro() {
-        when(igrejaRepository.findByIdExterno(igrejaId)).thenReturn(null);
+        when(igrejaJpaRepository.findByIdExterno(igrejaId)).thenReturn(null);
 
         assertThrows(ObjectNotFoundException.class,
             () -> igrejaService.buscarUUID(igrejaId));
 
-        verify(igrejaRepository).findByIdExterno(igrejaId);
+        verify(igrejaJpaRepository).findByIdExterno(igrejaId);
     }
 
     @Test
@@ -84,7 +85,7 @@ class IgrejaServiceTest {
 
         List<IgrejaSemiCompletoDTO> igrejasDTO = Arrays.asList(dto1, dto2);
 
-        when(igrejaRepository.findAll()).thenReturn(igrejas);
+        when(igrejaJpaRepository.findAll()).thenReturn(igrejas);
         when(igrejaMapper.paraListaIgrejaSemiCompletoDTO(igrejas)).thenReturn(igrejasDTO);
 
         List<IgrejaSemiCompletoDTO> result = igrejaService.buscarIgrejas();
@@ -93,19 +94,19 @@ class IgrejaServiceTest {
         assertEquals(2, result.size());
         assertEquals("Igreja Batista Central", result.getFirst().nome());
         assertEquals("Igreja Presbiteriana", result.get(1).nome());
-        verify(igrejaRepository).findAll();
+        verify(igrejaJpaRepository).findAll();
         verify(igrejaMapper).paraListaIgrejaSemiCompletoDTO(igrejas);
     }
 
     @Test
     @DisplayName("Deve lançar exceção quando lista de igrejas é nula")
     void buscarIgrejasListaNulaDeveRetornarErro() {
-        when(igrejaRepository.findAll()).thenReturn(null);
+        when(igrejaJpaRepository.findAll()).thenReturn(null);
 
         assertThrows(ObjectNotFoundException.class,
             () -> igrejaService.buscarIgrejas());
 
-        verify(igrejaRepository).findAll();
+        verify(igrejaJpaRepository).findAll();
         verify(igrejaMapper, never()).paraListaIgrejaSemiCompletoDTO(any());
     }
 
@@ -114,12 +115,12 @@ class IgrejaServiceTest {
     void buscarIgrejasListaVaziaDeveRetornarErro() {
         List<Igreja> igrejasVazias = new ArrayList<>();
 
-        when(igrejaRepository.findAll()).thenReturn(igrejasVazias);
+        when(igrejaJpaRepository.findAll()).thenReturn(igrejasVazias);
 
         assertThrows(ObjectNotFoundException.class,
             () -> igrejaService.buscarIgrejas());
 
-        verify(igrejaRepository).findAll();
+        verify(igrejaJpaRepository).findAll();
         verify(igrejaMapper, never()).paraListaIgrejaSemiCompletoDTO(any());
     }
 }

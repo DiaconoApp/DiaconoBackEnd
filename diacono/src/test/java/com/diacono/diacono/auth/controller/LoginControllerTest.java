@@ -1,8 +1,9 @@
 package com.diacono.diacono.auth.controller;
 
-import com.diacono.diacono.auth.model.dto.request.LoginRequestDTO;
-import com.diacono.diacono.auth.model.dto.response.LoginResponseDTO;
-import com.diacono.diacono.auth.service.LoginService;
+import com.diacono.diacono.applications.dtos.login.LoginRequestDTO;
+import com.diacono.diacono.applications.dtos.login.LoginResponseDTO;
+import com.diacono.diacono.infrastructure.controllers.LoginController;
+import com.diacono.diacono.use_cases.LoginService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

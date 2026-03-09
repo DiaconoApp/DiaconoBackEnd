@@ -1,12 +1,13 @@
 package com.diacono.diacono.membro.controller;
 
-import com.diacono.diacono.global.dto.response.RestResponseMessage;
-import com.diacono.diacono.membro.model.dto.request.MembroCreateDTO;
-import com.diacono.diacono.membro.model.dto.response.MembroResponseDTO;
-import com.diacono.diacono.membro.model.entity.EnumCargoMembro;
-import com.diacono.diacono.membro.model.entity.EnumGeneroMembro;
-import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
-import com.diacono.diacono.membro.service.MembroService;
+import com.diacono.diacono.infrastructure.controllers.MembroController;
+import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
+import com.diacono.diacono.applications.dtos.membro.MembroCreateDTO;
+import com.diacono.diacono.applications.dtos.membro.MembroResponseDTO;
+import com.diacono.diacono.domain.enums.EnumCargoMembro;
+import com.diacono.diacono.domain.enums.EnumGeneroMembro;
+import com.diacono.diacono.domain.enums.EnumStatusMembro;
+import com.diacono.diacono.use_cases.MembroService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -64,14 +65,14 @@ class MembroControllerTest {
                 null
         );
 
-        RestResponseMessage expectedResponse = new RestResponseMessage(
+        RestResponseMessageDTO expectedResponse = new RestResponseMessageDTO(
                 HttpStatus.CREATED,
                 "Membro criado com sucesso"
         );
 
         when(membroService.criarMembro(createDTO)).thenReturn(expectedResponse);
 
-        ResponseEntity<RestResponseMessage> response = membroController.criarMembro(createDTO);
+        ResponseEntity<RestResponseMessageDTO> response = membroController.criarMembro(createDTO);
 
         assertNotNull(response);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
