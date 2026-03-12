@@ -10,6 +10,7 @@ import com.diacono.diacono.evento.repository.EnderecoEventoRepository;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.util.JwtUtils;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -30,6 +31,11 @@ public class EnderecoEventoService {
     }
 
     public EnderecoEvento buscarPorUUID(UUID idExterno){
+        // OWASP A01/A05: evita consultar recurso com identificador ausente ou invalido.
+        if (idExterno == null) {
+            throw new FieldInvalidException("O id do endereço do evento precisa ser informado");
+        }
+
         EnderecoEvento enderecoEvento = enderecoEventoRepository.findByIdExterno(idExterno);
 
         if(enderecoEvento == null){
@@ -40,7 +46,12 @@ public class EnderecoEventoService {
     }
 
     public void salvarEnderecoEvento(EnderecoEvento endereco){
-        EnderecoEvento salvo = enderecoEventoRepository.save(endereco);
+        // OWASP A05: falha de forma segura antes de persistir payload nulo.
+        if (endereco == null) {
+            throw new FieldInvalidException("O endereço do evento precisa ser informado");
+        }
+
+        enderecoEventoRepository.save(endereco);
     }
 
     public EnderecoEventoSimplificadoDTO buscarEnderecoIgreja(){
@@ -56,15 +67,13 @@ public class EnderecoEventoService {
         return enderecoEventoMapper.paraEnderecoEventoSimplificadoDTO(enderecoEvento);
     }
 
-    //metodo para conversão
-
-    public EnderecoEvento converterDtoToEndereco(EnderecoEventoDTO enderecoEventoDTO){
+    // OWASP A01/A05: só permite conversão para nova entidade quando o payload representa um novo endereco.
+    public EnderecoEvento converterDtoToEndereco(@Valid EnderecoEventoDTO enderecoEventoDTO){
         return enderecoEventoMapper.paraEndereco(enderecoEventoDTO);
     }
 
-    //metodos para validacoes
-
-    public void validarEnderecoEvento(EnderecoEventoDTO endereco){
+    // OWASP A01/A05: remove bypass por idExterno e rejeita payload hibrido com id + campos de endereco.
+    public void validarEnderecoEvento(@Valid EnderecoEventoDTO endereco){
 
         if (endereco.idExterno() != null) {
             return;

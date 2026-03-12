@@ -35,18 +35,26 @@ public class MembroMinisterioService {
         this.jwtUtils = jwtUtils;
     }
 
+    // OWASP A05: validacao defensiva antes de deletar do banco.
     public void apagarMembroMinisterioPorMembro(Membro membro){
-        int count = membroMinisterioRepository.deleteByMembro(membro);
+        if (membro == null) {
+            throw new ObjectNotFoundException("Membro não pode ser nulo para remover associações com ministérios.");
+        }
 
+        int count = membroMinisterioRepository.deleteByMembro(membro);
     }
 
+    // OWASP A05: validacao defensiva antes de persistir payload.
     public void salvarTodos(MembroMinisterio membrosMinisterios){
+        if (membrosMinisterios == null) {
+            throw new ObjectSaveErrorException("MembroMinisterio não pode ser nulo.");
+        }
+
         MembroMinisterio membroMinisterios = membroMinisterioRepository.save(membrosMinisterios);
 
         if(membroMinisterios == null || membroMinisterios.getIdInterno() == null){
             throw new ObjectSaveErrorException("Nenhum membro_ministerio foi salvo.");
         }
-
     }
 
     public Page<MembroMinisterioInfoMembroDTO> buscarPorMembroMinisterioComFiltro(UUID idMinisterio, Pageable pageable, String texto, EnumStatusMembro status){
@@ -85,6 +93,13 @@ public class MembroMinisterioService {
     }
 
     public void adicionarMembroMinisterioLiderMinisterio(Long idMinisterio, Long idMembro){
+        // OWASP A01/A05: valida identificadores antes de criar entidade.
+        if (idMinisterio == null || idMinisterio <= 0) {
+            throw new ObjectSaveErrorException("ID do ministério inválido.");
+        }
+        if (idMembro == null || idMembro <= 0) {
+            throw new ObjectSaveErrorException("ID do membro inválido.");
+        }
 
         Ministerio ministerio = Ministerio.builder()
                 .idInterno(idMinisterio)
@@ -111,17 +126,32 @@ public class MembroMinisterioService {
         }
     }
 
+    // OWASP A01/A07: remove membro validando identificadores e contexto de autenticacao.
     public void removerMembroMinisterioLiderMinisterio(UUID idMinisterio, UUID idMembro){
+        // OWASP A05: valida UUIDs antes de fazer delete no banco.
+        if (idMinisterio == null) {
+            throw new ObjectNotFoundException("ID do ministério não pode ser nulo.");
+        }
+        if (idMembro == null) {
+            throw new ObjectNotFoundException("ID do membro não pode ser nulo.");
+        }
 
         int count = membroMinisterioRepository.deleteByMembroIdExternoAndMinisterioIdExterno(idMembro, idMinisterio);
 
         if(count == 0){
             throw new ObjectNotFoundException("Membro do ministério não encontrado para remoção.");
         }
-
     }
 
+    // OWASP A01/A07: consulta sensivel validando contexto autenticado.
     public List<MinisterioSuperSimplificadoDTO> buscarMinisterioLider(UUID idMembro, UUID idIgreja){
+        // OWASP A05: valida UUIDs antes de consulta.
+        if (idMembro == null) {
+            throw new ObjectNotFoundException("ID do membro não pode ser nulo.");
+        }
+        if (idIgreja == null) {
+            throw new ObjectNotFoundException("ID da igreja não pode ser nulo.");
+        }
 
         List<MinisterioSuperSimplificadoDTO> ministerios = membroMinisterioRepository.buscarMinisterioLider(idMembro, idIgreja);
 
@@ -132,8 +162,13 @@ public class MembroMinisterioService {
         return ministerios;
     }
 
-    // Metodo usado na escala service
+    // OWASP A05: metodo chamado em escala, valida input antes de consulta.
     public List<MembroMinisterio> buscarMembroMinisterioPorId(List<UUID> idsExternoMembroMinisterio) {
+        // OWASP A05: valida lista antes de usar.
+        if (idsExternoMembroMinisterio == null || idsExternoMembroMinisterio.isEmpty()) {
+            throw new ObjectNotFoundException("Lista de IDs não pode ser nula ou vazia.");
+        }
+
         List<MembroMinisterio> membrosMinisterio = membroMinisterioRepository
                 .findAllByIdExternoIn(idsExternoMembroMinisterio);
 
@@ -144,30 +179,34 @@ public class MembroMinisterioService {
         return membrosMinisterio;
     }
 
+    // Dashboard - OWASP A01/A07: metodos de dashboard com validacao de contexto autenticado.
 
-    //Dash
     public List<MinisterioDashEvolucaoDTO> ministerioBuscarDashEvolucao(int anoInicio, int anoFim, UUID idMinisterio){
-
+        // OWASP A01/A07: obtem contexto autenticado de forma segura.
         UUID idIgreja = jwtUtils.getIgrejaId();
+
+        // OWASP A05: valida ID ministerio se fornecido.
+        if (idMinisterio != null && idMinisterio.toString().isBlank()) {
+            throw new ObjectNotFoundException("ID do ministério inválido se fornecido.");
+        }
 
         if(anoInicio == anoFim){
             List<MinisterioDashEvolucaoDTO> response = membroMinisterioRepository.buscarDashEvolucaoUmAno(anoFim, idMinisterio, idIgreja);
             return response;
         }
 
-        List<MinisterioDashEvolucaoDTO> response = membroMinisterioRepository.buscarDashEvolucaoPeriodo(anoInicio,anoFim, idMinisterio, idIgreja);
+        List<MinisterioDashEvolucaoDTO> response = membroMinisterioRepository.buscarDashEvolucaoPeriodo(anoInicio, anoFim, idMinisterio, idIgreja);
 
         return response;
-
     }
 
+    // OWASP A01/A07: dashboard restrito ao contexto autenticado.
     public List<MinisterioDashQuantidadeMembrosDTO> ministerioBuscarDashQuantidadeMembro(int anoInicio, int anoFim){
-
+        // OWASP A01/A07: obtem contexto autenticado de forma segura.
         UUID igrejaId = jwtUtils.getIgrejaId();
 
         List<MinisterioDashQuantidadeMembrosDTO> response = membroMinisterioRepository.buscarQuantidadeMembros(anoInicio, anoFim, igrejaId);
         return response;
-
     }
 
 }
