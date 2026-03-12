@@ -2,6 +2,7 @@ package com.diacono.diacono.membro.model.entity;
 
 import com.diacono.diacono.Igreja.model.entity.Igreja;
 import com.diacono.diacono.global.util.IdEntityUtils;
+import com.diacono.diacono.global.util.SensitiveDataConverter;
 import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -37,14 +38,20 @@ public class Membro extends IdEntityUtils {
 
     private String nome;
 
+    @Convert(converter = SensitiveDataConverter.class)
+    @Column(length = 512)
     private String cpf;
 
     private LocalDate dataNascimento;
 
     private LocalDate dataRegistro;
 
+    @Convert(converter = SensitiveDataConverter.class)
+    @Column(length = 512)
     private String email;
 
+    @Convert(converter = SensitiveDataConverter.class)
+    @Column(length = 512)
     private String celular;
 
     private String senha;
