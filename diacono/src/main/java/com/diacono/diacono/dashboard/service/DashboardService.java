@@ -39,30 +39,30 @@ public class DashboardService {
         this.membroMinisterioService = membroMinisterioService;
     }
 
+    // OWASP A05: valida parametros antes de processar agregacoes sensíveis.
     public KpisMembrosDTO buscarKpisMembros(int anoInicio, int anoFim) {
-
         validarAnoInicioEFim(anoInicio, anoFim);
 
         MembroKpiResponseDTO kpis = membroService.buscarKpis(anoInicio, anoFim);
 
+        // OWASP A05: evita divisao por zero em calculo de retencao.
         long membrosAtivos = kpis.membrosAtivos();
         long membrosInativos = kpis.membrosInativos();
         long totalMembrosAnoInicio = kpis.totalAnoInicio();
         long totalMembros = membrosAtivos + membrosInativos;
 
+        if (totalMembros == 0) {
+            return new KpisMembrosDTO(0, 0, 0);
+        }
 
         long membrosNovos = totalMembros;
-
 
         if (anoInicio == anoFim) {
             membrosNovos = totalMembrosAnoInicio;
         }
 
         double resultado = Math.round((membrosAtivos - membrosInativos) * 100.0 / totalMembros);
-
-
         double retencao = membrosInativos == 0 ? 100 : resultado;
-
 
         KpisMembrosDTO kpisMembrosDTO = new KpisMembrosDTO(
                 membrosAtivos,
@@ -71,11 +71,10 @@ public class DashboardService {
         );
 
         return kpisMembrosDTO;
-
     }
 
+    // OWASP A05: valida resultado antes de retornar ao cliente.
     public List<MembroDashEvolucaoDTO> buscarDashEvolucao(int anoInicio, int anoFim) {
-
         validarAnoInicioEFim(anoInicio, anoFim);
 
         List<MembroDashEvolucaoDTO> bruto = membroService.buscarDashEvolucao(anoInicio, anoFim);
@@ -87,15 +86,19 @@ public class DashboardService {
         return bruto;
     }
 
+    // OWASP A05: evita divisao por zero em calculo de percentual.
     public DashboardFaixaEtariaMembroDTO buscarDashFaixaEtaria(int anoInicio, int anoFim) {
-
         validarAnoInicioEFim(anoInicio, anoFim);
 
         MembroDashFaixaEtariaDTO faixaEtaria = membroService.buscarDashFaixaEtaria(anoFim);
 
+        // OWASP A05: valida objeto retornado antes de processar.
+        if (faixaEtaria == null) {
+            throw new ObjectNotFoundException("Nenhum dado encontrado para o período informado.");
+        }
+
         long total = faixaEtaria.criancas() + faixaEtaria.adolescentes() + faixaEtaria.jovens()
                 + faixaEtaria.adultos() + faixaEtaria.idosos();
-
 
         if (total == 0) {
             return new DashboardFaixaEtariaMembroDTO(0, 0, 0, 0, 0);
@@ -112,18 +115,17 @@ public class DashboardService {
         return faixaEtariaDTO;
     }
 
+    // OWASP A05: evita divisao por zero e valida objeto recebido.
     public DashboardGeneroMembroDTO buscarDashGenero(int anoInicio, int anoFim) {
-
         validarAnoInicioEFim(anoInicio, anoFim);
 
         MembroDashGeneroDTO genero = membroService.buscarDashGenero(anoFim);
 
-        if (genero == null){
+        if (genero == null) {
             throw new ObjectNotFoundException("Nenhum dado encontrado para o período informado.");
         }
 
         long total = genero.masculino() + genero.feminino();
-
 
         if (total == 0) {
             return new DashboardGeneroMembroDTO(0, 0);
@@ -142,19 +144,18 @@ public class DashboardService {
 
     // Ministerios
 
+    // OWASP A05: valida multiplas respostas antes de agregar dados sensíveis.
     public KpisMinisteriosDTO ministerioBuscarKpis(int anoInicio, int anoFim) {
-
         validarAnoInicioEFim(anoInicio, anoFim);
 
         MinisterioKpisResponseDTO kpiMinisterio = ministerioService.ministerioBuscarKpis(anoFim);
         List<EventoKpiDTO> kpiEvento = eventoService.buscarKpisEvento(anoInicio, anoFim);
 
-        if (kpiMinisterio == null || kpiEvento == null || kpiEvento.isEmpty()){
+        if (kpiMinisterio == null || kpiEvento == null || kpiEvento.isEmpty()) {
             throw new ObjectNotFoundException("Nenhum dado encontrado para o período informado.");
         }
 
         EventoKpiDTO eventoRetido = kpiEvento.get(0);
-
 
         KpisMinisteriosDTO response = new KpisMinisteriosDTO(
                 eventoRetido,
@@ -164,10 +165,11 @@ public class DashboardService {
         return response;
     }
 
+    // OWASP A01/A05: valida id do ministerio e parametros antes de acessar dados.
     public List<MinisterioDashEvolucaoDTO> ministerioBuscarDashEvolucao(int anoInicio, int anoFim, UUID idMinisterio) {
-
+        // OWASP A05: valida UUID antes de fazer consulta ao banco.
         if (idMinisterio == null) {
-            throw new ObjectNotFoundException("Nenhum dado encontrado para o período informado.");
+            throw new FieldInvalidException("O id do ministerio precisa ser informado");
         }
 
         validarAnoInicioEFim(anoInicio, anoFim);
@@ -179,11 +181,10 @@ public class DashboardService {
         }
 
         return response;
-
     }
 
+    // OWASP A05: valida resultado antes de retornar.
     public List<MinisterioDashQuantidadeMembrosDTO> ministerioBuscarDashQuantidadeMembro(int anoInicio, int anoFim) {
-
         validarAnoInicioEFim(anoInicio, anoFim);
 
         List<MinisterioDashQuantidadeMembrosDTO> response = membroMinisterioService.ministerioBuscarDashQuantidadeMembro(anoInicio, anoFim);
@@ -193,13 +194,11 @@ public class DashboardService {
         }
 
         return response;
-
     }
 
+    // OWASP A05: valida resultado antes de retornar.
     public List<MinisterioEventoDashDTO> ministerioBuscarDashQuantidadeEventos(int anoInicio, int anoFim) {
-
         validarAnoInicioEFim(anoInicio, anoFim);
-
 
         List<MinisterioEventoDashDTO> response = eventoService.ministerioBuscarDashQuantidadeEventos(anoInicio, anoFim);
 
@@ -208,7 +207,6 @@ public class DashboardService {
         }
 
         return response;
-
     }
 
     //validacoes
@@ -216,10 +214,6 @@ public class DashboardService {
     private void validarAnoInicioEFim(int anoInicio, int anoFim) {
         if (anoInicio > anoFim) {
             throw new FieldInvalidException("Ano de início não pode ser maior que ano de fim.");
-        }
-
-        if (anoInicio <= 0 || anoFim <= 0) {
-            throw new FieldInvalidException("Ano de início e ano de fim devem ser informados.");
         }
     }
 

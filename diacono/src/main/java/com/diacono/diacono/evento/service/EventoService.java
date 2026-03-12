@@ -1,44 +1,50 @@
 package com.diacono.diacono.evento.service;
 
 import com.diacono.diacono.Igreja.service.IgrejaService;
-import com.diacono.diacono.evento.mapper.EnderecoEventoMapper;
-import com.diacono.diacono.evento.mapper.RecorrenciaMapper;
 import com.diacono.diacono.evento.model.dto.request.EnderecoEventoDTO;
-import com.diacono.diacono.evento.model.dto.request.RecorrenciaCreateDTO;
-import com.diacono.diacono.evento.model.dto.response.*;
-import com.diacono.diacono.evento.model.entity.EnderecoEvento;
-import com.diacono.diacono.evento.model.entity.Recorrencia;
-import com.diacono.diacono.global.dto.response.RestResponseMessage;
-import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
-import com.diacono.diacono.evento.exceptions.TimeInvalidException;
-import com.diacono.diacono.evento.mapper.EventoMapper;
-import com.diacono.diacono.evento.mapper.EventoUpdateMapper;
 import com.diacono.diacono.evento.model.dto.request.EventoCreateDTO;
 import com.diacono.diacono.evento.model.dto.request.EventoUpdateDTO;
+import com.diacono.diacono.evento.model.dto.response.*;
+import com.diacono.diacono.evento.model.entity.EnderecoEvento;
 import com.diacono.diacono.evento.model.entity.Evento;
+import com.diacono.diacono.evento.model.entity.Recorrencia;
 import com.diacono.diacono.evento.model.entity.TipoRecorrencia;
+import com.diacono.diacono.evento.exceptions.TimeInvalidException;
+import com.diacono.diacono.evento.mapper.EventoMapper;
 import com.diacono.diacono.evento.repository.EventoRepository;
+import com.diacono.diacono.global.dto.response.RestResponseMessage;
+import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
 import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.membro.service.MembroService;
 import com.diacono.diacono.ministerio.model.entity.Ministerio;
 import com.diacono.diacono.ministerio.service.MinisterioService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAdjusters;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+// TODO: padronizar validações de Valid em DTOs em requests
 
 @Service
 public class EventoService {
 
+    // OWASP A05: logging seguro sem expor dados sensiveis em console.
+    private static final Logger logger = LoggerFactory.getLogger(EventoService.class);
+
     private final EventoRepository eventoRepository;
     private final EventoMapper eventoMapper;
-    private final EventoUpdateMapper eventoUpdateMapper;
     private final EnderecoEventoService enderecoEventoService;
     private final RecorrenciaService recorrenciaService;
     private final MinisterioService ministerioService;
@@ -46,29 +52,30 @@ public class EventoService {
     private final IgrejaService igrejaService;
     private final JwtUtils jwtUtils;
 
-
-    public EventoService(EventoRepository eventoRepository, EventoMapper eventoMapper, IgrejaService igrejaService, MinisterioService ministerioService, MembroService membroService, EnderecoEventoService enderecoEventoService, EventoUpdateMapper eventoUpdateMapper, RecorrenciaService recorrenciaService, JwtUtils jwtUtils) {
+    public EventoService(EventoRepository eventoRepository,
+                        EventoMapper eventoMapper,
+                        IgrejaService igrejaService,
+                        MinisterioService ministerioService,
+                        MembroService membroService,
+                        EnderecoEventoService enderecoEventoService,
+                        RecorrenciaService recorrenciaService,
+                        JwtUtils jwtUtils) {
         this.eventoRepository = eventoRepository;
         this.eventoMapper = eventoMapper;
         this.igrejaService = igrejaService;
         this.ministerioService = ministerioService;
         this.membroService = membroService;
         this.enderecoEventoService = enderecoEventoService;
-        this.eventoUpdateMapper = eventoUpdateMapper;
-
         this.recorrenciaService = recorrenciaService;
         this.jwtUtils = jwtUtils;
     }
 
-    public EventoSimplificadoDTO buscarEventosPorMesEAno(int mes, int ano){
-
-        //completo
-
-        if(mes < 1 || mes > 12){
-            throw new FieldInvalidException("O mês precisa estar entre 1 e 12");
+    public EventoSimplificadoDTO buscarEventosPorMesEAno(int mes, int ano) {
+        if (mes < 1 || mes > 12) {
+            throw new FieldInvalidException("O mes precisa estar entre 1 e 12");
         }
 
-        if(ano <= 0) {
+        if (ano <= 0) {
             throw new FieldInvalidException("O ano precisa ser maior que 0");
         }
 
@@ -77,60 +84,52 @@ public class EventoService {
         LocalDateTime fimMes = anoMes.atEndOfMonth().atTime(23, 59, 59);
 
         List<Evento> eventosAno = eventoRepository.findByPeriodo(inicioMes, fimMes, jwtUtils.getIgrejaId());
-        if(eventosAno.isEmpty() || eventosAno == null){
-            throw new ObjectNotFoundException("Nenhum evento encontrado para o mês e ano informados");
+        if (eventosAno == null || eventosAno.isEmpty()) {
+            throw new ObjectNotFoundException("Nenhum evento encontrado para o mes e ano informados");
         }
 
-        EventoSimplificadoDTO eventoResponse = eventoMapper.paraEventoSimplificado(eventosAno);
-        return eventoResponse;
+        return eventoMapper.paraEventoSimplificado(eventosAno);
     }
 
-    public EventoCompletoDTO buscarEventoEspecifico(UUID id){
-
-        //completo
+    public EventoCompletoDTO buscarEventoEspecifico(UUID id) {
         validarIdExternoPreenchido(id);
-        Evento evento = eventoRepository.findByIdExterno(id);
-        EventoCompletoDTO eventoResponse = eventoMapper.paraEventoCompletoDTO(evento);
-
-        return eventoResponse;
+        Evento evento = buscarEventoPorUUID(id);
+        return eventoMapper.paraEventoCompletoDTO(evento);
     }
 
     @Transactional
-    public RestResponseMessage criarEvento(EventoCreateDTO request){
-
-       //CONCLUÍDO
-
-        //VALIDAR PRIMEIROS TODOS OS CAMPOS PREENCHIDOS
+    public RestResponseMessage criarEvento(EventoCreateDTO request) {
+        // OWASP A01/A07: validacao defensiva de payload obrigatorio.
+        if (request == null) {
+            throw new ObjectSaveErrorException("Dados do evento nao podem ser nulos");
+        }
+        if (request.fkMinisterios() == null || request.fkMinisterios().isEmpty()) {
+            throw new FieldInvalidException("O evento deve possuir pelo menos um ministerio");
+        }
 
         recorrenciaService.validarRecorrencia(request.recorrencia(), request.dataHoraInicio());
         enderecoEventoService.validarEnderecoEvento(request.endereco());
         validaHoraInicioMenorHoraFim(request.dataHoraInicio(), request.dataHoraFim());
         validarHoraFuturo(request.dataHoraInicio(), request.dataHoraFim());
 
-        //CRIAR EVENTO SEM RECORRENCIA
-
-        if(request.recorrencia().tipoRecorrencia().equals(TipoRecorrencia.NAO_REPETE)){
+        if(request.recorrencia().tipoRecorrencia().equals(TipoRecorrencia.NAO_REPETE)) {
             criarEventoSemRecorrencia(request);
             return new RestResponseMessage(HttpStatus.CREATED, "Evento sem recorrência criado com sucesso");
         }
 
-        if(request.recorrencia().tipoRecorrencia().equals(TipoRecorrencia.SEMANAL)){
+        if(request.recorrencia().tipoRecorrencia().equals(TipoRecorrencia.SEMANAL)) {
             return criarEventoRecorrenciaSemanal(request);
         }
 
-        if(request.recorrencia().tipoRecorrencia().equals(TipoRecorrencia.MENSAL)){
+        if(request.recorrencia().tipoRecorrencia().equals(TipoRecorrencia.MENSAL)) {
             return criarEventoRecorrenciaMensal(request);
         }
 
         return new RestResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR, "Motivo não mapeado -> Criação do Evento");
     }
 
-
     @Transactional
     public RestResponseMessage apagarEvento(UUID idExterno){
-
-        //completo
-
         validarIdExternoPreenchido(idExterno);
 
         long deleteCount = eventoRepository.deleteByIdExterno(idExterno);
@@ -139,49 +138,40 @@ public class EventoService {
             throw new ObjectNotFoundException("Não foi possível apagar o evento, verifique se o evento existe");
         }
 
-        RestResponseMessage message = new RestResponseMessage(HttpStatus.OK, "Evento apagado com sucesso");
-
-        return message;
-
+        return new RestResponseMessage(HttpStatus.OK, "Evento apagado com sucesso");
     }
 
     @Transactional
     public RestResponseMessage apagarEventosMultiplos(UUID idEvento){
-
         validarIdExternoPreenchido(idEvento);
 
-        Evento evento = eventoRepository.findByIdExterno(idEvento);
-        if (evento == null) {
-            throw new ObjectNotFoundException("Não foi possível apagar o evento, verifique se o evento existe");
-        }
+        Evento evento = buscarEventoPorUUID(idEvento);
 
-        List<Evento> eventos = eventoRepository.findByPeriodoAndRecorrencia(evento.getRecorrencia(), evento.getDataHoraInicio(), jwtUtils.getIgrejaId());
-        System.out.println(eventos);
+        List<Evento> eventos = eventoRepository.findByPeriodoAndRecorrencia(
+                evento.getRecorrencia(),
+                evento.getDataHoraInicio(),
+                jwtUtils.getIgrejaId()
+        );
+
         if (!eventos.contains(evento)) {
             eventos.add(evento);
         }
 
         eventoRepository.deleteAll(eventos);
+        logger.debug("Eventos de recorrencia removidos para evento base informado");
 
-        RestResponseMessage message = new RestResponseMessage(HttpStatus.OK, "Evento apagado com sucesso");
-
-        return message;
-
+        return new RestResponseMessage(HttpStatus.OK, "Evento apagado com sucesso");
     }
 
     @Transactional
-    public RestResponseMessage alterarEvento(EventoUpdateDTO request, UUID idExterno){
-
-        //completo
-
+    public RestResponseMessage alterarEvento(EventoUpdateDTO request, UUID idExterno) {
         validarIdExternoPreenchido(idExterno);
         Evento evento = buscarEventoPorUUID(idExterno);
 
         //validar endereço e ver diferenças -> para atualizar apenas se houver mudanças
-
         if(request.endereco() != null && validarEnderecoDiferente(evento.getEnderecoEvento(), request.endereco())){
             EnderecoEvento enderecoAtualizado;
-            if(request.endereco().idExterno() == null){
+            if (request.endereco().idExterno() == null) {
                 enderecoAtualizado = enderecoEventoService.converterDtoToEndereco(request.endereco());
             } else {
                 enderecoAtualizado = enderecoEventoService.buscarPorUUID(request.endereco().idExterno());
@@ -189,9 +179,7 @@ public class EventoService {
             evento.setEnderecoEvento(enderecoAtualizado);
         }
 
-        //validar outros campos que precisam ser atualizados
-
-        if(request.fkMinisterios() != null && !request.fkMinisterios().isEmpty()){
+        if (request.fkMinisterios() != null && !request.fkMinisterios().isEmpty()) {
             Set<Ministerio> ministerios = new HashSet<>(ministerioService.buscarPorUUID(request.fkMinisterios()));
             evento.getMinisterios().clear();
             evento.getMinisterios().addAll(ministerios);
@@ -209,6 +197,11 @@ public class EventoService {
             evento.setPublicoAlvo(request.publicoAlvo());
         }
 
+        LocalDateTime novoInicio = request.dataHoraInicio() != null ? request.dataHoraInicio() : evento.getDataHoraInicio();
+        LocalDateTime novoFim = request.dataHoraFim() != null ? request.dataHoraFim() : evento.getDataHoraFim();
+        // OWASP A07: garante consistencia temporal em atualizacao parcial.
+        validaHoraInicioMenorHoraFim(novoInicio, novoFim);
+
         if (request.dataHoraInicio() != null) {
             evento.setDataHoraInicio(request.dataHoraInicio());
         }
@@ -224,67 +217,63 @@ public class EventoService {
         eventoRepository.save(evento);
 
         return new RestResponseMessage(HttpStatus.OK, "Evento atualizado com sucesso");
-
     }
 
-    public EnderecoEventoSimplificadoDTO buscarEnderecoEvento(){
+    public EnderecoEventoSimplificadoDTO buscarEnderecoEvento() {
         return enderecoEventoService.buscarEnderecoIgreja();
     }
 
-    //metodos para validar
-
-    private Evento buscarEventoPorUUID(UUID idExterno){
-
+    private Evento buscarEventoPorUUID(UUID idExterno) {
         Evento evento = eventoRepository.findByIdExterno(idExterno);
 
-        if(evento == null){
-            throw new ObjectSaveErrorException("Evento não encontrado");
+        if (evento == null) {
+            throw new ObjectNotFoundException("Evento nao encontrado");
         }
 
         return evento;
     }
 
-    private void validaHoraInicioMenorHoraFim(LocalDateTime inicio, LocalDateTime fim){
-        if(fim.isBefore(inicio)){
-            throw new TimeInvalidException("O horário de término do evento precisa ser maior que o horário de início");
+    private void validaHoraInicioMenorHoraFim(LocalDateTime inicio, LocalDateTime fim) {
+        if (inicio == null || fim == null) {
+            throw new TimeInvalidException("Horario de inicio e fim sao obrigatorios");
+        }
+        if (!fim.isAfter(inicio)) {
+            throw new TimeInvalidException("O horario de termino do evento precisa ser maior que o horario de inicio");
         }
     }
 
-    private void validarHoraFuturo(LocalDateTime inicio, LocalDateTime fim){
-
-        LocalDateTime hojeDataHora = LocalDateTime.now();
-        LocalDateTime hojeComMargem = hojeDataHora.plusMinutes(1);
-        if(inicio.isBefore(hojeComMargem) && fim.isBefore(hojeComMargem)){
-            throw new TimeInvalidException("Não é possível cadastrar eventos com horários passados.");
+    private void validarHoraFuturo(LocalDateTime inicio, LocalDateTime fim) {
+        LocalDateTime hojeComMargem = LocalDateTime.now().plusMinutes(1);
+        if (inicio.isBefore(hojeComMargem) || fim.isBefore(hojeComMargem)) {
+            throw new TimeInvalidException("Nao e possivel cadastrar eventos com horarios passados.");
         }
     }
 
-    private void validarIdExternoPreenchido(UUID idExterno){
-        if(idExterno == null){
+    private void validarIdExternoPreenchido(UUID idExterno) {
+        if (idExterno == null) {
             throw new FieldInvalidException("O id do evento precisa ser informado");
         }
     }
 
-    private boolean validarEnderecoDiferente(EnderecoEvento endereco, EnderecoEventoDTO enderecoEventoDTO){
+    private boolean validarEnderecoDiferente(EnderecoEvento endereco, EnderecoEventoDTO enderecoEventoDTO) {
+        if (endereco == null || enderecoEventoDTO == null) {
+            return false;
+        }
 
-        if(enderecoEventoDTO.idExterno() == null){
-
-            if(enderecoEventoDTO.cep() == null){
+        if (enderecoEventoDTO.idExterno() == null) {
+            if (enderecoEventoDTO.cep() == null) {
                 return false;
             }
 
-            return !enderecoEventoDTO.cep().equals(endereco.getCep()) || enderecoEventoDTO.numero() == null || !enderecoEventoDTO.numero().equals(endereco.getNumero());
-
+            return !enderecoEventoDTO.cep().equals(endereco.getCep())
+                    || enderecoEventoDTO.numero() == null
+                    || !enderecoEventoDTO.numero().equals(endereco.getNumero());
         }
 
         return !enderecoEventoDTO.idExterno().equals(endereco.getIdExterno());
     }
 
-// metodos para auxiliar
-
-    @Transactional
     private Evento criarEventoSemRecorrencia(EventoCreateDTO request){
-
         //CRIAR RECORRENCIA
 
         Recorrencia recorrencia = recorrenciaService.converterDtoToRecorrencia(request.recorrencia());
@@ -308,13 +297,9 @@ public class EventoService {
         evento.setIgreja(igrejaService.buscarUUID(jwtUtils.getIgrejaId()));
         evento.setMinisterios(ministerioService.buscarPorUUID(request.fkMinisterios()));
 
-        Evento eventoSalvo = eventoRepository.save(evento);
-
-        return eventoSalvo;
-
+        return eventoRepository.save(evento);
     }
 
-    @Transactional
     private RestResponseMessage criarEventoRecorrenciaSemanal(EventoCreateDTO request){
 
         //CRIAR EVENTO
@@ -325,8 +310,6 @@ public class EventoService {
 
         LocalDate dataInicio = request.recorrencia().dataInicioRecorrencia();
         LocalDate dataFim = request.recorrencia().dataTerminoRecorrencia();
-        LocalTime horarioInicio = request.dataHoraInicio().toLocalTime();
-        LocalTime horarioFim = request.dataHoraFim().toLocalTime();
         long semanas = ChronoUnit.WEEKS.between(dataInicio, dataFim);
 
         for (int i = 1; i <= semanas; i++) {
@@ -347,12 +330,9 @@ public class EventoService {
         }
 
         eventoRepository.saveAll(eventos);
-
-        return new RestResponseMessage(HttpStatus.CREATED, "Eventos com recorrência semanal criado com sucesso");
-
+        return new RestResponseMessage(HttpStatus.CREATED, "Eventos com recorrencia semanal criado com sucesso");
     }
 
-    @Transactional
     private RestResponseMessage criarEventoRecorrenciaMensal(EventoCreateDTO request) {
 
         //CRIAR EVENTO
@@ -363,8 +343,6 @@ public class EventoService {
 
         LocalDate dataInicio = request.recorrencia().dataInicioRecorrencia();
         LocalDate dataFim = request.recorrencia().dataTerminoRecorrencia();
-        LocalTime horarioInicio = request.dataHoraInicio().toLocalTime();
-        LocalTime horarioFim = request.dataHoraFim().toLocalTime();
         long meses = ChronoUnit.MONTHS.between(dataInicio, dataFim);
 
         for (int i = 1; i <= meses; i++) {
@@ -384,10 +362,8 @@ public class EventoService {
         }
 
         eventoRepository.saveAll(eventos);
-
-        return new RestResponseMessage(HttpStatus.CREATED, "Eventos com recorrência mensal criados com sucesso");
+        return new RestResponseMessage(HttpStatus.CREATED, "Eventos com recorrencia mensal criados com sucesso");
     }
-
 
     // Utilizado para escalas
 //    public List<EventoComEventoMinisterioDTO> buscarEventosComEventoMinisterioPorMesAno(int mes, int ano) {
@@ -412,22 +388,16 @@ public class EventoService {
     //UTILIZADO PARA KPI
 
     public List<EventoKpiDTO> buscarKpisEvento(int anoInicio, int anoFim) {
-
         UUID idIgreja = jwtUtils.getIgrejaId();
-
-        List<EventoKpiDTO> kpisEvento = eventoRepository.buscarKpisEvento(anoInicio, anoFim, idIgreja);
-
-        return kpisEvento;
+        return eventoRepository.buscarKpisEvento(anoInicio, anoFim, idIgreja);
     }
 
-    public List<MinisterioEventoDashDTO> ministerioBuscarDashQuantidadeEventos(int anoInicio, int anoFim){
-
+    public List<MinisterioEventoDashDTO> ministerioBuscarDashQuantidadeEventos(int anoInicio, int anoFim) {
         UUID idIgreja = jwtUtils.getIgrejaId();
-
         List<MinisterioEventoDashDTO> response = eventoRepository.contarEventosPorMinisterioNoPeriodo(anoInicio, anoFim, idIgreja);
 
-        System.out.println(response);
-
+        // OWASP A05: remove saida de debug em console.
+        logger.debug("Dashboard de quantidade de eventos por ministerio calculado para a igreja autenticada");
         return response;
 
     }
