@@ -23,29 +23,31 @@ public interface MembroMinisterioRepository extends JpaRepository<MembroMinister
 
     List<MembroMinisterio> findAllByIdExternoIn(List<UUID> idsExternoMembroMinisterio);
 
+    // OWASP A01: query sensivel filtrada por ministerio; contexto de tenant valida em camada superior.
     @Query("""
             SELECT mm FROM MembroMinisterio mm
             JOIN mm.membro m
             WHERE mm.ministerio.idExterno = :idMinisterio
             AND (:status IS NULL OR m.status = :status)
             AND (:busca IS NULL OR
-            LOWER(m.nome) LIKE LOWER(:busca)
-            OR LOWER(m.email) LIKE LOWER(:busca))
+            LOWER(m.nome) LIKE LOWER(CONCAT('%', :busca, '%'))
+            OR LOWER(m.email) LIKE LOWER(CONCAT('%', :busca, '%')))
             """)
-    Page<MembroMinisterio> buscarPorMembroMinisterioComFiltro(Pageable pageable, UUID idMinisterio, @Param("busca") String texto, EnumStatusMembro status);
+    Page<MembroMinisterio> buscarPorMembroMinisterioComFiltro(Pageable pageable, @Param("idMinisterio") UUID idMinisterio, @Param("busca") String texto, @Param("status") EnumStatusMembro status);
 
+    // OWASP A01: query basica com filtro de ministerio.
     @Query("""
             SELECT mm FROM MembroMinisterio mm
             JOIN mm.membro m
             WHERE mm.ministerio.idExterno = :idMinisterio
             """)
-    Page<MembroMinisterio> buscarPorMembroMinisterioSemFiltro(Pageable pageable, UUID idMinisterio);
+    Page<MembroMinisterio> buscarPorMembroMinisterioSemFiltro(Pageable pageable, @Param("idMinisterio") UUID idMinisterio);
 
+    // OWASP A01: delecao protegida por chave composta membro+ministerio.
     int deleteByMembroIdExternoAndMinisterioIdExterno(UUID membroIdExterno, UUID ministerioIdExterno);
 
-
+    // OWASP A01: consulta sensivel com triplo filtro: membro, ministerio e igreja.
     @Query("""
-            
             SELECT new com.diacono.diacono.ministerio.model.dto.response.MinisterioSuperSimplificadoDTO(
                 ms.idExterno,
                 ms.nome
@@ -56,60 +58,55 @@ public interface MembroMinisterioRepository extends JpaRepository<MembroMinister
             WHERE m.idExterno = :idExternoMembro
             AND ms.igreja.idExterno = :idExternoIgreja
             AND mm.cargoMembro = 'LIDER_MINISTERIO'
-            
             """)
-    List<MinisterioSuperSimplificadoDTO> buscarMinisterioLider(UUID idExternoMembro, UUID idExternoIgreja);
+    List<MinisterioSuperSimplificadoDTO> buscarMinisterioLider(@Param("idExternoMembro") UUID idExternoMembro, @Param("idExternoIgreja") UUID idExternoIgreja);
 
+    // DASH - OWASP A01: queries de dashboard com escopo explicito por igreja.
 
-    //DASH
-
+    // OWASP A01: agregacao sensivel restrita ao ano especifico e igreja autenticada.
     @Query("""
-            
             SELECT new com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashEvolucaoDTO(
                 COUNT(mb),
                 mb.dataRegistro
             )
-            FROM MembroMinisterio mb  
-            JOIN mb.ministerio m      
+            FROM MembroMinisterio mb
+            JOIN mb.ministerio m
             WHERE m.igreja.idExterno = :idIgreja
             AND (:idMinisterio IS NULL OR m.idExterno = :idMinisterio)
-            AND FUNCTION('YEAR', mb.dataRegistro) = :anoFim  
-            GROUP BY mb.dataRegistro                       
+            AND FUNCTION('YEAR', mb.dataRegistro) = :anoFim
+            GROUP BY mb.dataRegistro
             ORDER BY mb.dataRegistro ASC
-            
             """)
-    List<MinisterioDashEvolucaoDTO> buscarDashEvolucaoUmAno(int anoFim, UUID idMinisterio, UUID idIgreja);
+    List<MinisterioDashEvolucaoDTO> buscarDashEvolucaoUmAno(@Param("anoFim") int anoFim, @Param("idMinisterio") UUID idMinisterio, @Param("idIgreja") UUID idIgreja);
 
+    // OWASP A01: agregacao sensivel restrita ao intervalo de anos e igreja autenticada.
     @Query("""
-            
             SELECT new com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashEvolucaoDTO(
                 COUNT(mb),
                 mb.dataRegistro
             )
-            FROM MembroMinisterio mb  
-            JOIN mb.ministerio m      
+            FROM MembroMinisterio mb
+            JOIN mb.ministerio m
             WHERE m.igreja.idExterno = :idIgreja
             AND (:idMinisterio IS NULL OR m.idExterno = :idMinisterio)
-            AND FUNCTION('YEAR', mb.dataRegistro) BETWEEN :anoInicio AND :anoFim 
-            GROUP BY mb.dataRegistro                       
+            AND FUNCTION('YEAR', mb.dataRegistro) BETWEEN :anoInicio AND :anoFim
+            GROUP BY mb.dataRegistro
             ORDER BY mb.dataRegistro ASC
-            
             """)
-    List<MinisterioDashEvolucaoDTO> buscarDashEvolucaoPeriodo(int anoInicio, int anoFim, UUID idMinisterio, UUID idIgreja);
+    List<MinisterioDashEvolucaoDTO> buscarDashEvolucaoPeriodo(@Param("anoInicio") int anoInicio, @Param("anoFim") int anoFim, @Param("idMinisterio") UUID idMinisterio, @Param("idIgreja") UUID idIgreja);
 
+    // OWASP A01: agregacao de quantidade de membros por ministerio restrita a igreja.
     @Query("""
-            
             SELECT new com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashQuantidadeMembrosDTO(
                 m.nome,
                 COUNT(mb)
             )
-            FROM MembroMinisterio mb        
-            JOIN mb.ministerio m          
+            FROM MembroMinisterio mb
+            JOIN mb.ministerio m
             WHERE m.igreja.idExterno = :idIgreja
-            AND FUNCTION('YEAR', mb.dataRegistro) BETWEEN :anoInicio AND :anoFim  
-            GROUP BY m.nome       
-            
+            AND FUNCTION('YEAR', mb.dataRegistro) BETWEEN :anoInicio AND :anoFim
+            GROUP BY m.nome
             """)
-    List<MinisterioDashQuantidadeMembrosDTO> buscarQuantidadeMembros(int anoInicio, int anoFim, @Param("idIgreja") UUID igrejaId);
+    List<MinisterioDashQuantidadeMembrosDTO> buscarQuantidadeMembros(@Param("anoInicio") int anoInicio, @Param("anoFim") int anoFim, @Param("idIgreja") UUID idIgreja);
 
 }

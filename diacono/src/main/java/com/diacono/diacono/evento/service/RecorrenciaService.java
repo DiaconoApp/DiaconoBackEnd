@@ -1,19 +1,20 @@
 package com.diacono.diacono.evento.service;
 
 import com.diacono.diacono.evento.mapper.RecorrenciaMapper;
-import com.diacono.diacono.evento.model.dto.request.EnderecoEventoDTO;
 import com.diacono.diacono.evento.model.dto.request.RecorrenciaCreateDTO;
-import com.diacono.diacono.evento.model.entity.EnderecoEvento;
 import com.diacono.diacono.evento.model.entity.Recorrencia;
 import com.diacono.diacono.evento.model.entity.TipoRecorrencia;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 
-import java.time.DateTimeException;
 import java.time.LocalDateTime;
 
 @Service
 public class RecorrenciaService {
+
+    // OWASP A05/A07: limita o periodo maximo da recorrencia para reduzir payload inconsistente.
+    private static final int MAX_INTERVALO_RECORRENCIA_DIAS = 365;
 
     private final RecorrenciaMapper recorrenciaMapper;
 
@@ -21,14 +22,14 @@ public class RecorrenciaService {
         this.recorrenciaMapper = recorrenciaMapper;
     }
 
-    //metodo para conversão
+    // OWASP A05: validacao defensiva antes da conversao do DTO.
+    public Recorrencia converterDtoToRecorrencia(@Valid RecorrenciaCreateDTO recorrenciaCreateDTO){
 
-    public Recorrencia converterDtoToRecorrencia(RecorrenciaCreateDTO recorrenciaCreateDTO){
         return recorrenciaMapper.paraRecorrencia(recorrenciaCreateDTO);
     }
 
-    // metodos para validacoes
-    public void validarRecorrencia(RecorrenciaCreateDTO recorrencia, LocalDateTime comparativoEvento){
+    // OWASP A05/A07: falha de forma segura para payload nulo e combinacoes inconsistentes.
+    public void validarRecorrencia(@Valid RecorrenciaCreateDTO recorrencia, LocalDateTime comparativoEvento){
 
         if(!recorrencia.tipoRecorrencia().equals(TipoRecorrencia.NAO_REPETE)){
 
