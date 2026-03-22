@@ -1,24 +1,24 @@
 package com.diacono.diacono.ministerio.service;
 
-import com.diacono.diacono.global.dto.response.RestResponseMessage;
-import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
-import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.global.util.JwtUtils;
-import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
-import com.diacono.diacono.membro.model.entity.Membro;
-import com.diacono.diacono.membro.repository.MembroRepository;
-import com.diacono.diacono.membroministerio.model.dto.request.MembroMinisterioCreateDTO;
-import com.diacono.diacono.membroministerio.model.dto.response.MembroMinisterioInfoMembroDTO;
-import com.diacono.diacono.membroministerio.model.entity.EnumCargoMembroMinisterio;
-import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
+import com.diacono.diacono.presentation.dto.response.RestResponseMessage;
+import com.diacono.diacono.application.exceptions.FieldInvalidException;
+import com.diacono.diacono.application.exceptions.ObjectNotFoundException;
+import com.diacono.diacono.infrastructure.extractor.JwtClaimsExtractor;
+import com.diacono.diacono.domain.enums.EnumStatusMembro;
+import com.diacono.diacono.domain.entities.Membro;
+import com.diacono.diacono.infrastructure.persistence.MembroRepository;
+import com.diacono.diacono.presentation.dto.request.MembroMinisterioCreateDTO;
+import com.diacono.diacono.presentation.dto.response.MembroMinisterioInfoMembroDTO;
+import com.diacono.diacono.domain.enums.EnumCargoMembroMinisterio;
+import com.diacono.diacono.domain.entities.MembroMinisterio;
 import com.diacono.diacono.membroministerio.service.MembroMinisterioService;
-import com.diacono.diacono.ministerio.mapper.MinisterioMapper;
-import com.diacono.diacono.ministerio.model.dto.MinisterioCreateDTO;
-import com.diacono.diacono.ministerio.model.dto.MinisterioUpdateDTO;
-import com.diacono.diacono.ministerio.model.dto.response.MinisterioSimplificadoDTO;
-import com.diacono.diacono.ministerio.model.entity.EnumStatusMinisterio;
-import com.diacono.diacono.ministerio.model.entity.Ministerio;
-import com.diacono.diacono.ministerio.repository.MinisteriosRepository;
+import com.diacono.diacono.application.mappers.MinisterioMapper;
+import com.diacono.diacono.presentation.dto.MinisterioCreateDTO;
+import com.diacono.diacono.presentation.dto.MinisterioUpdateDTO;
+import com.diacono.diacono.presentation.dto.MinisterioSimplificadoDTO;
+import com.diacono.diacono.domain.enums.EnumStatusMinisterio;
+import com.diacono.diacono.domain.entities.Ministerio;
+import com.diacono.diacono.infrastructure.persistence.MinisteriosRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,7 +44,7 @@ import static org.mockito.Mockito.*;
 class MinisterioServiceTest {
 
     @Mock
-    private JwtUtils jwtUtils;
+    private JwtClaimsExtractor jwtClaimsExtractor;
 
     @Mock
     private MinisteriosRepository ministeriosRepository;
@@ -97,7 +97,7 @@ class MinisterioServiceTest {
             EnumStatusMinisterio.ATIVO, LocalDate.now()
         );
 
-        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
+        when(jwtClaimsExtractor.getIgrejaId()).thenReturn(igrejaId);
         when(ministeriosRepository.findByIgreja_IdExterno(igrejaId, pageable)).thenReturn(ministeriosPage);
         when(ministerioMapper.paraMinisterioSimplificadoDTO(ministerio1)).thenReturn(dto1);
         when(ministerioMapper.paraMinisterioSimplificadoDTO(ministerio2)).thenReturn(dto2);
@@ -116,7 +116,7 @@ class MinisterioServiceTest {
     void buscarMinisteriosGovernoNenhumEncontradoDeveRetornarErro() {
         Page<Ministerio> ministeriosPageVazia = new PageImpl<>(Collections.emptyList(), pageable, 0);
 
-        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
+        when(jwtClaimsExtractor.getIgrejaId()).thenReturn(igrejaId);
         when(ministeriosRepository.findByIgreja_IdExterno(igrejaId, pageable)).thenReturn(ministeriosPageVazia);
 
         assertThrows(ObjectNotFoundException.class,
@@ -142,7 +142,7 @@ class MinisterioServiceTest {
             EnumStatusMinisterio.ATIVO, LocalDate.now()
         );
 
-        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
+        when(jwtClaimsExtractor.getIgrejaId()).thenReturn(igrejaId);
         when(ministeriosRepository.buscarComFiltros(pageable, stringBusca, status, igrejaId)).thenReturn(ministeriosPage);
         when(ministerioMapper.paraMinisterioSimplificadoDTO(ministerio)).thenReturn(dto);
 
@@ -164,7 +164,7 @@ class MinisterioServiceTest {
 
         Page<Ministerio> ministeriosPageVazia = new PageImpl<>(Collections.emptyList(), pageable, 0);
 
-        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
+        when(jwtClaimsExtractor.getIgrejaId()).thenReturn(igrejaId);
         when(ministeriosRepository.buscarComFiltros(pageable, stringBusca, status, igrejaId)).thenReturn(ministeriosPageVazia);
 
         assertThrows(ObjectNotFoundException.class,

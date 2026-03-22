@@ -1,8 +1,8 @@
 package com.diacono.diacono.auth.service;
 
-import com.diacono.diacono.Igreja.model.entity.Igreja;
-import com.diacono.diacono.membro.model.entity.EnumCargoMembro;
-import com.diacono.diacono.membro.model.entity.Membro;
+import com.diacono.diacono.domain.entities.Igreja;
+import com.diacono.diacono.domain.enums.EnumCargoMembro;
+import com.diacono.diacono.domain.entities.Membro;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

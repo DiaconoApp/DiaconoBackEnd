@@ -1,15 +1,16 @@
 package com.diacono.diacono.ministerio.controller;
 
-import com.diacono.diacono.global.dto.response.RestResponseMessage;
-import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
-import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
-import com.diacono.diacono.membroministerio.model.dto.request.MembroMinisterioCreateDTO;
-import com.diacono.diacono.membroministerio.model.dto.response.MembroMinisterioInfoMembroDTO;
-import com.diacono.diacono.ministerio.model.dto.MinisterioCreateDTO;
-import com.diacono.diacono.ministerio.model.dto.MinisterioUpdateDTO;
-import com.diacono.diacono.ministerio.model.dto.response.MinisterioSimplificadoDTO;
-import com.diacono.diacono.ministerio.model.entity.EnumStatusMinisterio;
+import com.diacono.diacono.presentation.dto.response.RestResponseMessage;
+import com.diacono.diacono.application.exceptions.FieldInvalidException;
+import com.diacono.diacono.domain.enums.EnumStatusMembro;
+import com.diacono.diacono.presentation.dto.request.MembroMinisterioCreateDTO;
+import com.diacono.diacono.presentation.dto.response.MembroMinisterioInfoMembroDTO;
+import com.diacono.diacono.presentation.dto.MinisterioCreateDTO;
+import com.diacono.diacono.presentation.dto.MinisterioUpdateDTO;
+import com.diacono.diacono.presentation.dto.MinisterioSimplificadoDTO;
+import com.diacono.diacono.domain.enums.EnumStatusMinisterio;
 import com.diacono.diacono.ministerio.service.MinisterioService;
+import com.diacono.diacono.presentation.controller.MinisteriosController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

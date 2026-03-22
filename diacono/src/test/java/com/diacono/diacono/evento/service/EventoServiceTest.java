@@ -1,30 +1,30 @@
 package com.diacono.diacono.evento.service;
 
-import com.diacono.diacono.evento.exceptions.TimeInvalidException;
-import com.diacono.diacono.evento.mapper.EventoMapper;
-import com.diacono.diacono.evento.mapper.EventoUpdateMapper;
-import com.diacono.diacono.evento.model.dto.request.EnderecoEventoDTO;
-import com.diacono.diacono.evento.model.dto.request.EventoCreateDTO;
-import com.diacono.diacono.evento.model.dto.request.EventoUpdateDTO;
-import com.diacono.diacono.evento.model.dto.request.RecorrenciaCreateDTO;
-import com.diacono.diacono.evento.model.dto.response.EnderecoEventoSimplificadoDTO;
-import com.diacono.diacono.evento.model.dto.response.EventoCompletoDTO;
-import com.diacono.diacono.evento.model.dto.response.EventoSimplificadoDTO;
-import com.diacono.diacono.evento.model.entity.EnderecoEvento;
-import com.diacono.diacono.evento.model.entity.Evento;
-import com.diacono.diacono.evento.model.entity.Recorrencia;
-import com.diacono.diacono.evento.model.entity.TipoRecorrencia;
-import com.diacono.diacono.evento.repository.EventoRepository;
-import com.diacono.diacono.global.dto.response.RestResponseMessage;
-import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
-import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
-import com.diacono.diacono.global.util.JwtUtils;
-import com.diacono.diacono.membro.model.entity.Membro;
+import com.diacono.diacono.application.exceptions.TimeInvalidException;
+import com.diacono.diacono.application.mappers.EventoMapper;
+import com.diacono.diacono.application.mappers.EventoUpdateMapper;
+import com.diacono.diacono.presentation.dto.request.EnderecoEventoDTO;
+import com.diacono.diacono.presentation.dto.request.EventoCreateDTO;
+import com.diacono.diacono.presentation.dto.request.EventoUpdateDTO;
+import com.diacono.diacono.presentation.dto.request.RecorrenciaCreateDTO;
+import com.diacono.diacono.presentation.dto.response.EnderecoEventoSimplificadoDTO;
+import com.diacono.diacono.presentation.dto.response.EventoCompletoDTO;
+import com.diacono.diacono.presentation.dto.response.EventoSimplificadoDTO;
+import com.diacono.diacono.domain.entities.EnderecoEvento;
+import com.diacono.diacono.domain.entities.Evento;
+import com.diacono.diacono.domain.entities.Recorrencia;
+import com.diacono.diacono.domain.enums.TipoRecorrencia;
+import com.diacono.diacono.infrastructure.persistence.EventoRepository;
+import com.diacono.diacono.presentation.dto.response.RestResponseMessage;
+import com.diacono.diacono.application.exceptions.FieldInvalidException;
+import com.diacono.diacono.application.exceptions.ObjectNotFoundException;
+import com.diacono.diacono.application.exceptions.ObjectSaveErrorException;
+import com.diacono.diacono.infrastructure.extractor.JwtClaimsExtractor;
+import com.diacono.diacono.domain.entities.Membro;
 import com.diacono.diacono.membro.service.MembroService;
-import com.diacono.diacono.ministerio.model.entity.Ministerio;
+import com.diacono.diacono.domain.entities.Ministerio;
 import com.diacono.diacono.ministerio.service.MinisterioService;
-import com.diacono.diacono.Igreja.model.entity.Igreja;
+import com.diacono.diacono.domain.entities.Igreja;
 import com.diacono.diacono.Igreja.service.IgrejaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -72,7 +72,7 @@ class EventoServiceTest {
     private IgrejaService igrejaService;
 
     @Mock
-    private JwtUtils jwtUtils;
+    private JwtClaimsExtractor jwtClaimsExtractor;
 
     @InjectMocks
     private EventoService eventoService;
@@ -105,7 +105,7 @@ class EventoServiceTest {
         eventos.add(evento);
         EventoSimplificadoDTO eventoResponseDTO = mock(EventoSimplificadoDTO.class);
 
-        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
+        when(jwtClaimsExtractor.getIgrejaId()).thenReturn(igrejaId);
         when(eventoRepository.findByPeriodo(any(LocalDateTime.class), any(LocalDateTime.class), eq(igrejaId))).thenReturn(eventos);
         when(eventoMapper.paraEventoSimplificado(eventos)).thenReturn(eventoResponseDTO);
 
@@ -143,7 +143,7 @@ class EventoServiceTest {
         int mes = 12;
         int ano = 2024;
 
-        when(jwtUtils.getIgrejaId()).thenReturn(null);
+        when(jwtClaimsExtractor.getIgrejaId()).thenReturn(null);
 
         when(eventoRepository.findByPeriodo(
                 any(LocalDateTime.class),
@@ -200,8 +200,8 @@ class EventoServiceTest {
         Igreja igreja = new Igreja();
         Set<Ministerio> ministerios = new HashSet<>();
 
-        when(jwtUtils.getSubject()).thenReturn(membroId);
-        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
+        when(jwtClaimsExtractor.getSubject()).thenReturn(membroId);
+        when(jwtClaimsExtractor.getIgrejaId()).thenReturn(igrejaId);
         when(recorrenciaService.converterDtoToRecorrencia(recorrenciaDTO)).thenReturn(recorrencia);
         when(enderecoEventoService.converterDtoToEndereco(enderecoDTO)).thenReturn(endereco);
         when(eventoMapper.paraEvento(eventoCreateDTO)).thenReturn(evento);
@@ -243,8 +243,8 @@ class EventoServiceTest {
         Igreja igreja = new Igreja();
         Set<Ministerio> ministerios = new HashSet<>();
 
-        when(jwtUtils.getSubject()).thenReturn(membroId);
-        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
+        when(jwtClaimsExtractor.getSubject()).thenReturn(membroId);
+        when(jwtClaimsExtractor.getIgrejaId()).thenReturn(igrejaId);
         when(recorrenciaService.converterDtoToRecorrencia(recorrenciaDTO)).thenReturn(recorrencia);
         when(enderecoEventoService.converterDtoToEndereco(enderecoDTO)).thenReturn(endereco);
         when(eventoMapper.paraEvento(eventoCreateDTO)).thenReturn(evento);
@@ -285,8 +285,8 @@ class EventoServiceTest {
         Igreja igreja = new Igreja();
         Set<Ministerio> ministerios = new HashSet<>();
 
-        when(jwtUtils.getSubject()).thenReturn(membroId);
-        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
+        when(jwtClaimsExtractor.getSubject()).thenReturn(membroId);
+        when(jwtClaimsExtractor.getIgrejaId()).thenReturn(igrejaId);
         when(recorrenciaService.converterDtoToRecorrencia(recorrenciaDTO)).thenReturn(recorrencia);
         when(enderecoEventoService.converterDtoToEndereco(enderecoDTO)).thenReturn(endereco);
         when(eventoMapper.paraEvento(eventoCreateDTO)).thenReturn(evento);
@@ -380,7 +380,7 @@ class EventoServiceTest {
 
         List<Evento> eventos = Arrays.asList(evento);
 
-        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
+        when(jwtClaimsExtractor.getIgrejaId()).thenReturn(igrejaId);
         when(eventoRepository.findByIdExterno(eventoId)).thenReturn(evento);
         when(eventoRepository.findByPeriodoAndRecorrencia(recorrencia, dataHoraInicio, igrejaId)).thenReturn(eventos);
 

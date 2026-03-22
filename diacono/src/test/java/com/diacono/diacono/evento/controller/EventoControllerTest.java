@@ -1,16 +1,17 @@
 package com.diacono.diacono.evento.controller;
 
-import com.diacono.diacono.evento.model.dto.request.EnderecoEventoDTO;
-import com.diacono.diacono.evento.model.dto.request.EventoCreateDTO;
-import com.diacono.diacono.evento.model.dto.request.EventoUpdateDTO;
-import com.diacono.diacono.evento.model.dto.request.RecorrenciaCreateDTO;
-import com.diacono.diacono.evento.model.dto.response.EnderecoEventoSimplificadoDTO;
-import com.diacono.diacono.evento.model.dto.response.EventoCompletoDTO;
-import com.diacono.diacono.evento.model.dto.response.EventoSimplificadoDTO;
-import com.diacono.diacono.evento.model.dto.response.EventoUnicoSimplificadoDTO;
-import com.diacono.diacono.evento.model.entity.TipoRecorrencia;
+import com.diacono.diacono.presentation.dto.request.EnderecoEventoDTO;
+import com.diacono.diacono.presentation.dto.request.EventoCreateDTO;
+import com.diacono.diacono.presentation.dto.request.EventoUpdateDTO;
+import com.diacono.diacono.presentation.dto.request.RecorrenciaCreateDTO;
+import com.diacono.diacono.presentation.dto.response.EnderecoEventoSimplificadoDTO;
+import com.diacono.diacono.presentation.dto.response.EventoCompletoDTO;
+import com.diacono.diacono.presentation.dto.response.EventoSimplificadoDTO;
+import com.diacono.diacono.presentation.dto.response.EventoUnicoSimplificadoDTO;
+import com.diacono.diacono.domain.enums.TipoRecorrencia;
 import com.diacono.diacono.evento.service.EventoService;
-import com.diacono.diacono.global.dto.response.RestResponseMessage;
+import com.diacono.diacono.presentation.dto.response.RestResponseMessage;
+import com.diacono.diacono.presentation.controller.EventoController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

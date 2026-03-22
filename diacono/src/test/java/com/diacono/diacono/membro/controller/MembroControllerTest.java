@@ -1,12 +1,13 @@
 package com.diacono.diacono.membro.controller;
 
-import com.diacono.diacono.global.dto.response.RestResponseMessage;
-import com.diacono.diacono.membro.model.dto.request.MembroCreateDTO;
-import com.diacono.diacono.membro.model.dto.response.MembroResponseDTO;
-import com.diacono.diacono.membro.model.entity.EnumCargoMembro;
-import com.diacono.diacono.membro.model.entity.EnumGeneroMembro;
-import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
+import com.diacono.diacono.presentation.dto.response.RestResponseMessage;
+import com.diacono.diacono.presentation.dto.request.MembroCreateDTO;
+import com.diacono.diacono.presentation.dto.response.MembroResponseDTO;
+import com.diacono.diacono.domain.enums.EnumCargoMembro;
+import com.diacono.diacono.domain.enums.EnumGeneroMembro;
+import com.diacono.diacono.domain.enums.EnumStatusMembro;
 import com.diacono.diacono.membro.service.MembroService;
+import com.diacono.diacono.presentation.controller.MembroController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

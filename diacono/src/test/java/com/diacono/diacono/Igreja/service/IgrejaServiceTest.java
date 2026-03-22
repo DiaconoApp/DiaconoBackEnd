@@ -1,10 +1,10 @@
 package com.diacono.diacono.Igreja.service;
 
-import com.diacono.diacono.Igreja.mapper.IgrejaMapper;
-import com.diacono.diacono.Igreja.model.dto.response.IgrejaSemiCompletoDTO;
-import com.diacono.diacono.Igreja.model.entity.Igreja;
-import com.diacono.diacono.Igreja.repository.IgrejaRepository;
-import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
+import com.diacono.diacono.application.mappers.IgrejaMapper;
+import com.diacono.diacono.presentation.dto.response.IgrejaSemiCompletoDTO;
+import com.diacono.diacono.domain.entities.Igreja;
+import com.diacono.diacono.infrastructure.persistence.IgrejaRepository;
+import com.diacono.diacono.application.exceptions.ObjectNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

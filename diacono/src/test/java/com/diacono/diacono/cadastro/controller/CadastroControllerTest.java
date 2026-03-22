@@ -1,10 +1,11 @@
 package com.diacono.diacono.cadastro.controller;
 
-import com.diacono.diacono.Igreja.model.dto.response.IgrejaSemiCompletoDTO;
-import com.diacono.diacono.cadastro.model.dto.CadastroExternoDTO;
+import com.diacono.diacono.presentation.dto.response.IgrejaSemiCompletoDTO;
+import com.diacono.diacono.presentation.dto.request.CadastroExternoDTO;
 import com.diacono.diacono.cadastro.service.CadastroService;
-import com.diacono.diacono.global.dto.response.RestResponseMessage;
-import com.diacono.diacono.membro.model.entity.EnumGeneroMembro;
+import com.diacono.diacono.presentation.dto.response.RestResponseMessage;
+import com.diacono.diacono.domain.enums.EnumGeneroMembro;
+import com.diacono.diacono.presentation.controller.CadastroController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

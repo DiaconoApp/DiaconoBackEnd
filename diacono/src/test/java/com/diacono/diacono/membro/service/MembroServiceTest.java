@@ -1,24 +1,24 @@
 package com.diacono.diacono.membro.service;
 
-import com.diacono.diacono.Igreja.model.entity.Igreja;
+import com.diacono.diacono.domain.entities.Igreja;
 import com.diacono.diacono.Igreja.service.IgrejaService;
-import com.diacono.diacono.cadastro.model.dto.CadastroExternoDTO;
-import com.diacono.diacono.global.dto.response.RestResponseMessage;
-import com.diacono.diacono.global.error.exceptions.ObjectExistsException;
-import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
-import com.diacono.diacono.global.util.JwtUtils;
-import com.diacono.diacono.membro.mapper.MembroMapper;
-import com.diacono.diacono.membro.model.dto.request.MembroCreateDTO;
-import com.diacono.diacono.membro.model.dto.response.MembroResponseDTO;
-import com.diacono.diacono.membro.model.entity.EnumCargoMembro;
-import com.diacono.diacono.membro.model.entity.EnumGeneroMembro;
-import com.diacono.diacono.membro.model.entity.EnumStatusMembro;
-import com.diacono.diacono.membro.model.entity.Membro;
-import com.diacono.diacono.membro.repository.MembroRepository;
-import com.diacono.diacono.membroministerio.model.entity.MembroMinisterio;
+import com.diacono.diacono.presentation.dto.request.CadastroExternoDTO;
+import com.diacono.diacono.presentation.dto.response.RestResponseMessage;
+import com.diacono.diacono.application.exceptions.ObjectExistsException;
+import com.diacono.diacono.application.exceptions.ObjectNotFoundException;
+import com.diacono.diacono.application.exceptions.ObjectSaveErrorException;
+import com.diacono.diacono.infrastructure.extractor.JwtClaimsExtractor;
+import com.diacono.diacono.application.mappers.MembroMapper;
+import com.diacono.diacono.presentation.dto.request.MembroCreateDTO;
+import com.diacono.diacono.presentation.dto.response.MembroResponseDTO;
+import com.diacono.diacono.domain.enums.EnumCargoMembro;
+import com.diacono.diacono.domain.enums.EnumGeneroMembro;
+import com.diacono.diacono.domain.enums.EnumStatusMembro;
+import com.diacono.diacono.domain.entities.Membro;
+import com.diacono.diacono.infrastructure.persistence.MembroRepository;
+import com.diacono.diacono.domain.entities.MembroMinisterio;
 import com.diacono.diacono.membroministerio.service.MembroMinisterioService;
-import com.diacono.diacono.ministerio.model.entity.Ministerio;
+import com.diacono.diacono.domain.entities.Ministerio;
 import com.diacono.diacono.ministerio.service.MinisterioService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,7 +36,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -48,7 +47,7 @@ import static org.mockito.Mockito.when;
 class MembroServiceTest {
 
     @Mock
-    private JwtUtils jwtUtils;
+    private JwtClaimsExtractor jwtClaimsExtractor;
 
     @Mock
     private MembroRepository membroRepository;
@@ -108,7 +107,7 @@ class MembroServiceTest {
         List<Membro> membros = List.of(membro1, membro2);
         Page<Membro> membroPage = new PageImpl<>(membros, pageable, membros.size());
 
-        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
+        when(jwtClaimsExtractor.getIgrejaId()).thenReturn(igrejaId);
         when(membroRepository.findByIgreja_IdExterno(igrejaId, pageable)).thenReturn(membroPage);
         when(membroMapper.paraMembroResponseDTO(membro1)).thenReturn(dto1);
         when(membroMapper.paraMembroResponseDTO(membro2)).thenReturn(dto2);
@@ -169,7 +168,7 @@ class MembroServiceTest {
 
         String buscaFormatada = "%" + termoBusca + "%";
 
-        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
+        when(jwtClaimsExtractor.getIgrejaId()).thenReturn(igrejaId);
         when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
         when(membroMapper.paraMembrosResponseDTO(membrosEncontrados)).thenReturn(responseDTOs);
 
@@ -516,7 +515,7 @@ class MembroServiceTest {
         membro1.setNome("João Silva");
         List<Membro> membrosEncontrados = List.of(membro1);
 
-        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
+        when(jwtClaimsExtractor.getIgrejaId()).thenReturn(igrejaId);
         when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
 
         List<Membro> result = (List<Membro>) ReflectionTestUtils.invokeMethod(membroService, "buscaMembros", termoBusca);
@@ -534,7 +533,7 @@ class MembroServiceTest {
         String buscaFormatada = "%" + termoBusca + "%";
         UUID igrejaId = UUID.randomUUID();
 
-        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
+        when(jwtClaimsExtractor.getIgrejaId()).thenReturn(igrejaId);
         when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(List.of());
 
         assertThrows(ObjectNotFoundException.class, () ->
@@ -574,7 +573,7 @@ class MembroServiceTest {
 
         String buscaFormatada = "%" + termoBusca + "%";
 
-        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
+        when(jwtClaimsExtractor.getIgrejaId()).thenReturn(igrejaId);
         when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
         when(membroMapper.paraMembrosResponseDTO(membrosEncontrados)).thenReturn(responseDTOs);
 
@@ -602,7 +601,7 @@ class MembroServiceTest {
         List<Membro> membrosEncontrados = List.of(membro1);
         String buscaFormatada = "%" + termoBusca + "%";
 
-        when(jwtUtils.getIgrejaId()).thenReturn(igrejaId);
+        when(jwtClaimsExtractor.getIgrejaId()).thenReturn(igrejaId);
         when(membroRepository.findAllWithFilter(buscaFormatada, igrejaId)).thenReturn(membrosEncontrados);
 
         assertThrows(ObjectNotFoundException.class, () ->

@@ -1,7 +1,6 @@
 package com.diacono.diacono.auth.service;
 
-import com.diacono.diacono.auth.model.CustomMembroOAuth2User;
-import com.diacono.diacono.membro.model.entity.Membro;
+import com.diacono.diacono.domain.entities.Membro;
 import com.diacono.diacono.membro.service.MembroService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

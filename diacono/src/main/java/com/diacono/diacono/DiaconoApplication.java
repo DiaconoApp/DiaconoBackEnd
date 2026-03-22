@@ -1,10 +1,13 @@
 package com.diacono.diacono;
 
-import com.diacono.diacono.Igreja.model.entity.EnderecoIgreja;
-import com.diacono.diacono.Igreja.model.entity.Igreja;
-import com.diacono.diacono.Igreja.repository.IgrejaRepository;
-import com.diacono.diacono.membro.model.entity.*;
-import com.diacono.diacono.membro.repository.MembroRepository;
+import com.diacono.diacono.domain.entities.EnderecoMembro;
+import com.diacono.diacono.domain.enums.EnumCargoMembro;
+import com.diacono.diacono.domain.enums.EnumGeneroMembro;
+import com.diacono.diacono.domain.enums.EnumStatusMembro;
+import com.diacono.diacono.domain.entities.Igreja;
+import com.diacono.diacono.infrastructure.persistence.IgrejaRepository;
+import com.diacono.diacono.domain.entities.Membro;
+import com.diacono.diacono.infrastructure.persistence.MembroRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
