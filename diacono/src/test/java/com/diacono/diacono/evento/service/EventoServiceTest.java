@@ -14,7 +14,7 @@ import com.diacono.diacono.domain.entity.EnderecoEvento;
 import com.diacono.diacono.domain.entity.Evento;
 import com.diacono.diacono.domain.entity.Recorrencia;
 import com.diacono.diacono.domain.enums.TipoRecorrencia;
-import com.diacono.diacono.infrastructure.persistence.EventoJpaRepository;
+import com.diacono.diacono.infrastructure.persistence.Evento.EventoJpaRepository;
 import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;

@@ -3,7 +3,7 @@ package com.diacono.diacono.Igreja.service;
 import com.diacono.diacono.applications.mappers.igreja.IgrejaMapper;
 import com.diacono.diacono.applications.dtos.igreja.IgrejaSemiCompletoDTO;
 import com.diacono.diacono.domain.entity.Igreja;
-import com.diacono.diacono.infrastructure.persistence.IgrejaJpaRepository;
+import com.diacono.diacono.infrastructure.persistence.Igreja.IgrejaJpaRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.use_cases.IgrejaService;
 import org.junit.jupiter.api.BeforeEach;

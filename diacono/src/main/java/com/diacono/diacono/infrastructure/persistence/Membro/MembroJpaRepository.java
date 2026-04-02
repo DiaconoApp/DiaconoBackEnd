@@ -1,4 +1,4 @@
-package com.diacono.diacono.infrastructure.persistence;
+package com.diacono.diacono.infrastructure.persistence.Membro;
 
 import com.diacono.diacono.applications.dtos.membro.MembroDashEvolucaoDTO;
 import com.diacono.diacono.applications.dtos.membro.MembroDashFaixaEtariaDTO;

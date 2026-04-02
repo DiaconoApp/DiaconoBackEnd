@@ -1,4 +1,4 @@
-package com.diacono.diacono.infrastructure.persistence;
+package com.diacono.diacono.infrastructure.persistence.Ministerios;
 
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioKpisResponseDTO;
 import com.diacono.diacono.domain.enums.EnumStatusMinisterio;

@@ -1,4 +1,4 @@
-package com.diacono.diacono.infrastructure.persistence;
+package com.diacono.diacono.infrastructure.persistence.MembroMinisterio;
 
 import com.diacono.diacono.domain.enums.EnumStatusMembro;
 import com.diacono.diacono.domain.entity.Membro;

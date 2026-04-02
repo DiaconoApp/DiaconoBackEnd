@@ -15,7 +15,7 @@ import com.diacono.diacono.domain.enums.EnumCargoMembro;
 import com.diacono.diacono.domain.enums.EnumGeneroMembro;
 import com.diacono.diacono.domain.enums.EnumStatusMembro;
 import com.diacono.diacono.domain.entity.Membro;
-import com.diacono.diacono.infrastructure.persistence.MembroJpaRepository;
+import com.diacono.diacono.infrastructure.persistence.Membro.MembroJpaRepository;
 import com.diacono.diacono.domain.entity.MembroMinisterio;
 import com.diacono.diacono.use_cases.MembroMinisterioService;
 import com.diacono.diacono.domain.entity.Ministerio;

@@ -1,13 +1,14 @@
 package com.diacono.diacono.use_cases;
 
 import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
+import com.diacono.diacono.domain.repository.MinisteriosRepository;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.domain.enums.EnumCargoMembro;
 import com.diacono.diacono.domain.enums.EnumStatusMembro;
 import com.diacono.diacono.domain.entity.Membro;
-import com.diacono.diacono.infrastructure.persistence.MembroJpaRepository;
+import com.diacono.diacono.infrastructure.persistence.Membro.MembroJpaRepository;
 import com.diacono.diacono.applications.dtos.membro.MembroMinisterioCreateDTO;
 import com.diacono.diacono.applications.dtos.membro.MembroMinisterioInfoMembroDTO;
 import com.diacono.diacono.domain.enums.EnumCargoMembroMinisterio;
@@ -20,7 +21,7 @@ import com.diacono.diacono.applications.dtos.ministerio.MinisterioSimplificadoDT
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioSuperSimplificadoDTO;
 import com.diacono.diacono.domain.enums.EnumStatusMinisterio;
 import com.diacono.diacono.domain.entity.Ministerio;
-import com.diacono.diacono.infrastructure.persistence.MinisteriosJpaRepository;
+import com.diacono.diacono.infrastructure.persistence.Ministerios.MinisteriosJpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
@@ -33,14 +34,14 @@ import java.util.*;
 @Service
 public class MinisterioService {
 
-    private final MinisteriosJpaRepository ministerios;
+    private final MinisteriosRepository ministeriosRepository;
     private final MinisterioMapper mapper;
     private final MembroMinisterioService membroMinisterio;
     private final MembroJpaRepository membro;
     private final JwtUtils jwtUtils;
 
-    public MinisterioService(MinisteriosJpaRepository ministerios, MinisterioMapper mapper, MembroMinisterioService membroMinisterio, MembroJpaRepository membro, JwtUtils jwtUtils) {
-        this.ministerios = ministerios;
+    public MinisterioService(MinisteriosRepository ministeriosRepository, MinisterioMapper mapper, MembroMinisterioService membroMinisterio, MembroJpaRepository membro, JwtUtils jwtUtils) {
+        this.ministeriosRepository = ministeriosRepository;
         this.mapper = mapper;
         this.membroMinisterio = membroMinisterio;
         this.membro = membro;
@@ -53,7 +54,7 @@ public class MinisterioService {
 
     public List<MinisterioSimplificadoDTO> buscarMinisteriosGerais() {
 
-        List<Ministerio> ministeriosResponse = ministerios.findByIgreja_IdExterno(jwtUtils.getIgrejaId());
+        List<Ministerio> ministeriosResponse = ministeriosRepository.findByIgrejaIdExterno(jwtUtils.getIgrejaId());
         if (ministeriosResponse.isEmpty()) {
             throw new ObjectNotFoundException("Nenhum ministério encontrado");
 
@@ -71,7 +72,8 @@ public class MinisterioService {
 
     public Page<MinisterioSimplificadoDTO> buscarMinisteriosGoverno(Pageable pageable) {
 
-        Page<Ministerio> ministeriosPage = ministerios.findByIgreja_IdExterno(jwtUtils.getIgrejaId(), pageable);
+        Page<Ministerio> ministeriosPage = ministeriosRepository.findByIgrejaIdExterno(jwtUtils.getIgrejaId(), pageable);
+
         if (ministeriosPage.isEmpty()) {
             throw new ObjectNotFoundException("Nenhum ministério encontrado");
         }
@@ -87,7 +89,7 @@ public class MinisterioService {
 
         String stringBusca = "%" + buscaGeral.trim().toUpperCase() + "%";
 
-        Page<Ministerio> ministeriosPage = ministerios.buscarComFiltros(pageable, stringBusca, status, jwtUtils.getIgrejaId());
+        Page<Ministerio> ministeriosPage = ministeriosRepository.buscarComFiltros(pageable, stringBusca, status, jwtUtils.getIgrejaId());
         if (ministeriosPage.isEmpty()) {
             throw new ObjectNotFoundException("Nenhum ministério encontrado");
         }
@@ -141,7 +143,7 @@ public class MinisterioService {
 
         membroMinisterios.add(membroLider);
         novoMinisterio.setMembros(membroMinisterios);
-        ministerios.save(novoMinisterio);
+        ministeriosRepository.save(novoMinisterio);
 
         return new RestResponseMessageDTO(HttpStatus.CREATED, "Ministério criado com sucesso");
 
@@ -150,15 +152,10 @@ public class MinisterioService {
     @Transactional
     public RestResponseMessageDTO editarMinisterio(MinisterioUpdateDTO ministerioDTO, UUID idMinisterio) {
 
-        Ministerio ministerioExistente = ministerios.findByIdExterno(idMinisterio);
-
-
-        if (ministerioExistente == null) {
-            throw new ObjectNotFoundException("Ministério não encontrado");
-        }
+        Ministerio ministerioExistente = ministeriosRepository.findByIdExterno(idMinisterio)
+                .orElseThrow(() -> new ObjectNotFoundException("Ministério não encontrado"));
 
         if (ministerioDTO.idLider() != null) {
-
 
             Membro liderNovo = membro.findByIdExterno(ministerioDTO.idLider());
 
@@ -229,7 +226,7 @@ public class MinisterioService {
         }
 
 
-        ministerios.save(ministerioExistente);
+        ministeriosRepository.save(ministerioExistente);
 
         return new RestResponseMessageDTO(HttpStatus.OK, "Ministério atualizado com sucesso");
     }
@@ -251,11 +248,8 @@ public class MinisterioService {
             throw new FieldInvalidException("Dados do membro do ministério não podem ser nulos");
         }
 
-        Long idMinisterioNovo = ministerios.buscarIdPorUUID(idMinisterio);
-
-        if (idMinisterioNovo == null) {
-            throw new ObjectNotFoundException("Ministério não encontrado");
-        }
+        Long idMinisterioNovo = ministeriosRepository.buscarIdPorUUID(idMinisterio)
+                .orElseThrow(() -> new ObjectNotFoundException("Ministério não encontrado"));
 
         Long idMembroNovo = membro.buscarIdPorUUID(dto.idExterno());
 
@@ -289,7 +283,7 @@ public class MinisterioService {
     /*ESSE METODO SE RELACIONA COM EVENTO*/
 
     public Set<Ministerio> buscarPorUUID(List<UUID> idExterno) {
-        Set<Ministerio> ministerios = this.ministerios.findAllByIdExternoIn(idExterno);
+        Set<Ministerio> ministerios = this.ministeriosRepository.findAllByIdExternoIn(idExterno);
 
         if (ministerios.isEmpty()) {
             throw new ObjectNotFoundException("Ministérios não encontrados");
@@ -299,11 +293,8 @@ public class MinisterioService {
     }
 
     public Ministerio buscarPorUUID(UUID idExterno) {
-        Ministerio ministerios = this.ministerios.findByIdExterno(idExterno);
-
-        if (ministerios == null) {
-            throw new ObjectNotFoundException("Ministérios não encontrados");
-        }
+        Ministerio ministerios = this.ministeriosRepository.findByIdExterno(idExterno)
+                .orElseThrow(() -> new ObjectNotFoundException("Ministério não encontrado"));
 
         return ministerios;
     }
@@ -312,7 +303,7 @@ public class MinisterioService {
 
     public MinisterioKpisResponseDTO ministerioBuscarKpis(int anoFim) {
         UUID igrejaId = jwtUtils.getIgrejaId();
-        MinisterioKpisResponseDTO response = ministerios.buscarKpis(igrejaId, anoFim);
+        MinisterioKpisResponseDTO response = ministeriosRepository.buscarKpis(igrejaId, anoFim);
         return response;
     }
 

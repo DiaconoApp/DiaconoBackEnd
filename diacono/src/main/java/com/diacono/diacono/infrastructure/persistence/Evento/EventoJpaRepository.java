@@ -1,4 +1,4 @@
-package com.diacono.diacono.infrastructure.persistence;
+package com.diacono.diacono.infrastructure.persistence.Evento;
 
 import com.diacono.diacono.applications.dtos.evento.EventoKpiDTO;
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioEventoDashDTO;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface EventoJpaRepository extends JpaRepository<Evento, Long> {
+public interface  EventoJpaRepository extends JpaRepository<Evento, Long> {
 
     @Query("""
             SELECT e FROM Evento e 

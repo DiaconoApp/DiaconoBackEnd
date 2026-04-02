@@ -3,7 +3,8 @@ package com.diacono.diacono.use_cases;
 import com.diacono.diacono.applications.mappers.igreja.IgrejaMapper;
 import com.diacono.diacono.applications.dtos.igreja.IgrejaSemiCompletoDTO;
 import com.diacono.diacono.domain.entity.Igreja;
-import com.diacono.diacono.infrastructure.persistence.IgrejaJpaRepository;
+import com.diacono.diacono.domain.repository.IgrejaRepository;
+import com.diacono.diacono.infrastructure.persistence.Igreja.IgrejaJpaRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -13,35 +14,31 @@ import java.util.UUID;
 @Service
 public class IgrejaService {
 
-    private final IgrejaJpaRepository igrejaJpaRepository;
+    private final IgrejaRepository igrejaRepository;
     private final IgrejaMapper igrejaMapper;
 
-    public IgrejaService(IgrejaJpaRepository igrejaJpaRepository, IgrejaMapper igrejaMapper) {
-        this.igrejaJpaRepository = igrejaJpaRepository;
+    public IgrejaService(IgrejaRepository igrejaRepository, IgrejaMapper igrejaMapper) {
+        this.igrejaRepository = igrejaRepository;
         this.igrejaMapper = igrejaMapper;
     }
 
     /*ESSE MÉTODO SE RELACIONA COM EVENTO*/
     public Igreja buscarUUID(UUID idExterno){
         //adicionar validação da existência da Igreja -- SE DER ERRO LANÇAR EXCEÇÃO
-        Igreja igreja = igrejaJpaRepository.findByIdExterno(idExterno);
-        if(igreja == null){
-            throw new ObjectNotFoundException("Igreja não encontrada");
-        }
+        Igreja igreja = igrejaRepository.findByIdExterno(idExterno)
+                .orElseThrow(() -> new ObjectNotFoundException("Igreja não encontrada"));;
 
         return igreja;
-
     }
 
     public List<IgrejaSemiCompletoDTO> buscarIgrejas(){
 
-        List<Igreja> igrejas = igrejaJpaRepository.findAll();
+        List<Igreja> igrejas = igrejaRepository.findAll();
 
         if(igrejas == null || igrejas.isEmpty()){
             throw new ObjectNotFoundException("Igrejas não encontradas");
         }
 
         return igrejaMapper.paraListaIgrejaSemiCompletoDTO(igrejas);
-
     }
 }

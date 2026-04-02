@@ -5,13 +5,14 @@ import com.diacono.diacono.applications.dtos.ministerio.MinisterioEventoDashDTO;
 import com.diacono.diacono.domain.entity.EnderecoEvento;
 import com.diacono.diacono.domain.entity.Recorrencia;
 import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
+import com.diacono.diacono.domain.repository.EventoRepository;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.infrastructure.exceptions.TimeInvalidException;
 import com.diacono.diacono.applications.mappers.evento.EventoMapper;
 import com.diacono.diacono.applications.mappers.evento.EventoUpdateMapper;
 import com.diacono.diacono.domain.entity.Evento;
 import com.diacono.diacono.domain.enums.TipoRecorrencia;
-import com.diacono.diacono.infrastructure.persistence.EventoJpaRepository;
+import com.diacono.diacono.infrastructure.persistence.Evento.EventoJpaRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
 import com.diacono.diacono.global.util.JwtUtils;
@@ -27,7 +28,7 @@ import java.util.*;
 @Service
 public class EventoService {
 
-    private final EventoJpaRepository eventoJpaRepository;
+    private final EventoRepository eventoRepository;
     private final EventoMapper eventoMapper;
     private final EventoUpdateMapper eventoUpdateMapper;
     private final EnderecoEventoService enderecoEventoService;
@@ -37,16 +38,14 @@ public class EventoService {
     private final IgrejaService igrejaService;
     private final JwtUtils jwtUtils;
 
-
-    public EventoService(EventoJpaRepository eventoJpaRepository, EventoMapper eventoMapper, IgrejaService igrejaService, MinisterioService ministerioService, MembroService membroService, EnderecoEventoService enderecoEventoService, EventoUpdateMapper eventoUpdateMapper, RecorrenciaService recorrenciaService, JwtUtils jwtUtils) {
-        this.eventoJpaRepository = eventoJpaRepository;
+    public EventoService(EventoRepository eventoRepository, EventoMapper eventoMapper, IgrejaService igrejaService, MinisterioService ministerioService, MembroService membroService, EnderecoEventoService enderecoEventoService, EventoUpdateMapper eventoUpdateMapper, RecorrenciaService recorrenciaService, JwtUtils jwtUtils) {
+        this.eventoRepository = eventoRepository;
         this.eventoMapper = eventoMapper;
         this.igrejaService = igrejaService;
         this.ministerioService = ministerioService;
         this.membroService = membroService;
         this.enderecoEventoService = enderecoEventoService;
         this.eventoUpdateMapper = eventoUpdateMapper;
-
         this.recorrenciaService = recorrenciaService;
         this.jwtUtils = jwtUtils;
     }
@@ -67,7 +66,7 @@ public class EventoService {
         LocalDateTime inicioMes = anoMes.atDay(1).atStartOfDay(); // 1º dia às 00:00
         LocalDateTime fimMes = anoMes.atEndOfMonth().atTime(23, 59, 59);
 
-        List<Evento> eventosAno = eventoJpaRepository.findByPeriodo(inicioMes, fimMes, jwtUtils.getIgrejaId());
+        List<Evento> eventosAno = eventoRepository.findByPeriodo(inicioMes, fimMes, jwtUtils.getIgrejaId());
         if(eventosAno.isEmpty() || eventosAno == null){
             throw new ObjectNotFoundException("Nenhum evento encontrado para o mês e ano informados");
         }
@@ -80,7 +79,9 @@ public class EventoService {
 
         //completo
         validarIdExternoPreenchido(id);
-        Evento evento = eventoJpaRepository.findByIdExterno(id);
+        Evento evento = eventoRepository.findByIdExterno(id)
+                .orElseThrow(() -> new ObjectNotFoundException("Evento não encontrado"));
+
         EventoCompletoDTO eventoResponse = eventoMapper.paraEventoCompletoDTO(evento);
 
         return eventoResponse;
@@ -124,7 +125,7 @@ public class EventoService {
 
         validarIdExternoPreenchido(idExterno);
 
-        long deleteCount = eventoJpaRepository.deleteByIdExterno(idExterno);
+        long deleteCount = eventoRepository.deleteByIdExterno(idExterno);
 
         if(deleteCount == 0){
             throw new ObjectNotFoundException("Não foi possível apagar o evento, verifique se o evento existe");
@@ -141,18 +142,16 @@ public class EventoService {
 
         validarIdExternoPreenchido(idEvento);
 
-        Evento evento = eventoJpaRepository.findByIdExterno(idEvento);
-        if (evento == null) {
-            throw new ObjectNotFoundException("Não foi possível apagar o evento, verifique se o evento existe");
-        }
+        Evento evento = eventoRepository.findByIdExterno(idEvento)
+                .orElseThrow(() -> new ObjectNotFoundException("Não foi possível apagar o evento, verifique se o evento existe"));;
 
-        List<Evento> eventos = eventoJpaRepository.findByPeriodoAndRecorrencia(evento.getRecorrencia(), evento.getDataHoraInicio(), jwtUtils.getIgrejaId());
+        List<Evento> eventos = eventoRepository.findByPeriodoAndRecorrencia(evento.getRecorrencia(), evento.getDataHoraInicio(), jwtUtils.getIgrejaId());
         System.out.println(eventos);
         if (!eventos.contains(evento)) {
             eventos.add(evento);
         }
 
-        eventoJpaRepository.deleteAll(eventos);
+        eventoRepository.deleteAll(eventos);
 
         RestResponseMessageDTO message = new RestResponseMessageDTO(HttpStatus.OK, "Evento apagado com sucesso");
 
@@ -212,7 +211,7 @@ public class EventoService {
             evento.setCusto(request.custo());
         }
 
-        eventoJpaRepository.save(evento);
+        eventoRepository.save(evento);
 
         return new RestResponseMessageDTO(HttpStatus.OK, "Evento atualizado com sucesso");
 
@@ -226,11 +225,8 @@ public class EventoService {
 
     private Evento buscarEventoPorUUID(UUID idExterno){
 
-        Evento evento = eventoJpaRepository.findByIdExterno(idExterno);
-
-        if(evento == null){
-            throw new ObjectSaveErrorException("Evento não encontrado");
-        }
+        Evento evento = eventoRepository.findByIdExterno(idExterno)
+                .orElseThrow(() -> new ObjectNotFoundException("Evento não encontrado"));;
 
         return evento;
     }
@@ -299,7 +295,7 @@ public class EventoService {
         evento.setIgreja(igrejaService.buscarUUID(jwtUtils.getIgrejaId()));
         evento.setMinisterios(ministerioService.buscarPorUUID(request.fkMinisterios()));
 
-        Evento eventoSalvo = eventoJpaRepository.save(evento);
+        Evento eventoSalvo = eventoRepository.save(evento);
 
         return eventoSalvo;
 
@@ -337,7 +333,7 @@ public class EventoService {
             eventos.add(novoEvento);
         }
 
-        eventoJpaRepository.saveAll(eventos);
+        eventoRepository.saveAll(eventos);
 
         return new RestResponseMessageDTO(HttpStatus.CREATED, "Eventos com recorrência semanal criado com sucesso");
 
@@ -374,7 +370,7 @@ public class EventoService {
             eventos.add(novoEvento);
         }
 
-        eventoJpaRepository.saveAll(eventos);
+        eventoRepository.saveAll(eventos);
 
         return new RestResponseMessageDTO(HttpStatus.CREATED, "Eventos com recorrência mensal criados com sucesso");
     }
@@ -406,7 +402,7 @@ public class EventoService {
 
         UUID idIgreja = jwtUtils.getIgrejaId();
 
-        List<EventoKpiDTO> kpisEvento = eventoJpaRepository.buscarKpisEvento(anoInicio, anoFim, idIgreja);
+        List<EventoKpiDTO> kpisEvento = eventoRepository.buscarKpisEvento(anoInicio, anoFim, idIgreja);
 
         return kpisEvento;
     }
@@ -415,7 +411,7 @@ public class EventoService {
 
         UUID idIgreja = jwtUtils.getIgrejaId();
 
-        List<MinisterioEventoDashDTO> response = eventoJpaRepository.contarEventosPorMinisterioNoPeriodo(anoInicio, anoFim, idIgreja);
+        List<MinisterioEventoDashDTO> response = eventoRepository.contarEventosPorMinisterioNoPeriodo(anoInicio, anoFim, idIgreja);
 
         System.out.println(response);
 

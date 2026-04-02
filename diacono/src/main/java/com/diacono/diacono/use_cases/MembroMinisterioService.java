@@ -1,5 +1,6 @@
 package com.diacono.diacono.use_cases;
 
+import com.diacono.diacono.domain.repository.MembroMinisterioRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
 import com.diacono.diacono.global.util.JwtUtils;
@@ -9,7 +10,7 @@ import com.diacono.diacono.applications.mappers.membro.MembroMinisterioMapper;
 import com.diacono.diacono.applications.dtos.membro.MembroMinisterioInfoMembroDTO;
 import com.diacono.diacono.domain.enums.EnumCargoMembroMinisterio;
 import com.diacono.diacono.domain.entity.MembroMinisterio;
-import com.diacono.diacono.infrastructure.persistence.MembroMinisterioJpaRepository;
+import com.diacono.diacono.infrastructure.persistence.MembroMinisterio.MembroMinisterioJpaRepository;
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioDashEvolucaoDTO;
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioDashQuantidadeMembrosDTO;
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioSuperSimplificadoDTO;
@@ -25,23 +26,23 @@ import java.util.UUID;
 @Service
 public class MembroMinisterioService {
 
-    private final MembroMinisterioJpaRepository membroMinisterioJpaRepository;
+    private final MembroMinisterioRepository membroMinisterioRepository;
     private final MembroMinisterioMapper mapper;
     private final JwtUtils jwtUtils;
 
-    public MembroMinisterioService(MembroMinisterioJpaRepository membroMinisterioJpaRepository, MembroMinisterioMapper mapper, JwtUtils jwtUtils) {
-        this.membroMinisterioJpaRepository = membroMinisterioJpaRepository;
+    public MembroMinisterioService(MembroMinisterioRepository membroMinisterioRepository, MembroMinisterioMapper mapper, JwtUtils jwtUtils) {
+        this.membroMinisterioRepository = membroMinisterioRepository;
         this.mapper = mapper;
         this.jwtUtils = jwtUtils;
     }
 
     public void apagarMembroMinisterioPorMembro(Membro membro){
-        int count = membroMinisterioJpaRepository.deleteByMembro(membro);
+        int count = membroMinisterioRepository.deleteByMembro(membro);
 
     }
 
     public void salvarTodos(MembroMinisterio membrosMinisterios){
-        MembroMinisterio membroMinisterios = membroMinisterioJpaRepository.save(membrosMinisterios);
+        MembroMinisterio membroMinisterios = membroMinisterioRepository.save(membrosMinisterios);
 
         if(membroMinisterios == null || membroMinisterios.getIdInterno() == null){
             throw new ObjectSaveErrorException("Nenhum membro_ministerio foi salvo.");
@@ -56,7 +57,7 @@ public class MembroMinisterioService {
             textoFormatado = "%" + texto + "%";
         }
 
-        Page<MembroMinisterio> page = membroMinisterioJpaRepository.buscarPorMembroMinisterioComFiltro(pageable,idMinisterio, textoFormatado, status);
+        Page<MembroMinisterio> page = membroMinisterioRepository.buscarPorMembroMinisterioComFiltro(pageable,idMinisterio, textoFormatado, status);
 
         if(page.isEmpty()){
             throw new ObjectNotFoundException("Nenhum membro_ministerio encontrado com os filtros informados.");
@@ -72,7 +73,7 @@ public class MembroMinisterioService {
     public Page<MembroMinisterioInfoMembroDTO> buscarPorMembroMinisterioSemFiltro(UUID idMinisterio, Pageable pageable){
 
 
-        Page<MembroMinisterio> page = membroMinisterioJpaRepository.buscarPorMembroMinisterioSemFiltro(pageable, idMinisterio);
+        Page<MembroMinisterio> page = membroMinisterioRepository.buscarPorMembroMinisterioSemFiltro(pageable, idMinisterio);
 
         if(page.isEmpty()){
             throw new ObjectNotFoundException("Nenhum membro_ministerio encontrado com os filtros informados.");
@@ -104,7 +105,7 @@ public class MembroMinisterioService {
                 .dataRegistro(dataHoje)
                 .build();
 
-        MembroMinisterio membroMinisterioSalvo = membroMinisterioJpaRepository.save(membroMinisterio);
+        MembroMinisterio membroMinisterioSalvo = membroMinisterioRepository.save(membroMinisterio);
 
         if(membroMinisterioSalvo.getIdInterno() == null){
             throw new ObjectSaveErrorException("Membro do ministério não foi salvo.");
@@ -113,7 +114,7 @@ public class MembroMinisterioService {
 
     public void removerMembroMinisterioLiderMinisterio(UUID idMinisterio, UUID idMembro){
 
-        int count = membroMinisterioJpaRepository.deleteByMembroIdExternoAndMinisterioIdExterno(idMembro, idMinisterio);
+        int count = membroMinisterioRepository.deleteByMembroIdExternoAndMinisterioIdExterno(idMembro, idMinisterio);
 
         if(count == 0){
             throw new ObjectNotFoundException("Membro do ministério não encontrado para remoção.");
@@ -123,7 +124,7 @@ public class MembroMinisterioService {
 
     public List<MinisterioSuperSimplificadoDTO> buscarMinisterioLider(UUID idMembro, UUID idIgreja){
 
-        List<MinisterioSuperSimplificadoDTO> ministerios = membroMinisterioJpaRepository.buscarMinisterioLider(idMembro, idIgreja);
+        List<MinisterioSuperSimplificadoDTO> ministerios = membroMinisterioRepository.buscarMinisterioLider(idMembro, idIgreja);
 
         if(ministerios.isEmpty()){
             throw new ObjectNotFoundException("Nenhum ministério encontrado para o líder informado.");
@@ -134,7 +135,7 @@ public class MembroMinisterioService {
 
     // Metodo usado na escala service
     public List<MembroMinisterio> buscarMembroMinisterioPorId(List<UUID> idsExternoMembroMinisterio) {
-        List<MembroMinisterio> membrosMinisterio = membroMinisterioJpaRepository
+        List<MembroMinisterio> membrosMinisterio = membroMinisterioRepository
                 .findAllByIdExternoIn(idsExternoMembroMinisterio);
 
         if(membrosMinisterio.isEmpty()){
@@ -151,11 +152,11 @@ public class MembroMinisterioService {
         UUID idIgreja = jwtUtils.getIgrejaId();
 
         if(anoInicio == anoFim){
-            List<MinisterioDashEvolucaoDTO> response = membroMinisterioJpaRepository.buscarDashEvolucaoUmAno(anoFim, idMinisterio, idIgreja);
+            List<MinisterioDashEvolucaoDTO> response = membroMinisterioRepository.buscarDashEvolucaoUmAno(anoFim, idMinisterio, idIgreja);
             return response;
         }
 
-        List<MinisterioDashEvolucaoDTO> response = membroMinisterioJpaRepository.buscarDashEvolucaoPeriodo(anoInicio,anoFim, idMinisterio, idIgreja);
+        List<MinisterioDashEvolucaoDTO> response = membroMinisterioRepository.buscarDashEvolucaoPeriodo(anoInicio,anoFim, idMinisterio, idIgreja);
 
         return response;
 
@@ -165,7 +166,7 @@ public class MembroMinisterioService {
 
         UUID igrejaId = jwtUtils.getIgrejaId();
 
-        List<MinisterioDashQuantidadeMembrosDTO> response = membroMinisterioJpaRepository.buscarQuantidadeMembros(anoInicio, anoFim, igrejaId);
+        List<MinisterioDashQuantidadeMembrosDTO> response = membroMinisterioRepository.buscarQuantidadeMembros(anoInicio, anoFim, igrejaId);
         return response;
 
     }

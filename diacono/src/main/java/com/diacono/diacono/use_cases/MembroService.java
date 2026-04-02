@@ -4,6 +4,7 @@ import com.diacono.diacono.applications.dtos.membro.*;
 import com.diacono.diacono.domain.entity.Igreja;
 import com.diacono.diacono.applications.dtos.CadastroExternoDTO;
 import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
+import com.diacono.diacono.domain.repository.MembroRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectExistsException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
@@ -11,7 +12,7 @@ import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.applications.mappers.membro.MembroMapper;
 import com.diacono.diacono.domain.enums.EnumStatusMembro;
 import com.diacono.diacono.domain.entity.Membro;
-import com.diacono.diacono.infrastructure.persistence.MembroJpaRepository;
+import com.diacono.diacono.infrastructure.persistence.Membro.MembroJpaRepository;
 import com.diacono.diacono.domain.enums.EnumCargoMembro;
 import com.diacono.diacono.domain.enums.EnumCargoMembroMinisterio;
 import com.diacono.diacono.domain.entity.MembroMinisterio;
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
 @Service
 public class MembroService {
 
-    private final MembroJpaRepository membroJpaRepository;
+    private final MembroRepository membroRepository;
     private final MembroMapper membroMapper;
     private final BCryptPasswordEncoder passwordEncoder;
     private final MinisterioService ministerioService;
@@ -41,8 +42,8 @@ public class MembroService {
     private final IgrejaService igrejaService;
     private final JwtUtils jwtUtils;
 
-    public MembroService(MembroJpaRepository membroJpaRepository, MembroMapper membroMapper, BCryptPasswordEncoder passwordEncoder, MinisterioService ministerioService, MembroMinisterioService membroMinisterioService, IgrejaService igrejaService, JwtUtils jwtUtils) {
-        this.membroJpaRepository = membroJpaRepository;
+    public MembroService(MembroRepository membroRepository, MembroMapper membroMapper, BCryptPasswordEncoder passwordEncoder, MinisterioService ministerioService, MembroMinisterioService membroMinisterioService, IgrejaService igrejaService, JwtUtils jwtUtils) {
+        this.membroRepository = membroRepository;
         this.membroMapper = membroMapper;
         this.passwordEncoder = passwordEncoder;
         this.ministerioService = ministerioService;
@@ -55,7 +56,8 @@ public class MembroService {
     @Transactional(readOnly = true)
     public Page<MembroResponseDTO> buscarTodosSemFiltro(Pageable pageable) {
 
-        Page<Membro> membrosPage = membroJpaRepository.findByIgreja_IdExterno(jwtUtils.getIgrejaId(),pageable);
+        Page<Membro> membrosPage = membroRepository.findByIgrejaIdExterno(jwtUtils.getIgrejaId(),pageable);
+
         validarMembrosEncontradosPage(membrosPage);
 
         return membrosPage.map(membroMapper::paraMembroResponseDTO);
@@ -143,7 +145,8 @@ public class MembroService {
             throw new ObjectSaveErrorException("Para cadastrar um líder de ministério, é necessário associar um ministério ao membro.");
         }
 
-        Membro membroExistente = membroJpaRepository.findByEmailOrCpf(membroDTO.email(), membroDTO.cpf());
+        Membro membroExistente = membroRepository.findByEmailOrCpf(membroDTO.email(), membroDTO.cpf())
+                .orElseThrow(() -> new ObjectNotFoundException("Membro não encontrado"));
 
         if(membroExistente != null){
             throw new ObjectExistsException("Email ou CPF ja cadastrado");
@@ -159,7 +162,7 @@ public class MembroService {
         membro.setGeneroMembro(membroDTO.generoMembro());
         membro.setCargoMembro(membroDTO.cargo());
         membro.setSenha(hashSenha(membroDTO.senha()));
-        Membro membroSalvo = membroJpaRepository.save(membro);
+        Membro membroSalvo = membroRepository.save(membro);
         validaCriacao(membroSalvo);
 
         return membroSalvo;
@@ -203,7 +206,7 @@ public class MembroService {
             buscaFormatada = "%" + busca + "%";
         }
 
-        List<Membro> membros = membroJpaRepository.findAllWithFilter(buscaFormatada, jwtUtils.getIgrejaId());
+        List<Membro> membros = membroRepository.findAllWithFilter(buscaFormatada, jwtUtils.getIgrejaId());
 
         if(membros.isEmpty() || membros == null){
             throw new ObjectNotFoundException("Nenhum membro encontrado");
@@ -245,7 +248,8 @@ public class MembroService {
     /*METODO QUE SE RELACIONA COM A ENTIDADE EVENTO E MINISTERIO*/
 
     public Membro buscarPorUUID(UUID idExterno) {
-        Membro membro = membroJpaRepository.findByIdExterno(idExterno);
+        Membro membro = membroRepository.findByIdExterno(idExterno)
+                .orElseThrow(() -> new ObjectNotFoundException("Membro não encontrado"));
 
         if(membro == null){
             throw new ObjectNotFoundException("Membro não encontrado.");
@@ -262,7 +266,8 @@ public class MembroService {
             throw new ObjectSaveErrorException("Dados do membro não podem ser nulos.");
         }
 
-        Membro membroExistente = membroJpaRepository.findByEmailOrCpf(membroDTO.email(), membroDTO.cpf());
+        Membro membroExistente = membroRepository.findByEmailOrCpf(membroDTO.email(), membroDTO.cpf())
+                .orElseThrow(() -> new ObjectNotFoundException("Membro não encontrado"));
 
         if(membroExistente != null){
             throw new ObjectExistsException("Erro ao se cadastrar");
@@ -278,7 +283,7 @@ public class MembroService {
         membro.setCargoMembro(EnumCargoMembro.MEMBRO);
         membro.setDataRegistro(dataHoje);
         membro.setSenha(hashSenha(membroDTO.senha()));
-        Membro membroSalvo = membroJpaRepository.save(membro);
+        Membro membroSalvo = membroRepository.save(membro);
         validaCriacao(membroSalvo);
 
         return membroSalvo;
@@ -289,15 +294,15 @@ public class MembroService {
 
     @Transactional
     public Membro buscarPorEmail(String email) {
-        Membro membro = membroJpaRepository.findByEmail(email);
+        Membro membro = membroRepository.findByEmail(email)
+                .orElseThrow(() -> new ObjectNotFoundException("Membro não encontrado com o email fornecido."));
+
         return membro;
     }
 
     @Transactional
     public Membro salvarMembro(Membro membro) {
-        Membro membroD = membroJpaRepository.save(membro);
-        membroJpaRepository.flush();
-        return membroD;
+        return membroRepository.saveAndFlush(membro);
     }
 
     // Metodo que se relaciona com Escala
@@ -305,7 +310,7 @@ public class MembroService {
 //        LocalDateTime horarioInicio = eventoUnicoSimplificadoDTO.dataHoraInicio();
 //        LocalDateTime horarioFim = eventoUnicoSimplificadoDTO.dataHoraFim();
 //
-//        List<MembroSimplificadoDTO> membrosMinisteriosLivres = membroRepository.findMembrosMinisteriosSemEscala(idExternoMinisterio, horarioInicio, horarioFim);
+//        List<MembroSimplificadoDTO> membrosMinisteriosLivres = memRepository.findMembrosMinisteriosSemEscala(idExternoMinisterio, horarioInicio, horarioFim);
 //
 //        if (membrosMinisteriosLivres.isEmpty()) {
 //            throw new ObjectNotFoundException("Nenhum membro disponível para escala encontrado.");
@@ -319,22 +324,21 @@ public class MembroService {
 
         UUID idExternoIgreja = jwtUtils.getIgrejaId();
 
-        return membroJpaRepository.buscarKpisMembros(idExternoIgreja, anoInicio, anoFim);
-
+        return membroRepository.buscarKpisMembros(idExternoIgreja, anoInicio, anoFim);
     }
 
     public List<MembroDashEvolucaoDTO> buscarDashEvolucao(int anoInicio, int anoFim) {
 
         UUID idExternoIgreja = jwtUtils.getIgrejaId();
 
-        return membroJpaRepository.buscarMembrosPorAno(idExternoIgreja, anoInicio, anoFim);
+        return membroRepository.buscarMembrosPorAno(idExternoIgreja, anoInicio, anoFim);
     }
 
     public MembroDashFaixaEtariaDTO buscarDashFaixaEtaria(int anoFim) {
 
         UUID idExternoIgreja = jwtUtils.getIgrejaId();
 
-        MembroDashFaixaEtariaDTO response = membroJpaRepository.buscarMembrosPorFaixaEtaria(idExternoIgreja, anoFim);
+        MembroDashFaixaEtariaDTO response = membroRepository.buscarMembrosPorFaixaEtaria(idExternoIgreja, anoFim);
 
 
         return response;
@@ -344,7 +348,7 @@ public class MembroService {
 
         UUID idExternoIgreja = jwtUtils.getIgrejaId();
 
-        MembroDashGeneroDTO response = membroJpaRepository.buscarMembrosPorGenero(idExternoIgreja, anoFim);
+        MembroDashGeneroDTO response = membroRepository.buscarMembrosPorGenero(idExternoIgreja, anoFim);
 
         System.out.println(response.feminino());
         System.out.println(response.masculino());
