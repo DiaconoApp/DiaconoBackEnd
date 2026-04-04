@@ -1,9 +1,9 @@
 package com.diacono.diacono.auth.handler;
 
-import com.diacono.diacono.use_cases.TokenService;
+import com.diacono.diacono.usecases.TokenService;
 import com.diacono.diacono.applications.dtos.login.LoginResponseDTO;
 import com.diacono.diacono.domain.entity.Membro;
-import com.diacono.diacono.use_cases.MembroService;
+import com.diacono.diacono.usecases.MembroService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;

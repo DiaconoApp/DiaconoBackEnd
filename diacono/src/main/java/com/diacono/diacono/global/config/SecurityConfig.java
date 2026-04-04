@@ -1,7 +1,7 @@
 package com.diacono.diacono.global.config;
 
 import com.diacono.diacono.auth.handler.CustomOAuth2AuthenticationSuccessHandler;
-import com.diacono.diacono.use_cases.CustomOidcUserService;
+import com.diacono.diacono.usecases.CustomOidcUserService;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;

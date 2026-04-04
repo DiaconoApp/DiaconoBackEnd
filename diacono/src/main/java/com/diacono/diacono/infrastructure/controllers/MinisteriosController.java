@@ -10,7 +10,7 @@ import com.diacono.diacono.applications.dtos.ministerio.MinisterioUpdateDTO;
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioSimplificadoDTO;
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioSuperSimplificadoDTO;
 import com.diacono.diacono.domain.enums.EnumStatusMinisterio;
-import com.diacono.diacono.use_cases.MinisterioService;
+import com.diacono.diacono.usecases.MinisterioService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

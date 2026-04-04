@@ -2,7 +2,7 @@ package com.diacono.diacono.infrastructure.controllers;
 
 import com.diacono.diacono.applications.dtos.login.LoginRequestDTO;
 import com.diacono.diacono.applications.dtos.login.LoginResponseDTO;
-import com.diacono.diacono.use_cases.LoginService;
+import com.diacono.diacono.usecases.LoginService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

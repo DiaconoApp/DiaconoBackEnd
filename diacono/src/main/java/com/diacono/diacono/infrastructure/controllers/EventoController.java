@@ -6,7 +6,7 @@ import com.diacono.diacono.applications.dtos.evento.EventoUpdateDTO;
 import com.diacono.diacono.applications.dtos.evento.EnderecoEventoSimplificadoDTO;
 import com.diacono.diacono.applications.dtos.evento.EventoCompletoDTO;
 import com.diacono.diacono.applications.dtos.evento.EventoSimplificadoDTO;
-import com.diacono.diacono.use_cases.EventoService;
+import com.diacono.diacono.usecases.EventoService;
 import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
 import com.diacono.diacono.global.error.comuns.ApiErrorsComuns;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

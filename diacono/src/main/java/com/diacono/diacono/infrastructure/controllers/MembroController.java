@@ -5,7 +5,7 @@ import com.diacono.diacono.global.error.comuns.ApiErrorsComuns;
 import com.diacono.diacono.applications.dtos.membro.MembroCreateDTO;
 import com.diacono.diacono.applications.dtos.membro.MembroResponseDTO;
 import com.diacono.diacono.domain.enums.EnumStatusMembro;
-import com.diacono.diacono.use_cases.MembroService;
+import com.diacono.diacono.usecases.MembroService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
