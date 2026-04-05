@@ -1,9 +1,10 @@
-package com.diacono.diacono.usecases;
+package com.diacono.diacono.auth.service;
 
 import com.diacono.diacono.auth.model.CustomMembroOAuth2User;
 import com.diacono.diacono.domain.enums.EnumCargoMembro;
 import com.diacono.diacono.domain.enums.EnumStatusMembro;
 import com.diacono.diacono.domain.entity.Membro;
+import com.diacono.diacono.usecases.MembroService;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;

@@ -8,19 +8,19 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LoginService {
+public class LoginServiceUseCase {
 
     private final MembroService membroService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final TokenService tokenService;
 
-    public LoginService(MembroService membroService, BCryptPasswordEncoder bCryptPasswordEncoder, TokenService tokenService) {
+    public LoginServiceUseCase(MembroService membroService, BCryptPasswordEncoder bCryptPasswordEncoder, TokenService tokenService) {
         this.membroService = membroService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.tokenService = tokenService;
     }
 
-    public LoginResponseDTO validarLogin(LoginRequestDTO loginRequestDTO){
+    public LoginResponseDTO execute(LoginRequestDTO loginRequestDTO){
 
         Membro membro = membroService.buscarPorEmail(loginRequestDTO.email());
 

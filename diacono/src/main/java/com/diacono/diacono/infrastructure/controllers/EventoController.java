@@ -6,9 +6,9 @@ import com.diacono.diacono.applications.dtos.evento.EventoUpdateDTO;
 import com.diacono.diacono.applications.dtos.evento.EnderecoEventoSimplificadoDTO;
 import com.diacono.diacono.applications.dtos.evento.EventoCompletoDTO;
 import com.diacono.diacono.applications.dtos.evento.EventoSimplificadoDTO;
-import com.diacono.diacono.usecases.EventoService;
 import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
 import com.diacono.diacono.global.error.comuns.ApiErrorsComuns;
+import com.diacono.diacono.usecases.eventos.*;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -21,10 +21,22 @@ import java.util.UUID;
 @RequestMapping("/api/v1/eventos")
 public class EventoController {
 
-    private final EventoService eventoService;
+    private final BuscarEventosPorMesEAnoUseCase buscarEventosPorMesEAnoUseCase;
+    private final BuscarEventoEspecificoUseCase buscarEventoEspecificoUseCase;
+    private final BuscarEnderecoEventoUseCase buscarEnderecoEventoUseCase;
+    private final CriarEventoUseCase criarEventoUseCase;
+    private final ApagarEventoUnicoUseCase apagarEventoUseCase;
+    private final ApagarEventosMultiplosUseCase apagarEventosMultiplosUseCase;
+    private final AtualizarEventoUseCase atualizarEventoUseCase;
 
-    public EventoController(EventoService eventoService) {
-        this.eventoService = eventoService;
+    public EventoController(BuscarEventosPorMesEAnoUseCase buscarEventosPorMesEAnoUseCase, BuscarEventoEspecificoUseCase buscarEventoEspecificoUseCase, BuscarEnderecoEventoUseCase buscarEnderecoEventoUseCase, CriarEventoUseCase criarEventoUseCase, ApagarEventoUnicoUseCase apagarEventoUseCase, ApagarEventosMultiplosUseCase apagarEventosMultiplosUseCase, AtualizarEventoUseCase atualizarEventoUseCase) {
+        this.buscarEventosPorMesEAnoUseCase = buscarEventosPorMesEAnoUseCase;
+        this.buscarEventoEspecificoUseCase = buscarEventoEspecificoUseCase;
+        this.buscarEnderecoEventoUseCase = buscarEnderecoEventoUseCase;
+        this.criarEventoUseCase = criarEventoUseCase;
+        this.apagarEventoUseCase = apagarEventoUseCase;
+        this.apagarEventosMultiplosUseCase = apagarEventosMultiplosUseCase;
+        this.atualizarEventoUseCase = atualizarEventoUseCase;
     }
 
     @ApiErrorsComuns
@@ -33,7 +45,7 @@ public class EventoController {
     //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<EventoSimplificadoDTO> buscarEventosPorMesEAno(@RequestParam int mes, @RequestParam int ano){
         //completo
-        return ResponseEntity.status(HttpStatus.OK).body(eventoService.buscarEventosPorMesEAno(mes, ano));
+        return ResponseEntity.status(HttpStatus.OK).body(buscarEventosPorMesEAnoUseCase.execute(mes, ano));
     }
 
     @ApiErrorsComuns
@@ -42,7 +54,7 @@ public class EventoController {
     //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO', 'SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<EventoCompletoDTO> buscarEventoEspecifico(@PathVariable("id") UUID id){
         //COMPLETO
-        return ResponseEntity.status(HttpStatus.OK).body(eventoService.buscarEventoEspecifico(id));
+        return ResponseEntity.status(HttpStatus.OK).body(buscarEventoEspecificoUseCase.execute(id));
     }
 
     @ApiErrorsComuns
@@ -52,7 +64,7 @@ public class EventoController {
     public ResponseEntity<EnderecoEventoSimplificadoDTO> buscarEnderecoEvento(){
         //COMPLETO
         //COLOCAR ISSO NUM CACHE
-        return ResponseEntity.status(HttpStatus.OK).body(eventoService.buscarEnderecoEvento());
+        return ResponseEntity.status(HttpStatus.OK).body(buscarEnderecoEventoUseCase.execute());
     }
 
     @ApiErrorsComuns
@@ -60,14 +72,14 @@ public class EventoController {
     @PostMapping
     public ResponseEntity<RestResponseMessageDTO> criarEvento(@RequestBody @Valid EventoCreateDTO request){
         //CONCLUIDO
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventoService.criarEvento(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(criarEventoUseCase.execute(request));
     }
 
     @ApiErrorsComuns
     @ApiResponse(responseCode = "204", description = "Evento deletado com sucesso")
     @DeleteMapping("/unico/{id}")
     public ResponseEntity<RestResponseMessageDTO> apagarEventoUnico(@PathVariable UUID id){
-       return ResponseEntity.status(HttpStatus.NO_CONTENT).body(eventoService.apagarEvento(id));
+       return ResponseEntity.status(HttpStatus.NO_CONTENT).body(apagarEventoUseCase.execute(id));
     }
 
     @ApiErrorsComuns
@@ -75,7 +87,7 @@ public class EventoController {
     @DeleteMapping("/multiplos/{id}")
     public ResponseEntity<RestResponseMessageDTO> apagarEventosMultiplos(@PathVariable UUID id){
         //completo
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(eventoService.apagarEventosMultiplos(id));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(apagarEventosMultiplosUseCase.execute(id));
     }
 
     @ApiErrorsComuns
@@ -83,7 +95,7 @@ public class EventoController {
     @PatchMapping("/{id}")
     public ResponseEntity<RestResponseMessageDTO> atualizarEvento(@RequestBody @Valid EventoUpdateDTO evento, @PathVariable("id") UUID id){
 
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(eventoService.alterarEvento(evento, id));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(atualizarEventoUseCase.execute(evento, id));
     }
 
     // Utilizado para escalas
