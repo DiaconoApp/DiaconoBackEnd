@@ -3,22 +3,17 @@ package com.diacono.diacono.usecases.eventos;
 import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
 import com.diacono.diacono.applications.dtos.evento.EnderecoEventoDTO;
 import com.diacono.diacono.applications.dtos.evento.EventoUpdateDTO;
-import com.diacono.diacono.applications.mappers.evento.EventoUpdateMapper;
+import com.diacono.diacono.applications.mappers.endereco.EnderecoEventoMapper;
 import com.diacono.diacono.domain.entity.EnderecoEvento;
 import com.diacono.diacono.domain.entity.Evento;
 import com.diacono.diacono.domain.entity.Ministerio;
 import com.diacono.diacono.domain.repository.EventoRepository;
-import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.infrastructure.exceptions.TimeInvalidException;
-import com.diacono.diacono.usecases.EnderecoEventoService;
-import com.diacono.diacono.usecases.MinisterioService;
+import com.diacono.diacono.usecases.ministerio.BuscarMembroMinisterioLiderMinisterioComFiltroUseCase;
 import com.diacono.diacono.usecases.eventos.validation.ValidarIdExternoPreenchido;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -27,15 +22,19 @@ import java.util.UUID;
 public class AtualizarEventoUseCase {
 
     private final EventoRepository eventoRepository;
-    private final EnderecoEventoService enderecoEventoService;
-    private final MinisterioService ministerioService;
+    private final BuscarEnderecoEventoPorUUIDUseCase buscarEnderecoEventoPorUUIDUseCase;
+    private final BuscarMembroMinisterioLiderMinisterioComFiltroUseCase buscarMembroMinisterioLiderMinisterioComFiltroUseCase;
     private final ValidarIdExternoPreenchido validarIdExternoPreenchido;
+    private final EnderecoEventoMapper enderecoEventoMapper;
+    private final BuscarMinisterioPorUUIDUseCase buscarMinisterioPorUUIDUseCase;
 
-    public AtualizarEventoUseCase(EventoRepository eventoRepository, EnderecoEventoService enderecoEventoService, MinisterioService ministerioService, ValidarIdExternoPreenchido validarIdExternoPreenchido) {
+    public AtualizarEventoUseCase(EventoRepository eventoRepository, BuscarEnderecoEventoPorUUIDUseCase buscarEnderecoEventoPorUUIDUseCase, BuscarMembroMinisterioLiderMinisterioComFiltroUseCase buscarMembroMinisterioLiderMinisterioComFiltroUseCase, ValidarIdExternoPreenchido validarIdExternoPreenchido, EnderecoEventoMapper enderecoEventoMapper, BuscarMinisterioPorUUIDUseCase buscarMinisterioPorUUIDUseCase) {
         this.eventoRepository = eventoRepository;
-        this.enderecoEventoService = enderecoEventoService;
-        this.ministerioService = ministerioService;
+        this.buscarEnderecoEventoPorUUIDUseCase = buscarEnderecoEventoPorUUIDUseCase;
+        this.buscarMembroMinisterioLiderMinisterioComFiltroUseCase = buscarMembroMinisterioLiderMinisterioComFiltroUseCase;
         this.validarIdExternoPreenchido = validarIdExternoPreenchido;
+        this.enderecoEventoMapper = enderecoEventoMapper;
+        this.buscarMinisterioPorUUIDUseCase = buscarMinisterioPorUUIDUseCase;
     }
 
     @Transactional
@@ -49,9 +48,9 @@ public class AtualizarEventoUseCase {
         if(request.endereco() != null && validarEnderecoDiferente(evento.getEnderecoEvento(), request.endereco())){
             EnderecoEvento enderecoAtualizado;
             if(request.endereco().idExterno() == null){
-                enderecoAtualizado = enderecoEventoService.converterDtoToEndereco(request.endereco());
+                enderecoAtualizado = enderecoEventoMapper.paraEndereco(request.endereco());
             } else {
-                enderecoAtualizado = enderecoEventoService.buscarPorUUID(request.endereco().idExterno());
+                enderecoAtualizado = buscarEnderecoEventoPorUUIDUseCase.execute(request.endereco().idExterno());
             }
             evento.setEnderecoEvento(enderecoAtualizado);
         }
@@ -59,7 +58,7 @@ public class AtualizarEventoUseCase {
         //validar outros campos que precisam ser atualizados
 
         if(request.fkMinisterios() != null && !request.fkMinisterios().isEmpty()){
-            Set<Ministerio> ministerios = new HashSet<>(ministerioService.buscarPorUUID(request.fkMinisterios()));
+            Set<Ministerio> ministerios = new HashSet<>(buscarMinisterioPorUUIDUseCase.execute(request.fkMinisterios()));
             evento.getMinisterios().clear();
             evento.getMinisterios().addAll(ministerios);
         }

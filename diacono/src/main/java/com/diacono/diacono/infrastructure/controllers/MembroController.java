@@ -5,7 +5,9 @@ import com.diacono.diacono.global.error.comuns.ApiErrorsComuns;
 import com.diacono.diacono.applications.dtos.membro.MembroCreateDTO;
 import com.diacono.diacono.applications.dtos.membro.MembroResponseDTO;
 import com.diacono.diacono.domain.enums.EnumStatusMembro;
-import com.diacono.diacono.usecases.MembroService;
+import com.diacono.diacono.usecases.membro.BuscarTodosComFiltroUseCase;
+import com.diacono.diacono.usecases.membro.BuscarTodosSemFiltroUseCase;
+import com.diacono.diacono.usecases.membro.CriarMembroUseCase;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -20,19 +22,22 @@ import java.util.UUID;
 @RequestMapping("/membros")
 public class MembroController {
 
-    private final MembroService membrosService;
+    private final CriarMembroUseCase criarMembroUseCase;
+    private final BuscarTodosSemFiltroUseCase buscarTodosSemFiltroUseCase;
+    private final BuscarTodosComFiltroUseCase buscarTodosComFiltroUseCase;
 
-    public MembroController(MembroService membrosService) {
-        this.membrosService = membrosService;
+    public MembroController(CriarMembroUseCase criarMembroUseCase, BuscarTodosSemFiltroUseCase buscarTodosSemFiltroUseCase, BuscarTodosComFiltroUseCase buscarTodosComFiltroUseCase) {
+        this.criarMembroUseCase = criarMembroUseCase;
+        this.buscarTodosSemFiltroUseCase = buscarTodosSemFiltroUseCase;
+        this.buscarTodosComFiltroUseCase = buscarTodosComFiltroUseCase;
     }
-
 
     @ApiErrorsComuns
     @ApiResponse(responseCode = "201", description = "Membro criado com sucesso")
     @PostMapping
     public ResponseEntity<RestResponseMessageDTO> criarMembro(@RequestBody @Valid MembroCreateDTO membroDTO){
 
-        RestResponseMessageDTO response = membrosService.criarMembro(membroDTO);
+        RestResponseMessageDTO response = criarMembroUseCase.execute(membroDTO);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -45,15 +50,14 @@ public class MembroController {
                                                                         @RequestParam(required = false) UUID fkMinisterio) {
 
         if((buscaGeral == null || buscaGeral.isBlank()) && fkMinisterio == null && status == null){
-            Page<MembroResponseDTO> response = membrosService.buscarTodosSemFiltro(pageable);
+
+            Page<MembroResponseDTO> response = buscarTodosSemFiltroUseCase.execute(pageable);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         }
 
-
-        Page<MembroResponseDTO> response = membrosService.buscarTodosComFiltro(pageable, buscaGeral, status, fkMinisterio);
+        Page<MembroResponseDTO> response = buscarTodosComFiltroUseCase.execute(pageable, buscaGeral, status, fkMinisterio);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
-
     }
 
 //    @ApiErrorsComuns

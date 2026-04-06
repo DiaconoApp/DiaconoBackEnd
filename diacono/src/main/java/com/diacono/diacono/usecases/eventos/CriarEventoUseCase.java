@@ -1,20 +1,25 @@
 package com.diacono.diacono.usecases.eventos;
 
 import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
+import com.diacono.diacono.applications.dtos.evento.EnderecoEventoDTO;
 import com.diacono.diacono.applications.dtos.evento.EventoCreateDTO;
+import com.diacono.diacono.applications.dtos.recorrencia.RecorrenciaCreateDTO;
+import com.diacono.diacono.applications.mappers.endereco.EnderecoEventoMapper;
 import com.diacono.diacono.applications.mappers.evento.EventoMapper;
+import com.diacono.diacono.applications.mappers.recorrencia.RecorrenciaMapper;
 import com.diacono.diacono.domain.entity.EnderecoEvento;
 import com.diacono.diacono.domain.entity.Evento;
+import com.diacono.diacono.domain.entity.Membro;
 import com.diacono.diacono.domain.entity.Recorrencia;
 import com.diacono.diacono.domain.enums.TipoRecorrencia;
 import com.diacono.diacono.domain.repository.EventoRepository;
+import com.diacono.diacono.domain.repository.MembroRepository;
+import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
+import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.util.JwtUtils;
-import com.diacono.diacono.usecases.EnderecoEventoService;
-import com.diacono.diacono.usecases.IgrejaService;
-import com.diacono.diacono.usecases.MembroService;
-import com.diacono.diacono.usecases.MinisterioService;
-import com.diacono.diacono.usecases.RecorrenciaService;
-import com.diacono.diacono.infrastructure.exceptions.TimeInvalidException;
+import com.diacono.diacono.usecases.igreja.BuscarIgrejaPorUUIDUseCase;
+import com.diacono.diacono.usecases.eventos.validation.ValidarHora;
+import com.diacono.diacono.usecases.ministerio.BuscarMembroMinisterioLiderMinisterioComFiltroUseCase;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,46 +30,44 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class CriarEventoUseCase {
 
     private final EventoRepository eventoRepository;
     private final EventoMapper eventoMapper;
-    private final EnderecoEventoService enderecoEventoService;
-    private final RecorrenciaService recorrenciaService;
-    private final MinisterioService ministerioService;
-    private final MembroService membroService;
-    private final IgrejaService igrejaService;
+    private final BuscarEnderecoEventoPorUUIDUseCase buscarEnderecoEventoPorUUIDUseCase;
+    private final RecorrenciaMapper recorrenciaMapper;
+    private final BuscarMembroMinisterioLiderMinisterioComFiltroUseCase buscarMembroMinisterioLiderMinisterioComFiltroUseCase;
+    private final MembroRepository membroRepository;
+    private final BuscarIgrejaPorUUIDUseCase buscarIgrejaPorUUIDUseCase;
     private final JwtUtils jwtUtils;
+    private final ValidarHora validarHora;
+    private final EnderecoEventoMapper enderecoEventoMapper;
+    private final BuscarMinisterioPorUUIDUseCase buscarMinisterioPorUUIDUseCase;
 
-    public CriarEventoUseCase(
-            EventoRepository eventoRepository,
-            EventoMapper eventoMapper,
-            EnderecoEventoService enderecoEventoService,
-            RecorrenciaService recorrenciaService,
-            MinisterioService ministerioService,
-            MembroService membroService,
-            IgrejaService igrejaService,
-            JwtUtils jwtUtils
-    ) {
+    public CriarEventoUseCase(EventoRepository eventoRepository, EventoMapper eventoMapper, BuscarEnderecoEventoPorUUIDUseCase buscarEnderecoEventoPorUUIDUseCase, RecorrenciaMapper recorrenciaMapper, BuscarMembroMinisterioLiderMinisterioComFiltroUseCase buscarMembroMinisterioLiderMinisterioComFiltroUseCase, MembroRepository membroRepository, BuscarIgrejaPorUUIDUseCase buscarIgrejaPorUUIDUseCase, JwtUtils jwtUtils, ValidarHora validarHora, EnderecoEventoMapper enderecoEventoMapper, BuscarMinisterioPorUUIDUseCase buscarMinisterioPorUUIDUseCase) {
         this.eventoRepository = eventoRepository;
         this.eventoMapper = eventoMapper;
-        this.enderecoEventoService = enderecoEventoService;
-        this.recorrenciaService = recorrenciaService;
-        this.ministerioService = ministerioService;
-        this.membroService = membroService;
-        this.igrejaService = igrejaService;
+        this.buscarEnderecoEventoPorUUIDUseCase = buscarEnderecoEventoPorUUIDUseCase;
+        this.recorrenciaMapper = recorrenciaMapper;
+        this.buscarMembroMinisterioLiderMinisterioComFiltroUseCase = buscarMembroMinisterioLiderMinisterioComFiltroUseCase;
+        this.membroRepository = membroRepository;
+        this.buscarIgrejaPorUUIDUseCase = buscarIgrejaPorUUIDUseCase;
         this.jwtUtils = jwtUtils;
+        this.validarHora = validarHora;
+        this.enderecoEventoMapper = enderecoEventoMapper;
+        this.buscarMinisterioPorUUIDUseCase = buscarMinisterioPorUUIDUseCase;
     }
 
     @Transactional
     public RestResponseMessageDTO execute(EventoCreateDTO request) {
 
-        recorrenciaService.validarRecorrencia(request.recorrencia(), request.dataHoraInicio());
-        enderecoEventoService.validarEnderecoEvento(request.endereco());
-        validaHoraInicioMenorHoraFim(request.dataHoraInicio(), request.dataHoraFim());
-        validarHoraFuturo(request.dataHoraInicio(), request.dataHoraFim());
+        validarRecorrencia(request.recorrencia(), request.dataHoraInicio());
+        validarEnderecoEvento(request.endereco());
+        validarHora.validaHoraInicioMenorHoraFim(request.dataHoraInicio(), request.dataHoraFim());
+        validarHora.validarHoraFuturo(request.dataHoraInicio(), request.dataHoraFim());
 
         if (request.recorrencia().tipoRecorrencia().equals(TipoRecorrencia.NAO_REPETE)) {
             criarEventoSemRecorrencia(request);
@@ -84,29 +87,62 @@ public class CriarEventoUseCase {
         return new RestResponseMessageDTO(HttpStatus.INTERNAL_SERVER_ERROR, "Motivo não mapeado -> Criação do Evento");
     }
 
+    public void validarRecorrencia(RecorrenciaCreateDTO recorrencia, LocalDateTime comparativoEvento){
 
-    private Evento criarEventoSemRecorrencia(EventoCreateDTO request) {
+        if(!recorrencia.tipoRecorrencia().equals(TipoRecorrencia.NAO_REPETE)){
 
-        Recorrencia recorrencia = recorrenciaService.converterDtoToRecorrencia(request.recorrencia());
+            if(recorrencia.dataTerminoRecorrencia() == null || recorrencia.dataInicioRecorrencia() == null){
+                throw  new FieldInvalidException("É necessário preencher os campos de inicío e término da recorrência");
+            }
 
-        EnderecoEvento endereco;
-        if (request.endereco().idExterno() == null) {
-            endereco = enderecoEventoService.converterDtoToEndereco(request.endereco());
-        } else {
-            endereco = enderecoEventoService.buscarPorUUID(request.endereco().idExterno());
+            if(!recorrencia.dataTerminoRecorrencia().isAfter(recorrencia.dataInicioRecorrencia())){
+                throw new FieldInvalidException("A data final da recorrência precisa ser maior que a data de início, para eventos com recorrência.");
+            }
+
+            if(recorrencia.dataInicioRecorrencia().plusDays(365).isBefore(recorrencia.dataTerminoRecorrencia())){
+                throw  new FieldInvalidException("A data final da recorrência precisar estar dentro do período de um ano");
+            }
+
+            if(!recorrencia.dataInicioRecorrencia().isEqual(comparativoEvento.toLocalDate())){
+                throw new FieldInvalidException("A data de início da recorrência precisa ser igual à data de início do evento.");
+            }
+
         }
-
-        Evento evento = eventoMapper.paraEvento(request);
-
-        evento.setEnderecoEvento(endereco);
-        evento.setRecorrencia(recorrencia);
-        evento.setOrganizador(membroService.buscarPorUUID(jwtUtils.getSubject()));
-        evento.setIgreja(igrejaService.buscarUUID(jwtUtils.getIgrejaId()));
-        evento.setMinisterios(ministerioService.buscarPorUUID(request.fkMinisterios()));
-
-        return eventoRepository.save(evento);
     }
 
+    private void validarEnderecoEvento(EnderecoEventoDTO endereco){
+        if (endereco.idExterno() != null) {
+            return;
+        }
+
+        if (endereco.cep() == null || endereco.cep().isBlank()) {
+            throw new FieldInvalidException("Você precisa preencher o CEP");
+        }
+
+        if (endereco.estado() == null || endereco.estado().isBlank()) {
+            throw new FieldInvalidException("Você precisa preencher o estado");
+        }
+
+        if (endereco.cidade() == null || endereco.cidade().isBlank()) {
+            throw new FieldInvalidException("Você precisa preencher a cidade");
+        }
+
+        if (endereco.bairro() == null || endereco.bairro().isBlank()) {
+            throw new FieldInvalidException("Você precisa preencher o bairro");
+        }
+
+        if (endereco.rua() == null || endereco.rua().isBlank()) {
+            throw new FieldInvalidException("Você precisa preencher a rua");
+        }
+
+        if (endereco.numero() == null || endereco.numero().isBlank()) {
+            throw new FieldInvalidException("Você precisa preencher o número");
+        }
+
+        if (endereco.apelido() == null || endereco.apelido().isBlank()) {
+            throw new FieldInvalidException("Você precisa preencher o apelido");
+        }
+    }
 
     private RestResponseMessageDTO criarEventoRecorrenciaSemanal(EventoCreateDTO request) {
 
@@ -175,18 +211,36 @@ public class CriarEventoUseCase {
         return new RestResponseMessageDTO(HttpStatus.CREATED, "Eventos com recorrência mensal criados com sucesso");
     }
 
-    private void validaHoraInicioMenorHoraFim(LocalDateTime inicio, LocalDateTime fim) {
-        if (fim.isBefore(inicio)) {
-            throw new TimeInvalidException("O horário de término do evento precisa ser maior que o horário de início");
+    private Evento criarEventoSemRecorrencia(EventoCreateDTO request) {
+
+        Recorrencia recorrencia = converterDtoToRecorrencia(request.recorrencia());
+
+        EnderecoEvento endereco;
+        if (request.endereco().idExterno() == null) {
+            endereco = enderecoEventoMapper.paraEndereco(request.endereco());
+        } else {
+            endereco = buscarEnderecoEventoPorUUIDUseCase.execute(request.endereco().idExterno());
         }
+
+        Evento evento = eventoMapper.paraEvento(request);
+
+        evento.setEnderecoEvento(endereco);
+        evento.setRecorrencia(recorrencia);
+        evento.setOrganizador(buscarPorUUID(jwtUtils.getSubject()));
+        evento.setIgreja(buscarIgrejaPorUUIDUseCase.execute(jwtUtils.getIgrejaId()));
+        evento.setMinisterios(buscarMinisterioPorUUIDUseCase.execute(request.fkMinisterios()));
+
+        return eventoRepository.save(evento);
     }
 
-    private void validarHoraFuturo(LocalDateTime inicio, LocalDateTime fim) {
+    public Membro buscarPorUUID(UUID idExterno) {
+        Membro membro = membroRepository.findByIdExterno(idExterno)
+                .orElseThrow(() -> new ObjectNotFoundException("Membro não encontrado"));
 
-        LocalDateTime hojeComMargem = LocalDateTime.now().plusMinutes(1);
+        return membro;
+    }
 
-        if (inicio.isBefore(hojeComMargem) && fim.isBefore(hojeComMargem)) {
-            throw new TimeInvalidException("Não é possível cadastrar eventos com horários passados.");
-        }
+    public Recorrencia converterDtoToRecorrencia(RecorrenciaCreateDTO recorrenciaCreateDTO){
+        return recorrenciaMapper.paraRecorrencia(recorrenciaCreateDTO);
     }
 }

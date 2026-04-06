@@ -2,25 +2,30 @@ package com.diacono.diacono.usecases.dashboard.membros;
 
 import com.diacono.diacono.applications.dtos.ministerio.KpisMembrosDTO;
 import com.diacono.diacono.applications.dtos.membro.MembroKpiResponseDTO;
-import com.diacono.diacono.usecases.MembroService;
+import com.diacono.diacono.domain.repository.MembroRepository;
+import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.usecases.dashboard.validation.DashboardPeriodoValidator;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 public class BuscarKpiMembrosDashUseCase {
 
-    private final MembroService membroService;
     private final DashboardPeriodoValidator periodoValidator;
+    private final MembroRepository membroRepository;
+    private final JwtUtils jwtUtils;
 
-    public BuscarKpiMembrosDashUseCase(MembroService membroService, DashboardPeriodoValidator periodoValidator) {
-        this.membroService = membroService;
+    public BuscarKpiMembrosDashUseCase(DashboardPeriodoValidator periodoValidator, MembroRepository membroRepository, JwtUtils jwtUtils) {
         this.periodoValidator = periodoValidator;
+        this.membroRepository = membroRepository;
+        this.jwtUtils = jwtUtils;
     }
 
     public KpisMembrosDTO execute(int anoInicio, int anoFim) {
         periodoValidator.validarAnoInicioEFim(anoInicio, anoFim);
 
-        MembroKpiResponseDTO kpis = membroService.buscarKpis(anoInicio, anoFim);
+        MembroKpiResponseDTO kpis = buscarKpis(anoInicio, anoFim);
 
         long membrosAtivos = kpis.membrosAtivos();
         long membrosInativos = kpis.membrosInativos();
@@ -34,4 +39,12 @@ public class BuscarKpiMembrosDashUseCase {
 
         return new KpisMembrosDTO(membrosAtivos, membrosNovos, retencao);
     }
+
+    public MembroKpiResponseDTO buscarKpis(int anoInicio, int anoFim){
+
+        UUID idExternoIgreja = jwtUtils.getIgrejaId();
+
+        return membroRepository.buscarKpisMembros(idExternoIgreja, anoInicio, anoFim);
+    }
+
 }

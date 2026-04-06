@@ -1,33 +1,30 @@
-package com.diacono.diacono.usecases;
+package com.diacono.diacono.usecases.igreja;
 
-import com.diacono.diacono.applications.mappers.igreja.IgrejaMapper;
 import com.diacono.diacono.applications.dtos.igreja.IgrejaSemiCompletoDTO;
+import com.diacono.diacono.applications.mappers.igreja.IgrejaMapper;
 import com.diacono.diacono.domain.entity.Igreja;
 import com.diacono.diacono.domain.repository.IgrejaRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
-public class IgrejaService {
+public class BuscasIgrejasUseCase {
 
     private final IgrejaRepository igrejaRepository;
     private final IgrejaMapper igrejaMapper;
 
-    public IgrejaService(IgrejaRepository igrejaRepository, IgrejaMapper igrejaMapper) {
+    public BuscasIgrejasUseCase(IgrejaRepository igrejaRepository, IgrejaMapper igrejaMapper) {
         this.igrejaRepository = igrejaRepository;
         this.igrejaMapper = igrejaMapper;
     }
 
-    /*ESSE MÉTODO SE RELACIONA COM EVENTO*/
-    public Igreja buscarUUID(UUID idExterno){
-        //adicionar validação da existência da Igreja -- SE DER ERRO LANÇAR EXCEÇÃO
-        Igreja igreja = igrejaRepository.findByIdExterno(idExterno)
-                .orElseThrow(() -> new ObjectNotFoundException("Igreja não encontrada"));;
+    public List<IgrejaSemiCompletoDTO> execute(){
 
-        return igreja;
+        List<IgrejaSemiCompletoDTO> igrejas = buscarIgrejas();
+
+        return igrejas;
     }
 
     public List<IgrejaSemiCompletoDTO> buscarIgrejas(){

@@ -2,8 +2,8 @@ package com.diacono.diacono.infrastructure.controllers;
 
 import com.diacono.diacono.applications.dtos.igreja.IgrejaSemiCompletoDTO;
 import com.diacono.diacono.applications.dtos.CadastroExternoDTO;
-import com.diacono.diacono.usecases.CadastrarMembroUseCase;
-import com.diacono.diacono.usecases.BuscasIgrejasUseCase;
+import com.diacono.diacono.usecases.membro.CadastrarMembroUseCase;
+import com.diacono.diacono.usecases.igreja.BuscasIgrejasUseCase;
 import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
 import com.diacono.diacono.global.error.comuns.ApiErrorsComuns;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

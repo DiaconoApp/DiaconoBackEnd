@@ -4,9 +4,9 @@ import com.diacono.diacono.applications.dtos.evento.EventoKpiDTO;
 import com.diacono.diacono.applications.dtos.ministerio.KpisMinisteriosDTO;
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioKpisResponseDTO;
 import com.diacono.diacono.domain.repository.EventoRepository;
+import com.diacono.diacono.domain.repository.MinisteriosRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.util.JwtUtils;
-import com.diacono.diacono.usecases.MinisterioService;
 import com.diacono.diacono.usecases.dashboard.validation.DashboardPeriodoValidator;
 import org.springframework.stereotype.Service;
 
@@ -16,13 +16,13 @@ import java.util.UUID;
 @Service
 public class BuscarKpiMinisteriosDashUseCase {
 
-    private final MinisterioService ministerioService;
+    private final MinisteriosRepository ministeriosRepository;
     private final DashboardPeriodoValidator periodoValidator;
     private final JwtUtils jwtUtils;
     private final EventoRepository eventoRepository;
 
-    public BuscarKpiMinisteriosDashUseCase(MinisterioService ministerioService, DashboardPeriodoValidator periodoValidator, JwtUtils jwtUtils, EventoRepository eventoRepository) {
-        this.ministerioService = ministerioService;
+    public BuscarKpiMinisteriosDashUseCase(MinisteriosRepository ministeriosRepository, DashboardPeriodoValidator periodoValidator, JwtUtils jwtUtils, EventoRepository eventoRepository) {
+        this.ministeriosRepository = ministeriosRepository;
         this.periodoValidator = periodoValidator;
         this.jwtUtils = jwtUtils;
         this.eventoRepository = eventoRepository;
@@ -32,7 +32,7 @@ public class BuscarKpiMinisteriosDashUseCase {
 
         periodoValidator.validarAnoInicioEFim(anoInicio, anoFim);
 
-        MinisterioKpisResponseDTO kpiMinisterio = ministerioService.ministerioBuscarKpis(anoFim);
+        MinisterioKpisResponseDTO kpiMinisterio = ministerioBuscarKpis(anoFim);
         List<EventoKpiDTO> kpiEvento = buscarKpisEvento(anoInicio, anoFim);
 
         if (kpiMinisterio == null || kpiEvento == null || kpiEvento.isEmpty()) {
@@ -44,12 +44,17 @@ public class BuscarKpiMinisteriosDashUseCase {
         return new KpisMinisteriosDTO(eventoRetido, kpiMinisterio);
     }
 
+    private MinisterioKpisResponseDTO ministerioBuscarKpis(int anoFim) {
+        UUID igrejaId = jwtUtils.getIgrejaId();
+
+        return ministeriosRepository.buscarKpis(igrejaId, anoFim);
+    }
+
+
     private List<EventoKpiDTO> buscarKpisEvento(int anoInicio, int anoFim) {
 
         UUID idIgreja = jwtUtils.getIgrejaId();
 
-        List<EventoKpiDTO> kpisEvento = eventoRepository.buscarKpisEvento(anoInicio, anoFim, idIgreja);
-
-        return kpisEvento;
+        return eventoRepository.buscarKpisEvento(anoInicio, anoFim, idIgreja);
     }
 }

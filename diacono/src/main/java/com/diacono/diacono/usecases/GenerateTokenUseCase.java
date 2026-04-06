@@ -12,18 +12,18 @@ import java.time.Instant;
 
 @Service
 @Getter
-public class TokenService {
+public class GenerateTokenUseCase {
 
     private final JwtEncoder jwtEncoder;
 
     @Value("${app.jwt.expiration-seconds:3600}")
     private long expiresIn;
 
-    public TokenService(JwtEncoder jwtEncoder) {
+    public GenerateTokenUseCase(JwtEncoder jwtEncoder) {
         this.jwtEncoder = jwtEncoder;
     }
 
-    public String generateToken(Membro membro) {
+    public String execute(Membro membro) {
         var now = Instant.now();
 
         String scopeString = membro.getCargoMembro().name();

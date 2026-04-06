@@ -10,7 +10,8 @@ import com.diacono.diacono.applications.dtos.ministerio.MinisterioUpdateDTO;
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioSimplificadoDTO;
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioSuperSimplificadoDTO;
 import com.diacono.diacono.domain.enums.EnumStatusMinisterio;
-import com.diacono.diacono.usecases.MinisterioService;
+import com.diacono.diacono.usecases.ministerio.BuscarMembroMinisterioLiderMinisterioComFiltroUseCase;
+import com.diacono.diacono.usecases.ministerio.*;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,10 +26,28 @@ import java.util.UUID;
 @RequestMapping("/api/v1/ministerios")
 public class MinisteriosController {
 
-    private final MinisterioService ministerio;
+    private final BuscarMembroMinisterioLiderMinisterioComFiltroUseCase buscarMembroMinisterioLiderMinisterioComFiltroUseCase;
+    private final BuscarMinisteriosGeraisUseCase buscarMinisteriosGeraisUseCase;
+    private final AdicionarMinisterioUseCase adicionarMinisterioUseCase;
+    private final EditarMinisterioUseCase editarMinisterioUseCase;
+    private final RemoverMembroMinisterioLiderMinisterioUseCase removerMembroMinisterioLiderMinisterioUseCase;
+    private final AdicionarMembroMinisterioLiderMinisterioUseCase adicionarMembroMinisterioLiderMinisterioUseCase;
+    private final BuscarMinisteriosLiderMinisterioUseCase buscarMinisteriosLiderMinisterioUseCase;
+    private final BuscarMinisteriosGovernoSemFiltroUseCase buscarMinisteriosGovernoSemFiltroUseCase;
+    private final BuscarMinisteriosGovernoComFiltroUseCase buscarMinisteriosGovernoComFiltroUseCase;
+    private final BuscarMembroMinisterioLiderMinisterioSemFiltroUseCase buscarMembroMinisterioLiderMinisterioSemFiltroUseCase;
 
-    public MinisteriosController(MinisterioService ministerio) {
-        this.ministerio = ministerio;
+    public MinisteriosController(BuscarMembroMinisterioLiderMinisterioComFiltroUseCase buscarMembroMinisterioLiderMinisterioComFiltroUseCase, BuscarMinisteriosGeraisUseCase buscarMinisteriosGeraisUseCase, AdicionarMinisterioUseCase adicionarMinisterioUseCase, EditarMinisterioUseCase editarMinisterioUseCase, RemoverMembroMinisterioLiderMinisterioUseCase removerMembroMinisterioLiderMinisterioUseCase, AdicionarMembroMinisterioLiderMinisterioUseCase adicionarMembroMinisterioLiderMinisterioUseCase, BuscarMinisteriosLiderMinisterioUseCase buscarMinisteriosLiderMinisterioUseCase, BuscarMinisteriosGovernoSemFiltroUseCase buscarMinisteriosGovernoSemFiltroUseCase, BuscarMinisteriosGovernoComFiltroUseCase buscarMinisteriosGovernoComFiltroUseCase, BuscarMembroMinisterioLiderMinisterioSemFiltroUseCase buscarMembroMinisterioLiderMinisterioSemFiltroUseCase) {
+        this.buscarMembroMinisterioLiderMinisterioComFiltroUseCase = buscarMembroMinisterioLiderMinisterioComFiltroUseCase;
+        this.buscarMinisteriosGeraisUseCase = buscarMinisteriosGeraisUseCase;
+        this.adicionarMinisterioUseCase = adicionarMinisterioUseCase;
+        this.editarMinisterioUseCase = editarMinisterioUseCase;
+        this.removerMembroMinisterioLiderMinisterioUseCase = removerMembroMinisterioLiderMinisterioUseCase;
+        this.adicionarMembroMinisterioLiderMinisterioUseCase = adicionarMembroMinisterioLiderMinisterioUseCase;
+        this.buscarMinisteriosLiderMinisterioUseCase = buscarMinisteriosLiderMinisterioUseCase;
+        this.buscarMinisteriosGovernoSemFiltroUseCase = buscarMinisteriosGovernoSemFiltroUseCase;
+        this.buscarMinisteriosGovernoComFiltroUseCase = buscarMinisteriosGovernoComFiltroUseCase;
+        this.buscarMembroMinisterioLiderMinisterioSemFiltroUseCase = buscarMembroMinisterioLiderMinisterioSemFiltroUseCase;
     }
 
     //USO GERAL
@@ -36,10 +55,7 @@ public class MinisteriosController {
     @GetMapping
     public ResponseEntity<List<MinisterioSimplificadoDTO>> buscarMinisteriosGerais() {
 
-        return ResponseEntity.status(HttpStatus.OK).body(
-                ministerio.buscarMinisteriosGerais()
-        );
-
+        return ResponseEntity.status(HttpStatus.OK).body(buscarMinisteriosGeraisUseCase.execute());
     }
 
     //VISAO GOVERNO
@@ -54,11 +70,11 @@ public class MinisteriosController {
         Page pagina;
 
         if (semBusca && semStatus) {
-            pagina = ministerio.buscarMinisteriosGoverno(pageable);
+            pagina = buscarMinisteriosGovernoSemFiltroUseCase.execute(pageable);
             return ResponseEntity.status(HttpStatus.OK).body(pagina);
         }
 
-        pagina = ministerio.buscarMinisteriosGovernoComFiltro(pageable, buscaGeral, status);
+        pagina = buscarMinisteriosGovernoComFiltroUseCase.execute(pageable, buscaGeral, status);
         return ResponseEntity.status(HttpStatus.OK).body(
                 pagina
         );
@@ -67,14 +83,12 @@ public class MinisteriosController {
 
     @PostMapping("/governo")
     public ResponseEntity<RestResponseMessageDTO> adicionarMinisterio(@RequestBody @Valid MinisterioCreateDTO ministerioCreateDTO) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                ministerio.criarMinisterio(ministerioCreateDTO)
-        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(adicionarMinisterioUseCase.execute(ministerioCreateDTO));
     }
 
-    @PatchMapping("/governo/{idMinisterio}")
+    @PatchMapping("/governo/{idMinisterio}") //OK
     public ResponseEntity<RestResponseMessageDTO> editarMinisterio(@PathVariable UUID idMinisterio, @RequestBody @Valid MinisterioUpdateDTO ministerioUpdateDTO) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ministerio.editarMinisterio(ministerioUpdateDTO, idMinisterio));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(editarMinisterioUseCase.execute(ministerioUpdateDTO, idMinisterio));
     }
 
     //VISAO  LIDER MINISTERIO
@@ -92,11 +106,11 @@ public class MinisteriosController {
         Page<MembroMinisterioInfoMembroDTO> pagina;
 
         if (semBusca && semStatus) {
-            pagina = ministerio.buscarMembroMinisterioLiderMinisterio(idMinisterio, pageable);
+            pagina = buscarMembroMinisterioLiderMinisterioSemFiltroUseCase.execute(idMinisterio, pageable);
             return ResponseEntity.status(HttpStatus.OK).body(pagina);
         }
 
-        pagina = ministerio.buscarMembroMinisterioLiderMinisterioComFiltro(idMinisterio, pageable, buscaGeral, status);
+        pagina = buscarMembroMinisterioLiderMinisterioComFiltroUseCase.execute(idMinisterio, pageable, buscaGeral, status);
 
         return ResponseEntity.status(HttpStatus.OK).body(pagina);
 
@@ -105,26 +119,24 @@ public class MinisteriosController {
     @GetMapping("/lider-ministerio")
     public ResponseEntity<List<MinisterioSuperSimplificadoDTO>> buscarMinisteriosLiderMinisterio() {
 
-        List<MinisterioSuperSimplificadoDTO> listaMinisterios = ministerio.buscarMinisteriosLiderMinisterio();
-
+        List<MinisterioSuperSimplificadoDTO> listaMinisterios = buscarMinisteriosLiderMinisterioUseCase.execute();
 
         return ResponseEntity.status(HttpStatus.OK).body(listaMinisterios);
-
     }
 
     @PatchMapping("/lider-ministerio/{idMinisterio}")
     public ResponseEntity<RestResponseMessageDTO> adicionarMembroMinisterioLiderMinisterio(@PathVariable UUID idMinisterio, @RequestBody @Valid MembroMinisterioCreateDTO membroMinisterio) {
+
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
-                ministerio.adicionarMembroMinisterioLiderMinisterio(idMinisterio, membroMinisterio)
+                adicionarMembroMinisterioLiderMinisterioUseCase.execute(idMinisterio, membroMinisterio)
         );
     }
 
     @DeleteMapping("/lider-ministerio/{idMinisterio}/{idMembroMinisterio}")
     public ResponseEntity<RestResponseMessageDTO> removerMembroMinisterioLiderMinisterio(@PathVariable UUID idMinisterio, @PathVariable UUID idMembroMinisterio) {
+
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
-                ministerio.removerMembroMinisterioLiderMinisterio(idMinisterio, idMembroMinisterio)
+                removerMembroMinisterioLiderMinisterioUseCase.execute(idMinisterio, idMembroMinisterio)
         );
     }
-
-
 }

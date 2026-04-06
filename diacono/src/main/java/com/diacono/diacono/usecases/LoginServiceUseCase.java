@@ -4,32 +4,33 @@ import com.diacono.diacono.applications.dtos.login.LoginRequestDTO;
 import com.diacono.diacono.applications.dtos.login.LoginResponseDTO;
 import com.diacono.diacono.global.error.exceptions.BadCredentialsException;
 import com.diacono.diacono.domain.entity.Membro;
+import com.diacono.diacono.usecases.membro.BuscarPorEmaiUseCase;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LoginServiceUseCase {
 
-    private final MembroService membroService;
+    private final BuscarPorEmaiUseCase buscarPorEmaiUseCase;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    private final TokenService tokenService;
+    private final GenerateTokenUseCase generateTokenUseCase;
 
-    public LoginServiceUseCase(MembroService membroService, BCryptPasswordEncoder bCryptPasswordEncoder, TokenService tokenService) {
-        this.membroService = membroService;
+    public LoginServiceUseCase(BuscarPorEmaiUseCase buscarPorEmaiUseCase, BCryptPasswordEncoder bCryptPasswordEncoder, GenerateTokenUseCase generateTokenUseCase) {
+        this.buscarPorEmaiUseCase = buscarPorEmaiUseCase;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-        this.tokenService = tokenService;
+        this.generateTokenUseCase = generateTokenUseCase;
     }
 
     public LoginResponseDTO execute(LoginRequestDTO loginRequestDTO){
 
-        Membro membro = membroService.buscarPorEmail(loginRequestDTO.email());
+        Membro membro = buscarPorEmaiUseCase.execute(loginRequestDTO.email());
 
         if(membro == null || !bCryptPasswordEncoder.matches(loginRequestDTO.senha(), membro.getSenha())){
             throw new BadCredentialsException("Usuário ou senha inválidos");
         }
 
-        String jwtValue = tokenService.generateToken(membro);
-        long expiresIn = tokenService.getExpiresIn();
+        String jwtValue = generateTokenUseCase.execute(membro);
+        long expiresIn = generateTokenUseCase.getExpiresIn();
 
         return new LoginResponseDTO(jwtValue, expiresIn);
     }

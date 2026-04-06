@@ -2,30 +2,32 @@ package com.diacono.diacono.usecases.dashboard.membros;
 
 import com.diacono.diacono.applications.dtos.dashboard.DashboardGeneroMembroDTO;
 import com.diacono.diacono.applications.dtos.membro.MembroDashGeneroDTO;
+import com.diacono.diacono.domain.repository.MembroRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.usecases.MembroService;
+import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.usecases.dashboard.validation.DashboardPeriodoValidator;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 public class BuscarKpiGeneroMembrosDashUseCase {
 
-    private final MembroService membroService;
     private final DashboardPeriodoValidator periodoValidator;
+    private final MembroRepository membroRepository;
+    private final JwtUtils jwtUtils;
 
-    public BuscarKpiGeneroMembrosDashUseCase(
-            MembroService membroService,
-            DashboardPeriodoValidator periodoValidator
-    ) {
-        this.membroService = membroService;
+    public BuscarKpiGeneroMembrosDashUseCase(DashboardPeriodoValidator periodoValidator, MembroRepository membroRepository, JwtUtils jwtUtils) {
         this.periodoValidator = periodoValidator;
+        this.membroRepository = membroRepository;
+        this.jwtUtils = jwtUtils;
     }
 
     public DashboardGeneroMembroDTO execute(int anoInicio, int anoFim) {
 
         periodoValidator.validarAnoInicioEFim(anoInicio, anoFim);
 
-        MembroDashGeneroDTO genero = membroService.buscarDashGenero(anoFim);
+        MembroDashGeneroDTO genero = buscarDashGenero(anoFim);
 
         if (genero == null) {
             throw new ObjectNotFoundException("Nenhum dado encontrado para o período informado.");
@@ -41,5 +43,17 @@ public class BuscarKpiGeneroMembrosDashUseCase {
         double femininoPercent = (double) genero.feminino() / total * 100;
 
         return new DashboardGeneroMembroDTO(masculinoPercent, femininoPercent);
+    }
+
+    public MembroDashGeneroDTO buscarDashGenero(int anoFim) {
+
+        UUID idExternoIgreja = jwtUtils.getIgrejaId();
+
+        MembroDashGeneroDTO response = membroRepository.buscarMembrosPorGenero(idExternoIgreja, anoFim);
+
+        System.out.println(response.feminino());
+        System.out.println(response.masculino());
+
+        return response;
     }
 }
