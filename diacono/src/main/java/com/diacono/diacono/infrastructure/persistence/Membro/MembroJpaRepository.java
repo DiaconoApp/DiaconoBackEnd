@@ -81,19 +81,23 @@ public interface MembroJpaRepository extends JpaRepository<Membro, Long> {
     //dashboards
 
     @Query("""
-            SELECT new com.diacono.diacono.membro.model.dto.response.MembroKpiResponseDTO(
-                SUM(CASE WHEN m.status = com.diacono.diacono.membro.model.entity.EnumStatusMembro.ATIVO AND FUNCTION('YEAR', m.dataRegistro) BETWEEN :anoInicio AND :anoFim  THEN 1 ELSE 0 END),
-                SUM(CASE WHEN m.status = com.diacono.diacono.membro.model.entity.EnumStatusMembro.INATIVO AND FUNCTION('YEAR', m.dataRegistro) BETWEEN :anoInicio AND :anoFim  THEN 1 ELSE 0 END),
+            SELECT new com.diacono.diacono.applications.dtos.membro.MembroKpiResponseDTO(
+                SUM(CASE WHEN m.status = com.diacono.diacono.domain.enums.EnumStatusMembro.ATIVO AND FUNCTION('YEAR', m.dataRegistro) BETWEEN :anoInicio AND :anoFim  THEN 1 ELSE 0 END),
+                SUM(CASE WHEN m.status = com.diacono.diacono.domain.enums.EnumStatusMembro.INATIVO AND FUNCTION('YEAR', m.dataRegistro) BETWEEN :anoInicio AND :anoFim  THEN 1 ELSE 0 END),
                 SUM(CASE WHEN FUNCTION('YEAR', m.dataRegistro) = :anoInicio THEN 1 ELSE 0 END),
                 SUM(CASE WHEN FUNCTION('YEAR', m.dataRegistro) = :anoFim THEN 1 ELSE 0 END)
             )
             FROM Membro m
             WHERE m.igreja.idExterno = :idExternoIgreja
             """)
-    MembroKpiResponseDTO buscarKpisMembros(UUID idExternoIgreja, int anoInicio, int anoFim);
+    MembroKpiResponseDTO buscarKpisMembros(
+            @Param("idExternoIgreja") UUID idExternoIgreja,
+            @Param("anoInicio") int anoInicio,
+            @Param("anoFim") int anoFim
+    );
 
     @Query("""
-            SELECT new com.diacono.diacono.membro.model.dto.response.MembroDashEvolucaoDTO(
+            SELECT new com.diacono.diacono.applications.dtos.membro.MembroDashEvolucaoDTO(
                 m.dataRegistro,
                 COUNT(m.idInterno)
             )
@@ -110,7 +114,7 @@ public interface MembroJpaRepository extends JpaRepository<Membro, Long> {
     );
 
     @Query("""
-            SELECT new com.diacono.diacono.membro.model.dto.response.MembroDashFaixaEtariaDTO(
+            SELECT new com.diacono.diacono.applications.dtos.membro.MembroDashFaixaEtariaDTO(
                 SUM(CASE WHEN (:anoFim - YEAR(m.dataNascimento)) BETWEEN 0 AND 11 THEN 1 ELSE 0 END),
                 SUM(CASE WHEN (:anoFim - YEAR(m.dataNascimento)) BETWEEN 12 AND 17 THEN 1 ELSE 0 END),
                 SUM(CASE WHEN (:anoFim - YEAR(m.dataNascimento)) BETWEEN 18 AND 29 THEN 1 ELSE 0 END),
@@ -118,7 +122,7 @@ public interface MembroJpaRepository extends JpaRepository<Membro, Long> {
                 SUM(CASE WHEN (:anoFim - YEAR(m.dataNascimento)) >= 60 THEN 1 ELSE 0 END)
             )
             FROM Membro m
-                WHERE m.igreja.idExterno = :idExternoIgreja 
+                WHERE m.igreja.idExterno = :idExternoIgreja
             """)
     MembroDashFaixaEtariaDTO buscarMembrosPorFaixaEtaria(
             @Param("idExternoIgreja") UUID idExternoIgreja,
@@ -126,7 +130,7 @@ public interface MembroJpaRepository extends JpaRepository<Membro, Long> {
     );
 
     @Query("""
-            SELECT new com.diacono.diacono.membro.model.dto.response.MembroDashGeneroDTO(
+            SELECT new com.diacono.diacono.applications.dtos.membro.MembroDashGeneroDTO(
                 SUM(CASE WHEN m.generoMembro = 'MASCULINO' THEN 1 ELSE 0 END),
                 SUM(CASE WHEN m.generoMembro = 'FEMININO' THEN 1 ELSE 0 END)
             )

@@ -32,21 +32,29 @@ public interface MembroMinisterioJpaRepository extends JpaRepository<MembroMinis
             LOWER(m.nome) LIKE LOWER(:busca)
             OR LOWER(m.email) LIKE LOWER(:busca))
             """)
-    Page<MembroMinisterio> buscarPorMembroMinisterioComFiltro(Pageable pageable, UUID idMinisterio, @Param("busca") String texto, EnumStatusMembro status);
+    Page<MembroMinisterio> buscarPorMembroMinisterioComFiltro(
+            Pageable pageable,
+            @Param("idMinisterio") UUID idMinisterio,
+            @Param("busca") String texto,
+            @Param("status") EnumStatusMembro status
+    );
 
     @Query("""
             SELECT mm FROM MembroMinisterio mm
             JOIN mm.membro m
             WHERE mm.ministerio.idExterno = :idMinisterio
             """)
-    Page<MembroMinisterio> buscarPorMembroMinisterioSemFiltro(Pageable pageable, UUID idMinisterio);
+    Page<MembroMinisterio> buscarPorMembroMinisterioSemFiltro(
+            Pageable pageable,
+            @Param("idMinisterio") UUID idMinisterio
+    );
 
     int deleteByMembroIdExternoAndMinisterioIdExterno(UUID membroIdExterno, UUID ministerioIdExterno);
 
 
     @Query("""
             
-            SELECT new com.diacono.diacono.ministerio.model.dto.response.MinisterioSuperSimplificadoDTO(
+            SELECT new com.diacono.diacono.applications.dtos.ministerio.MinisterioSuperSimplificadoDTO(
                 ms.idExterno,
                 ms.nome
             )
@@ -55,17 +63,20 @@ public interface MembroMinisterioJpaRepository extends JpaRepository<MembroMinis
             JOIN mm.membro m
             WHERE m.idExterno = :idExternoMembro
             AND ms.igreja.idExterno = :idExternoIgreja
-            AND mm.cargoMembro = 'LIDER_MINISTERIO'
+            AND mm.cargoMembro = com.diacono.diacono.domain.enums.EnumCargoMembroMinisterio.LIDER_MINISTERIO
             
             """)
-    List<MinisterioSuperSimplificadoDTO> buscarMinisterioLider(UUID idExternoMembro, UUID idExternoIgreja);
+    List<MinisterioSuperSimplificadoDTO> buscarMinisterioLider(
+            @Param("idExternoMembro") UUID idExternoMembro,
+            @Param("idExternoIgreja") UUID idExternoIgreja
+    );
 
 
     //DASH
 
     @Query("""
             
-            SELECT new com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashEvolucaoDTO(
+            SELECT new com.diacono.diacono.applications.dtos.ministerio.MinisterioDashEvolucaoDTO(
                 COUNT(mb),
                 mb.dataRegistro
             )
@@ -78,11 +89,15 @@ public interface MembroMinisterioJpaRepository extends JpaRepository<MembroMinis
             ORDER BY mb.dataRegistro ASC
             
             """)
-    List<MinisterioDashEvolucaoDTO> buscarDashEvolucaoUmAno(int anoFim, UUID idMinisterio, UUID idIgreja);
+    List<MinisterioDashEvolucaoDTO> buscarDashEvolucaoUmAno(
+            @Param("anoFim") int anoFim,
+            @Param("idMinisterio") UUID idMinisterio,
+            @Param("idIgreja") UUID idIgreja
+    );
 
     @Query("""
             
-            SELECT new com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashEvolucaoDTO(
+            SELECT new com.diacono.diacono.applications.dtos.ministerio.MinisterioDashEvolucaoDTO(
                 COUNT(mb),
                 mb.dataRegistro
             )
@@ -95,11 +110,16 @@ public interface MembroMinisterioJpaRepository extends JpaRepository<MembroMinis
             ORDER BY mb.dataRegistro ASC
             
             """)
-    List<MinisterioDashEvolucaoDTO> buscarDashEvolucaoPeriodo(int anoInicio, int anoFim, UUID idMinisterio, UUID idIgreja);
+    List<MinisterioDashEvolucaoDTO> buscarDashEvolucaoPeriodo(
+            @Param("anoInicio") int anoInicio,
+            @Param("anoFim") int anoFim,
+            @Param("idMinisterio") UUID idMinisterio,
+            @Param("idIgreja") UUID idIgreja
+    );
 
     @Query("""
             
-            SELECT new com.diacono.diacono.membroministerio.model.dto.response.MinisterioDashQuantidadeMembrosDTO(
+            SELECT new com.diacono.diacono.applications.dtos.ministerio.MinisterioDashQuantidadeMembrosDTO(
                 m.nome,
                 COUNT(mb)
             )
@@ -110,6 +130,10 @@ public interface MembroMinisterioJpaRepository extends JpaRepository<MembroMinis
             GROUP BY m.nome       
             
             """)
-    List<MinisterioDashQuantidadeMembrosDTO> buscarQuantidadeMembros(int anoInicio, int anoFim, @Param("idIgreja") UUID igrejaId);
+    List<MinisterioDashQuantidadeMembrosDTO> buscarQuantidadeMembros(
+            @Param("anoInicio") int anoInicio,
+            @Param("anoFim") int anoFim,
+            @Param("idIgreja") UUID igrejaId
+    );
 
 }

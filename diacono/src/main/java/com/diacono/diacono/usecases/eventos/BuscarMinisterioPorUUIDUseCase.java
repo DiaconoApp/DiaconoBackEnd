@@ -3,11 +3,13 @@ package com.diacono.diacono.usecases.eventos;
 import com.diacono.diacono.domain.entity.Ministerio;
 import com.diacono.diacono.domain.repository.MinisteriosRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+@Service
 public class BuscarMinisterioPorUUIDUseCase {
 
     private final MinisteriosRepository ministeriosRepository;

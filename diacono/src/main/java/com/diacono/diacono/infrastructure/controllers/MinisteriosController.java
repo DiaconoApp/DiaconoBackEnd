@@ -67,14 +67,14 @@ public class MinisteriosController {
         boolean semBusca = (buscaGeral == null || buscaGeral.isBlank());
         boolean semStatus = (status == null);
 
-        Page pagina;
+        Page<MinisterioSimplificadoDTO> pagina;
 
         if (semBusca && semStatus) {
             pagina = buscarMinisteriosGovernoSemFiltroUseCase.execute(pageable);
             return ResponseEntity.status(HttpStatus.OK).body(pagina);
         }
 
-        pagina = buscarMinisteriosGovernoComFiltroUseCase.execute(pageable, buscaGeral, status);
+        pagina = buscarMinisteriosGovernoComFiltroUseCase.execute(pageable, buscaGeral == null ? "" : buscaGeral, status);
         return ResponseEntity.status(HttpStatus.OK).body(
                 pagina
         );

@@ -40,7 +40,7 @@ public interface MinisteriosJpaRepository extends JpaRepository<Ministerio, Long
 
     @Query("""
             
-            SELECT new com.diacono.diacono.ministerio.model.dto.response.MinisterioKpisResponseDTO(
+            SELECT new com.diacono.diacono.applications.dtos.ministerio.MinisterioKpisResponseDTO(
                 COUNT(m),
                 CASE WHEN COUNT(m) = 0 THEN 0 ELSE CAST(SUM(SIZE(m.membros)) AS double) / COUNT(m) END
             )

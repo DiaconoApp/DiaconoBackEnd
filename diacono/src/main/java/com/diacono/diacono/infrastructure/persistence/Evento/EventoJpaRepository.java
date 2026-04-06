@@ -63,22 +63,21 @@ public interface  EventoJpaRepository extends JpaRepository<Evento, Long> {
     //kpis
 
     @Query("""
-            
-            SELECT new com.diacono.diacono.evento.model.dto.response.EventoKpiDTO(
+            SELECT new com.diacono.diacono.applications.dtos.evento.EventoKpiDTO(
                 m.nome,
                 COUNT(e.idExterno)
             )
             FROM Evento e
             JOIN e.ministerios m
-            WHERE YEAR(e.dataHoraInicio) BETWEEN :anoInicio AND :anoFim
+            WHERE FUNCTION('YEAR', e.dataHoraInicio) BETWEEN :anoInicio AND :anoFim
             AND e.igreja.idExterno = :idIgreja
             GROUP BY m.nome
             ORDER BY COUNT(e.idExterno) DESC
             """)
-    List<EventoKpiDTO> buscarKpisEvento(int anoInicio, int anoFim, UUID idIgreja);
+    List<EventoKpiDTO> buscarKpisEvento(@Param("anoInicio") int anoInicio, @Param("anoFim") int anoFim, @Param("idIgreja") UUID idIgreja);
 
     @Query("""
-            SELECT new com.diacono.diacono.evento.model.dto.response.MinisterioEventoDashDTO(
+            SELECT new com.diacono.diacono.applications.dtos.ministerio.MinisterioEventoDashDTO(
                 min.nome,
                 COUNT(e)
             )

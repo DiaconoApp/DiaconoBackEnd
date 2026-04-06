@@ -7,9 +7,11 @@ import com.diacono.diacono.domain.repository.MembroMinisterioRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+@Service
 public class BuscarMembroMinisterioLiderMinisterioSemFiltroUseCase {
 
     private final MembroMinisterioRepository membroMinisterioRepository;

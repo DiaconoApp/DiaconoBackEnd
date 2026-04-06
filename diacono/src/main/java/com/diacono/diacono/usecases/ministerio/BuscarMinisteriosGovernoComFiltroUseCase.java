@@ -9,7 +9,10 @@ import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.util.JwtUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Service
 public class BuscarMinisteriosGovernoComFiltroUseCase {
 
     private final MinisteriosRepository ministeriosRepository;
@@ -22,6 +25,7 @@ public class BuscarMinisteriosGovernoComFiltroUseCase {
         this.jwtUtils = jwtUtils;
     }
 
+    @Transactional(readOnly = true)
     public Page<MinisterioSimplificadoDTO> execute(Pageable pageable, String buscaGeral, EnumStatusMinisterio status) {
 
         String stringBusca = "%" + buscaGeral.trim().toUpperCase() + "%";
@@ -31,10 +35,6 @@ public class BuscarMinisteriosGovernoComFiltroUseCase {
             throw new ObjectNotFoundException("Nenhum ministério encontrado");
         }
 
-        //mapper::paraMinisterioSimplificadoDTO == (m -> mapper.paraMinisterioSimplificadoDTO(m))
-        Page<MinisterioSimplificadoDTO> responses = ministeriosPage
-                .map(mapper::paraMinisterioSimplificadoDTO);
-
-        return responses;
+        return ministeriosPage.map(mapper::paraMinisterioSimplificadoDTO);
     }
 }

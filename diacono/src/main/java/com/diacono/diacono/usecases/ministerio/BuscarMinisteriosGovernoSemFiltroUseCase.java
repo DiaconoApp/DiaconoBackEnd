@@ -3,7 +3,6 @@ package com.diacono.diacono.usecases.ministerio;
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioSimplificadoDTO;
 import com.diacono.diacono.applications.mappers.ministerio.MinisterioMapper;
 import com.diacono.diacono.domain.entity.Ministerio;
-import com.diacono.diacono.domain.enums.EnumStatusMinisterio;
 import com.diacono.diacono.domain.repository.MinisteriosRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.util.JwtUtils;
@@ -29,6 +28,7 @@ public class BuscarMinisteriosGovernoSemFiltroUseCase {
         this.jwtUtils = jwtUtils;
     }
 
+    @Transactional(readOnly = true)
     public Page<MinisterioSimplificadoDTO> execute(Pageable pageable) {
 
         Page<Ministerio> ministeriosPage = ministeriosRepository.findByIgrejaIdExterno(jwtUtils.getIgrejaId(), pageable);
@@ -37,7 +37,6 @@ public class BuscarMinisteriosGovernoSemFiltroUseCase {
             throw new ObjectNotFoundException("Nenhum ministério encontrado");
         }
 
-        //mapper::paraMinisterioSimplificadoDTO == (m -> mapper.paraMinisterioSimplificadoDTO(m))
 
         return ministeriosPage.map(ministerioMapper::paraMinisterioSimplificadoDTO);
     }
