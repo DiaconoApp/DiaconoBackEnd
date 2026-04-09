@@ -1,6 +1,6 @@
 package com.diacono.diacono.auth.model;
 
-import com.diacono.diacono.membro.model.entity.Membro;
+import com.diacono.diacono.domain.entity.Membro;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;

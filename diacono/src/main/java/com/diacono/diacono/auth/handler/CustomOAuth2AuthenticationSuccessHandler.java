@@ -1,9 +1,9 @@
 package com.diacono.diacono.auth.handler;
 
-import com.diacono.diacono.auth.service.TokenService;
-import com.diacono.diacono.auth.model.dto.response.LoginResponseDTO;
-import com.diacono.diacono.membro.model.entity.Membro;
-import com.diacono.diacono.membro.service.MembroService;
+import com.diacono.diacono.usecases.GenerateTokenUseCase;
+import com.diacono.diacono.applications.dtos.login.LoginResponseDTO;
+import com.diacono.diacono.domain.entity.Membro;
+import com.diacono.diacono.usecases.membro.BuscarPorEmaiUseCase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -18,18 +18,18 @@ import java.io.IOException;
 @Component
 public class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-    private final TokenService tokenService;
-    private final MembroService membroService;
+    private final GenerateTokenUseCase generateTokenUseCase;
+    private final BuscarPorEmaiUseCase buscarPorEmaiUseCase;
     private final ObjectMapper objectMapper;
 
 
     public CustomOAuth2AuthenticationSuccessHandler(
-            TokenService tokenService,
-            MembroService membroService,
+            GenerateTokenUseCase generateTokenUseCase,
+            BuscarPorEmaiUseCase buscarPorEmaiUseCase,
             ObjectMapper objectMapper
     ) {
-        this.tokenService = tokenService;
-        this.membroService = membroService;
+        this.generateTokenUseCase = generateTokenUseCase;
+        this.buscarPorEmaiUseCase = buscarPorEmaiUseCase;
         this.objectMapper = objectMapper;
     }
 
@@ -43,7 +43,7 @@ public class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationS
         OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
         String email = oauth2User.getAttribute("email");
 
-        Membro membro = membroService.buscarPorEmail(email);
+        Membro membro = buscarPorEmaiUseCase.execute(email);
 
         if (membro == null) {
             System.out.println("Erro: Membro não encontrado para o email: " + email);
@@ -52,8 +52,8 @@ public class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationS
             return;
         }
 
-        String jwtToken = tokenService.generateToken(membro);
-        long expiresIn = tokenService.getExpiresIn();
+        String jwtToken = generateTokenUseCase.execute(membro);
+        long expiresIn = generateTokenUseCase.getExpiresIn();
 
         LoginResponseDTO responseDto = new LoginResponseDTO(jwtToken, expiresIn);
 
