@@ -1,7 +1,7 @@
 package com.diacono.diacono.global.error;
 
-import com.diacono.diacono.evento.exceptions.DateInvalidException;
-import com.diacono.diacono.evento.exceptions.TimeInvalidException;
+import com.diacono.diacono.infrastructure.exceptions.DateInvalidException;
+import com.diacono.diacono.infrastructure.exceptions.TimeInvalidException;
 import com.diacono.diacono.global.error.exceptions.*;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.springframework.http.HttpHeaders;

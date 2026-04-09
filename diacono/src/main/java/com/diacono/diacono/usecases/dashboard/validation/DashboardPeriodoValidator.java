@@ -1,0 +1,19 @@
+package com.diacono.diacono.usecases.dashboard.validation;
+
+import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
+import org.springframework.stereotype.Service;
+
+@Service
+public class DashboardPeriodoValidator {
+
+    public void validarAnoInicioEFim(int anoInicio, int anoFim) {
+
+        if (anoInicio > anoFim) {
+            throw new FieldInvalidException("Ano de início não pode ser maior que ano de fim.");
+        }
+
+        if (anoInicio <= 0 || anoFim <= 0) {
+            throw new FieldInvalidException("Ano de início e ano de fim devem ser informados.");
+        }
+    }
+}
