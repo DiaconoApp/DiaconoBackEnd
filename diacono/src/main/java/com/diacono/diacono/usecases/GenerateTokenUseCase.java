@@ -42,4 +42,8 @@ public class GenerateTokenUseCase {
 
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
+
+    public long getExpiresIn() {
+        return expiresIn;
+    }
 }
