@@ -1,7 +1,8 @@
 package com.diacono.diacono.applications.dtos.googleauth;
 
-public record GoogleAuthRequestDTO(
-        String idToken,
+public record GoogleRefreshTokenResponseDTO(
+        String email,
+        String nome,
         String refreshToken
 ) {
 }

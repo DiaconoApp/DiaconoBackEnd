@@ -1,8 +1,8 @@
-package com.diacono.diacono.domain.auth;
+package com.diacono.diacono.applications.dtos.googleauth;
 
 import java.util.List;
 
-public record GoogleIdTokenClaims(
+public record GoogleIdTokenDTO(
         List<String> audience,
         String email,
         Boolean emailVerified
