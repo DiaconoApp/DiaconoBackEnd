@@ -21,7 +21,6 @@ public class GoogleAuthController {
 
     @PostMapping
     public ResponseEntity<LoginResponseDTO> autenticarComGoogle(@RequestBody GoogleAuthRequestDTO googleAuthRequestDTO) {
-        System.out.println("Recebido ID Token: " + googleAuthRequestDTO.idToken());
-        return ResponseEntity.ok(LoginGoogleAuthService.autenticar(googleAuthRequestDTO));
+        return ResponseEntity.ok(LoginGoogleAuthService.execute(googleAuthRequestDTO));
     }
 }
