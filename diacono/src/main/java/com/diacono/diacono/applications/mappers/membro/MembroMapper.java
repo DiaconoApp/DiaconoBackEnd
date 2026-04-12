@@ -17,7 +17,7 @@ import java.util.List;
         uses = {EnderecoMembroMapper.class, IgrejaMapper.class, MinisterioMapper.class, MembroMinisterioMapper.class})
 public interface MembroMapper {
 
-
+    @Mapping(source = "cargoMembro", target = "cargo")
     MembroResponseDTO paraMembroResponseDTO(Membro membro);
 
     MembroSimplificadoDTO paraMembroSimplificadoDTO(Membro membro);
