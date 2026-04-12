@@ -66,7 +66,6 @@ public class DiaconoApplication {
                     .generoMembro(EnumGeneroMembro.MASCULINO)
                     .build();
 
-
             repository.save(governo);
 
             System.out.println("Entidade criada e salva com sucesso: " + governo.getNome());
