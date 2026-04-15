@@ -1,6 +1,6 @@
 package com.diacono.diacono.infrastructure.controllers;
 
-import com.diacono.diacono.applications.dtos.escalas.EscalaEventoDTO;
+import com.diacono.diacono.applications.dtos.escalasevento.EscalaEventoDTO;
 import com.diacono.diacono.usecases.escalasevento.BuscarEscalaEventoPorMesAnoUseCase;
 import com.diacono.diacono.global.util.JwtUtils;
 import org.springframework.http.HttpStatus;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/eventos")
+@RequestMapping("/api/v1/escalas-evento")
 public class EscalaEventoController {
 
     private final BuscarEscalaEventoPorMesAnoUseCase buscarEscalaEventoPorMesAnoUseCase;
@@ -28,7 +28,7 @@ public class EscalaEventoController {
         this.jwtUtils = jwtUtils;
     }
 
-    @GetMapping("/escala-evento")
+    @GetMapping
     public ResponseEntity<List<EscalaEventoDTO>> buscarEscalaEventoPorMesAno(
             @RequestParam int mes,
             @RequestParam int ano

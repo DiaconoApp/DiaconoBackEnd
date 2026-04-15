@@ -1,6 +1,6 @@
 package com.diacono.diacono.usecases.escalasevento;
 
-import com.diacono.diacono.applications.dtos.escalas.EscalaEventoDTO;
+import com.diacono.diacono.applications.dtos.escalasevento.EscalaEventoDTO;
 import com.diacono.diacono.domain.repository.EscalaEventoRepository;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import org.springframework.stereotype.Service;

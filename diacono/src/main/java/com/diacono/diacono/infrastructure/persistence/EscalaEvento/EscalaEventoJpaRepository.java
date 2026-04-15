@@ -20,13 +20,14 @@ public interface EscalaEventoJpaRepository extends JpaRepository<EscalaEvento, L
                 e.dataHoraFim,
                 e.dataHoraInicio,
                 cast(count(ee) as integer),
-                cast(sum(case when ee.ministerioConfirmado = true then 1 else 0 end) as integer)
+                cast(sum(case when ee.ministerioConfirmado = true then 1 else 0 end) as integer),
+                e.status
             )
             FROM EscalaEvento ee
             JOIN ee.evento e
             WHERE (e.dataHoraInicio BETWEEN :dataInicio AND :dataFim)
               AND (e.igreja.idExterno = :igrejaFk)
-            GROUP BY e.idExterno, e.nome, e.dataHoraFim, e.dataHoraInicio
+            GROUP BY e.idExterno, e.nome, e.dataHoraFim, e.dataHoraInicio, e.status
             ORDER BY e.dataHoraInicio ASC
             """)
     List<EscalaEventoQueryResult> findEscalaEventoByPeriodo(@Param("igrejaFk") UUID igrejaFk, @Param("dataInicio") LocalDateTime dataInicio, @Param("dataFim") LocalDateTime dataFim);

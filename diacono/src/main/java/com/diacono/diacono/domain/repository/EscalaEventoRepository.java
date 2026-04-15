@@ -1,6 +1,6 @@
 package com.diacono.diacono.domain.repository;
 
-import com.diacono.diacono.applications.dtos.escalas.EscalaEventoDTO;
+import com.diacono.diacono.applications.dtos.escalasevento.EscalaEventoDTO;
 
 import java.time.LocalDateTime;
 import java.util.List;

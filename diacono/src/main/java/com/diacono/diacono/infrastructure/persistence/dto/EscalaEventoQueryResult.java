@@ -1,5 +1,7 @@
 package com.diacono.diacono.infrastructure.persistence.dto;
 
+import com.diacono.diacono.domain.enums.EnumStatusEvento;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -9,7 +11,8 @@ public record EscalaEventoQueryResult(
         LocalDateTime dataHoraFim,
         LocalDateTime dataHoraInicio,
         int ministeriosEscalados,
-        int ministeriosEscaladosConfirmados
+        int ministeriosEscaladosConfirmados,
+        EnumStatusEvento status
 ) {
 }
 

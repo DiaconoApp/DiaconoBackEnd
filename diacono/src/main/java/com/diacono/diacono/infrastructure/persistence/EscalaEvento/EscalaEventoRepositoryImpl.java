@@ -1,6 +1,6 @@
 package com.diacono.diacono.infrastructure.persistence.EscalaEvento;
 
-import com.diacono.diacono.applications.dtos.escalas.EscalaEventoDTO;
+import com.diacono.diacono.applications.dtos.escalasevento.EscalaEventoDTO;
 import com.diacono.diacono.domain.repository.EscalaEventoRepository;
 import com.diacono.diacono.infrastructure.persistence.dto.EscalaEventoQueryResult;
 import org.springframework.stereotype.Repository;
@@ -28,7 +28,8 @@ public class EscalaEventoRepositoryImpl implements EscalaEventoRepository {
                         result.dataHoraFim(),
                         result.dataHoraInicio(),
                         result.ministeriosEscalados(),
-                        result.ministeriosEscaladosConfirmados()
+                        result.ministeriosEscaladosConfirmados(),
+                        result.status()
                 ))
                 .toList();
     }

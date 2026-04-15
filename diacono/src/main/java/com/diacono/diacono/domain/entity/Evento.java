@@ -1,5 +1,6 @@
 package com.diacono.diacono.domain.entity;
 
+import com.diacono.diacono.domain.enums.EnumStatusEvento;
 import com.diacono.diacono.global.util.IdEntityUtils;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,6 +33,7 @@ public class Evento extends IdEntityUtils {
     @JoinColumn(name = "fk_endereco", unique = false, nullable = true)
     private EnderecoEvento enderecoEvento;
 
+    @Builder.Default
     @OneToMany(mappedBy = "evento", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<EscalaEvento> escalaEvento = new HashSet<>();
 
@@ -51,6 +53,9 @@ public class Evento extends IdEntityUtils {
     @Column(name = "data_hora_fim")
     private LocalDateTime dataHoraFim;
     private BigDecimal custo;
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    private EnumStatusEvento status = EnumStatusEvento.ESCALADO;
 
     public void setIgreja(Igreja igreja) {
         this.igreja = igreja;
@@ -94,5 +99,9 @@ public class Evento extends IdEntityUtils {
 
     public void setCusto(BigDecimal custo) {
         this.custo = custo;
+    }
+
+    public void setStatus(EnumStatusEvento status) {
+        this.status = status == null ? EnumStatusEvento.ESCALADO : status;
     }
 }

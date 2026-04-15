@@ -2,6 +2,7 @@ package com.diacono.diacono.domain.entity;
 
 import com.diacono.diacono.global.util.IdEntityUtils;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,6 +26,7 @@ public class EscalaEvento extends IdEntityUtils {
     @JoinColumn(name = "fk_ministerio", nullable = false)
     private Ministerio ministerio;
 
+    @Builder.Default
     private Boolean ministerioConfirmado = true;
 }
 
