@@ -273,110 +273,110 @@ INSERT INTO evento (
 -- 6. VINCULO EVENTO x MINISTERIO (CORRIGIDO: Inclusão das colunas ID_EXTERNO e IS_CONFIRMADO)
 -- ==================================================================================
 
-INSERT INTO evento_ministerio (fk_evento, fk_ministerio) VALUES
-(1, 1),  -- Culto Família / Louvor
-(1, 2),  -- Culto Família / Kids
-(1, 3),  -- Culto Família / Recepção
-(1, 4),  -- Culto Família / Multimídia
-(1, 5),  -- Culto Família / Intercessão
-(2, 1),  -- Sábado Jovem / Louvor
-(2, 3),  -- Sábado Jovem / Recepção
-(2, 4),  -- Sábado Jovem / Multimídia
-(3, 2),  -- Tarde Alegria / Kids
-(4, 1),  -- Acampamento / Louvor
-(4, 2),  -- Acampamento / Kids
-(4, 3),  -- Acampamento / Recepção
-(4, 4),  -- Acampamento / Multimídia
-(4, 5),  -- Acampamento / Intercessão
-(5, 4),  -- Workshop / Multimídia
-(6, 1),  -- Ide Praças / Louvor
-(6, 5),  -- Ide Praças / Intercessão
-(7, 1),  -- Vigília / Louvor
-(7, 5),  -- Vigília / Intercessão
-(8, 2),  -- Café Boas Vindas / Kids
-(8, 3), -- Café Boas Vindas / Recepção
+INSERT INTO escala_evento (id_externo, fk_evento, fk_ministerio, ministerio_confirmado) VALUES
+(RANDOM_UUID(), 1, 1, 1),  -- Culto Família / Louvor
+(RANDOM_UUID(), 1, 2, 1),  -- Culto Família / Kids
+(RANDOM_UUID(), 1, 3, 1),  -- Culto Família / Recepção
+(RANDOM_UUID(), 1, 4, 1),  -- Culto Família / Multimídia
+(RANDOM_UUID(), 1, 5, 1),  -- Culto Família / Intercessão
+(RANDOM_UUID(), 2, 1, 1),  -- Sábado Jovem / Louvor
+(RANDOM_UUID(), 2, 3, 1),  -- Sábado Jovem / Recepção
+(RANDOM_UUID(), 2, 4, 1),  -- Sábado Jovem / Multimídia
+(RANDOM_UUID(), 3, 2, 1),  -- Tarde Alegria / Kids
+(RANDOM_UUID(), 4, 1, 1),  -- Acampamento / Louvor
+(RANDOM_UUID(), 4, 2, 1),  -- Acampamento / Kids
+(RANDOM_UUID(), 4, 3, 1),  -- Acampamento / Recepção
+(RANDOM_UUID(), 4, 4, 1),  -- Acampamento / Multimídia
+(RANDOM_UUID(), 4, 5, 1),  -- Acampamento / Intercessão
+(RANDOM_UUID(), 5, 4, 1),  -- Workshop / Multimídia
+(RANDOM_UUID(), 6, 1, 1),  -- Ide Praças / Louvor
+(RANDOM_UUID(), 6, 5, 1),  -- Ide Praças / Intercessão
+(RANDOM_UUID(), 7, 1, 1),  -- Vigília / Louvor
+(RANDOM_UUID(), 7, 5, 1),  -- Vigília / Intercessão
+(RANDOM_UUID(), 8, 2, 1),  -- Café Boas Vindas / Kids
+(RANDOM_UUID(), 8, 3, 1), -- Café Boas Vindas / Recepção
 -- Retiro de Verão: Profundidade (fk_evento 9) - Grande evento, envolve todos
-(9, 1),
-(9, 2),
-(9, 3),
-(9, 4),
-(9, 5),
+(RANDOM_UUID(), 9, 1, 1),
+(RANDOM_UUID(), 9, 2, 1),
+(RANDOM_UUID(), 9, 3, 1),
+(RANDOM_UUID(), 9, 4, 1),
+(RANDOM_UUID(), 9, 5, 1),
 
 -- Reunião dos Diáconos (fk_evento 10) - Não requer muitos ministérios de suporte
-(10, 5), -- Intercessão pela reunião
+(RANDOM_UUID(), 10, 5, 1), -- Intercessão pela reunião
 
 -- Culto de Missões (fk_evento 11) - Culto regular, foco em Louvor/Recepção/Multimídia
-(11, 1),
-(11, 3),
-(11, 4),
+(RANDOM_UUID(), 11, 1, 1),
+(RANDOM_UUID(), 11, 3, 1),
+(RANDOM_UUID(), 11, 4, 1),
 
 -- Noite do Cinema Kids (fk_evento 12) - Foco em Kids e Multimídia
-(12, 2),
-(12, 4),
+(RANDOM_UUID(), 12, 2, 1),
+(RANDOM_UUID(), 12, 4, 1),
 
 -- Treinamento para Novos Membros (fk_evento 13) - Suporte básico
-(13, 3),
-(13, 4),
+(RANDOM_UUID(), 13, 3, 1),
+(RANDOM_UUID(), 13, 4, 1),
 
 -- Jantar de Casais: Renovação (fk_evento 14) - Requer Recepção e Louvor para ambiente
-(14, 1),
-(14, 3),
+(RANDOM_UUID(), 14, 1, 1),
+(RANDOM_UUID(), 14, 3, 1),
 
 -- Culto Especial de Páscoa (fk_evento 15) - Grande evento, como o Culto da Família
-(15, 1),
-(15, 2),
-(15, 3),
-(15, 4),
+(RANDOM_UUID(), 15, 1, 1),
+(RANDOM_UUID(), 15, 2, 1),
+(RANDOM_UUID(), 15, 3, 1),
+(RANDOM_UUID(), 15, 4, 1),
 
 -- Estudo Bíblico Semanal (fk_evento 16) - Suporte mínimo
-(16, 4),
-(16, 5),
+(RANDOM_UUID(), 16, 4, 1),
+(RANDOM_UUID(), 16, 5, 1),
 
 -- Chá de Oração das Mulheres (fk_evento 17) - Foco em Intercessão e Recepção
-(17, 3),
-(17, 5),
+(RANDOM_UUID(), 17, 3, 1),
+(RANDOM_UUID(), 17, 5, 1),
 
 -- Reunião de Líderes de Célula (fk_evento 18) - Suporte básico
-(18, 4),
+(RANDOM_UUID(), 18, 4, 1),
 
 -- Conferência de Louvor e Adoração (fk_evento 19) - Foco total em Louvor e Multimídia
-(19, 1),
-(19, 3),
-(19, 4),
+(RANDOM_UUID(), 19, 1, 1),
+(RANDOM_UUID(), 19, 3, 1),
+(RANDOM_UUID(), 19, 4, 1),
 
 -- Dia do Amigo Kids (fk_evento 20) - Foco em Kids e Recepção
-(20, 2),
-(20, 3),
+(RANDOM_UUID(), 20, 2, 1),
+(RANDOM_UUID(), 20, 3, 1),
 
 -- Semana de Santa Ceia (fk_evento 21) - Culto principal, envolve todos
-(21, 1),
-(21, 3),
-(21, 4),
-(21, 5),
+(RANDOM_UUID(), 21, 1, 1),
+(RANDOM_UUID(), 21, 3, 1),
+(RANDOM_UUID(), 21, 4, 1),
+(RANDOM_UUID(), 21, 5, 1),
 
 -- Feira Vocacional Cristã (fk_evento 22) - Grande evento aberto, foca em Recepção e Multimídia
-(22, 3),
-(22, 4),
+(RANDOM_UUID(), 22, 3, 1),
+(RANDOM_UUID(), 22, 4, 1),
 
 -- Atualização de Software e Streaming (fk_evento 23) - Foco exclusivo em Multimídia
-(23, 4),
+(RANDOM_UUID(), 23, 4, 1),
 
 -- Culto de Ação de Graças (fk_evento 24) - Culto principal
-(24, 1),
-(24, 3),
-(24, 4),
+(RANDOM_UUID(), 24, 1, 1),
+(RANDOM_UUID(), 24, 3, 1),
+(RANDOM_UUID(), 24, 4, 1),
 
 -- Campanha de Arrecadação de Roupas (fk_evento 25) - Ação social, foca em Recepção/Acolhimento
-(25, 3),
+(RANDOM_UUID(), 25, 3, 1),
 
 -- Festa do Dia das Crianças (fk_evento 26) - Foco em Kids e Recepção
-(26, 2),
-(26, 3),
+(RANDOM_UUID(), 26, 2, 1),
+(RANDOM_UUID(), 26, 3, 1),
 
 -- Treinamento de Acolhimento (fk_evento 27) - Foco em Recepção
-(27, 3),
+(RANDOM_UUID(), 27, 3, 1),
 
 -- Ceia de Natal Comunitária (fk_evento 28) - Grande evento de comunhão
-(28, 1),
-(28, 3),
-(28, 4);
+(RANDOM_UUID(), 28, 1, 1),
+(RANDOM_UUID(), 28, 3, 1),
+(RANDOM_UUID(), 28, 4, 1);

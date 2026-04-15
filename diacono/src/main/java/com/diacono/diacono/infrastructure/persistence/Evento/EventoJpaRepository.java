@@ -19,7 +19,7 @@ import java.util.UUID;
 public interface  EventoJpaRepository extends JpaRepository<Evento, Long> {
 
     @Query("""
-            SELECT e FROM Evento e 
+            SELECT e FROM Evento e
             WHERE (e.dataHoraInicio BETWEEN :dataInicio AND :dataFim) AND (e.igreja.idExterno = :igrejaFk)
             ORDER BY e.dataHoraInicio ASC
             """)
@@ -32,7 +32,7 @@ public interface  EventoJpaRepository extends JpaRepository<Evento, Long> {
     long deleteByIdExterno(UUID idExterno);
 
     @Query("""
-            SELECT e FROM Evento e 
+            SELECT e FROM Evento e
             WHERE (e.recorrencia = :recorrencia) AND (e.dataHoraInicio >= :dataInicio) AND  (e.igreja.idExterno = :igrejaFk)
             ORDER BY e.dataHoraInicio ASC
             """)
@@ -68,7 +68,8 @@ public interface  EventoJpaRepository extends JpaRepository<Evento, Long> {
                 COUNT(e.idExterno)
             )
             FROM Evento e
-            JOIN e.ministerios m
+            JOIN e.escalaEvento escala
+            JOIN escala.ministerio m
             WHERE FUNCTION('YEAR', e.dataHoraInicio) BETWEEN :anoInicio AND :anoFim
             AND e.igreja.idExterno = :idIgreja
             GROUP BY m.nome
@@ -81,11 +82,12 @@ public interface  EventoJpaRepository extends JpaRepository<Evento, Long> {
                 min.nome,
                 COUNT(e)
             )
-            FROM Evento e 
-            JOIN e.ministerios min 
+            FROM Evento e
+            JOIN e.escalaEvento escala
+            JOIN escala.ministerio min
             WHERE e.igreja.idExterno = :idIgreja  
             AND FUNCTION('YEAR', e.dataHoraInicio) BETWEEN :anoInicio and :anoFim
-            GROUP BY min.nome    
+            GROUP BY min.nome
             ORDER BY COUNT(e) DESC
             """)
     List<MinisterioEventoDashDTO> contarEventosPorMinisterioNoPeriodo(@Param("anoInicio") int anoInicio, @Param("anoFim") int anoFim, @Param("idIgreja") UUID idIgreja);

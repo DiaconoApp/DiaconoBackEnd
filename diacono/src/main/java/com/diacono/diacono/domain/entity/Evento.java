@@ -7,6 +7,7 @@ import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -31,13 +32,8 @@ public class Evento extends IdEntityUtils {
     @JoinColumn(name = "fk_endereco", unique = false, nullable = true)
     private EnderecoEvento enderecoEvento;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "evento_ministerio",
-            joinColumns = @JoinColumn(name = "fk_evento"),
-            inverseJoinColumns = @JoinColumn(name = "fk_ministerio")
-    )
-    private Set<Ministerio> ministerios;
+    @OneToMany(mappedBy = "evento", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<EscalaEvento> escalaEvento = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(
@@ -68,8 +64,8 @@ public class Evento extends IdEntityUtils {
         this.enderecoEvento = enderecoEvento;
     }
 
-    public void setMinisterios(Set<Ministerio> ministerios) {
-        this.ministerios = ministerios;
+    public void setEscalaEvento(Set<EscalaEvento> escalasEvento) {
+        this.escalaEvento = escalasEvento;
     }
 
     public void setRecorrencia(Recorrencia recorrencia) {
