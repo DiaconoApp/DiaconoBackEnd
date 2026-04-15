@@ -1,11 +1,12 @@
 package com.diacono.diacono.domain.repository;
 
 import com.diacono.diacono.applications.dtos.escalasevento.EscalaEventoDTO;
+import com.diacono.diacono.domain.enums.EnumStatusEvento;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 public interface EscalaEventoRepository {
-    List<EscalaEventoDTO> findEscalaEventoByPeriodo(UUID idIgreja, LocalDateTime dataHoraInicio, LocalDateTime dataHoraFim);
+    List<EscalaEventoDTO> findEscalaEventoByPeriodo(UUID idIgreja, LocalDateTime dataHoraInicio, LocalDateTime dataHoraFim, EnumStatusEvento status, UUID ministerioId, String nomeEvento);
 }

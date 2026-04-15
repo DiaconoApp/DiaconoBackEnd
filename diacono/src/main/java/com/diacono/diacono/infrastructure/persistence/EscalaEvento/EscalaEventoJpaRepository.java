@@ -1,6 +1,7 @@
 package com.diacono.diacono.infrastructure.persistence.EscalaEvento;
 
 import com.diacono.diacono.domain.entity.EscalaEvento;
+import com.diacono.diacono.domain.enums.EnumStatusEvento;
 import com.diacono.diacono.infrastructure.persistence.dto.EscalaEventoQueryResult;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -27,8 +28,16 @@ public interface EscalaEventoJpaRepository extends JpaRepository<EscalaEvento, L
             JOIN ee.evento e
             WHERE (e.dataHoraInicio BETWEEN :dataInicio AND :dataFim)
               AND (e.igreja.idExterno = :igrejaFk)
+              AND (:status IS NULL OR e.status = :status)
+              AND (:ministerioId IS NULL OR ee.ministerio.idExterno = :ministerioId)
+              AND (:nomeEvento IS NULL OR e.nome LIKE CONCAT('%', :nomeEvento, '%'))
             GROUP BY e.idExterno, e.nome, e.dataHoraFim, e.dataHoraInicio, e.status
             ORDER BY e.dataHoraInicio ASC
             """)
-    List<EscalaEventoQueryResult> findEscalaEventoByPeriodo(@Param("igrejaFk") UUID igrejaFk, @Param("dataInicio") LocalDateTime dataInicio, @Param("dataFim") LocalDateTime dataFim);
+    List<EscalaEventoQueryResult> findEscalaEventoByPeriodo(@Param("igrejaFk") UUID igrejaFk,
+                                                             @Param("dataInicio") LocalDateTime dataInicio,
+                                                             @Param("dataFim") LocalDateTime dataFim,
+                                                             @Param("status") EnumStatusEvento status,
+                                                             @Param("ministerioId") UUID ministerioId,
+                                                             @Param("nomeEvento") String nomeEvento);
 }

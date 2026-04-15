@@ -1,8 +1,9 @@
 package com.diacono.diacono.infrastructure.controllers;
 
 import com.diacono.diacono.applications.dtos.escalasevento.EscalaEventoDTO;
-import com.diacono.diacono.usecases.escalasevento.BuscarEscalaEventoPorMesAnoUseCase;
+import com.diacono.diacono.domain.enums.EnumStatusEvento;
 import com.diacono.diacono.global.util.JwtUtils;
+import com.diacono.diacono.usecases.escalasevento.BuscarEscalaEventoPorMesAnoUseCase;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,12 +32,15 @@ public class EscalaEventoController {
     @GetMapping
     public ResponseEntity<List<EscalaEventoDTO>> buscarEscalaEventoPorMesAno(
             @RequestParam int mes,
-            @RequestParam int ano
+            @RequestParam int ano,
+            @RequestParam(required = false) EnumStatusEvento status,
+            @RequestParam(required = false) UUID ministerioId,
+            @RequestParam(required = false) String nomeEvento
     ){
         UUID idIgreja = jwtUtils.getIgrejaId();
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(buscarEscalaEventoPorMesAnoUseCase.execute(idIgreja, mes, ano));
+                .body(buscarEscalaEventoPorMesAnoUseCase.execute(idIgreja, mes, ano, status, ministerioId, nomeEvento));
     }
 }

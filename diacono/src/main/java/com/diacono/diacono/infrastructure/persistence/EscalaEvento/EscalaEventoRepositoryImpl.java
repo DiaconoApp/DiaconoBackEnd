@@ -1,6 +1,7 @@
 package com.diacono.diacono.infrastructure.persistence.EscalaEvento;
 
 import com.diacono.diacono.applications.dtos.escalasevento.EscalaEventoDTO;
+import com.diacono.diacono.domain.enums.EnumStatusEvento;
 import com.diacono.diacono.domain.repository.EscalaEventoRepository;
 import com.diacono.diacono.infrastructure.persistence.dto.EscalaEventoQueryResult;
 import org.springframework.stereotype.Repository;
@@ -18,8 +19,8 @@ public class EscalaEventoRepositoryImpl implements EscalaEventoRepository {
     }
 
     @Override
-    public List<EscalaEventoDTO> findEscalaEventoByPeriodo(UUID idIgreja, LocalDateTime dataHoraInicio, LocalDateTime dataHoraFim) {
-        List<EscalaEventoQueryResult> queryResults = jpaRepository.findEscalaEventoByPeriodo(idIgreja, dataHoraInicio, dataHoraFim);
+    public List<EscalaEventoDTO> findEscalaEventoByPeriodo(UUID idIgreja, LocalDateTime dataHoraInicio, LocalDateTime dataHoraFim, EnumStatusEvento status, UUID ministerioId, String nomeEvento) {
+        List<EscalaEventoQueryResult> queryResults = jpaRepository.findEscalaEventoByPeriodo(idIgreja, dataHoraInicio, dataHoraFim, status, ministerioId, nomeEvento);
 
         return queryResults.stream()
                 .map(result ->  new EscalaEventoDTO(
