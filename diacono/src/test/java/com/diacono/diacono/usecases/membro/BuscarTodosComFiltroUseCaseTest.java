@@ -5,6 +5,7 @@ import com.diacono.diacono.applications.mappers.membro.MembroMapper;
 import com.diacono.diacono.domain.entity.Membro;
 import com.diacono.diacono.domain.entity.MembroMinisterio;
 import com.diacono.diacono.domain.entity.Ministerio;
+import com.diacono.diacono.domain.enums.EnumCargoMembro;
 import com.diacono.diacono.domain.enums.EnumStatusMembro;
 import com.diacono.diacono.domain.repository.MembroRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
@@ -70,7 +71,8 @@ class BuscarTodosComFiltroUseCaseTest {
 				"11999999999",
 				LocalDate.of(2000, 1, 1),
 				null,
-				EnumStatusMembro.ATIVO
+				EnumStatusMembro.ATIVO,
+                EnumCargoMembro.MEMBRO
 		);
 
 		when(jwtUtils.getIgrejaId()).thenReturn(idIgreja);

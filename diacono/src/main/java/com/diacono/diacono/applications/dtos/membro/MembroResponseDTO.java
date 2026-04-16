@@ -1,5 +1,6 @@
 package com.diacono.diacono.applications.dtos.membro;
 
+import com.diacono.diacono.domain.enums.EnumCargoMembro;
 import com.diacono.diacono.domain.enums.EnumStatusMembro;
 
 import java.time.LocalDate;
@@ -13,5 +14,6 @@ public record MembroResponseDTO(
         String celular,
         LocalDate dataNascimento,
         Set<MembroMinisterioDTO> ministerios,
-        EnumStatusMembro status
+        EnumStatusMembro status,
+        EnumCargoMembro cargo
         ) {}

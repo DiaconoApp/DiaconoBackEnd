@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -65,10 +66,9 @@ public class CriarMembroUseCase {
             throw new ObjectSaveErrorException("Para cadastrar um líder de ministério, é necessário associar um ministério ao membro.");
         }
 
-        Membro membroExistente = membroRepository.findByEmailOrCpf(membroDTO.email(), membroDTO.cpf())
-                .orElseThrow(() -> new ObjectNotFoundException("Membro não encontrado"));
+        Optional<Membro> membroExistente = membroRepository.findByEmailOrCpf(membroDTO.email(), membroDTO.cpf());
 
-        if(membroExistente != null){
+        if(membroExistente.isPresent()){
             throw new ObjectExistsException("Email ou CPF ja cadastrado");
         }
 

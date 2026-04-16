@@ -1,13 +1,12 @@
 package com.diacono.diacono.infrastructure.controllers;
 
 import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
+import com.diacono.diacono.applications.dtos.membro.MembroUpdateDTO;
 import com.diacono.diacono.global.error.comuns.ApiErrorsComuns;
 import com.diacono.diacono.applications.dtos.membro.MembroCreateDTO;
 import com.diacono.diacono.applications.dtos.membro.MembroResponseDTO;
 import com.diacono.diacono.domain.enums.EnumStatusMembro;
-import com.diacono.diacono.usecases.membro.BuscarTodosComFiltroUseCase;
-import com.diacono.diacono.usecases.membro.BuscarTodosSemFiltroUseCase;
-import com.diacono.diacono.usecases.membro.CriarMembroUseCase;
+import com.diacono.diacono.usecases.membro.*;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -19,17 +18,21 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/membros")
+@RequestMapping("/api/membros")
 public class MembroController {
 
     private final CriarMembroUseCase criarMembroUseCase;
     private final BuscarTodosSemFiltroUseCase buscarTodosSemFiltroUseCase;
     private final BuscarTodosComFiltroUseCase buscarTodosComFiltroUseCase;
+    private final BuscarMembroPorUUIDUseCase buscarMembroPorUUIDUseCase;
+    private final AtualizarMembroUseCase atualizarMembroUseCase;
 
-    public MembroController(CriarMembroUseCase criarMembroUseCase, BuscarTodosSemFiltroUseCase buscarTodosSemFiltroUseCase, BuscarTodosComFiltroUseCase buscarTodosComFiltroUseCase) {
+    public MembroController(CriarMembroUseCase criarMembroUseCase, BuscarTodosSemFiltroUseCase buscarTodosSemFiltroUseCase, BuscarTodosComFiltroUseCase buscarTodosComFiltroUseCase, BuscarMembroPorUUIDUseCase buscarMembroPorUUIDUseCase, AtualizarMembroUseCase atualizarMembroUseCase) {
         this.criarMembroUseCase = criarMembroUseCase;
         this.buscarTodosSemFiltroUseCase = buscarTodosSemFiltroUseCase;
         this.buscarTodosComFiltroUseCase = buscarTodosComFiltroUseCase;
+        this.buscarMembroPorUUIDUseCase = buscarMembroPorUUIDUseCase;
+        this.atualizarMembroUseCase = atualizarMembroUseCase;
     }
 
     @ApiErrorsComuns
@@ -59,6 +62,24 @@ public class MembroController {
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
+    @ApiErrorsComuns
+    @ApiResponse(responseCode = "200", description = "Membro encontrado com sucesso")
+    @GetMapping("/{idExterno}")
+    public ResponseEntity<MembroResponseDTO> buscarPorId(@PathVariable UUID idExterno) {
+        MembroResponseDTO response = buscarMembroPorUUIDUseCase.execute(idExterno);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PatchMapping("/{idExterno}")
+    public ResponseEntity<RestResponseMessageDTO> atualizarMembro(
+            @PathVariable UUID idExterno,
+            @RequestBody @Valid MembroUpdateDTO request) {
+
+        RestResponseMessageDTO response = atualizarMembroUseCase.execute(idExterno, request);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
 
 //    @ApiErrorsComuns
 //    @ApiResponse(responseCode = "200", description = "Membros encontrados com sucesso")
