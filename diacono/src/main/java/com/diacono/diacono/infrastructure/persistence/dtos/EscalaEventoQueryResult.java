@@ -1,4 +1,4 @@
-package com.diacono.diacono.infrastructure.persistence.dto;
+package com.diacono.diacono.infrastructure.persistence.dtos;
 
 import com.diacono.diacono.domain.enums.EnumStatusEvento;
 

@@ -1,9 +1,11 @@
 package com.diacono.diacono.infrastructure.persistence.EscalaEvento;
 
 import com.diacono.diacono.applications.dtos.escalasevento.EscalaEventoConsolidadoDTO;
+import com.diacono.diacono.applications.dtos.escalasevento.EscalaEventoEscaladoDTO;
 import com.diacono.diacono.domain.enums.EnumStatusEvento;
 import com.diacono.diacono.domain.repository.EscalaEventoRepository;
-import com.diacono.diacono.infrastructure.persistence.dto.EscalaEventoQueryResult;
+import com.diacono.diacono.infrastructure.persistence.dtos.EscalaEventoEscaladoQueryResult;
+import com.diacono.diacono.infrastructure.persistence.dtos.EscalaEventoQueryResult;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -31,6 +33,19 @@ public class EscalaEventoRepositoryImpl implements EscalaEventoRepository {
                         result.ministeriosEscalados(),
                         result.ministeriosEscaladosConfirmados(),
                         result.status()
+                ))
+                .toList();
+    }
+
+    public List<EscalaEventoEscaladoDTO> findEscalaEventoEscaladoByEventoId(UUID idIgreja, UUID eventoId) {
+        List<EscalaEventoEscaladoQueryResult> queryResults = jpaRepository.findEscalaEventoEscaladoByEventoId(idIgreja, eventoId);
+
+        return queryResults.stream()
+                .map(result -> new EscalaEventoEscaladoDTO(
+                        result.idExternoMinisterio(),
+                        result.nomeMinisterio(),
+                        result.idExternoEscalaEvento(),
+                        result.isMinisterioEscalado()
                 ))
                 .toList();
     }

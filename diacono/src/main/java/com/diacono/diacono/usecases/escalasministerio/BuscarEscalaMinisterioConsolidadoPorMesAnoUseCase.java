@@ -5,8 +5,8 @@ import com.diacono.diacono.applications.dtos.ministerio.MinisterioSuperSimplific
 import com.diacono.diacono.domain.enums.EnumStatusEvento;
 import com.diacono.diacono.domain.repository.EscalaEventoRepository;
 import com.diacono.diacono.domain.repository.MembroMinisterioRepository;
-import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
+import com.diacono.diacono.usecases.escalasevento.validation.ValidarMesEAno;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,13 +21,16 @@ public class BuscarEscalaMinisterioConsolidadoPorMesAnoUseCase {
 
 	private final EscalaEventoRepository escalaEventoRepository;
 	private final MembroMinisterioRepository membroMinisterioRepository;
+	private final ValidarMesEAno validarMesEAno;
 
 	public BuscarEscalaMinisterioConsolidadoPorMesAnoUseCase(
 			EscalaEventoRepository escalaEventoRepository,
-			MembroMinisterioRepository membroMinisterioRepository
+			MembroMinisterioRepository membroMinisterioRepository,
+			ValidarMesEAno validarMesEAno
 	) {
 		this.escalaEventoRepository = escalaEventoRepository;
 		this.membroMinisterioRepository = membroMinisterioRepository;
+		this.validarMesEAno = validarMesEAno;
 	}
 
 	public List<EscalaEventoConsolidadoDTO> execute(
@@ -38,7 +41,7 @@ public class BuscarEscalaMinisterioConsolidadoPorMesAnoUseCase {
 			EnumStatusEvento status,
 			String nomeEvento
 	) {
-		validarMesEAno(mes, ano);
+		validarMesEAno.validarMesEAno(mes, ano);
 
 		YearMonth anoMes = YearMonth.of(ano, mes);
 		LocalDateTime inicioMes = anoMes.atDay(1).atStartOfDay();
@@ -58,15 +61,5 @@ public class BuscarEscalaMinisterioConsolidadoPorMesAnoUseCase {
 		}
 
 		return ministerios.getFirst().idExterno();
-	}
-
-	private void validarMesEAno(int mes, int ano) {
-		if (mes < 1 || mes > 12) {
-			throw new FieldInvalidException("O mês precisa estar entre 1 e 12");
-		}
-
-		if (ano <= 0) {
-			throw new FieldInvalidException("O ano precisa ser maior que 0");
-		}
 	}
 }

@@ -2,7 +2,8 @@ package com.diacono.diacono.infrastructure.persistence.EscalaEvento;
 
 import com.diacono.diacono.domain.entity.EscalaEvento;
 import com.diacono.diacono.domain.enums.EnumStatusEvento;
-import com.diacono.diacono.infrastructure.persistence.dto.EscalaEventoQueryResult;
+import com.diacono.diacono.infrastructure.persistence.dtos.EscalaEventoEscaladoQueryResult;
+import com.diacono.diacono.infrastructure.persistence.dtos.EscalaEventoQueryResult;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,7 +16,7 @@ import java.util.UUID;
 @Repository
 public interface EscalaEventoJpaRepository extends JpaRepository<EscalaEvento, Long> {
     @Query("""
-            SELECT new com.diacono.diacono.infrastructure.persistence.dto.EscalaEventoQueryResult(
+            SELECT new com.diacono.diacono.infrastructure.persistence.dtos.EscalaEventoQueryResult(
                 e.idExterno,
                 e.nome,
                 e.dataHoraFim,
@@ -35,9 +36,24 @@ public interface EscalaEventoJpaRepository extends JpaRepository<EscalaEvento, L
             ORDER BY e.dataHoraInicio ASC
             """)
     List<EscalaEventoQueryResult> findEscalaEventoConsolidadoByPeriodo(@Param("igrejaFk") UUID igrejaFk,
-                                                                       @Param("dataInicio") LocalDateTime dataInicio,
-                                                                       @Param("dataFim") LocalDateTime dataFim,
-                                                                       @Param("status") EnumStatusEvento status,
-                                                                       @Param("ministerioId") UUID ministerioId,
-                                                                       @Param("nomeEvento") String nomeEvento);
+                                                                        @Param("dataInicio") LocalDateTime dataInicio,
+                                                                        @Param("dataFim") LocalDateTime dataFim,
+                                                                        @Param("status") EnumStatusEvento status,
+                                                                        @Param("ministerioId") UUID ministerioId,
+                                                                        @Param("nomeEvento") String nomeEvento);
+
+     @Query("""
+             SELECT new com.diacono.diacono.infrastructure.persistence.dtos.EscalaEventoEscaladoQueryResult(
+                 m.idExterno,
+                 m.nome,
+                 ee.idExterno,
+                 CASE WHEN ee.idExterno IS NOT NULL THEN true ELSE false END
+             )
+             FROM Ministerio m
+             LEFT JOIN EscalaEvento ee ON ee.ministerio.idInterno = m.idInterno AND ee.evento.idExterno = :eventoId
+             WHERE m.igreja.idExterno = :igrejaFk
+             ORDER BY CASE WHEN ee.idExterno IS NOT NULL THEN 0 ELSE 1 END, m.nome ASC
+             """)
+     List<EscalaEventoEscaladoQueryResult> findEscalaEventoEscaladoByEventoId(@Param("igrejaFk") UUID igrejaFk,
+                                                                               @Param("eventoId") UUID eventoId);
 }

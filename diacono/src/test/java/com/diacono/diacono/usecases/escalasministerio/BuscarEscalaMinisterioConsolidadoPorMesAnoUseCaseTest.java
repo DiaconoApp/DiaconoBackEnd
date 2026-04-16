@@ -7,10 +7,12 @@ import com.diacono.diacono.domain.repository.EscalaEventoRepository;
 import com.diacono.diacono.domain.repository.MembroMinisterioRepository;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
+import com.diacono.diacono.usecases.escalasevento.validation.ValidarMesEAno;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
@@ -31,6 +33,9 @@ class BuscarEscalaMinisterioConsolidadoPorMesAnoUseCaseTest {
 
     @Mock
     private MembroMinisterioRepository membroMinisterioRepository;
+
+    @Spy
+    private ValidarMesEAno validarMesEAno = new ValidarMesEAno();
 
     @InjectMocks
     private BuscarEscalaMinisterioConsolidadoPorMesAnoUseCase useCase;
