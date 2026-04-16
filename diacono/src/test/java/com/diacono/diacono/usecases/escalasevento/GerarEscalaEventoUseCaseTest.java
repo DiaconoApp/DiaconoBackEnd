@@ -19,6 +19,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -72,6 +73,16 @@ class GerarEscalaEventoUseCaseTest {
                 .orElseThrow();
         assertEquals(true, escalaCriada.getMinisterioConfirmado());
         assertSame(evento, escalaCriada.getEvento());
+    }
+
+    @Test
+    void deveRetornarEscalaVaziaQuandoNaoHouverMinisteriosSelecionados() {
+        Evento evento = Evento.builder().build();
+
+        Set<EscalaEvento> resultado = useCase.executeParaAtualizacao(evento, new HashSet<>(), List.of());
+
+        assertTrue(resultado.isEmpty());
+        verifyNoInteractions(buscarMinisterioPorUUIDUseCase);
     }
 }
 

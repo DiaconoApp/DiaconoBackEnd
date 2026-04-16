@@ -39,6 +39,10 @@ public class GerarEscalaEventoUseCase {
     }
 
     public Set<EscalaEvento> executeParaAtualizacao(Evento evento, Set<EscalaEvento> escalasEventoOrigem, List<UUID> ministeriosId) {
+        if (ministeriosId == null || ministeriosId.isEmpty()) {
+            return new HashSet<>();
+        }
+
         Set<Ministerio> ministerios = buscarMinisterioPorUUIDUseCase.execute(ministeriosId);
         Set<EscalaEvento> escalasAtualizadas = new HashSet<>();
 

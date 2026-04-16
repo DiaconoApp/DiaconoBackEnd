@@ -2,8 +2,10 @@ package com.diacono.diacono.infrastructure.controllers;
 
 import com.diacono.diacono.applications.dtos.escalasevento.EscalaEventoConsolidadoDTO;
 import com.diacono.diacono.applications.dtos.escalasevento.EscalaEventoEscaladoDTO;
+import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
 import com.diacono.diacono.domain.enums.EnumStatusEvento;
 import com.diacono.diacono.global.util.JwtUtils;
+import com.diacono.diacono.usecases.escalasevento.AtualizarEscalaEventoPorEventoIdUseCase;
 import com.diacono.diacono.usecases.escalasevento.BuscarEscalaEventoConsolidadoPorMesAnoUseCase;
 import com.diacono.diacono.usecases.escalasevento.BuscarEscalaEventoEscaladoPorEventoIdUseCase;
 import org.springframework.http.HttpStatus;
@@ -20,15 +22,18 @@ public class EscalaEventoController {
 
     private final BuscarEscalaEventoConsolidadoPorMesAnoUseCase buscarEscalaEventoConsolidadoPorMesAnoUseCase;
     private final BuscarEscalaEventoEscaladoPorEventoIdUseCase buscarEscalaEventoEscaladoPorEventoIdUseCase;
+    private final AtualizarEscalaEventoPorEventoIdUseCase atualizarEscalaEventoPorEventoIdUseCase;
     private final JwtUtils jwtUtils;
 
     public EscalaEventoController(
             BuscarEscalaEventoConsolidadoPorMesAnoUseCase buscarEscalaEventoConsolidadoPorMesAnoUseCase,
             BuscarEscalaEventoEscaladoPorEventoIdUseCase buscarEscalaEventoEscaladoPorEventoIdUseCase,
+            AtualizarEscalaEventoPorEventoIdUseCase atualizarEscalaEventoPorEventoIdUseCase,
             JwtUtils jwtUtils
     ) {
         this.buscarEscalaEventoConsolidadoPorMesAnoUseCase = buscarEscalaEventoConsolidadoPorMesAnoUseCase;
         this.buscarEscalaEventoEscaladoPorEventoIdUseCase = buscarEscalaEventoEscaladoPorEventoIdUseCase;
+        this.atualizarEscalaEventoPorEventoIdUseCase = atualizarEscalaEventoPorEventoIdUseCase;
         this.jwtUtils = jwtUtils;
     }
 
@@ -49,13 +54,24 @@ public class EscalaEventoController {
 
     @GetMapping("/{eventoId}")
     public ResponseEntity<List<EscalaEventoEscaladoDTO>> buscarEscalaEventoEscaladoPorEventoId(
-            @PathVariable("eventoId") UUID eventoId,
-            @RequestParam(required = false) String nomeMinisterio
+            @PathVariable("eventoId") UUID eventoId
     ) {
         UUID igrejaId = jwtUtils.getIgrejaId();
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(buscarEscalaEventoEscaladoPorEventoIdUseCase.execute(igrejaId, eventoId));
+    }
+
+    @PatchMapping("/{eventoId}")
+    public ResponseEntity<RestResponseMessageDTO> atualizarEscalaEventoPorEventoId(
+            @PathVariable("eventoId") UUID eventoId,
+            @RequestBody List<EscalaEventoEscaladoDTO> escalasEvento
+    ) {
+        UUID igrejaId = jwtUtils.getIgrejaId();
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(atualizarEscalaEventoPorEventoIdUseCase.execute(igrejaId, eventoId, escalasEvento));
     }
 }

@@ -16,6 +16,7 @@ import java.util.Set;
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
 public class Evento extends IdEntityUtils {
+    // TODO: Validar set EscalaEvento
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name = "fk_igreja", nullable = false)
@@ -70,7 +71,16 @@ public class Evento extends IdEntityUtils {
     }
 
     public void setEscalaEvento(Set<EscalaEvento> escalasEvento) {
-        this.escalaEvento = escalasEvento;
+        this.escalaEvento.clear();
+
+        if (escalasEvento == null || escalasEvento.isEmpty()) {
+            return;
+        }
+
+        for (EscalaEvento escalaEvento : escalasEvento) {
+            escalaEvento.setEvento(this);
+            this.escalaEvento.add(escalaEvento);
+        }
     }
 
     public void setRecorrencia(Recorrencia recorrencia) {
