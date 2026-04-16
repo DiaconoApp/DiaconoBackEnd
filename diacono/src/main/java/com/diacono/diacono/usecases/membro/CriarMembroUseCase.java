@@ -61,7 +61,6 @@ public class CriarMembroUseCase {
     }
 
     private Membro criarMembroSemMinisterio(MembroCreateDTO membroDTO) {
-
         if (membroDTO.cargo().equals(EnumCargoMembro.LIDER_MINISTERIO) && (membroDTO.idExternoMinisterios() == null)) {
             throw new ObjectSaveErrorException("Para cadastrar um líder de ministério, é necessário associar um ministério ao membro.");
         }

@@ -11,6 +11,7 @@ import com.diacono.diacono.infrastructure.persistence.Membro.MembroJpaRepository
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -18,6 +19,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @SpringBootApplication
+@ConfigurationPropertiesScan
 public class DiaconoApplication {
 
 	public static void main(String[] args) {
@@ -51,7 +53,7 @@ public class DiaconoApplication {
 
             Membro governo = Membro.builder()
                     .nome("Tico")
-                    .email("tico@gmail.com")
+                    .email("fabiam.damaceno@gmail.com")
                     .igreja(igrejaIcf)
                     .enderecoMembro(enderecoMembro)
                     .cpf("74431506012")
@@ -63,7 +65,6 @@ public class DiaconoApplication {
                     .cargoMembro(EnumCargoMembro.GOVERNO)
                     .generoMembro(EnumGeneroMembro.MASCULINO)
                     .build();
-
 
             repository.save(governo);
 
