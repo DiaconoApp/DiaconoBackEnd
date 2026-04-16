@@ -49,7 +49,7 @@ class BuscarEscalaMinisterioConsolidadoPorMesAnoUseCaseTest {
                         LocalDateTime.of(2026, 5, 15, 19, 0),
                         1,
                         1,
-                        EnumStatusEvento.ESCALADO
+                        EnumStatusEvento.CONFIRMADO
                 )
         );
 
@@ -60,7 +60,7 @@ class BuscarEscalaMinisterioConsolidadoPorMesAnoUseCaseTest {
                 idIgreja,
                 LocalDateTime.of(2026, 5, 1, 0, 0),
                 LocalDateTime.of(2026, 5, 31, 23, 59, 59),
-                EnumStatusEvento.ESCALADO,
+                EnumStatusEvento.CONFIRMADO,
                 idMinisterio,
                 "Culto"
         )).thenReturn(esperado);
@@ -70,7 +70,7 @@ class BuscarEscalaMinisterioConsolidadoPorMesAnoUseCaseTest {
                 idMembro,
                 5,
                 2026,
-                EnumStatusEvento.ESCALADO,
+                EnumStatusEvento.CONFIRMADO,
                 "Culto"
         );
 
