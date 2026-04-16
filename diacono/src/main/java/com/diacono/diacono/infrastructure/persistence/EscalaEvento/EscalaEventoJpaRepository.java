@@ -34,10 +34,10 @@ public interface EscalaEventoJpaRepository extends JpaRepository<EscalaEvento, L
             GROUP BY e.idExterno, e.nome, e.dataHoraFim, e.dataHoraInicio, e.status
             ORDER BY e.dataHoraInicio ASC
             """)
-    List<EscalaEventoQueryResult> findEscalaEventoByPeriodo(@Param("igrejaFk") UUID igrejaFk,
-                                                             @Param("dataInicio") LocalDateTime dataInicio,
-                                                             @Param("dataFim") LocalDateTime dataFim,
-                                                             @Param("status") EnumStatusEvento status,
-                                                             @Param("ministerioId") UUID ministerioId,
-                                                             @Param("nomeEvento") String nomeEvento);
+    List<EscalaEventoQueryResult> findEscalaEventoConsolidadoByPeriodo(@Param("igrejaFk") UUID igrejaFk,
+                                                                       @Param("dataInicio") LocalDateTime dataInicio,
+                                                                       @Param("dataFim") LocalDateTime dataFim,
+                                                                       @Param("status") EnumStatusEvento status,
+                                                                       @Param("ministerioId") UUID ministerioId,
+                                                                       @Param("nomeEvento") String nomeEvento);
 }

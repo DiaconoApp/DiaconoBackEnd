@@ -1,9 +1,10 @@
 package com.diacono.diacono.infrastructure.controllers;
 
+import com.diacono.diacono.applications.dtos.escalasevento.EscalaEventoConsolidadoDTO;
 import com.diacono.diacono.applications.dtos.escalasevento.EscalaEventoDTO;
 import com.diacono.diacono.domain.enums.EnumStatusEvento;
 import com.diacono.diacono.global.util.JwtUtils;
-import com.diacono.diacono.usecases.escalasevento.BuscarEscalaEventoPorMesAnoUseCase;
+import com.diacono.diacono.usecases.escalasevento.BuscarEscalaEventoConsolidadoPorMesAnoUseCase;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,22 +16,22 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/escalas-evento")
+@RequestMapping("/api/v1/escalas-evento/governo")
 public class EscalaEventoController {
 
-    private final BuscarEscalaEventoPorMesAnoUseCase buscarEscalaEventoPorMesAnoUseCase;
+    private final BuscarEscalaEventoConsolidadoPorMesAnoUseCase buscarEscalaEventoConsolidadoPorMesAnoUseCase;
     private final JwtUtils jwtUtils;
 
     public EscalaEventoController(
-            BuscarEscalaEventoPorMesAnoUseCase buscarEscalaEventoPorMesAnoUseCase,
+            BuscarEscalaEventoConsolidadoPorMesAnoUseCase buscarEscalaEventoConsolidadoPorMesAnoUseCase,
             JwtUtils jwtUtils
     ) {
-        this.buscarEscalaEventoPorMesAnoUseCase = buscarEscalaEventoPorMesAnoUseCase;
+        this.buscarEscalaEventoConsolidadoPorMesAnoUseCase = buscarEscalaEventoConsolidadoPorMesAnoUseCase;
         this.jwtUtils = jwtUtils;
     }
 
     @GetMapping
-    public ResponseEntity<List<EscalaEventoDTO>> buscarEscalaEventoPorMesAno(
+    public ResponseEntity<List<EscalaEventoConsolidadoDTO>> buscarEscalaEventoConsolidadoPorMesAno(
             @RequestParam int mes,
             @RequestParam int ano,
             @RequestParam(required = false) EnumStatusEvento status,
@@ -41,6 +42,11 @@ public class EscalaEventoController {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(buscarEscalaEventoPorMesAnoUseCase.execute(idIgreja, mes, ano, status, ministerioId, nomeEvento));
+                .body(buscarEscalaEventoConsolidadoPorMesAnoUseCase.execute(idIgreja, mes, ano, status, ministerioId, nomeEvento));
+    }
+
+    public ResponseEntity<List<EscalaEventoDTO>> buscarEscalaEventoPorEvento() {
+        // TODO - Fazer endpoint. Antes perguntar para Izael
+        return null;
     }
 }
