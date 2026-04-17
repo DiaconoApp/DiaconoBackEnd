@@ -1,12 +1,13 @@
 package com.diacono.diacono.usecases.escalasministerio;
 
-import com.diacono.diacono.applications.dtos.escalasevento.EscalaEventoConsolidadoDTO;
+import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMinisterioConsolidadoDTO;
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioSuperSimplificadoDTO;
-import com.diacono.diacono.domain.enums.EnumStatusEvento;
-import com.diacono.diacono.domain.repository.EscalaEventoRepository;
+import com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio;
+import com.diacono.diacono.domain.repository.EscalaMinisterioRepository;
 import com.diacono.diacono.domain.repository.MembroMinisterioRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.usecases.escalasevento.validation.ValidarMesEAno;
+import com.diacono.diacono.usecases.ministerio.BuscarMinisteriosLiderMinisterioUseCase;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,47 +20,66 @@ public class BuscarEscalaMinisterioConsolidadoPorMesAnoUseCase {
 	// TODO: Mudar a funcao chamado do repo
 	// TODO: Buscar ministerios por ID deve ser uma outra chamada, endpoint
 
-	private final EscalaEventoRepository escalaEventoRepository;
+	private final EscalaMinisterioRepository escalaMinisterioRepository;
 	private final MembroMinisterioRepository membroMinisterioRepository;
 	private final ValidarMesEAno validarMesEAno;
+	private final BuscarMinisteriosLiderMinisterioUseCase buscarMinisteriosLiderMinisterioUseCase;
 
 	public BuscarEscalaMinisterioConsolidadoPorMesAnoUseCase(
-			EscalaEventoRepository escalaEventoRepository,
+			EscalaMinisterioRepository escalaMinisterioRepository,
 			MembroMinisterioRepository membroMinisterioRepository,
-			ValidarMesEAno validarMesEAno
-	) {
-		this.escalaEventoRepository = escalaEventoRepository;
+			ValidarMesEAno validarMesEAno,
+			BuscarMinisteriosLiderMinisterioUseCase buscarMinisteriosLiderMinisterioUseCase) {
+		this.escalaMinisterioRepository = escalaMinisterioRepository;
 		this.membroMinisterioRepository = membroMinisterioRepository;
 		this.validarMesEAno = validarMesEAno;
+		this.buscarMinisteriosLiderMinisterioUseCase = buscarMinisteriosLiderMinisterioUseCase;
 	}
 
-	public List<EscalaEventoConsolidadoDTO> execute(
-			UUID idIgreja,
-			UUID idMembro,
+	public List<EscalaMinisterioConsolidadoDTO> execute(
+			UUID igrejaId,
+			UUID  membroId,
+			UUID ministerioId,
 			Integer mes,
 			Integer ano,
-			EnumStatusEvento status,
+			EnumStatusEscalaMinisterio status,
 			String nomeEvento
 	) {
 		validarMesEAno.validarMesEAno(mes, ano);
+
+		List<UUID> listaMinisterios = montarMinisterioIds(igrejaId, membroId, ministerioId);
 
 		YearMonth anoMes = YearMonth.of(ano, mes);
 		LocalDateTime inicioMes = anoMes.atDay(1).atStartOfDay();
 		LocalDateTime fimMes = anoMes.atEndOfMonth().atTime(23, 59, 59);
 
-		UUID ministerioId = buscarMinisterioLider(idMembro, idIgreja);
 
-		return escalaEventoRepository
-				.findEscalaEventoConsolidadoByPeriodo(idIgreja, inicioMes, fimMes, status, ministerioId, nomeEvento);
+		return escalaMinisterioRepository
+				.findEscalaMinisterioConsolidadoByPeriodo(igrejaId, inicioMes, fimMes, status, listaMinisterios, nomeEvento);
 	}
 
-	private UUID buscarMinisterioLider(UUID idMembro, UUID idIgreja) {
-		List<MinisterioSuperSimplificadoDTO> ministerios = membroMinisterioRepository.buscarMinisterioLider(idMembro, idIgreja);
+	private List<UUID> montarMinisterioIds (UUID igrejaId, UUID  membroId, UUID ministerioId) {
+		List<UUID> listaMinisterios = membroMinisterioRepository
+				.buscarMinisterioLider(membroId, igrejaId)
+				.stream()
+				.map(MinisterioSuperSimplificadoDTO::idExterno)
+				.toList();
 
-		if (ministerios.isEmpty()) {
+		if(listaMinisterios.isEmpty()){
 			throw new ObjectNotFoundException("Nenhum ministério encontrado para o líder informado.");
 		}
 
-		return ministerios.getFirst().idExterno();
+		if (ministerioId != null) {
+			validarMinisterioId(listaMinisterios, ministerioId);
+			return List.of(ministerioId);
+		}
+
+		return listaMinisterios;
+	}
+
+	private void validarMinisterioId(List<UUID> ministeriosDoLider, UUID ministerioId) {
+		if (!ministeriosDoLider.contains(ministerioId)) {
+			throw new ObjectNotFoundException("O líder informado não possui vínculo com o ministério solicitado.");
+		}
 	}
 }

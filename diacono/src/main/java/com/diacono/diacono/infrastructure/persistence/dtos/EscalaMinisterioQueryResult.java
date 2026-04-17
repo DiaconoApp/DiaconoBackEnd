@@ -1,13 +1,12 @@
-package com.diacono.diacono.applications.dtos.escalaministerio;
+package com.diacono.diacono.infrastructure.persistence.dtos;
 
 import com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio;
-import com.diacono.diacono.domain.enums.EnumStatusEvento;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record EscalaMinisterioConsolidadoDTO(
-        UUID idExternoEscalaEvento,
+public record EscalaMinisterioQueryResult(
+        UUID idEventoExterno,
         String nomeReuniao,
         LocalDateTime dataHoraFim,
         LocalDateTime dataHoraInicio,
@@ -16,3 +15,4 @@ public record EscalaMinisterioConsolidadoDTO(
         EnumStatusEscalaMinisterio status
 ) {
 }
+

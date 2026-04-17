@@ -1,5 +1,6 @@
 package com.diacono.diacono.domain.entity;
 
+import com.diacono.diacono.domain.enums.EnumStatusEvento;
 import com.diacono.diacono.global.util.IdEntityUtils;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -7,8 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "escala_evento", uniqueConstraints = @UniqueConstraint(columnNames = {"fk_evento", "fk_ministerio"}))
@@ -27,6 +26,6 @@ public class EscalaEvento extends IdEntityUtils {
     private Ministerio ministerio;
 
     @Builder.Default
-    private Boolean ministerioConfirmado = true;
+    private EnumStatusEvento statusEscalaEvento = EnumStatusEvento.CONFIRMADO;
 }
 

@@ -22,7 +22,7 @@ public interface EscalaEventoJpaRepository extends JpaRepository<EscalaEvento, L
                 e.dataHoraFim,
                 e.dataHoraInicio,
                 cast(count(ee) as integer),
-                cast(sum(case when ee.ministerioConfirmado = true then 1 else 0 end) as integer),
+                cast(sum(case when ee.statusEscalaEvento = com.diacono.diacono.domain.enums.EnumStatusEvento.CONFIRMADO then 1 else 0 end) as integer),
                 e.status
             )
             FROM EscalaEvento ee

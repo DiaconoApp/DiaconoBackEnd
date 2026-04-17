@@ -3,6 +3,7 @@ package com.diacono.diacono.usecases.escalasevento;
 import com.diacono.diacono.domain.entity.EscalaEvento;
 import com.diacono.diacono.domain.entity.Evento;
 import com.diacono.diacono.domain.entity.Ministerio;
+import com.diacono.diacono.domain.enums.EnumStatusEvento;
 import com.diacono.diacono.usecases.eventos.BuscarMinisterioPorUUIDUseCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,7 +50,7 @@ class GerarEscalaEventoUseCaseTest {
         EscalaEvento escalaExistente = EscalaEvento.builder()
                 .evento(evento)
                 .ministerio(ministerioExistente)
-                .ministerioConfirmado(false)
+                .statusEscalaEvento(EnumStatusEvento.PENDENTE)
                 .build();
 
         Set<EscalaEvento> escalasAtuais = new HashSet<>(Set.of(escalaExistente));
@@ -65,13 +66,13 @@ class GerarEscalaEventoUseCaseTest {
                 .filter(escala -> idMinisterioExistente.equals(escala.getMinisterio().getIdExterno()))
                 .findFirst()
                 .orElseThrow());
-        assertEquals(false, escalaExistente.getMinisterioConfirmado());
+        assertEquals(EnumStatusEvento.PENDENTE, escalaExistente.getStatusEscalaEvento());
 
         EscalaEvento escalaCriada = resultado.stream()
                 .filter(escala -> idMinisterioNovo.equals(escala.getMinisterio().getIdExterno()))
                 .findFirst()
                 .orElseThrow();
-        assertEquals(true, escalaCriada.getMinisterioConfirmado());
+        assertEquals(EnumStatusEvento.CONFIRMADO, escalaCriada.getStatusEscalaEvento());
         assertSame(evento, escalaCriada.getEvento());
     }
 

@@ -3,6 +3,7 @@ package com.diacono.diacono.usecases.escalasevento;
 import com.diacono.diacono.domain.entity.EscalaEvento;
 import com.diacono.diacono.domain.entity.Evento;
 import com.diacono.diacono.domain.entity.Ministerio;
+import com.diacono.diacono.domain.enums.EnumStatusEvento;
 import com.diacono.diacono.usecases.eventos.BuscarMinisterioPorUUIDUseCase;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +32,7 @@ public class GerarEscalaEventoUseCase {
             EscalaEvento escala = new EscalaEvento();
             escala.setEvento(evento);
             escala.setMinisterio(ministerio);
-            escala.setMinisterioConfirmado(true);
+            escala.setStatusEscalaEvento(EnumStatusEvento.CONFIRMADO);
             escalasEvento.add(escala);
         }
 
@@ -71,7 +72,7 @@ public class GerarEscalaEventoUseCase {
             EscalaEvento novaEscala = new EscalaEvento();
             novaEscala.setEvento(evento);
             novaEscala.setMinisterio(ministerio);
-            novaEscala.setMinisterioConfirmado(true);
+            novaEscala.setStatusEscalaEvento(EnumStatusEvento.CONFIRMADO);
             escalasAtualizadas.add(novaEscala);
         }
 
@@ -85,7 +86,7 @@ public class GerarEscalaEventoUseCase {
             EscalaEvento escala = new EscalaEvento();
             escala.setEvento(evento);
             escala.setMinisterio(escalaOrigem.getMinisterio());
-            escala.setMinisterioConfirmado(escalaOrigem.getMinisterioConfirmado());
+            escala.setStatusEscalaEvento(escalaOrigem.getStatusEscalaEvento());
             escalasEvento.add(escala);
         }
 

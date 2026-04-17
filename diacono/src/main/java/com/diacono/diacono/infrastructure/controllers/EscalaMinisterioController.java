@@ -1,7 +1,7 @@
 package com.diacono.diacono.infrastructure.controllers;
 
-import com.diacono.diacono.applications.dtos.escalasevento.EscalaEventoConsolidadoDTO;
-import com.diacono.diacono.domain.enums.EnumStatusEvento;
+import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMinisterioConsolidadoDTO;
+import com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio;
 import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.usecases.escalasministerio.BuscarEscalaMinisterioConsolidadoPorMesAnoUseCase;
 import org.springframework.http.HttpStatus;
@@ -30,10 +30,11 @@ public class EscalaMinisterioController {
     }
 
     @GetMapping
-    public ResponseEntity<List<EscalaEventoConsolidadoDTO>> buscarEscalaMinisterioConsolidadoPorMesAno(
+    public ResponseEntity<List<EscalaMinisterioConsolidadoDTO>> buscarEscalaMinisterioConsolidadoPorMesAno(
             @RequestParam int mes,
             @RequestParam int ano,
-            @RequestParam(required = false) EnumStatusEvento status,
+            @RequestParam(required = false) EnumStatusEscalaMinisterio status,
+            @RequestParam(required = false) UUID ministerioId,
             @RequestParam(required = false) String nomeEvento
     ){
         UUID idIgreja = jwtUtils.getIgrejaId();
@@ -41,6 +42,6 @@ public class EscalaMinisterioController {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(buscarEscalaMinisterioConsolidadoPorMesAnoUseCase.execute(idIgreja, idMembro, mes, ano, status, nomeEvento));
+                .body(buscarEscalaMinisterioConsolidadoPorMesAnoUseCase.execute(idIgreja, idMembro, ministerioId, mes, ano, status, nomeEvento));
     }
 }
