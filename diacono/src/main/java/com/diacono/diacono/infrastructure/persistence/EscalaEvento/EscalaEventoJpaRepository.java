@@ -31,7 +31,7 @@ public interface EscalaEventoJpaRepository extends JpaRepository<EscalaEvento, L
               AND (e.igreja.idExterno = :igrejaFk)
               AND (:status IS NULL OR e.status = :status)
               AND (:ministerioId IS NULL OR ee.ministerio.idExterno = :ministerioId)
-              AND (:nomeEvento IS NULL OR e.nome LIKE CONCAT('%', :nomeEvento, '%'))
+              AND (:nomeEvento IS NULL OR LOWER(e.nome) LIKE CONCAT('%', LOWER(:nomeEvento), '%'))
             GROUP BY e.idExterno, e.nome, e.dataHoraFim, e.dataHoraInicio, e.status
             ORDER BY e.dataHoraInicio ASC
             """)
