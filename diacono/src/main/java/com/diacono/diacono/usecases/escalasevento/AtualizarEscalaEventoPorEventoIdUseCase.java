@@ -30,26 +30,12 @@ public class AtualizarEscalaEventoPorEventoIdUseCase {
     }
 
     @Transactional
-    public RestResponseMessageDTO execute(UUID igrejaId, UUID eventoId, List<EscalaEventoEscaladoDTO> request) {
-        if (request == null || request.isEmpty()) {
-            throw new FieldInvalidException("Lista de escalas do evento nao pode estar vazia");
-        }
+    public RestResponseMessageDTO execute(UUID igrejaId, UUID eventoId, List<EscalaEventoEscaladoDTO> listaEscalaEvento) {
+        validarListaEscalaEvento(listaEscalaEvento);
 
-        Evento evento = eventoRepository.findByIdExterno(eventoId)
-                .orElseThrow(() -> new ObjectNotFoundException("Evento nao encontrado"));
+        Evento evento = buscarEvento(igrejaId, eventoId);
 
-        if (evento.getIgreja() == null || !igrejaId.equals(evento.getIgreja().getIdExterno())) {
-            throw new ObjectNotFoundException("Evento nao encontrado");
-        }
-
-        boolean existeMinisterioEscaladoSemId = request.stream()
-                .anyMatch(item -> Boolean.TRUE.equals(item.isMinisterioEscalado()) && item.idExternoMinisterio() == null);
-
-        if (existeMinisterioEscaladoSemId) {
-            throw new FieldInvalidException("idExternoMinisterio e obrigatorio quando isMinisterioEscalado for true");
-        }
-
-        List<UUID> ministeriosEscaladosId = request.stream()
+        List<UUID> ministeriosEscaladosId = listaEscalaEvento.stream()
                 .filter(item -> Boolean.TRUE.equals(item.isMinisterioEscalado()))
                 .map(EscalaEventoEscaladoDTO::idExternoMinisterio)
                 .filter(Objects::nonNull)
@@ -65,6 +51,23 @@ public class AtualizarEscalaEventoPorEventoIdUseCase {
         eventoRepository.save(evento);
 
         return new RestResponseMessageDTO(HttpStatus.OK, "Escala do evento atualizada com sucesso");
+    }
+
+    private void validarListaEscalaEvento(List<EscalaEventoEscaladoDTO> listaEscalaEvento) {
+        if (listaEscalaEvento == null || listaEscalaEvento.isEmpty()) {
+            throw new FieldInvalidException("Lista de escalas do evento nao pode estar vazia");
+        }
+    }
+
+    private Evento buscarEvento(UUID igrejaId, UUID eventoId) {
+        Evento evento = eventoRepository.findByIdExterno(eventoId)
+                .orElseThrow(() -> new ObjectNotFoundException("Evento nao encontrado"));
+
+        if (evento.getIgreja() == null || !igrejaId.equals(evento.getIgreja().getIdExterno())) {
+            throw new ObjectNotFoundException("Evento nao encontrado");
+        }
+
+        return evento;
     }
 }
 
