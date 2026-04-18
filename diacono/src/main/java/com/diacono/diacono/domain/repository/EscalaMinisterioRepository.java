@@ -3,6 +3,8 @@ package com.diacono.diacono.domain.repository;
 import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMembroMinisterioDTO;
 import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMinisterioConsolidadoDTO;
 import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMinisterioDTO;
+import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMinisterioSalvarDTO;
+import com.diacono.diacono.domain.entity.EscalaEvento;
 import com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio;
 
 import java.time.LocalDateTime;
@@ -14,4 +16,5 @@ public interface EscalaMinisterioRepository {
     List<EscalaMinisterioDTO> findEscalaMinisterioByPeriodo(UUID igrejaId, LocalDateTime inicioMes, LocalDateTime fimMes, EnumStatusEscalaMinisterio status, UUID membroId, UUID ministerioId, String nomeEvento);
     List<EscalaMembroMinisterioDTO> findEscalaMembroMinisterioByEscalaEventoId(UUID igrejaId, UUID escalaEventoId);
     List<UUID> findMembrosMinisterioOcupadosByEscalaEventoId(UUID igrejaId, UUID escalaEventoId);
+    void replaceEscalaMinisterioByEscalaEventoId(UUID igrejaId, UUID escalaEventoId, EscalaEvento escalaEvento, List<EscalaMinisterioSalvarDTO> escalasMinisterio);
 }

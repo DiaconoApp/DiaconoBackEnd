@@ -2,6 +2,7 @@ package com.diacono.diacono.infrastructure.persistence.EscalaEvento;
 
 import com.diacono.diacono.applications.dtos.escalasevento.EscalaEventoConsolidadoDTO;
 import com.diacono.diacono.applications.dtos.escalasevento.EscalaEventoEscaladoDTO;
+import com.diacono.diacono.domain.entity.EscalaEvento;
 import com.diacono.diacono.domain.enums.EnumStatusEvento;
 import com.diacono.diacono.domain.repository.EscalaEventoRepository;
 import com.diacono.diacono.infrastructure.persistence.dtos.EscalaEventoEscaladoQueryResult;
@@ -52,5 +53,9 @@ public class EscalaEventoRepositoryImpl implements EscalaEventoRepository {
 
     public UUID findMinisterioIdByEscalaEventoId(UUID idIgreja, UUID escalaEventoId) {
         return jpaRepository.findMinisterioIdByEscalaEventoId(idIgreja, escalaEventoId);
-    };
+    }
+
+    public EscalaEvento findEscalaEventoByIdExternoAndIgrejaId(UUID igrejaId, UUID escalaEventoId) {
+        return jpaRepository.findEscalaEventoByIdExternoAndIgrejaId(igrejaId, escalaEventoId);
+    }
 }

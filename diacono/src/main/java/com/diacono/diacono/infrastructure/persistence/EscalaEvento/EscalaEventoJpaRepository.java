@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -66,4 +67,16 @@ public interface EscalaEventoJpaRepository extends JpaRepository<EscalaEvento, L
              """)
     UUID findMinisterioIdByEscalaEventoId(@Param("idIgreja") UUID idIgreja,
                                           @Param("escalaEventoId") UUID escalaEventoId);
+
+    @Query("""
+            SELECT ee
+            FROM EscalaEvento ee
+            JOIN ee.evento e
+            WHERE e.igreja.idExterno = :igrejaId
+              AND ee.idExterno = :escalaEventoId
+            """)
+    EscalaEvento findEscalaEventoByIdExternoAndIgrejaId(
+            @Param("igrejaId") UUID igrejaId,
+            @Param("escalaEventoId") UUID escalaEventoId
+    );
 }

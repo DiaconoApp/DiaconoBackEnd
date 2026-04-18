@@ -1,17 +1,21 @@
 package com.diacono.diacono.infrastructure.persistence.EscalaMinisterio;
 
+import com.diacono.diacono.domain.entity.EscalaEvento;
 import com.diacono.diacono.domain.entity.EscalaMinisterio;
+import com.diacono.diacono.domain.entity.MembroMinisterio;
 import com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio;
 import com.diacono.diacono.infrastructure.persistence.dtos.EscalaMembroMinisterioQueryResult;
 import com.diacono.diacono.infrastructure.persistence.dtos.EscalaMinisterioConsolidadoQueryResult;
 import com.diacono.diacono.infrastructure.persistence.dtos.EscalaMinisterioQueryResult;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -136,6 +140,35 @@ public interface EscalaMinisterioJpaRepository extends JpaRepository<EscalaMinis
     List<UUID> findMembrosMinisterioOcupadosByEscalaEventoId(
             @Param("igrejaId") UUID igrejaId,
             @Param("escalaEventoId") UUID escalaEventoId
+    );
+
+    @Modifying
+    @Query("""
+            DELETE FROM EscalaMinisterio em
+            WHERE em.escalaEvento.idExterno = :escalaEventoId
+              AND em.escalaEvento.evento.igreja.idExterno = :igrejaId
+            """)
+    void deleteByEscalaEventoIdAndIgrejaId(
+            @Param("igrejaId") UUID igrejaId,
+            @Param("escalaEventoId") UUID escalaEventoId
+    );
+
+
+
+    @Query("""
+            SELECT mm
+            FROM EscalaEvento ee
+            JOIN ee.ministerio mi
+            JOIN mi.membros mm
+            JOIN mm.membro m
+            WHERE ee.idExterno = :escalaEventoId
+              AND m.igreja.idExterno = :igrejaId
+              AND mm.idExterno IN :membrosMinisterioIds
+            """)
+    List<MembroMinisterio> findMembrosMinisterioByEscalaEventoIdAndIds(
+            @Param("igrejaId") UUID igrejaId,
+            @Param("escalaEventoId") UUID escalaEventoId,
+            @Param("membrosMinisterioIds") List<UUID> membrosMinisterioIds
     );
 }
 
