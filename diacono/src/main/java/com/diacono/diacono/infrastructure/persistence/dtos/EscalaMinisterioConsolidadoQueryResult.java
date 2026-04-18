@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record EscalaMinisterioConsolidadoQueryResult(
-        UUID idEventoExterno,
+        UUID idExternoEscalaEvento,
         String nomeReuniao,
         LocalDateTime dataHoraFim,
         LocalDateTime dataHoraInicio,

@@ -13,4 +13,5 @@ public interface EscalaMinisterioRepository {
     List<EscalaMinisterioConsolidadoDTO> findEscalaMinisterioConsolidadoByPeriodo(UUID igrejaId, LocalDateTime inicioMes, LocalDateTime fimMes, EnumStatusEscalaMinisterio status, List<UUID> listaMinisterios, String nomeEvento);
     List<EscalaMinisterioDTO> findEscalaMinisterioByPeriodo(UUID igrejaId, LocalDateTime inicioMes, LocalDateTime fimMes, EnumStatusEscalaMinisterio status, UUID membroId, UUID ministerioId, String nomeEvento);
     List<EscalaMembroMinisterioDTO> findEscalaMembroMinisterioByEscalaEventoId(UUID igrejaId, UUID escalaEventoId);
+    List<UUID> findMembrosMinisterioOcupadosByEscalaEventoId(UUID igrejaId, UUID escalaEventoId);
 }

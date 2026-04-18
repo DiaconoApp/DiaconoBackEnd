@@ -1,8 +1,10 @@
 package com.diacono.diacono.usecases.escalasministerio;
 
 import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMembroMinisterioDTO;
+import com.diacono.diacono.applications.dtos.ministerio.MinisterioSuperSimplificadoDTO;
 import com.diacono.diacono.domain.repository.EscalaEventoRepository;
 import com.diacono.diacono.domain.repository.EscalaMinisterioRepository;
+import com.diacono.diacono.domain.repository.MembroMinisterioRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +30,9 @@ class BuscarMembrosMinisterioPorEscalaEventoIdUseCaseTest {
 
     @Mock
     private EscalaEventoRepository escalaEventoRepository;
+
+    @Mock
+    private MembroMinisterioRepository membroMinisterioRepository;
 
     @InjectMocks
     private BuscarMembrosMinisterioPorEscalaEventoIdUseCase useCase;
@@ -61,14 +66,68 @@ class BuscarMembrosMinisterioPorEscalaEventoIdUseCaseTest {
 
         when(escalaEventoRepository.findMinisterioIdByEscalaEventoId(igrejaId, escalaEventoId))
                 .thenReturn(ministerioId);
+        when(membroMinisterioRepository.buscarMinisterioLider(membroId, igrejaId))
+                .thenReturn(List.of(new MinisterioSuperSimplificadoDTO(ministerioId, "Louvor")));
         when(escalaMinisterioRepository.findEscalaMembroMinisterioByEscalaEventoId(igrejaId, escalaEventoId))
                 .thenReturn(esperado);
+        when(escalaMinisterioRepository.findMembrosMinisterioOcupadosByEscalaEventoId(igrejaId, escalaEventoId))
+                .thenReturn(List.of());
 
         List<EscalaMembroMinisterioDTO> response = useCase.execute(escalaEventoId, igrejaId, membroId);
 
         assertEquals(esperado, response);
         verify(escalaEventoRepository).findMinisterioIdByEscalaEventoId(igrejaId, escalaEventoId);
         verify(escalaMinisterioRepository).findEscalaMembroMinisterioByEscalaEventoId(igrejaId, escalaEventoId);
+        verify(escalaMinisterioRepository).findMembrosMinisterioOcupadosByEscalaEventoId(igrejaId, escalaEventoId);
+    }
+
+    @Test
+    void deveIncrementarIndicadorDeMembroOcupadoComBaseNaSegundaConsulta() {
+        UUID igrejaId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID escalaEventoId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+        UUID membroId = UUID.fromString("33333333-3333-3333-3333-333333333333");
+        UUID ministerioId = UUID.fromString("44444444-4444-4444-4444-444444444444");
+        UUID membroMinisterioLivreId = UUID.fromString("55555555-5555-5555-5555-555555555555");
+        UUID membroMinisterioOcupadoId = UUID.fromString("66666666-6666-6666-6666-666666666666");
+
+        when(escalaEventoRepository.findMinisterioIdByEscalaEventoId(igrejaId, escalaEventoId))
+                .thenReturn(ministerioId);
+        when(membroMinisterioRepository.buscarMinisterioLider(membroId, igrejaId))
+                .thenReturn(List.of(new MinisterioSuperSimplificadoDTO(ministerioId, "Louvor")));
+        when(escalaMinisterioRepository.findEscalaMembroMinisterioByEscalaEventoId(igrejaId, escalaEventoId))
+                .thenReturn(List.of(
+                        new EscalaMembroMinisterioDTO(membroMinisterioLivreId, "Ana", null, null),
+                        new EscalaMembroMinisterioDTO(membroMinisterioOcupadoId, "Bruno", null, null)
+                ));
+        when(escalaMinisterioRepository.findMembrosMinisterioOcupadosByEscalaEventoId(igrejaId, escalaEventoId))
+                .thenReturn(List.of(membroMinisterioOcupadoId));
+
+        List<EscalaMembroMinisterioDTO> response = useCase.execute(escalaEventoId, igrejaId, membroId);
+
+        assertEquals(false, response.get(0).isMembroOcupado());
+        assertEquals(true, response.get(1).isMembroOcupado());
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoLiderNaoPossuiVinculoComMinisterioDaEscala() {
+        UUID igrejaId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID escalaEventoId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+        UUID membroId = UUID.fromString("33333333-3333-3333-3333-333333333333");
+        UUID ministerioEscalaId = UUID.fromString("44444444-4444-4444-4444-444444444444");
+        UUID ministerioLiderId = UUID.fromString("55555555-5555-5555-5555-555555555555");
+
+        when(escalaEventoRepository.findMinisterioIdByEscalaEventoId(igrejaId, escalaEventoId))
+                .thenReturn(ministerioEscalaId);
+        when(membroMinisterioRepository.buscarMinisterioLider(membroId, igrejaId))
+                .thenReturn(List.of(new MinisterioSuperSimplificadoDTO(ministerioLiderId, "Kids")));
+
+        ObjectNotFoundException ex = assertThrows(
+                ObjectNotFoundException.class,
+                () -> useCase.execute(escalaEventoId, igrejaId, membroId)
+        );
+
+        assertEquals("O líder informado não possui vínculo com o ministério solicitado.", ex.getMessage());
+        verify(escalaMinisterioRepository, never()).findEscalaMembroMinisterioByEscalaEventoId(igrejaId, escalaEventoId);
     }
 }
 

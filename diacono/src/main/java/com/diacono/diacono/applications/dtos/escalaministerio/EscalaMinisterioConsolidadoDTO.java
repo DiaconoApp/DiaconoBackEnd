@@ -1,7 +1,6 @@
 package com.diacono.diacono.applications.dtos.escalaministerio;
 
 import com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio;
-import com.diacono.diacono.domain.enums.EnumStatusEvento;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

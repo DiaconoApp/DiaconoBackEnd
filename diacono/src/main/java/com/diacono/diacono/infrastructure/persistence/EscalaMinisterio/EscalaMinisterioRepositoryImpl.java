@@ -43,7 +43,7 @@ public class EscalaMinisterioRepositoryImpl implements EscalaMinisterioRepositor
 
         return queryResults.stream()
                 .map(result -> new EscalaMinisterioConsolidadoDTO(
-                        result.idEventoExterno(),
+                        result.idExternoEscalaEvento(),
                         result.nomeReuniao(),
                         result.dataHoraFim(),
                         result.dataHoraInicio(),
@@ -90,6 +90,11 @@ public class EscalaMinisterioRepositoryImpl implements EscalaMinisterioRepositor
                         result.isMembroOcupado()
                 ))
                 .toList();
+    }
+
+    @Override
+    public List<UUID> findMembrosMinisterioOcupadosByEscalaEventoId(UUID igrejaId, UUID escalaEventoId) {
+        return jpaRepository.findMembrosMinisterioOcupadosByEscalaEventoId(igrejaId, escalaEventoId);
     }
 }
 

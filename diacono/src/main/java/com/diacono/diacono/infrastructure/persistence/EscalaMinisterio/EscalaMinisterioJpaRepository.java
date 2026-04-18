@@ -19,7 +19,7 @@ public interface EscalaMinisterioJpaRepository extends JpaRepository<EscalaMinis
 
     @Query("""
             SELECT new com.diacono.diacono.infrastructure.persistence.dtos.EscalaMinisterioConsolidadoQueryResult(
-                e.idExterno,
+                ee.idExterno,
                 e.nome,
                 e.dataHoraFim,
                 e.dataHoraInicio,
@@ -50,7 +50,7 @@ public interface EscalaMinisterioJpaRepository extends JpaRepository<EscalaMinis
 
     @Query("""
             SELECT new com.diacono.diacono.infrastructure.persistence.dtos.EscalaMinisterioQueryResult(
-                ee.idExterno,
+                em.idExterno,
                 e.nome,
                 mi.nome,
                 e.dataHoraFim,
@@ -100,6 +100,32 @@ public interface EscalaMinisterioJpaRepository extends JpaRepository<EscalaMinis
             ORDER BY m.nome ASC
             """)
     List<EscalaMembroMinisterioQueryResult> findEscalaMembroMinisterioByEscalaEventoId(
+            @Param("igrejaId") UUID igrejaId,
+            @Param("escalaEventoId") UUID escalaEventoId
+    );
+
+    @Query("""
+            SELECT DISTINCT mm.idExterno
+            FROM EscalaEvento ee
+            JOIN ee.evento e
+            JOIN ee.ministerio mi
+            JOIN mi.membros mm
+            WHERE e.igreja.idExterno = :igrejaId
+              AND ee.idExterno = :escalaEventoId
+              AND EXISTS (
+                  SELECT 1
+                  FROM EscalaMinisterio emConflito
+                  JOIN emConflito.escalaEvento eeConflito
+                  JOIN eeConflito.evento eConflito
+                  JOIN emConflito.membroMinisterio mmConflito
+                  WHERE mmConflito.membro.idExterno = mm.membro.idExterno
+                    AND eConflito.igreja.idExterno = :igrejaId
+                    AND eeConflito.idExterno <> :escalaEventoId
+                    AND eConflito.dataHoraInicio <= e.dataHoraFim
+                    AND eConflito.dataHoraFim >= e.dataHoraInicio
+              )
+            """)
+    List<UUID> findMembrosMinisterioOcupadosByEscalaEventoId(
             @Param("igrejaId") UUID igrejaId,
             @Param("escalaEventoId") UUID escalaEventoId
     );
