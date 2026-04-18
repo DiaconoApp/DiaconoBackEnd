@@ -199,6 +199,7 @@ INSERT INTO membro_ministerio (
 ('40000000-0000-0000-0000-000000000028', 36, 2, 'MEMBRO_MINISTERIO', 'Kids e Juniores', '2021-02-01'),
 ('40000000-0000-0000-0000-000000000029', 41, 2, 'MEMBRO_MINISTERIO', 'Kids e Juniores', '2019-10-10'),
 ('40000000-0000-0000-0000-000000000030', 46, 2, 'MEMBRO_MINISTERIO', 'Kids e Juniores', '2021-08-12'),
+('40000000-0000-0000-0000-000000000049', 2, 2, 'MEMBRO_MINISTERIO', 'Kids e Juniores', '2024-01-01'),
 
 -- Continuação Recepção e Acolhimento (fk_ministerio 3)
 ('40000000-0000-0000-0000-000000000031', 22, 3, 'MEMBRO_MINISTERIO', 'Recepção e Acolhimento', '2019-05-01'),
@@ -464,6 +465,7 @@ INSERT INTO escala_ministerio (id_externo, fk_escala_evento, fk_membro_ministeri
 ('70000000-0000-0000-0000-000000000083', 9, 28, 'CONFIRMADO'),
 ('70000000-0000-0000-0000-000000000084', 9, 29, 'CONFIRMADO'),
 ('70000000-0000-0000-0000-000000000085', 9, 30, 'CONFIRMADO'),
+('70000000-0000-0000-0000-000000000638', 23, 49, 'CONFIRMADO'),  -- mesma pessoa escalada em outro ministério no mesmo evento
 ('70000000-0000-0000-0000-000000000086', 10, 1, 'CONFIRMADO'),  -- escala_evento 10 / ministerio 1
 ('70000000-0000-0000-0000-000000000087', 10, 2, 'CONFIRMADO'),
 ('70000000-0000-0000-0000-000000000088', 10, 3, 'CONFIRMADO'),
@@ -582,14 +584,14 @@ INSERT INTO escala_ministerio (id_externo, fk_escala_evento, fk_membro_ministeri
 ('70000000-0000-0000-0000-000000000201', 21, 35, 'CONFIRMADO'),
 ('70000000-0000-0000-0000-000000000202', 21, 36, 'CONFIRMADO'),
 ('70000000-0000-0000-0000-000000000203', 22, 1, 'CONFIRMADO'),  -- escala_evento 22 / ministerio 1
-('70000000-0000-0000-0000-000000000204', 22, 2, 'CONFIRMADO'),
+-- ('70000000-0000-0000-0000-000000000204', 22, 2, 'CONFIRMADO'),  -- Individuo indisponivel devido outro evento, conflitante
 ('70000000-0000-0000-0000-000000000205', 22, 3, 'CONFIRMADO'),
 ('70000000-0000-0000-0000-000000000206', 22, 4, 'CONFIRMADO'),
 ('70000000-0000-0000-0000-000000000207', 22, 19, 'CONFIRMADO'),
-('70000000-0000-0000-0000-000000000208', 22, 20, 'CONFIRMADO'),
+-- ('70000000-0000-0000-0000-000000000208', 22, 20, 'CONFIRMADO'), -- Individuo indisponivel devido outro evento, conflitante
 ('70000000-0000-0000-0000-000000000209', 22, 21, 'CONFIRMADO'),
 ('70000000-0000-0000-0000-000000000210', 22, 22, 'CONFIRMADO'),
-('70000000-0000-0000-0000-000000000211', 22, 23, 'CONFIRMADO'),
+-- ('70000000-0000-0000-0000-000000000211', 22, 23, 'CONFIRMADO'),  -- Individuo indisponivel devido outro evento, conflitante
 ('70000000-0000-0000-0000-000000000212', 22, 24, 'CONFIRMADO'),
 ('70000000-0000-0000-0000-000000000213', 23, 5, 'CONFIRMADO'),  -- escala_evento 23 / ministerio 2
 ('70000000-0000-0000-0000-000000000214', 23, 6, 'CONFIRMADO'),
@@ -1013,4 +1015,24 @@ INSERT INTO escala_ministerio (id_externo, fk_escala_evento, fk_membro_ministeri
 ('70000000-0000-0000-0000-000000000632', 67, 40, 'CONFIRMADO'),
 ('70000000-0000-0000-0000-000000000633', 67, 41, 'CONFIRMADO'),
 ('70000000-0000-0000-0000-000000000634', 67, 42, 'CONFIRMADO');
+
+
+-- ==================================================================================
+-- 8. EVENTO SOBREPOSTO PARA GERAR MEMBROS OCUPADOS NO ENDPOINT
+-- ==================================================================================
+
+INSERT INTO evento (
+    id_externo, fk_igreja, fk_organizador, fk_endereco,
+    nome, descricao, publico_alvo, data_hora_inicio, data_hora_fim, custo, status
+) VALUES
+('50000000-0000-0000-0000-000000000029', 1, 1, NULL, 'Retiro de Verão: Profundidade - Encontro Paralelo', 'Evento criado para sobrepor o retiro e gerar conflito de agenda', 'Geral', '2026-01-17 18:00:00', '2026-01-20 16:00:00', 0.00, 'CONFIRMADO');
+
+INSERT INTO escala_evento (id_externo, fk_evento, fk_ministerio, status_escala_evento) VALUES
+('60000000-0000-0000-0000-000000000068', 29, 1, 'CONFIRMADO');
+
+INSERT INTO escala_ministerio (id_externo, fk_escala_evento, fk_membro_ministerio, status_escala_ministerio) VALUES
+('70000000-0000-0000-0000-000000000635', 68, 2, 'CONFIRMADO'),
+('70000000-0000-0000-0000-000000000636', 68, 20, 'CONFIRMADO'),
+('70000000-0000-0000-0000-000000000637', 68, 23, 'CONFIRMADO');
+
 

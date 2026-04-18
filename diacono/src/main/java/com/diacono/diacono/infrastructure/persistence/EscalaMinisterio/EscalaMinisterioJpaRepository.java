@@ -120,9 +120,17 @@ public interface EscalaMinisterioJpaRepository extends JpaRepository<EscalaMinis
                   JOIN emConflito.membroMinisterio mmConflito
                   WHERE mmConflito.membro.idExterno = mm.membro.idExterno
                     AND eConflito.igreja.idExterno = :igrejaId
-                    AND eeConflito.idExterno <> :escalaEventoId
-                    AND eConflito.dataHoraInicio <= e.dataHoraFim
-                    AND eConflito.dataHoraFim >= e.dataHoraInicio
+                    AND (
+                        (
+                            eeConflito.idExterno = ee.idExterno
+                            AND eeConflito.ministerio.idExterno <> ee.ministerio.idExterno
+                        )
+                        OR (
+                            eeConflito.idExterno <> ee.idExterno
+                            AND eConflito.dataHoraInicio <= e.dataHoraFim
+                            AND eConflito.dataHoraFim >= e.dataHoraInicio
+                        )
+                    )
               )
             """)
     List<UUID> findMembrosMinisterioOcupadosByEscalaEventoId(
