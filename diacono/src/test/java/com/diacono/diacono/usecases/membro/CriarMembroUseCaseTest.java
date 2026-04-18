@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -128,7 +129,7 @@ class CriarMembroUseCaseTest {
 				"samuel@teste.com",
 				"11999999999",
 				"123456",
-				null,
+				(List<UUID>) null,
 				EnumCargoMembro.LIDER_MINISTERIO,
 				EnumGeneroMembro.MASCULINO,
 				new EnderecoMembroDTO("12345678", "SP", "SAO PAULO", "CENTRO", "RUA A", "AP 1", "10")

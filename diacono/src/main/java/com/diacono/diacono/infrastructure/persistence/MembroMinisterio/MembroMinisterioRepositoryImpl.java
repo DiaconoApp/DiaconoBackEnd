@@ -73,4 +73,9 @@ public class MembroMinisterioRepositoryImpl implements MembroMinisterioRepositor
     public List<MinisterioDashQuantidadeMembrosDTO> buscarQuantidadeMembros(int anoInicio, int anoFim, UUID igrejaId) {
         return jpaRepository.buscarQuantidadeMembros(anoInicio, anoFim, igrejaId);
     }
+
+    @Override
+    public void flush() {
+        jpaRepository.flush();
+    }
 }

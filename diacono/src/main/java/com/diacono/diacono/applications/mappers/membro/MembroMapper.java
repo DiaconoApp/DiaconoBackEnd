@@ -2,6 +2,7 @@ package com.diacono.diacono.applications.mappers.membro;
 
 import com.diacono.diacono.applications.dtos.CadastroExternoDTO;
 import com.diacono.diacono.applications.dtos.membro.MembroCreateDTO;
+import com.diacono.diacono.applications.dtos.membro.MembroDetalheResponseDTO;
 import com.diacono.diacono.applications.dtos.membro.MembroResponseDTO;
 import com.diacono.diacono.applications.dtos.membro.MembroSimplificadoDTO;
 import com.diacono.diacono.applications.mappers.endereco.EnderecoMembroMapper;
@@ -19,6 +20,12 @@ public interface MembroMapper {
 
     @Mapping(source = "cargoMembro", target = "cargo")
     MembroResponseDTO paraMembroResponseDTO(Membro membro);
+
+    @Mapping(source = "cargoMembro", target = "cargo")
+    @Mapping(source = "igreja.idExterno", target = "fkIgreja")
+    @Mapping(source = "enderecoMembro", target = "membroEnderecoDTO")
+    @Mapping(target = "ministerios", source = "ministerios")
+    MembroDetalheResponseDTO paraMembroDetalheResponseDTO(Membro membro);
 
     MembroSimplificadoDTO paraMembroSimplificadoDTO(Membro membro);
 
@@ -41,5 +48,4 @@ public interface MembroMapper {
     @Mapping(target = "idExterno", ignore = true)
     @Mapping(target = "status", ignore = true)
     Membro paraMembro(CadastroExternoDTO membroDTO);
-
 }
