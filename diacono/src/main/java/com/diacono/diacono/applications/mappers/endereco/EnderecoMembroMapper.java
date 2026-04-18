@@ -1,6 +1,7 @@
 package com.diacono.diacono.applications.mappers.endereco;
 
 import com.diacono.diacono.applications.dtos.membro.EnderecoMembroDTO;
+import com.diacono.diacono.applications.dtos.membro.EnderecoMembroResponseDTO;
 import com.diacono.diacono.domain.entity.EnderecoMembro;
 import org.mapstruct.Mapper;
 
@@ -8,4 +9,6 @@ import org.mapstruct.Mapper;
 public interface EnderecoMembroMapper {
 
     EnderecoMembro paraEnderecoMembro(EnderecoMembroDTO enderecoMembroDto);
+
+    EnderecoMembroResponseDTO paraEnderecoMembroResponseDTO(EnderecoMembro enderecoMembro);
 }

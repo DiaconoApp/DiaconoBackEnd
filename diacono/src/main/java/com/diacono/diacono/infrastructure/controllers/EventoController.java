@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -42,28 +43,24 @@ public class EventoController {
     @ApiErrorsComuns
     @ApiResponse(responseCode = "200", description = "Eventos encontrados com sucesso")
     @GetMapping
-    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO','SCOPE_GOVERNO')")
     public ResponseEntity<EventoSimplificadoDTO> buscarEventosPorMesEAno(@RequestParam int mes, @RequestParam int ano){
-        //completo
         return ResponseEntity.status(HttpStatus.OK).body(buscarEventosPorMesEAnoUseCase.execute(mes, ano));
     }
 
     @ApiErrorsComuns
     @ApiResponse(responseCode = "200", description = "Evento encontrado com sucesso")
     @GetMapping("/{id}")
-    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO', 'SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO','SCOPE_GOVERNO')")
     public ResponseEntity<EventoCompletoDTO> buscarEventoEspecifico(@PathVariable("id") UUID id){
-        //COMPLETO
         return ResponseEntity.status(HttpStatus.OK).body(buscarEventoEspecificoUseCase.execute(id));
     }
 
     @ApiErrorsComuns
-    @ApiResponse(responseCode = "200", description = "Evento encontrado com sucesso")
+    @ApiResponse(responseCode = "200", description = "Endereços de eventos")
     @GetMapping("/enderecos")
-    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO', 'SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO','SCOPE_GOVERNO')")
     public ResponseEntity<EnderecoEventoSimplificadoDTO> buscarEnderecoEvento(){
-        //COMPLETO
-        //COLOCAR ISSO NUM CACHE
         return ResponseEntity.status(HttpStatus.OK).body(buscarEnderecoEventoUseCase.execute());
     }
 

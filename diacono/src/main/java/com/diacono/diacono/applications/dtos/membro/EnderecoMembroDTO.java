@@ -36,11 +36,11 @@ public record EnderecoMembroDTO(
 ) {
 
     public EnderecoMembroDTO {
-        estado = estado.toUpperCase(Locale.ROOT);
-        cidade = cidade.toUpperCase(Locale.ROOT);
-        bairro = bairro.toUpperCase(Locale.ROOT);
-        rua = rua.toUpperCase(Locale.ROOT);
-        complemento = complemento.toUpperCase(Locale.ROOT);
+        estado = estado != null ? estado.toUpperCase(Locale.ROOT) : null;
+        cidade = cidade != null ? cidade.toUpperCase(Locale.ROOT) : null;
+        bairro = bairro != null ? bairro.toUpperCase(Locale.ROOT) : null;
+        rua = rua != null ? rua.toUpperCase(Locale.ROOT) : null;
+        complemento = complemento != null ? complemento.toUpperCase(Locale.ROOT) : null;
     }
 }
 

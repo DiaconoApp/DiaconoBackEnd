@@ -3,11 +3,15 @@ package com.diacono.diacono.infrastructure.controllers;
 import com.diacono.diacono.applications.dtos.login.LoginRequestDTO;
 import com.diacono.diacono.applications.dtos.login.LoginResponseDTO;
 import com.diacono.diacono.usecases.LoginServiceUseCase;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.time.Duration;
 
 @RestController
 @RequestMapping("/api/v1/auth/login")
@@ -20,8 +24,19 @@ public class LoginController {
     }
 
     @PostMapping
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO loginRequestDTO){
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO loginRequestDTO) {
+        LoginResponseDTO loginResponse = loginServiceUseCase.execute(loginRequestDTO);
 
-        return ResponseEntity.ok(loginServiceUseCase.execute(loginRequestDTO));
+        ResponseCookie cookie = ResponseCookie.from("auth_token", loginResponse.acessToken())
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(Duration.ofSeconds(loginResponse.expiresIn()))
+                .sameSite("Strict")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(loginResponse);
     }
 }

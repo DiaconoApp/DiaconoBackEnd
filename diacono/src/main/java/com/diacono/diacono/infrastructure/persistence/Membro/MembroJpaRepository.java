@@ -7,6 +7,7 @@ import com.diacono.diacono.applications.dtos.membro.MembroKpiResponseDTO;
 import com.diacono.diacono.domain.entity.Membro;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,6 +19,7 @@ import java.util.UUID;
 @Repository
 public interface MembroJpaRepository extends JpaRepository<Membro, Long> {
 
+    @EntityGraph(attributePaths = {"enderecoMembro", "ministerios"})
     Membro findByIdExterno(UUID idExterno);
 
     Page<Membro> findByIgreja_IdExterno(UUID fkIgreja, Pageable pageable);
@@ -48,6 +50,7 @@ public interface MembroJpaRepository extends JpaRepository<Membro, Long> {
 
     Membro findByEmailOrCpf(String email, String cpf);
 
+    @EntityGraph(attributePaths = {"enderecoMembro", "ministerios"})
     Membro findByEmail(String email);
 
 

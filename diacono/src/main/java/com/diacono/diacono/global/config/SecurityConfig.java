@@ -2,6 +2,7 @@ package com.diacono.diacono.global.config;
 
 import com.diacono.diacono.auth.handler.CustomOAuth2AuthenticationSuccessHandler;
 import com.diacono.diacono.auth.service.CustomOidcUserService;
+import com.diacono.diacono.global.security.CookieBearerTokenResolver;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -9,7 +10,6 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -27,6 +27,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -38,31 +39,28 @@ public class SecurityConfig {
     private RSAPrivateKey rsaPrivateKey;
     @Value("${jwt.public.key}")
     private RSAPublicKey rsaPublicKey;
+    @Value("${cors.allowed-origins:http://localhost:5173}")
+    private String corsAllowedOrigins;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOidcUserService customOidcUserService, CustomOAuth2AuthenticationSuccessHandler successHandler ) throws Exception{
-
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOidcUserService customOidcUserService,
+                                                   CustomOAuth2AuthenticationSuccessHandler successHandler,
+                                                   JwtDecoder jwtDecoder) throws Exception {
         http
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login/**","/api/v1/auth/**",  "/oauth2/**", "/register/**").permitAll()
+                        .requestMatchers("/login/**", "/api/v1/auth/**", "/oauth2/**", "/register/**").permitAll()
                         .requestMatchers("/h2-console/**", "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/swagger-resources/**",
-                                "/webjars/**").permitAll()
+                                "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                /*oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .oidcUserService(customOidcUserService)
-                        )
-                        .successHandler(successHandler))*/
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .bearerTokenResolver(new CookieBearerTokenResolver())
+                        .jwt(jwt -> jwt.decoder(jwtDecoder)))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .logout(logout -> logout.logoutSuccessUrl("/").permitAll());
-
 
         return http.build();
     }
@@ -97,7 +95,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:5173"));
+        List<String> origins = Arrays.asList(corsAllowedOrigins.split(","));
+        configuration.setAllowedOriginPatterns(origins);
         configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

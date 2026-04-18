@@ -71,7 +71,8 @@ INSERT INTO endereco_membro (id_externo, rua, numero, bairro, cidade, estado, ce
 ('10000000-0000-0000-0000-000000000046', 'Rua Evangelina', '400', 'Vila Carrão', 'São Paulo', 'SP', '03421-000', NULL),
 ('10000000-0000-0000-0000-000000000047', 'Rua Francisca de Paula', '300', 'Vila Carrão', 'São Paulo', 'SP', '03436-000', NULL),
 ('10000000-0000-0000-0000-000000000048', 'Rua Xiririca', '500', 'Vila Carrão', 'São Paulo', 'SP', '03441-000', NULL),
-('10000000-0000-0000-0000-000000000049', 'Rua Lutécia', '800', 'Vila Carrão', 'São Paulo', 'SP', '03423-000', 'Casa de esquina');
+('10000000-0000-0000-0000-000000000049', 'Rua Lutécia', '800', 'Vila Carrão', 'São Paulo', 'SP', '03423-000', 'Casa de esquina'),
+('10000000-0000-0000-0000-000000000050', 'Rua do Governo', '1', 'Centro', 'São Paulo', 'SP', '01000-001', NULL);
 
 -- Endereços dos Eventos (prefixo 1100...)
 INSERT INTO endereco_evento (id_externo, rua, numero, bairro, cidade, estado, cep) VALUES
@@ -135,7 +136,8 @@ INSERT INTO membro (
 ('20000000-0000-0000-0000-000000000046', 1, 46, 3, 'Otávio Lins', '78901032166', '1994-04-02', '2021-06-12', 'otavio.lins@email.com', '11999990046', '$2a$10$agCzV50qLUM5cxjjiIbFi.WyjGf1lqWgGL.1HMD96aIOURmgF2aZW', 'ATIVO', 'MEMBRO', 'MASCULINO'),
 ('20000000-0000-0000-0000-000000000047', 1, 47, 2, 'Isabela Campos', '89012021077', '1995-12-25', '2023-01-05', 'isabela.cam@email.com', '11999990047', '$2a$10$agCzV50qLUM5cxjjiIbFi.WyjGf1lqWgGL.1HMD96aIOURmgF2aZW', 'ATIVO', 'MEMBRO', 'FEMININO'),
 ('20000000-0000-0000-0000-000000000048', 1, 48, 3, 'Vinícius Moura', '90123010988', '2002-02-18', '2023-08-20', 'vini.moura@email.com', '11999990048', '$2a$10$agCzV50qLUM5cxjjiIbFi.WyjGf1lqWgGL.1HMD96aIOURmgF2aZW', 'ATIVO', 'MEMBRO', 'MASCULINO'),
-('20000000-0000-0000-0000-000000000049', 1, 49, 2, 'Cecília Pires', '01234009899', '1983-03-08', '2015-05-20', 'cecilia.pires@email.com', '11999990049', '$2a$10$agCzV50qLUM5cxjjiIbFi.WyjGf1lqWgGL.1HMD96aIOURmgF2aZW', 'ATIVO', 'MEMBRO', 'FEMININO');
+('20000000-0000-0000-0000-000000000049', 1, 49, 2, 'Cecília Pires', '01234009899', '1983-03-08', '2015-05-20', 'cecilia.pires@email.com', '11999990049', '$2a$10$agCzV50qLUM5cxjjiIbFi.WyjGf1lqWgGL.1HMD96aIOURmgF2aZW', 'ATIVO', 'MEMBRO', 'FEMININO'),
+('20000000-0000-0000-0000-000000000050', 1, 50, NULL, 'Admin Governo', '00000000000', '1990-01-01', '2024-01-01', 'admin@diacono.com', '11000000000', '$2a$10$agCzV50qLUM5cxjjiIbFi.WyjGf1lqWgGL.1HMD96aIOURmgF2aZW', 'ATIVO', 'GOVERNO', 'MASCULINO');
 
 -- ==================================================================================
 -- 3. MINISTÉRIOS (Corrigido para hexadecimais válidos: prefixo 3000...)

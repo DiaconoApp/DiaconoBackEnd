@@ -6,6 +6,7 @@ import com.diacono.diacono.domain.entity.Membro;
 import com.diacono.diacono.domain.repository.MembroRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -20,6 +21,7 @@ public class BuscarMembroPorUUIDUseCase {
         this.membroMapper = membroMapper;
     }
 
+    @Transactional(readOnly = true)
     public MembroResponseDTO execute(UUID idExterno) {
         Membro membro = membroRepository.findByIdExterno(idExterno)
                 .orElseThrow(() -> new ObjectNotFoundException("Membro não encontrado"));

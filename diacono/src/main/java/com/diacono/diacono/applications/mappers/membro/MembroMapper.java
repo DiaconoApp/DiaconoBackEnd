@@ -18,6 +18,7 @@ import java.util.List;
 public interface MembroMapper {
 
     @Mapping(source = "cargoMembro", target = "cargo")
+    @Mapping(source = "enderecoMembro", target = "membroEnderecoDTO")
     MembroResponseDTO paraMembroResponseDTO(Membro membro);
 
     MembroSimplificadoDTO paraMembroSimplificadoDTO(Membro membro);
@@ -35,6 +36,7 @@ public interface MembroMapper {
     @Mapping(target = "idInterno", ignore = true)
     @Mapping(target = "idExterno", ignore = true)
     @Mapping(target = "status", ignore = true)
+    @Mapping(source = "membroEnderecoDTO", target = "enderecoMembro")
     Membro paraMembro(MembroCreateDTO membroDTO);
 
     @Mapping(target = "idInterno", ignore = true)

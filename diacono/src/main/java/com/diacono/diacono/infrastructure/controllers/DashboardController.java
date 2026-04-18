@@ -19,6 +19,7 @@ import com.diacono.diacono.usecases.dashboard.ministerios.BuscarKpiMinisteriosDa
 import com.diacono.diacono.usecases.dashboard.ministerios.BuscarKpiQuantidadeMembrosPorMinisterioDashUseCase;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -51,60 +52,52 @@ public class DashboardController {
     //Membros
 
     @GetMapping("/membros/kpis")
-    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO','SCOPE_GOVERNO')")
     public ResponseEntity<KpisMembrosDTO> buscarKpisMembros(@RequestParam int anoInicio, @RequestParam int anoFim) {
-
         return ResponseEntity.status(HttpStatus.OK).body(buscarKpiMembrosDashUseCase.execute(anoInicio, anoFim));
     }
 
     @GetMapping("/membros/evolucao")
-    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO','SCOPE_GOVERNO')")
     public ResponseEntity<List<MembroDashEvolucaoDTO>> buscarEvolucaoMembros(@RequestParam int anoInicio, @RequestParam int anoFim) {
-
         return ResponseEntity.status(HttpStatus.OK).body(buscarKpiEvolucaoMembrosDashUseCase.execute(anoInicio, anoFim));
     }
 
     @GetMapping("/membros/faixa-etaria")
-    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO','SCOPE_GOVERNO')")
     public ResponseEntity<DashboardFaixaEtariaMembroDTO> buscarFaixaEtariaMembros(@RequestParam int anoInicio, @RequestParam int anoFim) {
-
         return ResponseEntity.status(HttpStatus.OK).body(buscarKpiFaixaEtariaMembrosDashUseCase.execute(anoInicio, anoFim));
     }
 
     @GetMapping("/membros/genero")
-    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO','SCOPE_GOVERNO')")
     public ResponseEntity<DashboardGeneroMembroDTO> buscarGeneroMembros(@RequestParam int anoInicio, @RequestParam int anoFim) {
-
         return ResponseEntity.status(HttpStatus.OK).body(buscarKpiGeneroMembrosDashUseCase.execute(anoInicio, anoFim));
     }
 
     //Ministerios
 
     @GetMapping("/ministerios/kpis")
-    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO','SCOPE_GOVERNO')")
     public ResponseEntity<KpisMinisteriosDTO> buscarKpisMinisterios(@RequestParam int anoInicio, @RequestParam int anoFim) {
-
         return ResponseEntity.status(HttpStatus.OK).body(buscarKpiMinisteriosDashUseCase.execute(anoInicio, anoFim));
     }
 
     @GetMapping("/ministerios/evolucao/{idMinisterio}")
-    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO','SCOPE_GOVERNO')")
     public ResponseEntity<List<MinisterioDashEvolucaoDTO>> buscarEvolucaoMinisterio(@RequestParam int anoInicio, @RequestParam int anoFim, @PathVariable UUID idMinisterio) {
-
         return ResponseEntity.status(HttpStatus.OK).body(buscarKpiEvolucaoMinisteriosDashUseCase.execute(anoInicio, anoFim, idMinisterio));
     }
 
     @GetMapping("/ministerios/quantidade-membros")
-    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO','SCOPE_GOVERNO')")
     public ResponseEntity<List<MinisterioDashQuantidadeMembrosDTO>> buscarQuantidadeMembrosPorMinisterio(@RequestParam int anoInicio, @RequestParam int anoFim) {
-
         return ResponseEntity.status(HttpStatus.OK).body(buscarKpiQuantidadeMembrosPorMinisterioDashUseCase.execute(anoInicio, anoFim));
     }
 
     @GetMapping("/ministerios/quantidade-eventos")
-    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO','SCOPE_GOVERNO')")
     public ResponseEntity<List<MinisterioEventoDashDTO>> buscarQuantidadeEventosPorMinisterio(@RequestParam int anoInicio, @RequestParam int anoFim) {
-
         return ResponseEntity.status(HttpStatus.OK).body(buscarKpiQuantidadeEventosPorMinisterioDashUseCase.execute(anoInicio, anoFim));
     }
 
