@@ -266,112 +266,112 @@ INSERT INTO evento (
 -- ==================================================================================
 
 INSERT INTO escala_evento (id_externo, fk_evento, fk_ministerio, status_escala_evento) VALUES
-(RANDOM_UUID(), 1, 1, 'CONFIRMADO'),  -- Culto Família / Louvor
-(RANDOM_UUID(), 1, 2, 'CONFIRMADO'),  -- Culto Família / Kids
-(RANDOM_UUID(), 1, 3, 'CONFIRMADO'),  -- Culto Família / Recepção
-(RANDOM_UUID(), 1, 4, 'CONFIRMADO'),  -- Culto Família / Multimídia
-(RANDOM_UUID(), 1, 5, 'CONFIRMADO'),  -- Culto Família / Intercessão
-(RANDOM_UUID(), 2, 1, 'CONFIRMADO'),  -- Sábado Jovem / Louvor
-(RANDOM_UUID(), 2, 3, 'CONFIRMADO'),  -- Sábado Jovem / Recepção
-(RANDOM_UUID(), 2, 4, 'CONFIRMADO'),  -- Sábado Jovem / Multimídia
-(RANDOM_UUID(), 3, 2, 'CONFIRMADO'),  -- Tarde Alegria / Kids
-(RANDOM_UUID(), 4, 1, 'CONFIRMADO'),  -- Acampamento / Louvor
-(RANDOM_UUID(), 4, 2, 'CONFIRMADO'),  -- Acampamento / Kids
-(RANDOM_UUID(), 4, 3, 'CONFIRMADO'),  -- Acampamento / Recepção
-(RANDOM_UUID(), 4, 4, 'CONFIRMADO'),  -- Acampamento / Multimídia
-(RANDOM_UUID(), 4, 5, 'CONFIRMADO'),  -- Acampamento / Intercessão
-(RANDOM_UUID(), 5, 4, 'CONFIRMADO'),  -- Workshop / Multimídia
-(RANDOM_UUID(), 6, 1, 'CONFIRMADO'),  -- Ide Praças / Louvor
-(RANDOM_UUID(), 6, 5, 'CONFIRMADO'),  -- Ide Praças / Intercessão
-(RANDOM_UUID(), 7, 1, 'CONFIRMADO'),  -- Vigília / Louvor
-(RANDOM_UUID(), 7, 5, 'CONFIRMADO'),  -- Vigília / Intercessão
-(RANDOM_UUID(), 8, 2, 'CONFIRMADO'),  -- Café Boas Vindas / Kids
-(RANDOM_UUID(), 8, 3, 'CONFIRMADO'), -- Café Boas Vindas / Recepção
+('60000000-0000-0000-0000-000000000001', 1, 1, 'CONFIRMADO'),  -- Culto Família / Louvor
+('60000000-0000-0000-0000-000000000002', 1, 2, 'CONFIRMADO'),  -- Culto Família / Kids
+('60000000-0000-0000-0000-000000000003', 1, 3, 'CONFIRMADO'),  -- Culto Família / Recepção
+('60000000-0000-0000-0000-000000000004', 1, 4, 'CONFIRMADO'),  -- Culto Família / Multimídia
+('60000000-0000-0000-0000-000000000005', 1, 5, 'CONFIRMADO'),  -- Culto Família / Intercessão
+('60000000-0000-0000-0000-000000000006', 2, 1, 'CONFIRMADO'),  -- Sábado Jovem / Louvor
+('60000000-0000-0000-0000-000000000007', 2, 3, 'CONFIRMADO'),  -- Sábado Jovem / Recepção
+('60000000-0000-0000-0000-000000000008', 2, 4, 'CONFIRMADO'),  -- Sábado Jovem / Multimídia
+('60000000-0000-0000-0000-000000000009', 3, 2, 'CONFIRMADO'),  -- Tarde Alegria / Kids
+('60000000-0000-0000-0000-000000000010', 4, 1, 'CONFIRMADO'),  -- Acampamento / Louvor
+('60000000-0000-0000-0000-000000000011', 4, 2, 'CONFIRMADO'),  -- Acampamento / Kids
+('60000000-0000-0000-0000-000000000012', 4, 3, 'CONFIRMADO'),  -- Acampamento / Recepção
+('60000000-0000-0000-0000-000000000013', 4, 4, 'CONFIRMADO'),  -- Acampamento / Multimídia
+('60000000-0000-0000-0000-000000000014', 4, 5, 'CONFIRMADO'),  -- Acampamento / Intercessão
+('60000000-0000-0000-0000-000000000015', 5, 4, 'CONFIRMADO'),  -- Workshop / Multimídia
+('60000000-0000-0000-0000-000000000016', 6, 1, 'CONFIRMADO'),  -- Ide Praças / Louvor
+('60000000-0000-0000-0000-000000000017', 6, 5, 'CONFIRMADO'),  -- Ide Praças / Intercessão
+('60000000-0000-0000-0000-000000000018', 7, 1, 'CONFIRMADO'),  -- Vigília / Louvor
+('60000000-0000-0000-0000-000000000019', 7, 5, 'CONFIRMADO'),  -- Vigília / Intercessão
+('60000000-0000-0000-0000-000000000020', 8, 2, 'CONFIRMADO'),  -- Café Boas Vindas / Kids
+('60000000-0000-0000-0000-000000000021', 8, 3, 'CONFIRMADO'), -- Café Boas Vindas / Recepção
 -- Retiro de Verão: Profundidade (fk_evento 9) - Grande evento, envolve todos
-(RANDOM_UUID(), 9, 1, 'CONFIRMADO'),
-(RANDOM_UUID(), 9, 2, 'CONFIRMADO'),
-(RANDOM_UUID(), 9, 3, 'CONFIRMADO'),
-(RANDOM_UUID(), 9, 4, 'CONFIRMADO'),
-(RANDOM_UUID(), 9, 5, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000022', 9, 1, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000023', 9, 2, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000024', 9, 3, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000025', 9, 4, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000026', 9, 5, 'CONFIRMADO'),
 
 -- Reunião dos Diáconos (fk_evento 10) - Não requer muitos ministérios de suporte
-(RANDOM_UUID(), 10, 5, 'CONFIRMADO'), -- Intercessão pela reunião
+('60000000-0000-0000-0000-000000000027', 10, 5, 'CONFIRMADO'), -- Intercessão pela reunião
 
 -- Culto de Missões (fk_evento 11) - Culto regular, foco em Louvor/Recepção/Multimídia
-(RANDOM_UUID(), 11, 1, 'CONFIRMADO'),
-(RANDOM_UUID(), 11, 3, 'CONFIRMADO'),
-(RANDOM_UUID(), 11, 4, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000028', 11, 1, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000029', 11, 3, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000030', 11, 4, 'CONFIRMADO'),
 
 -- Noite do Cinema Kids (fk_evento 12) - Foco em Kids e Multimídia
-(RANDOM_UUID(), 12, 2, 'CONFIRMADO'),
-(RANDOM_UUID(), 12, 4, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000031', 12, 2, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000032', 12, 4, 'CONFIRMADO'),
 
 -- Treinamento para Novos Membros (fk_evento 13) - Suporte básico
-(RANDOM_UUID(), 13, 3, 'CONFIRMADO'),
-(RANDOM_UUID(), 13, 4, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000033', 13, 3, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000034', 13, 4, 'CONFIRMADO'),
 
 -- Jantar de Casais: Renovação (fk_evento 14) - Requer Recepção e Louvor para ambiente
-(RANDOM_UUID(), 14, 1, 'CONFIRMADO'),
-(RANDOM_UUID(), 14, 3, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000035', 14, 1, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000036', 14, 3, 'CONFIRMADO'),
 
 -- Culto Especial de Páscoa (fk_evento 15) - Grande evento, como o Culto da Família
-(RANDOM_UUID(), 15, 1, 'CONFIRMADO'),
-(RANDOM_UUID(), 15, 2, 'CONFIRMADO'),
-(RANDOM_UUID(), 15, 3, 'CONFIRMADO'),
-(RANDOM_UUID(), 15, 4, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000037', 15, 1, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000038', 15, 2, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000039', 15, 3, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000040', 15, 4, 'CONFIRMADO'),
 
 -- Estudo Bíblico Semanal (fk_evento 16) - Suporte mínimo
-(RANDOM_UUID(), 16, 4, 'CONFIRMADO'),
-(RANDOM_UUID(), 16, 5, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000041', 16, 4, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000042', 16, 5, 'CONFIRMADO'),
 
 -- Chá de Oração das Mulheres (fk_evento 17) - Foco em Intercessão e Recepção
-(RANDOM_UUID(), 17, 3, 'CONFIRMADO'),
-(RANDOM_UUID(), 17, 5, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000043', 17, 3, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000044', 17, 5, 'CONFIRMADO'),
 
 -- Reunião de Líderes de Célula (fk_evento 18) - Suporte básico
-(RANDOM_UUID(), 18, 4, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000045', 18, 4, 'CONFIRMADO'),
 
 -- Conferência de Louvor e Adoração (fk_evento 19) - Foco total em Louvor e Multimídia
-(RANDOM_UUID(), 19, 1, 'CONFIRMADO'),
-(RANDOM_UUID(), 19, 3, 'CONFIRMADO'),
-(RANDOM_UUID(), 19, 4, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000046', 19, 1, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000047', 19, 3, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000048', 19, 4, 'CONFIRMADO'),
 
 -- Dia do Amigo Kids (fk_evento 20) - Foco em Kids e Recepção
-(RANDOM_UUID(), 20, 2, 'CONFIRMADO'),
-(RANDOM_UUID(), 20, 3, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000049', 20, 2, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000050', 20, 3, 'CONFIRMADO'),
 
 -- Semana de Santa Ceia (fk_evento 21) - Culto principal, envolve todos
-(RANDOM_UUID(), 21, 1, 'CONFIRMADO'),
-(RANDOM_UUID(), 21, 3, 'CONFIRMADO'),
-(RANDOM_UUID(), 21, 4, 'CONFIRMADO'),
-(RANDOM_UUID(), 21, 5, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000051', 21, 1, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000052', 21, 3, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000053', 21, 4, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000054', 21, 5, 'CONFIRMADO'),
 
 -- Feira Vocacional Cristã (fk_evento 22) - Grande evento aberto, foca em Recepção e Multimídia
-(RANDOM_UUID(), 22, 3, 'CONFIRMADO'),
-(RANDOM_UUID(), 22, 4, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000055', 22, 3, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000056', 22, 4, 'CONFIRMADO'),
 
 -- Atualização de Software e Streaming (fk_evento 23) - Foco exclusivo em Multimídia
-(RANDOM_UUID(), 23, 4, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000057', 23, 4, 'CONFIRMADO'),
 
 -- Culto de Ação de Graças (fk_evento 24) - Culto principal
-(RANDOM_UUID(), 24, 1, 'CONFIRMADO'),
-(RANDOM_UUID(), 24, 3, 'CONFIRMADO'),
-(RANDOM_UUID(), 24, 4, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000058', 24, 1, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000059', 24, 3, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000060', 24, 4, 'CONFIRMADO'),
 
 -- Campanha de Arrecadação de Roupas (fk_evento 25) - Ação social, foca em Recepção/Acolhimento
-(RANDOM_UUID(), 25, 3, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000061', 25, 3, 'CONFIRMADO'),
 
 -- Festa do Dia das Crianças (fk_evento 26) - Foco em Kids e Recepção
-(RANDOM_UUID(), 26, 2, 'CONFIRMADO'),
-(RANDOM_UUID(), 26, 3, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000062', 26, 2, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000063', 26, 3, 'CONFIRMADO'),
 
 -- Treinamento de Acolhimento (fk_evento 27) - Foco em Recepção
-(RANDOM_UUID(), 27, 3, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000064', 27, 3, 'CONFIRMADO'),
 
 -- Ceia de Natal Comunitária (fk_evento 28) - Grande evento de comunhão
-(RANDOM_UUID(), 28, 1, 'CONFIRMADO'),
-(RANDOM_UUID(), 28, 3, 'CONFIRMADO'),
-(RANDOM_UUID(), 28, 4, 'CONFIRMADO');
+('60000000-0000-0000-0000-000000000065', 28, 1, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000066', 28, 3, 'CONFIRMADO'),
+('60000000-0000-0000-0000-000000000067', 28, 4, 'CONFIRMADO');
 
 -- ==================================================================================
 -- 7. VINCULO ESCALA_EVENTO x MEMBRO_MINISTERIO

@@ -49,4 +49,8 @@ public class EscalaEventoRepositoryImpl implements EscalaEventoRepository {
                 ))
                 .toList();
     }
+
+    public UUID findMinisterioIdByEscalaEventoId(UUID idIgreja, UUID escalaEventoId) {
+        return jpaRepository.findMinisterioIdByEscalaEventoId(idIgreja, escalaEventoId);
+    };
 }

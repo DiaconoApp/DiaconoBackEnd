@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface EscalaEventoRepository {
     List<EscalaEventoConsolidadoDTO> findEscalaEventoConsolidadoByPeriodo(UUID idIgreja, LocalDateTime dataHoraInicio, LocalDateTime dataHoraFim, EnumStatusEvento status, UUID ministerioId, String nomeEvento);
     List<EscalaEventoEscaladoDTO> findEscalaEventoEscaladoByEventoId(UUID idIgreja, UUID eventoId);
+    UUID findMinisterioIdByEscalaEventoId(UUID idIgreja, UUID escalaEventoId);
 }

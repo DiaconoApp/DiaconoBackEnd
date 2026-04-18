@@ -2,6 +2,7 @@ package com.diacono.diacono.infrastructure.persistence.EscalaMinisterio;
 
 import com.diacono.diacono.domain.entity.EscalaMinisterio;
 import com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio;
+import com.diacono.diacono.infrastructure.persistence.dtos.EscalaMembroMinisterioQueryResult;
 import com.diacono.diacono.infrastructure.persistence.dtos.EscalaMinisterioConsolidadoQueryResult;
 import com.diacono.diacono.infrastructure.persistence.dtos.EscalaMinisterioQueryResult;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -77,6 +78,30 @@ public interface EscalaMinisterioJpaRepository extends JpaRepository<EscalaMinis
             @Param("membroId") UUID membroId,
             @Param("ministerioId") UUID ministerioId,
             @Param("nomeEvento") String nomeEvento
+    );
+
+    @Query("""
+            SELECT new com.diacono.diacono.infrastructure.persistence.dtos.EscalaMembroMinisterioQueryResult(
+                mm.idExterno,
+                m.nome,
+                em.statusEscalaMinisterio,
+                null
+            )
+            FROM EscalaEvento ee
+            JOIN ee.evento e
+            JOIN ee.ministerio mi
+            JOIN mi.membros mm
+            JOIN mm.membro m
+            LEFT JOIN EscalaMinisterio em
+                   ON em.escalaEvento = ee
+                  AND em.membroMinisterio = mm
+            WHERE e.igreja.idExterno = :igrejaId
+              AND ee.idExterno = :escalaEventoId
+            ORDER BY m.nome ASC
+            """)
+    List<EscalaMembroMinisterioQueryResult> findEscalaMembroMinisterioByEscalaEventoId(
+            @Param("igrejaId") UUID igrejaId,
+            @Param("escalaEventoId") UUID escalaEventoId
     );
 }
 

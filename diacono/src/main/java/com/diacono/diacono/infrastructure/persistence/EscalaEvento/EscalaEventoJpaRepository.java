@@ -56,4 +56,14 @@ public interface EscalaEventoJpaRepository extends JpaRepository<EscalaEvento, L
              """)
      List<EscalaEventoEscaladoQueryResult> findEscalaEventoEscaladoByEventoId(@Param("igrejaFk") UUID igrejaFk,
                                                                                @Param("eventoId") UUID eventoId);
+
+     @Query("""
+             SELECT ee.ministerio.idExterno
+             FROM EscalaEvento ee
+             JOIN ee.evento e
+             WHERE e.igreja.idExterno = :idIgreja
+               AND ee.idExterno = :escalaEventoId
+             """)
+    UUID findMinisterioIdByEscalaEventoId(@Param("idIgreja") UUID idIgreja,
+                                          @Param("escalaEventoId") UUID escalaEventoId);
 }

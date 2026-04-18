@@ -1,9 +1,11 @@
 package com.diacono.diacono.infrastructure.persistence.EscalaMinisterio;
 
+import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMembroMinisterioDTO;
 import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMinisterioConsolidadoDTO;
 import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMinisterioDTO;
 import com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio;
 import com.diacono.diacono.domain.repository.EscalaMinisterioRepository;
+import com.diacono.diacono.infrastructure.persistence.dtos.EscalaMembroMinisterioQueryResult;
 import com.diacono.diacono.infrastructure.persistence.dtos.EscalaMinisterioConsolidadoQueryResult;
 import com.diacono.diacono.infrastructure.persistence.dtos.EscalaMinisterioQueryResult;
 import org.springframework.stereotype.Repository;
@@ -72,6 +74,20 @@ public class EscalaMinisterioRepositoryImpl implements EscalaMinisterioRepositor
                         result.dataHoraFim(),
                         result.dataHoraInicio(),
                         result.status()
+                ))
+                .toList();
+    }
+
+    @Override
+    public List<EscalaMembroMinisterioDTO> findEscalaMembroMinisterioByEscalaEventoId(UUID igrejaId, UUID escalaEventoId) {
+        List<EscalaMembroMinisterioQueryResult> queryResults = jpaRepository.findEscalaMembroMinisterioByEscalaEventoId(igrejaId, escalaEventoId);
+
+        return queryResults.stream()
+                .map(result -> new EscalaMembroMinisterioDTO(
+                        result.membroMinisterioId(),
+                        result.nomeMembro(),
+                        result.status(),
+                        result.isMembroOcupado()
                 ))
                 .toList();
     }

@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class GerarEscalaEventoUseCase {
+    // TODO: Refatorar e Validar Posts
 
     private final BuscarMinisterioPorUUIDUseCase buscarMinisterioPorUUIDUseCase;
 
