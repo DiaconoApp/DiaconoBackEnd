@@ -23,17 +23,14 @@ public class BuscarEscalaMinisterioConsolidadoPorMesAnoUseCase {
 	private final EscalaMinisterioRepository escalaMinisterioRepository;
 	private final MembroMinisterioRepository membroMinisterioRepository;
 	private final ValidarMesEAno validarMesEAno;
-	private final BuscarMinisteriosLiderMinisterioUseCase buscarMinisteriosLiderMinisterioUseCase;
 
 	public BuscarEscalaMinisterioConsolidadoPorMesAnoUseCase(
 			EscalaMinisterioRepository escalaMinisterioRepository,
 			MembroMinisterioRepository membroMinisterioRepository,
-			ValidarMesEAno validarMesEAno,
-			BuscarMinisteriosLiderMinisterioUseCase buscarMinisteriosLiderMinisterioUseCase) {
+			ValidarMesEAno validarMesEAno) {
 		this.escalaMinisterioRepository = escalaMinisterioRepository;
 		this.membroMinisterioRepository = membroMinisterioRepository;
 		this.validarMesEAno = validarMesEAno;
-		this.buscarMinisteriosLiderMinisterioUseCase = buscarMinisteriosLiderMinisterioUseCase;
 	}
 
 	public List<EscalaMinisterioConsolidadoDTO> execute(

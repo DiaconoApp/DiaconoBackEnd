@@ -5,12 +5,14 @@ import com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record EscalaMinisterioQueryResult(
-        UUID idExternoEscalaMinisterio,
+public record EscalaMinisterioConsolidadoQueryResult(
+        UUID idEventoExterno,
         String nomeReuniao,
-        String nomeMinisterio,
         LocalDateTime dataHoraFim,
         LocalDateTime dataHoraInicio,
+        int membrosEscalados,
+        int membrosEscaladosConfirmados,
         EnumStatusEscalaMinisterio status
 ) {
 }
+

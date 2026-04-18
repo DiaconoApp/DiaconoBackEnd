@@ -1,8 +1,10 @@
 package com.diacono.diacono.infrastructure.persistence.EscalaMinisterio;
 
 import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMinisterioConsolidadoDTO;
+import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMinisterioDTO;
 import com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio;
 import com.diacono.diacono.domain.repository.EscalaMinisterioRepository;
+import com.diacono.diacono.infrastructure.persistence.dtos.EscalaMinisterioConsolidadoQueryResult;
 import com.diacono.diacono.infrastructure.persistence.dtos.EscalaMinisterioQueryResult;
 import org.springframework.stereotype.Repository;
 
@@ -28,7 +30,7 @@ public class EscalaMinisterioRepositoryImpl implements EscalaMinisterioRepositor
             List<UUID> listaMinisterios,
             String nomeEvento
     ) {
-        List<EscalaMinisterioQueryResult> queryResults = jpaRepository.findEscalaMinisterioConsolidadoByPeriodo(
+        List<EscalaMinisterioConsolidadoQueryResult> queryResults = jpaRepository.findEscalaMinisterioConsolidadoByPeriodo(
                 igrejaId,
                 inicioMes,
                 fimMes,
@@ -45,6 +47,30 @@ public class EscalaMinisterioRepositoryImpl implements EscalaMinisterioRepositor
                         result.dataHoraInicio(),
                         result.membrosEscalados(),
                         result.membrosEscaladosConfirmados(),
+                        result.status()
+                ))
+                .toList();
+    }
+
+    @Override
+    public List<EscalaMinisterioDTO> findEscalaMinisterioByPeriodo(UUID igrejaId, LocalDateTime inicioMes, LocalDateTime fimMes, EnumStatusEscalaMinisterio status, UUID membroId, UUID ministerioId, String nomeEvento) {
+        List<EscalaMinisterioQueryResult> queryResults = jpaRepository.findEscalaMinisterioByPeriodo(
+                igrejaId,
+                inicioMes,
+                fimMes,
+                status,
+                membroId,
+                ministerioId,
+                nomeEvento
+        );
+
+        return queryResults.stream()
+                .map(result -> new EscalaMinisterioDTO(
+                        result.idExternoEscalaMinisterio(),
+                        result.nomeReuniao(),
+                        result.nomeMinisterio(),
+                        result.dataHoraFim(),
+                        result.dataHoraInicio(),
                         result.status()
                 ))
                 .toList();

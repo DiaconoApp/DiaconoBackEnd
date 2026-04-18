@@ -51,6 +51,22 @@ public interface MembroMinisterioJpaRepository extends JpaRepository<MembroMinis
 
     int deleteByMembroIdExternoAndMinisterioIdExterno(UUID membroIdExterno, UUID ministerioIdExterno);
 
+    @Query("""
+            SELECT new com.diacono.diacono.applications.dtos.ministerio.MinisterioSuperSimplificadoDTO(
+                ms.idExterno,
+                ms.nome
+            )
+            FROM MembroMinisterio mm
+            JOIN mm.ministerio ms
+            JOIN mm.membro m
+            WHERE m.idExterno = :idExternoMembro
+            AND ms.igreja.idExterno = :idExternoIgreja
+            AND mm.cargoMembro = com.diacono.diacono.domain.enums.EnumCargoMembroMinisterio.MEMBRO_MINISTERIO
+                        """)
+    List<MinisterioSuperSimplificadoDTO> buscarMembro(
+            @Param("idExternoMembro") UUID idExternoMembro,
+            @Param("idExternoIgreja") UUID idExternoIgreja
+    );
 
     @Query("""
             

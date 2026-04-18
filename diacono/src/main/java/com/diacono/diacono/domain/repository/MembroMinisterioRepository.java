@@ -22,6 +22,7 @@ public interface MembroMinisterioRepository {
     Page<MembroMinisterio> buscarPorMembroMinisterioSemFiltro(Pageable pageable, UUID idMinisterio);
 
     int deleteByMembroIdExternoAndMinisterioIdExterno(UUID membroIdExterno, UUID ministerioIdExterno);
+    List<MinisterioSuperSimplificadoDTO> buscarMembro(UUID idExternoMembro, UUID idExternoIgreja);
     List<MinisterioSuperSimplificadoDTO> buscarMinisterioLider(UUID idExternoMembro, UUID idExternoIgreja);
     List<MembroMinisterio> findAllByIdExternoIn(List<UUID> idsExternoMembroMinisterio);
 

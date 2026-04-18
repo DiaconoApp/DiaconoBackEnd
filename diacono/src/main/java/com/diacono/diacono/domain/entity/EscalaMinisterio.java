@@ -24,9 +24,6 @@ public class EscalaMinisterio extends IdEntityUtils {
     @JoinColumn(name = "fk_membro_ministerio", nullable = false)
     private MembroMinisterio membroMinisterio;
 
-    @Builder.Default
-    private Boolean membroConfirmado = true;
-
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private EnumStatusEscalaMinisterio statusEscalaMinisterio = EnumStatusEscalaMinisterio.CONFIRMADO;

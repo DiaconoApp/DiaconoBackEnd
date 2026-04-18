@@ -25,6 +25,7 @@ public class EscalaEvento extends IdEntityUtils {
     @JoinColumn(name = "fk_ministerio", nullable = false)
     private Ministerio ministerio;
 
+    @Enumerated(EnumType.STRING)
     @Builder.Default
     private EnumStatusEvento statusEscalaEvento = EnumStatusEvento.CONFIRMADO;
 }
