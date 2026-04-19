@@ -1,0 +1,27 @@
+meta {
+  name: 08 Validacao Inicial Evento Nao Confirmado
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/v1/escalas-evento/governo?mes={{mesEvento}}&ano={{anoEvento}}&nomeEvento={{nomeEvento}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+tests {
+  test("evento inicia com status diferente de confirmado", function () {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(Array.isArray(body)).to.equal(true);
+    expect(body.length).to.equal(1);
+    expect(body[0].idExternoEvento).to.equal(bru.getVar("eventoId"));
+    expect(body[0].status).to.not.equal("CONFIRMADO");
+  });
+}
+

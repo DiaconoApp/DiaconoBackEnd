@@ -3,8 +3,10 @@ package com.diacono.diacono.infrastructure.persistence.Evento;
 import com.diacono.diacono.applications.dtos.evento.EventoKpiDTO;
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioEventoDashDTO;
 import com.diacono.diacono.domain.entity.Evento;
+import com.diacono.diacono.domain.enums.EnumStatusEvento;
 import com.diacono.diacono.domain.entity.Recorrencia;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -30,6 +32,15 @@ public interface  EventoJpaRepository extends JpaRepository<Evento, Long> {
 
     @Transactional
     long deleteByIdExterno(UUID idExterno);
+
+    @Modifying
+    @Query("""
+            UPDATE Evento e
+            SET e.status = :status
+            WHERE e.idExterno = :eventoId
+              AND e.status <> :status
+            """)
+    void updateStatusByEventoId(@Param("eventoId") UUID eventoId, @Param("status") EnumStatusEvento status);
 
     @Query("""
             SELECT e FROM Evento e

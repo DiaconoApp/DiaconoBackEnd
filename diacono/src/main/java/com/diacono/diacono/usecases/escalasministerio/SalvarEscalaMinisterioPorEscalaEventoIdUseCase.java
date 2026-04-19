@@ -3,12 +3,15 @@ package com.diacono.diacono.usecases.escalasministerio;
 import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
 import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMembroMinisterioDTO;
 import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMinisterioSalvarDTO;
+import com.diacono.diacono.applications.dtos.ministerio.MinisterioSuperSimplificadoDTO;
 import com.diacono.diacono.domain.entity.EscalaEvento;
 import com.diacono.diacono.domain.entity.EscalaMinisterio;
 import com.diacono.diacono.domain.entity.MembroMinisterio;
 import com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio;
 import com.diacono.diacono.domain.repository.EscalaEventoRepository;
 import com.diacono.diacono.domain.repository.EscalaMinisterioRepository;
+import com.diacono.diacono.domain.repository.MembroMinisterioRepository;
+import com.diacono.diacono.domain.service.EscalaStatusDomainService;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -22,13 +25,19 @@ public class SalvarEscalaMinisterioPorEscalaEventoIdUseCase {
 
     private final EscalaMinisterioRepository escalaMinisterioRepository;
     private final EscalaEventoRepository escalaEventoRepository;
+    private final MembroMinisterioRepository membroMinisterioRepository;
+    private final EscalaStatusDomainService escalaStatusDomainService;
 
     public SalvarEscalaMinisterioPorEscalaEventoIdUseCase(
             EscalaMinisterioRepository escalaMinisterioRepository,
-            EscalaEventoRepository escalaEventoRepository
+            EscalaEventoRepository escalaEventoRepository,
+            MembroMinisterioRepository membroMinisterioRepository,
+            EscalaStatusDomainService escalaStatusDomainService
     ) {
         this.escalaMinisterioRepository = escalaMinisterioRepository;
         this.escalaEventoRepository = escalaEventoRepository;
+        this.membroMinisterioRepository = membroMinisterioRepository;
+        this.escalaStatusDomainService = escalaStatusDomainService;
     }
 
     @Transactional
@@ -51,6 +60,7 @@ public class SalvarEscalaMinisterioPorEscalaEventoIdUseCase {
         List<EscalaMinisterio> escalasParaSalvar = montarEscalasParaSalver(membrosMinisterioPorId, escalaEvento, escalasMinisterio);
 
         escalaMinisterioRepository.replaceEscalaMinisterioByEscalaEventoId(igrejaId, escalaEventoId, escalasParaSalvar);
+        escalaStatusDomainService.recalcularStatusPorEscalaEventoId(escalaEventoId);
 
         return new RestResponseMessageDTO(HttpStatus.OK, "Escala de membros do ministério atualizada com sucesso");
     }
@@ -84,6 +94,16 @@ public class SalvarEscalaMinisterioPorEscalaEventoIdUseCase {
 
         if (ministerioId == null) {
             throw new ObjectNotFoundException("Escala evento não encontrada para a igreja informada.");
+        }
+
+        List<UUID> listaMinisteriosLider = membroMinisterioRepository
+                .buscarMinisterioLider(membroId, igrejaId)
+                .stream()
+                .map(MinisterioSuperSimplificadoDTO::idExterno)
+                .toList();
+
+        if (!listaMinisteriosLider.contains(ministerioId)) {
+            throw new ObjectNotFoundException("O líder informado não possui vínculo com o ministério solicitado.");
         }
     }
 

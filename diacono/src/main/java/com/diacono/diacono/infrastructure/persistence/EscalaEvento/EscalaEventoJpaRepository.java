@@ -5,13 +5,13 @@ import com.diacono.diacono.domain.enums.EnumStatusEvento;
 import com.diacono.diacono.infrastructure.persistence.dtos.EscalaEventoEscaladoQueryResult;
 import com.diacono.diacono.infrastructure.persistence.dtos.EscalaEventoQueryResult;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -79,4 +79,31 @@ public interface EscalaEventoJpaRepository extends JpaRepository<EscalaEvento, L
             @Param("igrejaId") UUID igrejaId,
             @Param("escalaEventoId") UUID escalaEventoId
     );
+
+    @Query("""
+            SELECT ee.evento.idExterno
+            FROM EscalaEvento ee
+            WHERE ee.idExterno = :escalaEventoId
+            """)
+    UUID findEventoIdByEscalaEventoId(@Param("escalaEventoId") UUID escalaEventoId);
+
+    @Query("""
+            SELECT CASE
+                WHEN COUNT(ee) > 0 AND SUM(CASE WHEN ee.statusEscalaEvento = com.diacono.diacono.domain.enums.EnumStatusEvento.CONFIRMADO THEN 1 ELSE 0 END) = COUNT(ee)
+                THEN true
+                ELSE false
+            END
+            FROM EscalaEvento ee
+            WHERE ee.evento.idExterno = :eventoId
+            """)
+    boolean areAllConfirmadosByEventoId(@Param("eventoId") UUID eventoId);
+
+    @Modifying
+    @Query("""
+            UPDATE EscalaEvento ee
+            SET ee.statusEscalaEvento = :status
+            WHERE ee.idExterno = :escalaEventoId
+              AND ee.statusEscalaEvento <> :status
+            """)
+    void updateStatusByEscalaEventoId(@Param("escalaEventoId") UUID escalaEventoId, @Param("status") EnumStatusEvento status);
 }

@@ -6,6 +6,7 @@ import com.diacono.diacono.domain.entity.EscalaEvento;
 import com.diacono.diacono.domain.entity.Evento;
 import com.diacono.diacono.domain.entity.Igreja;
 import com.diacono.diacono.domain.repository.EventoRepository;
+import com.diacono.diacono.domain.service.EscalaStatusDomainService;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,9 @@ class AtualizarEscalaEventoPorEventoIdUseCaseTest {
 
     @Mock
     private GerarEscalaEventoUseCase gerarEscalaEventoUseCase;
+
+    @Mock
+    private EscalaStatusDomainService escalaStatusDomainService;
 
     @InjectMocks
     private AtualizarEscalaEventoPorEventoIdUseCase useCase;
@@ -72,6 +76,7 @@ class AtualizarEscalaEventoPorEventoIdUseCaseTest {
         assertEquals("Escala do evento atualizada com sucesso", response.getMessage());
         assertEquals(escalaAtualizada, evento.getEscalaEvento());
         verify(eventoRepository).save(evento);
+        verify(escalaStatusDomainService).recalcularStatusEvento(eventoId);
     }
 
     @Test

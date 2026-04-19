@@ -4,6 +4,7 @@ import com.diacono.diacono.applications.dtos.evento.EventoKpiDTO;
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioEventoDashDTO;
 import com.diacono.diacono.domain.entity.Evento;
 import com.diacono.diacono.domain.entity.Recorrencia;
+import com.diacono.diacono.domain.enums.EnumStatusEvento;
 import com.diacono.diacono.domain.repository.EventoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -54,6 +55,11 @@ public class EventoRepositoryImpl implements EventoRepository {
     @Override
     public void deleteAll(List<Evento> eventos) {
         jpaRepository.deleteAll(eventos);
+    }
+
+    @Override
+    public void updateStatusByEventoId(UUID eventoId, EnumStatusEvento status) {
+        jpaRepository.updateStatusByEventoId(eventoId, status);
     }
 
     @Override

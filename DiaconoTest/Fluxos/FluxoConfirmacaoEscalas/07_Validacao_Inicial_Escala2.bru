@@ -1,0 +1,28 @@
+meta {
+  name: 07 Validacao Inicial Escala2 Nao Confirmada
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/v1/escalas-ministerio/lider-ministerio/{{escalaEventoId2}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+tests {
+  test("escala 2 inicia sem confirmacao", function () {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(Array.isArray(body)).to.equal(true);
+    expect(body.length).to.be.greaterThan(0);
+
+    const possuiConfirmado = body.some((m) => m.status === "CONFIRMADO");
+    expect(possuiConfirmado).to.equal(false);
+  });
+}
+

@@ -14,4 +14,7 @@ public interface EscalaEventoRepository {
     List<EscalaEventoEscaladoDTO> findEscalaEventoEscaladoByEventoId(UUID idIgreja, UUID eventoId);
     UUID findMinisterioIdByEscalaEventoId(UUID idIgreja, UUID escalaEventoId);
     EscalaEvento findEscalaEventoByIdExternoAndIgrejaId(UUID igrejaId, UUID escalaEventoId);
+    UUID findEventoIdByEscalaEventoId(UUID escalaEventoId);
+    boolean areAllConfirmadosByEventoId(UUID eventoId);
+    void updateStatusByEscalaEventoId(UUID escalaEventoId, EnumStatusEvento status);
 }

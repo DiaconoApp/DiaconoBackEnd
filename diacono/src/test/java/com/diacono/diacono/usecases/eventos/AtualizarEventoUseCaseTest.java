@@ -8,6 +8,7 @@ import com.diacono.diacono.domain.entity.EnderecoEvento;
 import com.diacono.diacono.domain.entity.Evento;
 import com.diacono.diacono.domain.entity.Ministerio;
 import com.diacono.diacono.domain.repository.EventoRepository;
+import com.diacono.diacono.domain.service.EscalaStatusDomainService;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.usecases.escalasevento.GerarEscalaEventoUseCase;
 import com.diacono.diacono.usecases.eventos.validation.ValidarIdExternoPreenchido;
@@ -55,6 +56,9 @@ class AtualizarEventoUseCaseTest {
 	@Mock
 	private GerarEscalaEventoUseCase gerarEscalaEventoUseCase;
 
+	@Mock
+	private EscalaStatusDomainService escalaStatusDomainService;
+
 	@InjectMocks
 	private AtualizarEventoUseCase useCase;
 
@@ -101,6 +105,7 @@ class AtualizarEventoUseCaseTest {
 		assertEquals("Louvor", evento.getEscalaEvento().iterator().next().getMinisterio().getNome());
 		assertEquals(escalaAtual, evento.getEscalaEvento().iterator().next());
 		verify(eventoRepository).save(evento);
+		verify(escalaStatusDomainService).recalcularStatusEvento(idEvento);
 	}
 
 	@Test

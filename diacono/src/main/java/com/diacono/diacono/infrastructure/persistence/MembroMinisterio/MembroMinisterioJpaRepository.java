@@ -81,7 +81,6 @@ public interface MembroMinisterioJpaRepository extends JpaRepository<MembroMinis
             AND mm.cargoMembro = com.diacono.diacono.domain.enums.EnumCargoMembroMinisterio.LIDER_MINISTERIO
             AND ms.status = com.diacono.diacono.domain.enums.EnumStatusMinisterio.ATIVO
             AND m.status = com.diacono.diacono.domain.enums.EnumStatusMembro.ATIVO
-            AND ms.nomeLider = m.nome
             """)
     List<MinisterioSuperSimplificadoDTO> buscarMinisterioLider(
             @Param("idExternoMembro") UUID idExternoMembro,

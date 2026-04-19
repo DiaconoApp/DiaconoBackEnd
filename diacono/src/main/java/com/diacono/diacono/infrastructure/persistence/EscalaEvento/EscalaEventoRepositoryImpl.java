@@ -58,4 +58,19 @@ public class EscalaEventoRepositoryImpl implements EscalaEventoRepository {
     public EscalaEvento findEscalaEventoByIdExternoAndIgrejaId(UUID igrejaId, UUID escalaEventoId) {
         return jpaRepository.findEscalaEventoByIdExternoAndIgrejaId(igrejaId, escalaEventoId);
     }
+
+    @Override
+    public UUID findEventoIdByEscalaEventoId(UUID escalaEventoId) {
+        return jpaRepository.findEventoIdByEscalaEventoId(escalaEventoId);
+    }
+
+    @Override
+    public boolean areAllConfirmadosByEventoId(UUID eventoId) {
+        return jpaRepository.areAllConfirmadosByEventoId(eventoId);
+    }
+
+    @Override
+    public void updateStatusByEscalaEventoId(UUID escalaEventoId, EnumStatusEvento status) {
+        jpaRepository.updateStatusByEscalaEventoId(escalaEventoId, status);
+    }
 }

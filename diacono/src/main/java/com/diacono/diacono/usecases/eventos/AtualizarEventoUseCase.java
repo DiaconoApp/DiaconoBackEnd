@@ -7,6 +7,7 @@ import com.diacono.diacono.applications.mappers.endereco.EnderecoEventoMapper;
 import com.diacono.diacono.domain.entity.EnderecoEvento;
 import com.diacono.diacono.domain.entity.Evento;
 import com.diacono.diacono.domain.repository.EventoRepository;
+import com.diacono.diacono.domain.service.EscalaStatusDomainService;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.usecases.escalasevento.GerarEscalaEventoUseCase;
 import com.diacono.diacono.usecases.eventos.validation.ValidarIdExternoPreenchido;
@@ -23,13 +24,15 @@ public class AtualizarEventoUseCase {
     private final ValidarIdExternoPreenchido validarIdExternoPreenchido;
     private final EnderecoEventoMapper enderecoEventoMapper;
     private final GerarEscalaEventoUseCase gerarEscalaEventoUseCase;
+    private final EscalaStatusDomainService escalaStatusDomainService;
 
-    public AtualizarEventoUseCase(EventoRepository eventoRepository, BuscarEnderecoEventoPorUUIDUseCase buscarEnderecoEventoPorUUIDUseCase, ValidarIdExternoPreenchido validarIdExternoPreenchido, EnderecoEventoMapper enderecoEventoMapper, GerarEscalaEventoUseCase gerarEscalaEventoUseCase) {
+    public AtualizarEventoUseCase(EventoRepository eventoRepository, BuscarEnderecoEventoPorUUIDUseCase buscarEnderecoEventoPorUUIDUseCase, ValidarIdExternoPreenchido validarIdExternoPreenchido, EnderecoEventoMapper enderecoEventoMapper, GerarEscalaEventoUseCase gerarEscalaEventoUseCase, EscalaStatusDomainService escalaStatusDomainService) {
         this.eventoRepository = eventoRepository;
         this.buscarEnderecoEventoPorUUIDUseCase = buscarEnderecoEventoPorUUIDUseCase;
         this.validarIdExternoPreenchido = validarIdExternoPreenchido;
         this.enderecoEventoMapper = enderecoEventoMapper;
         this.gerarEscalaEventoUseCase = gerarEscalaEventoUseCase;
+        this.escalaStatusDomainService = escalaStatusDomainService;
     }
 
     @Transactional
@@ -81,6 +84,7 @@ public class AtualizarEventoUseCase {
         }
 
         eventoRepository.save(evento);
+        escalaStatusDomainService.recalcularStatusEvento(idExterno);
 
         return new RestResponseMessageDTO(HttpStatus.OK, "Evento atualizado com sucesso");
 
@@ -89,11 +93,8 @@ public class AtualizarEventoUseCase {
     //metodos para validar
 
     private Evento buscarEventoPorUUID(UUID idExterno){
-
-        Evento evento = eventoRepository.findByIdExterno(idExterno)
+        return eventoRepository.findByIdExterno(idExterno)
                 .orElseThrow(() -> new ObjectNotFoundException("Evento não encontrado"));
-
-        return evento;
     }
 
     private boolean validarEnderecoDiferente(EnderecoEvento endereco, EnderecoEventoDTO enderecoEventoDTO){

@@ -4,6 +4,7 @@ import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
 import com.diacono.diacono.applications.dtos.escalasevento.EscalaEventoEscaladoDTO;
 import com.diacono.diacono.domain.entity.Evento;
 import com.diacono.diacono.domain.repository.EventoRepository;
+import com.diacono.diacono.domain.service.EscalaStatusDomainService;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -20,13 +21,16 @@ public class AtualizarEscalaEventoPorEventoIdUseCase {
 
     private final EventoRepository eventoRepository;
     private final GerarEscalaEventoUseCase gerarEscalaEventoUseCase;
+    private final EscalaStatusDomainService escalaStatusDomainService;
 
     public AtualizarEscalaEventoPorEventoIdUseCase(
             EventoRepository eventoRepository,
-            GerarEscalaEventoUseCase gerarEscalaEventoUseCase
+            GerarEscalaEventoUseCase gerarEscalaEventoUseCase,
+            EscalaStatusDomainService escalaStatusDomainService
     ) {
         this.eventoRepository = eventoRepository;
         this.gerarEscalaEventoUseCase = gerarEscalaEventoUseCase;
+        this.escalaStatusDomainService = escalaStatusDomainService;
     }
 
     @Transactional
@@ -49,6 +53,7 @@ public class AtualizarEscalaEventoPorEventoIdUseCase {
         ));
 
         eventoRepository.save(evento);
+        escalaStatusDomainService.recalcularStatusEvento(eventoId);
 
         return new RestResponseMessageDTO(HttpStatus.OK, "Escala do evento atualizada com sucesso");
     }

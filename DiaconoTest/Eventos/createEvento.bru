@@ -5,52 +5,48 @@ meta {
 }
 
 post {
-  url: http://localhost:8080/api/v1/eventos
+  url: {{baseUrl}}/api/v1/eventos
   body: json
   auth: bearer
 }
 
 auth:bearer {
-  token: {{acessToken}}
+  token: {{token}}
+}
+
+headers {
+  content-type: application/json
 }
 
 body:json {
   {
-    "fkIgreja": "550e8400-e29b-41d4-a716-446655440000",
-    "fkOrganizador": "8dcdaaf2-7533-4642-b897-425c087d6539",
-     "fkMinisterios": [
-      "550e8400-e29b-41d4-a716-446655440020",
-      "550e8400-e29b-41d4-a716-446655440020",
-      "550e8400-e29b-41d4-a716-446655440020",
-      "550e8400-e29b-41d4-a716-446655440020"
+    "fkMinisterios": [
+      "{{ministerioId1}}",
+      "{{ministerioId2}}"
     ],
-    "nome": "Culto da Virada e Batismo",
-    "descricao": "Culto de adoração especial com celebração de batismos e ceia",
-    "publicoAlvo": "Membros e visitantes",
-    "dataHoraInicio": "2025-11-12T23:30:00",
-    "dataHoraFim": "2025-11-13T01:30:00",
+    "nome": "{{nomeEvento}}",
+    "descricao": "VALIDACAO EVENTO",
+    "publicoAlvo": "MEMBROS",
+    "dataHoraInicio": "{{dataHoraInicio}}",
+    "dataHoraFim": "{{dataHoraFim}}",
+    "custo": 0,
     "recorrencia": {
-      "tipoRecorrencia": "SEMANAL",
-      "dataInicioRecorrencia": "2025-11-12",
-      "dataTerminoRecorrencia": "2026-11-11"
+      "tipoRecorrencia": "NAO_REPETE",
+      "dataInicioRecorrencia": null,
+      "dataTerminoRecorrencia": null
     },
-    "custo": 0.00,
-    "diasSemana": null,
-    "horarioRecorrencia": null,
-    "intervaloRecorrencia": 0,
     "endereco": {
       "idExterno": null,
-      "cep": "04000000",
-      "rua": 123,
-      "cidade": "São Paulo",
-      "estado": "São Paulo",
-      "bairro": "Centro",
-      "complemento": "Ao lado do prédio",
-      "numero": "123",
-      "apelido": "Salão Principal"
+      "cep": "04094000",
+      "rua": "PARQUE IBIRAPUERA",
+      "cidade": "SAO PAULO",
+      "estado": "SP",
+      "bairro": "VILA MARIANA",
+      "complemento": "PORTAO PRINCIPAL",
+      "numero": "S N",
+      "apelido": "LOCAL EVENTO"
     }
   }
-  
 }
 
 settings {

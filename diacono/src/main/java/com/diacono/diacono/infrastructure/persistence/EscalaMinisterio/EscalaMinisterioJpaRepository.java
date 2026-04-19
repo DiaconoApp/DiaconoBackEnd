@@ -173,5 +173,16 @@ public interface EscalaMinisterioJpaRepository extends JpaRepository<EscalaMinis
             @Param("membrosMinisterioIds") List<UUID> membrosMinisterioIds
     );
 
+    @Query("""
+            SELECT CASE
+                WHEN COUNT(em) > 0 AND SUM(CASE WHEN em.statusEscalaMinisterio = com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio.CONFIRMADO THEN 1 ELSE 0 END) = COUNT(em)
+                THEN true
+                ELSE false
+            END
+            FROM EscalaMinisterio em
+            WHERE em.escalaEvento.idExterno = :escalaEventoId
+            """)
+    boolean areAllConfirmadosByEscalaEventoId(@Param("escalaEventoId") UUID escalaEventoId);
+
 }
 

@@ -1,12 +1,10 @@
 package com.diacono.diacono.infrastructure.persistence.EscalaMinisterio;
 
 import com.diacono.diacono.applications.dtos.escalaministerio.*;
-import com.diacono.diacono.domain.entity.EscalaEvento;
 import com.diacono.diacono.domain.entity.EscalaMinisterio;
 import com.diacono.diacono.domain.entity.MembroMinisterio;
 import com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio;
 import com.diacono.diacono.domain.repository.EscalaMinisterioRepository;
-import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.infrastructure.persistence.dtos.EscalaMembroMinisterioQueryResult;
 import com.diacono.diacono.infrastructure.persistence.dtos.EscalaMinisterioConsolidadoQueryResult;
 import com.diacono.diacono.infrastructure.persistence.dtos.EscalaMinisterioQueryResult;
@@ -16,7 +14,6 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.List;
 import java.util.UUID;
-import java.util.ArrayList;
 import java.util.function.Function;
 
 @Repository
@@ -104,6 +101,7 @@ public class EscalaMinisterioRepositoryImpl implements EscalaMinisterioRepositor
         return jpaRepository.findMembrosMinisterioOcupadosByEscalaEventoId(igrejaId, escalaEventoId);
     }
 
+    @Override
     public Map<UUID, MembroMinisterio> findMembrosMinisterioByEscalaEventoIdAndIds (UUID igrejaId, UUID escalaEventoId, List<UUID> idsMembrosMinisterio) {
         return jpaRepository
                 .findMembrosMinisterioByEscalaEventoIdAndIds(igrejaId, escalaEventoId, idsMembrosMinisterio)
@@ -116,6 +114,11 @@ public class EscalaMinisterioRepositoryImpl implements EscalaMinisterioRepositor
         jpaRepository.deleteByEscalaEventoIdAndIgrejaId(igrejaId, escalaEventoId);
 
         jpaRepository.saveAll(escalasParaSalvar);
+    }
+
+    @Override
+    public boolean areAllConfirmadosByEscalaEventoId(UUID escalaEventoId) {
+        return jpaRepository.areAllConfirmadosByEscalaEventoId(escalaEventoId);
     }
 }
 
