@@ -8,11 +8,11 @@ public record EventoCriadoMessageDTO(
         UUID idExternoEvento,
         String nome,
         String descricao,
-        BigDecimal custo, // Adicionado agora
-        String PublicoAlvo, // Adicionado agora
+        BigDecimal custo,
+        String PublicoAlvo,
         LocalDateTime dataHoraInicio,
         LocalDateTime dataHoraFim,
-        String Localizacao, // Adicionado agora
+        String Localizacao,
         UUID idExternoIgreja,
         UUID idExternoOrganizador
 ) {
