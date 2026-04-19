@@ -27,6 +27,6 @@ public class EscalaEvento extends IdEntityUtils {
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private EnumStatusEvento statusEscalaEvento = EnumStatusEvento.CONFIRMADO;
+    private EnumStatusEvento statusEscalaEvento = EnumStatusEvento.PENDENTE;
 }
 

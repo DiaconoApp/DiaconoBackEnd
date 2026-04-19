@@ -72,7 +72,7 @@ class GerarEscalaEventoUseCaseTest {
                 .filter(escala -> idMinisterioNovo.equals(escala.getMinisterio().getIdExterno()))
                 .findFirst()
                 .orElseThrow();
-        assertEquals(EnumStatusEvento.CONFIRMADO, escalaCriada.getStatusEscalaEvento());
+        assertEquals(EnumStatusEvento.PENDENTE, escalaCriada.getStatusEscalaEvento());
         assertSame(evento, escalaCriada.getEvento());
     }
 

@@ -56,7 +56,7 @@ public class Evento extends IdEntityUtils {
     private BigDecimal custo;
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    private EnumStatusEvento status = EnumStatusEvento.CONFIRMADO;
+    private EnumStatusEvento status = EnumStatusEvento.PENDENTE;
 
     public void setIgreja(Igreja igreja) {
         this.igreja = igreja;
@@ -112,6 +112,6 @@ public class Evento extends IdEntityUtils {
     }
 
     public void setStatus(EnumStatusEvento status) {
-        this.status = status == null ? EnumStatusEvento.CONFIRMADO : status;
+        this.status = status == null ? EnumStatusEvento.PENDENTE : status;
     }
 }
