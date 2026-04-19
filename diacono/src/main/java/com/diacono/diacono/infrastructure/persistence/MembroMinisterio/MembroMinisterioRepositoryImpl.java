@@ -52,7 +52,7 @@ public class MembroMinisterioRepositoryImpl implements MembroMinisterioRepositor
     @Override
     public List<MinisterioSuperSimplificadoDTO> buscarMembro(UUID idExternoMembro, UUID idExternoIgreja) {
         return jpaRepository.buscarMembro(idExternoMembro, idExternoIgreja);
-    };
+    }
 
     @Override
     public List<MinisterioSuperSimplificadoDTO> buscarMinisterioLider(UUID idExternoMembro, UUID idExternoIgreja) {

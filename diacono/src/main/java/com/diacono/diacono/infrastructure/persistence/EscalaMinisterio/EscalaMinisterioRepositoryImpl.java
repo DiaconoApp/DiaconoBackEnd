@@ -1,9 +1,6 @@
 package com.diacono.diacono.infrastructure.persistence.EscalaMinisterio;
 
-import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMembroMinisterioDTO;
-import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMinisterioConsolidadoDTO;
-import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMinisterioDTO;
-import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMinisterioSalvarDTO;
+import com.diacono.diacono.applications.dtos.escalaministerio.*;
 import com.diacono.diacono.domain.entity.EscalaEvento;
 import com.diacono.diacono.domain.entity.EscalaMinisterio;
 import com.diacono.diacono.domain.entity.MembroMinisterio;
@@ -51,8 +48,10 @@ public class EscalaMinisterioRepositoryImpl implements EscalaMinisterioRepositor
 
         return queryResults.stream()
                 .map(result -> new EscalaMinisterioConsolidadoDTO(
+                        result.idEvento(),
                         result.idExternoEscalaEvento(),
                         result.nomeReuniao(),
+                        result.nomeMinisterio(),
                         result.dataHoraFim(),
                         result.dataHoraInicio(),
                         result.membrosEscalados(),

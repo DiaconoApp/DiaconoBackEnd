@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
@@ -22,6 +23,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,10 +50,12 @@ class BuscarEscalaMinisterioConsolidadoPorMesAnoUseCaseTest {
 
         List<EscalaMinisterioConsolidadoDTO> esperado = List.of(
                 new EscalaMinisterioConsolidadoDTO(
+                          UUID.fromString("55555555-5555-5555-5555-555555555555"),
                         UUID.fromString("44444444-4444-4444-4444-444444444444"),
+                          "Culto Especial de Páscoa",
                         "Culto de Jovens",
-                        LocalDateTime.of(2026, 5, 15, 21, 0),
-                        LocalDateTime.of(2026, 5, 15, 19, 0),
+                          LocalDateTime.of(2026, 5, 15, 21, 0),
+                          LocalDateTime.of(2026, 5, 15, 19, 0),
                         1,
                         1,
                         EnumStatusEscalaMinisterio.CONFIRMADO
@@ -81,6 +85,50 @@ class BuscarEscalaMinisterioConsolidadoPorMesAnoUseCaseTest {
         );
 
         assertEquals(esperado, response);
+    }
+
+    @Test
+    void deveRemoverMinisteriosDuplicadosAntesDeConsultarConsolidado() {
+        UUID idIgreja = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID idMembro = UUID.fromString("22222222-2222-2222-2222-222222222222");
+        UUID idMinisterio = UUID.fromString("33333333-3333-3333-3333-333333333333");
+
+        when(membroMinisterioRepository.buscarMinisterioLider(idMembro, idIgreja))
+                .thenReturn(List.of(
+                        new MinisterioSuperSimplificadoDTO(idMinisterio, "Louvor"),
+                        new MinisterioSuperSimplificadoDTO(idMinisterio, "Louvor")
+                ));
+
+        when(escalaMinisterioRepository.findEscalaMinisterioConsolidadoByPeriodo(
+                idIgreja,
+                LocalDateTime.of(2026, 5, 1, 0, 0),
+                LocalDateTime.of(2026, 5, 31, 23, 59, 59),
+                EnumStatusEscalaMinisterio.CONFIRMADO,
+                List.of(idMinisterio),
+                "Culto"
+        )).thenReturn(List.of());
+
+        useCase.execute(
+                idIgreja,
+                idMembro,
+                null,
+                5,
+                2026,
+                EnumStatusEscalaMinisterio.CONFIRMADO,
+                "Culto"
+        );
+
+        ArgumentCaptor<List<UUID>> listaMinisteriosCaptor = ArgumentCaptor.forClass(List.class);
+        verify(escalaMinisterioRepository).findEscalaMinisterioConsolidadoByPeriodo(
+                org.mockito.ArgumentMatchers.eq(idIgreja),
+                org.mockito.ArgumentMatchers.eq(LocalDateTime.of(2026, 5, 1, 0, 0)),
+                org.mockito.ArgumentMatchers.eq(LocalDateTime.of(2026, 5, 31, 23, 59, 59)),
+                org.mockito.ArgumentMatchers.eq(EnumStatusEscalaMinisterio.CONFIRMADO),
+                listaMinisteriosCaptor.capture(),
+                org.mockito.ArgumentMatchers.eq("Culto")
+        );
+
+        assertEquals(List.of(idMinisterio), listaMinisteriosCaptor.getValue());
     }
 
     @Test

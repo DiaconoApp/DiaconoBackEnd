@@ -1,16 +1,10 @@
 package com.diacono.diacono.infrastructure.controllers;
 
-import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMembroMinisterioDTO;
-import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMinisterioConsolidadoDTO;
-import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMinisterioDTO;
-import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMinisterioSalvarDTO;
+import com.diacono.diacono.applications.dtos.escalaministerio.*;
 import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
 import com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio;
 import com.diacono.diacono.global.util.JwtUtils;
-import com.diacono.diacono.usecases.escalasministerio.BuscarEscalaMinisterioConsolidadoPorMesAnoUseCase;
-import com.diacono.diacono.usecases.escalasministerio.BuscarEscalaMinisterioPorMembroIdMesAnoUseCase;
-import com.diacono.diacono.usecases.escalasministerio.BuscarMembrosMinisterioPorEscalaEventoIdUseCase;
-import com.diacono.diacono.usecases.escalasministerio.SalvarEscalaMinisterioPorEscalaEventoIdUseCase;
+import com.diacono.diacono.usecases.escalasministerio.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +20,7 @@ public class EscalaMinisterioController {
     private final BuscarEscalaMinisterioPorMembroIdMesAnoUseCase buscarEscalaMinisterioPorMembroIdMesAnoUseCase;
     private final BuscarMembrosMinisterioPorEscalaEventoIdUseCase buscarMembrosMinisterioPorEscalaEventoIdUseCase;
     private final SalvarEscalaMinisterioPorEscalaEventoIdUseCase salvarEscalaMinisterioPorEscalaEventoIdUseCase;
+    private final BuscarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCase buscarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCase;
     private final JwtUtils jwtUtils;
 
     public EscalaMinisterioController(
@@ -33,12 +28,14 @@ public class EscalaMinisterioController {
         BuscarEscalaMinisterioPorMembroIdMesAnoUseCase buscarEscalaMinisterioPorMembroIdMesAnoUseCase,
         BuscarMembrosMinisterioPorEscalaEventoIdUseCase buscarMembrosMinisterioPorEscalaEventoIdUseCase,
         SalvarEscalaMinisterioPorEscalaEventoIdUseCase salvarEscalaMinisterioPorEscalaEventoIdUseCase,
+        BuscarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCase buscarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCase,
         JwtUtils jwtUtils
     ) {
         this.buscarEscalaMinisterioConsolidadoPorMesAnoUseCase = buscarEscalaMinisterioConsolidadoPorMesAnoUseCase;
         this.buscarEscalaMinisterioPorMembroIdMesAnoUseCase = buscarEscalaMinisterioPorMembroIdMesAnoUseCase;
         this.buscarMembrosMinisterioPorEscalaEventoIdUseCase = buscarMembrosMinisterioPorEscalaEventoIdUseCase;
         this.salvarEscalaMinisterioPorEscalaEventoIdUseCase = salvarEscalaMinisterioPorEscalaEventoIdUseCase;
+        this.buscarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCase = buscarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCase;
         this.jwtUtils = jwtUtils;
     }
 
@@ -66,6 +63,24 @@ public class EscalaMinisterioController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(buscarMembrosMinisterioPorEscalaEventoIdUseCase.execute(escalaEventoId, igrejaId, membroId));
+    }
+
+    @GetMapping("/lider-ministerio/{escalaEventoId}/{quantidadeMembrosRandomizados}")
+    public ResponseEntity<List<EscalaMembroMinisterioSimplificadoDTO>> buscarMembrosMinisterioRandomizadosPorEscalaEventoId(
+            @PathVariable UUID escalaEventoId,
+            @PathVariable int quantidadeMembrosRandomizados
+    ) {
+        UUID igrejaId = jwtUtils.getIgrejaId();
+        UUID membroId = jwtUtils.getSubject();
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(buscarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCase.execute(
+                        escalaEventoId,
+                        igrejaId,
+                        membroId,
+                        quantidadeMembrosRandomizados
+                ));
     }
 
     @PatchMapping("/lider-ministerio/{escalaEventoId}")

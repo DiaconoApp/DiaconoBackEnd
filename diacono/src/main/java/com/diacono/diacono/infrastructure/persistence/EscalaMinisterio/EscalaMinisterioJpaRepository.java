@@ -1,6 +1,5 @@
 package com.diacono.diacono.infrastructure.persistence.EscalaMinisterio;
 
-import com.diacono.diacono.domain.entity.EscalaEvento;
 import com.diacono.diacono.domain.entity.EscalaMinisterio;
 import com.diacono.diacono.domain.entity.MembroMinisterio;
 import com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -23,8 +21,10 @@ public interface EscalaMinisterioJpaRepository extends JpaRepository<EscalaMinis
 
     @Query("""
             SELECT new com.diacono.diacono.infrastructure.persistence.dtos.EscalaMinisterioConsolidadoQueryResult(
+                e.idExterno,
                 ee.idExterno,
                 e.nome,
+                m.nome,
                 e.dataHoraFim,
                 e.dataHoraInicio,
                 cast(count(em) as integer),
@@ -34,13 +34,15 @@ public interface EscalaMinisterioJpaRepository extends JpaRepository<EscalaMinis
             FROM EscalaMinisterio em
             JOIN em.escalaEvento ee
             JOIN ee.evento e
+                JOIN ee.ministerio m
             JOIN em.membroMinisterio mm
             WHERE e.dataHoraInicio BETWEEN :dataInicio AND :dataFim
               AND e.igreja.idExterno = :igrejaId
-              AND (:listaMinisterios IS NULL OR mm.ministerio.idExterno IN :listaMinisterios)
+              AND (:listaMinisterios IS NULL OR ee.ministerio.idExterno IN :listaMinisterios)
+              AND mm.ministerio.idExterno = ee.ministerio.idExterno
               AND (:nomeEvento IS NULL OR LOWER(e.nome) LIKE CONCAT('%', LOWER(:nomeEvento), '%'))
               AND (:status IS NULL OR em.statusEscalaMinisterio = :status)
-            GROUP BY e.idExterno, e.nome, e.dataHoraFim, e.dataHoraInicio, em.statusEscalaMinisterio
+            GROUP BY ee.idExterno, e.idExterno, m.idExterno, e.nome, m.nome, e.dataHoraFim, e.dataHoraInicio, em.statusEscalaMinisterio
             ORDER BY e.dataHoraInicio ASC
             """)
     List<EscalaMinisterioConsolidadoQueryResult> findEscalaMinisterioConsolidadoByPeriodo(
@@ -170,5 +172,6 @@ public interface EscalaMinisterioJpaRepository extends JpaRepository<EscalaMinis
             @Param("escalaEventoId") UUID escalaEventoId,
             @Param("membrosMinisterioIds") List<UUID> membrosMinisterioIds
     );
+
 }
 

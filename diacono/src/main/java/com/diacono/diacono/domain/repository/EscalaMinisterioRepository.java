@@ -1,10 +1,6 @@
 package com.diacono.diacono.domain.repository;
 
-import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMembroMinisterioDTO;
-import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMinisterioConsolidadoDTO;
-import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMinisterioDTO;
-import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMinisterioSalvarDTO;
-import com.diacono.diacono.domain.entity.EscalaEvento;
+import com.diacono.diacono.applications.dtos.escalaministerio.*;
 import com.diacono.diacono.domain.entity.EscalaMinisterio;
 import com.diacono.diacono.domain.entity.MembroMinisterio;
 import com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio;

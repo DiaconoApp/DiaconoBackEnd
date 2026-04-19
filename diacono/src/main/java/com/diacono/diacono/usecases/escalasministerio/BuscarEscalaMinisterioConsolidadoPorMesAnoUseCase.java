@@ -7,7 +7,6 @@ import com.diacono.diacono.domain.repository.EscalaMinisterioRepository;
 import com.diacono.diacono.domain.repository.MembroMinisterioRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.usecases.escalasevento.validation.ValidarMesEAno;
-import com.diacono.diacono.usecases.ministerio.BuscarMinisteriosLiderMinisterioUseCase;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -60,6 +59,7 @@ public class BuscarEscalaMinisterioConsolidadoPorMesAnoUseCase {
 				.buscarMinisterioLider(membroId, igrejaId)
 				.stream()
 				.map(MinisterioSuperSimplificadoDTO::idExterno)
+				.distinct()
 				.toList();
 
 		if(listaMinisterios.isEmpty()){
