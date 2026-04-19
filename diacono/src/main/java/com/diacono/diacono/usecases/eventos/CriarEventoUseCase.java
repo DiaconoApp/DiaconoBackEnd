@@ -17,6 +17,7 @@ import com.diacono.diacono.domain.repository.MembroRepository;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.util.JwtUtils;
+import com.diacono.diacono.infrastructure.messaging.EventoProducer;
 import com.diacono.diacono.usecases.igreja.BuscarIgrejaPorUUIDUseCase;
 import com.diacono.diacono.usecases.eventos.validation.ValidarHora;
 import com.diacono.diacono.usecases.ministerio.BuscarMembroMinisterioLiderMinisterioComFiltroUseCase;
@@ -46,8 +47,9 @@ public class CriarEventoUseCase {
     private final ValidarHora validarHora;
     private final EnderecoEventoMapper enderecoEventoMapper;
     private final BuscarMinisterioPorUUIDUseCase buscarMinisterioPorUUIDUseCase;
+    private final EventoProducer eventoProducer;
 
-    public CriarEventoUseCase(EventoRepository eventoRepository, EventoMapper eventoMapper, BuscarEnderecoEventoPorUUIDUseCase buscarEnderecoEventoPorUUIDUseCase, RecorrenciaMapper recorrenciaMapper, BuscarMembroMinisterioLiderMinisterioComFiltroUseCase buscarMembroMinisterioLiderMinisterioComFiltroUseCase, MembroRepository membroRepository, BuscarIgrejaPorUUIDUseCase buscarIgrejaPorUUIDUseCase, JwtUtils jwtUtils, ValidarHora validarHora, EnderecoEventoMapper enderecoEventoMapper, BuscarMinisterioPorUUIDUseCase buscarMinisterioPorUUIDUseCase) {
+    public CriarEventoUseCase(EventoRepository eventoRepository, EventoMapper eventoMapper, BuscarEnderecoEventoPorUUIDUseCase buscarEnderecoEventoPorUUIDUseCase, RecorrenciaMapper recorrenciaMapper, BuscarMembroMinisterioLiderMinisterioComFiltroUseCase buscarMembroMinisterioLiderMinisterioComFiltroUseCase, MembroRepository membroRepository, BuscarIgrejaPorUUIDUseCase buscarIgrejaPorUUIDUseCase, JwtUtils jwtUtils, ValidarHora validarHora, EnderecoEventoMapper enderecoEventoMapper, BuscarMinisterioPorUUIDUseCase buscarMinisterioPorUUIDUseCase, EventoProducer eventoProducer) {
         this.eventoRepository = eventoRepository;
         this.eventoMapper = eventoMapper;
         this.buscarEnderecoEventoPorUUIDUseCase = buscarEnderecoEventoPorUUIDUseCase;
@@ -59,6 +61,7 @@ public class CriarEventoUseCase {
         this.validarHora = validarHora;
         this.enderecoEventoMapper = enderecoEventoMapper;
         this.buscarMinisterioPorUUIDUseCase = buscarMinisterioPorUUIDUseCase;
+        this.eventoProducer = eventoProducer;
     }
 
     @Transactional
@@ -172,7 +175,8 @@ public class CriarEventoUseCase {
             eventos.add(novoEvento);
         }
 
-        eventoRepository.saveAll(eventos);
+        List<Evento> eventosSalvos = eventoRepository.saveAll(eventos);
+        eventosSalvos.forEach(eventoProducer::publicarEventoCriadoAposCommit);
 
         return new RestResponseMessageDTO(HttpStatus.CREATED, "Eventos com recorrência semanal criado com sucesso");
     }
@@ -206,7 +210,8 @@ public class CriarEventoUseCase {
             eventos.add(novoEvento);
         }
 
-        eventoRepository.saveAll(eventos);
+        List<Evento> eventosSalvos = eventoRepository.saveAll(eventos);
+        eventosSalvos.forEach(eventoProducer::publicarEventoCriadoAposCommit);
 
         return new RestResponseMessageDTO(HttpStatus.CREATED, "Eventos com recorrência mensal criados com sucesso");
     }
@@ -230,7 +235,10 @@ public class CriarEventoUseCase {
         evento.setIgreja(buscarIgrejaPorUUIDUseCase.execute(jwtUtils.getIgrejaId()));
         evento.setMinisterios(buscarMinisterioPorUUIDUseCase.execute(request.fkMinisterios()));
 
-        return eventoRepository.save(evento);
+        Evento eventoSalvo = eventoRepository.save(evento);
+        eventoProducer.publicarEventoCriadoAposCommit(eventoSalvo);
+
+        return eventoSalvo;
     }
 
     public Membro buscarPorUUID(UUID idExterno) {
