@@ -1,0 +1,28 @@
+meta {
+  name: escalasMinisterioConsolidadoLider
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/escalas-ministerio/lider-ministerio?mes={{mesEvento}}&ano={{anoEvento}}&status={{statusEscalaMinisterio}}&ministerioId={{ministerioId}}&nomeEvento={{nomeEvento}}
+  body: none
+  auth: bearer
+}
+
+params:query {
+  mes: {{mesEvento}}
+  ano: {{anoEvento}}
+  status: {{statusEscalaMinisterio}}
+  ministerioId: {{ministerioId}}
+  nomeEvento: {{nomeEvento}}
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

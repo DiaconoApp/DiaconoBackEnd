@@ -5,33 +5,33 @@ meta {
 }
 
 post {
-  url: http://localhost:8080/register
+  url: {{baseUrl}}/register
   body: json
-  auth: inherit
+  auth: none
+}
+
+headers {
+  content-type: application/json
 }
 
 body:json {
   {
-    "fkIgreja": "550e8400-e29b-41d4-a716-446655440000",
-    "nome": "string",
+    "fkIgreja": "{{igrejaId}}",
+    "nome": "Novo Membro",
     "cpf": "99209712005",
-    "dataNascimento": "2025-10-20",
-    "email": "oliveira@gmail.com",
-    "celular": "51928982091",
-    "senha": "chocolate",
-    "idExternoMinisterios": [
-      "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-    ],
-    "cargo": "ROLE_GOVERNO",
+    "dataNascimento": "2000-10-20",
+    "email": "novo.membro@email.com",
+    "celular": "11999999999",
+    "senha": "Senha@123",
     "generoMembro": "MASCULINO",
     "membroEnderecoDTO": {
       "cep": "01009459",
-      "estado": "string",
-      "cidade": "string",
-      "bairro": "string",
-      "rua": "string",
-      "complemento": "string",
-      "numero": "string"
+      "estado": "SP",
+      "cidade": "SAO PAULO",
+      "bairro": "CENTRO",
+      "rua": "RUA TESTE",
+      "complemento": "APTO 10",
+      "numero": "100"
     }
   }
 }

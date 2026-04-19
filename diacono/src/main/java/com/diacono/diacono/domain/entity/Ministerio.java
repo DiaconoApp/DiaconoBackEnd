@@ -29,7 +29,6 @@ public class Ministerio extends IdEntityUtils{
     private EnumStatusMinisterio status;
     @OneToMany(mappedBy = "ministerio", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MembroMinisterio> membros = new HashSet<>();
-
-
+    @OneToMany(mappedBy = "ministerio", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<EscalaEvento> escalasEvento = new HashSet<>();
 }
-

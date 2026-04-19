@@ -31,7 +31,7 @@ public interface MembroMinisterioJpaRepository extends JpaRepository<MembroMinis
             AND (:busca IS NULL OR
             LOWER(m.nome) LIKE LOWER(:busca)
             OR LOWER(m.email) LIKE LOWER(:busca))
-            """)
+                  """)
     Page<MembroMinisterio> buscarPorMembroMinisterioComFiltro(
             Pageable pageable,
             @Param("idMinisterio") UUID idMinisterio,
@@ -51,10 +51,25 @@ public interface MembroMinisterioJpaRepository extends JpaRepository<MembroMinis
 
     int deleteByMembroIdExternoAndMinisterioIdExterno(UUID membroIdExterno, UUID ministerioIdExterno);
 
+    @Query("""
+          SELECT DISTINCT new com.diacono.diacono.applications.dtos.ministerio.MinisterioSuperSimplificadoDTO(
+                ms.idExterno,
+                ms.nome
+            )
+            FROM MembroMinisterio mm
+            JOIN mm.ministerio ms
+            JOIN mm.membro m
+            WHERE m.idExterno = :idExternoMembro
+            AND ms.igreja.idExterno = :idExternoIgreja
+            AND mm.cargoMembro = com.diacono.diacono.domain.enums.EnumCargoMembroMinisterio.MEMBRO_MINISTERIO
+            """)
+    List<MinisterioSuperSimplificadoDTO> buscarMembro(
+            @Param("idExternoMembro") UUID idExternoMembro,
+            @Param("idExternoIgreja") UUID idExternoIgreja
+    );
 
     @Query("""
-            
-            SELECT new com.diacono.diacono.applications.dtos.ministerio.MinisterioSuperSimplificadoDTO(
+          SELECT DISTINCT new com.diacono.diacono.applications.dtos.ministerio.MinisterioSuperSimplificadoDTO(
                 ms.idExterno,
                 ms.nome
             )
@@ -64,7 +79,8 @@ public interface MembroMinisterioJpaRepository extends JpaRepository<MembroMinis
             WHERE m.idExterno = :idExternoMembro
             AND ms.igreja.idExterno = :idExternoIgreja
             AND mm.cargoMembro = com.diacono.diacono.domain.enums.EnumCargoMembroMinisterio.LIDER_MINISTERIO
-            
+            AND ms.status = com.diacono.diacono.domain.enums.EnumStatusMinisterio.ATIVO
+            AND m.status = com.diacono.diacono.domain.enums.EnumStatusMembro.ATIVO
             """)
     List<MinisterioSuperSimplificadoDTO> buscarMinisterioLider(
             @Param("idExternoMembro") UUID idExternoMembro,
@@ -75,19 +91,17 @@ public interface MembroMinisterioJpaRepository extends JpaRepository<MembroMinis
     //DASH
 
     @Query("""
-            
             SELECT new com.diacono.diacono.applications.dtos.ministerio.MinisterioDashEvolucaoDTO(
                 COUNT(mb),
                 mb.dataRegistro
             )
-            FROM MembroMinisterio mb  
-            JOIN mb.ministerio m      
+            FROM MembroMinisterio mb
+            JOIN mb.ministerio m
             WHERE m.igreja.idExterno = :idIgreja
             AND (:idMinisterio IS NULL OR m.idExterno = :idMinisterio)
-            AND FUNCTION('YEAR', mb.dataRegistro) = :anoFim  
-            GROUP BY mb.dataRegistro                       
+            AND FUNCTION('YEAR', mb.dataRegistro) = :anoFim
+            GROUP BY mb.dataRegistro
             ORDER BY mb.dataRegistro ASC
-            
             """)
     List<MinisterioDashEvolucaoDTO> buscarDashEvolucaoUmAno(
             @Param("anoFim") int anoFim,
@@ -96,19 +110,17 @@ public interface MembroMinisterioJpaRepository extends JpaRepository<MembroMinis
     );
 
     @Query("""
-            
             SELECT new com.diacono.diacono.applications.dtos.ministerio.MinisterioDashEvolucaoDTO(
                 COUNT(mb),
                 mb.dataRegistro
             )
-            FROM MembroMinisterio mb  
-            JOIN mb.ministerio m      
+            FROM MembroMinisterio mb
+            JOIN mb.ministerio m
             WHERE m.igreja.idExterno = :idIgreja
             AND (:idMinisterio IS NULL OR m.idExterno = :idMinisterio)
-            AND FUNCTION('YEAR', mb.dataRegistro) BETWEEN :anoInicio AND :anoFim 
-            GROUP BY mb.dataRegistro                       
+            AND FUNCTION('YEAR', mb.dataRegistro) BETWEEN :anoInicio AND :anoFim
+            GROUP BY mb.dataRegistro
             ORDER BY mb.dataRegistro ASC
-            
             """)
     List<MinisterioDashEvolucaoDTO> buscarDashEvolucaoPeriodo(
             @Param("anoInicio") int anoInicio,
@@ -118,17 +130,16 @@ public interface MembroMinisterioJpaRepository extends JpaRepository<MembroMinis
     );
 
     @Query("""
-            
             SELECT new com.diacono.diacono.applications.dtos.ministerio.MinisterioDashQuantidadeMembrosDTO(
                 m.nome,
                 COUNT(mb)
             )
-            FROM MembroMinisterio mb        
-            JOIN mb.ministerio m          
+            FROM MembroMinisterio mb
+            JOIN mb.ministerio m
             WHERE m.igreja.idExterno = :idIgreja
-            AND FUNCTION('YEAR', mb.dataRegistro) BETWEEN :anoInicio AND :anoFim  
-            GROUP BY m.nome       
-            
+            AND FUNCTION('YEAR', mb.dataRegistro) BETWEEN :anoInicio AND :anoFim
+            GROUP BY m.nome
+
             """)
     List<MinisterioDashQuantidadeMembrosDTO> buscarQuantidadeMembros(
             @Param("anoInicio") int anoInicio,

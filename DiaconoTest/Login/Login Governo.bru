@@ -1,0 +1,42 @@
+meta {
+  name: Login Governo
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+    "email": "{{emailGoverno}}",
+    "senha": "{{senhaGoverno}}"
+  }
+}
+
+script:post-response {
+  const body = res.getBody();
+  const token = body.acessToken || body.accessToken || "";
+  bru.setVar("tokenGoverno", token);
+  bru.setVar("token", token);
+}
+
+tests {
+  test("deve autenticar governo", function () {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(Boolean(body.acessToken || body.accessToken)).to.equal(true);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

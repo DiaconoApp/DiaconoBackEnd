@@ -1,0 +1,28 @@
+meta {
+  name: 06b Validacao Inicial Escala1 Consolidado Nao Confirmado
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/v1/escalas-ministerio/lider-ministerio?mes={{mesEvento}}&ano={{anoEvento}}&nomeEvento={{nomeEvento}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+tests {
+  test("escala ministerio consolidada da escala 1 deve iniciar nao confirmada", function () {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(Array.isArray(body)).to.equal(true);
+
+    const escala1 = body.find((item) => item.idExternoEscalaEvento === bru.getVar("escalaEventoId1"));
+    expect(escala1).to.not.equal(undefined);
+    expect(escala1.status).to.not.equal("CONFIRMADO");
+  });
+}
+

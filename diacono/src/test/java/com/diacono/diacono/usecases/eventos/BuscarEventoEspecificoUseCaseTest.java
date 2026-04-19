@@ -3,6 +3,7 @@ package com.diacono.diacono.usecases.eventos;
 import com.diacono.diacono.applications.dtos.evento.EventoCompletoDTO;
 import com.diacono.diacono.applications.mappers.evento.EventoMapper;
 import com.diacono.diacono.domain.entity.Evento;
+import com.diacono.diacono.domain.enums.EnumStatusEvento;
 import com.diacono.diacono.domain.repository.EventoRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.usecases.eventos.validation.ValidarIdExternoPreenchido;
@@ -43,7 +44,7 @@ class BuscarEventoEspecificoUseCaseTest {
 	void deveRetornarEventoCompletoQuandoEventoExistir() {
 		UUID idEvento = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		Evento evento = Evento.builder().nome("Culto").dataHoraInicio(LocalDateTime.of(2026, 5, 10, 19, 0)).build();
-		EventoCompletoDTO dto = new EventoCompletoDTO("Culto", "Descricao", "JOVENS", null, null, null, null, null, null, null, null);
+		EventoCompletoDTO dto = new EventoCompletoDTO("Culto", "Descricao", "JOVENS", null, null, null, null, null, null, null, null, EnumStatusEvento.PENDENTE);
 
 		when(eventoRepository.findByIdExterno(idEvento)).thenReturn(Optional.of(evento));
 		when(eventoMapper.paraEventoCompletoDTO(evento)).thenReturn(dto);
@@ -51,6 +52,7 @@ class BuscarEventoEspecificoUseCaseTest {
 		EventoCompletoDTO response = useCase.execute(idEvento);
 
 		assertSame(dto, response);
+		assertEquals(EnumStatusEvento.PENDENTE, response.status());
 		verify(validarIdExternoPreenchido).validarIdExternoPreenchido(idEvento);
 	}
 

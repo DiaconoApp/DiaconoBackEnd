@@ -3,19 +3,22 @@ package com.diacono.diacono.usecases.eventos;
 import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
 import com.diacono.diacono.applications.dtos.evento.EventoUpdateDTO;
 import com.diacono.diacono.applications.mappers.endereco.EnderecoEventoMapper;
+import com.diacono.diacono.domain.entity.EscalaEvento;
 import com.diacono.diacono.domain.entity.EnderecoEvento;
 import com.diacono.diacono.domain.entity.Evento;
 import com.diacono.diacono.domain.entity.Ministerio;
 import com.diacono.diacono.domain.repository.EventoRepository;
+import com.diacono.diacono.domain.service.EscalaStatusDomainService;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
+import com.diacono.diacono.usecases.escalasevento.GerarEscalaEventoUseCase;
 import com.diacono.diacono.usecases.eventos.validation.ValidarIdExternoPreenchido;
-import com.diacono.diacono.usecases.ministerio.BuscarMembroMinisterioLiderMinisterioComFiltroUseCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -28,7 +31,6 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 //noinspection unused
@@ -43,9 +45,6 @@ class AtualizarEventoUseCaseTest {
 	private BuscarEnderecoEventoPorUUIDUseCase buscarEnderecoEventoPorUUIDUseCase;
 
 	@Mock
-	private BuscarMembroMinisterioLiderMinisterioComFiltroUseCase buscarMembroMinisterioLiderMinisterioComFiltroUseCase;
-
-	@Mock
 	private ValidarIdExternoPreenchido validarIdExternoPreenchido;
 
 	@Mock
@@ -54,16 +53,23 @@ class AtualizarEventoUseCaseTest {
 	@Mock
 	private BuscarMinisterioPorUUIDUseCase buscarMinisterioPorUUIDUseCase;
 
+	@Mock
+	private GerarEscalaEventoUseCase gerarEscalaEventoUseCase;
+
+	@Mock
+	private EscalaStatusDomainService escalaStatusDomainService;
+
 	@InjectMocks
 	private AtualizarEventoUseCase useCase;
 
 	@Test
 	void deveAtualizarEventoComSucesso() {
 		UUID idEvento = UUID.fromString("11111111-1111-1111-1111-111111111111");
-		UUID idMinisterioNovo = UUID.fromString("22222222-2222-2222-2222-222222222222");
+		UUID idMinisterioAtual = UUID.fromString("22222222-2222-2222-2222-222222222222");
 
 		Ministerio ministerioAtual = Ministerio.builder().nome("Louvor").build();
-		Ministerio ministerioNovo = Ministerio.builder().nome("Intercessao").build();
+		ReflectionTestUtils.setField(ministerioAtual, "idExterno", idMinisterioAtual);
+		EscalaEvento escalaAtual = EscalaEvento.builder().ministerio(ministerioAtual).build();
 
 		Evento evento = Evento.builder()
 				.nome("Evento Antigo")
@@ -72,12 +78,12 @@ class AtualizarEventoUseCaseTest {
 				.custo(BigDecimal.TEN)
 				.dataHoraInicio(LocalDateTime.of(2026, 5, 10, 19, 0))
 				.dataHoraFim(LocalDateTime.of(2026, 5, 10, 21, 0))
-				.ministerios(new HashSet<>(Set.of(ministerioAtual)))
+				.escalaEvento(new HashSet<>(Set.of(escalaAtual)))
 				.enderecoEvento(EnderecoEvento.builder().cep("12345678").numero("10").build())
 				.build();
 
 		EventoUpdateDTO request = new EventoUpdateDTO(
-				List.of(idMinisterioNovo),
+				List.of(idMinisterioAtual),
 				null,
 				"Evento Novo",
 				"Descricao Nova",
@@ -88,17 +94,18 @@ class AtualizarEventoUseCaseTest {
 		);
 
 		when(eventoRepository.findByIdExterno(idEvento)).thenReturn(Optional.of(evento));
-		when(buscarMinisterioPorUUIDUseCase.execute(List.of(idMinisterioNovo))).thenReturn(Set.of(ministerioNovo));
+		when(gerarEscalaEventoUseCase.executeParaAtualizacao(evento, evento.getEscalaEvento(), List.of(idMinisterioAtual))).thenReturn(Set.of(escalaAtual));
 
 		RestResponseMessageDTO response = useCase.execute(request, idEvento);
 
 		assertEquals(HttpStatus.OK, response.getStatus());
 		assertEquals("Evento atualizado com sucesso", response.getMessage());
 		assertEquals("Evento Novo", evento.getNome());
-		assertEquals(1, evento.getMinisterios().size());
-		assertEquals("Intercessao", evento.getMinisterios().iterator().next().getNome());
+		assertEquals(1, evento.getEscalaEvento().size());
+		assertEquals("Louvor", evento.getEscalaEvento().iterator().next().getMinisterio().getNome());
+		assertEquals(escalaAtual, evento.getEscalaEvento().iterator().next());
 		verify(eventoRepository).save(evento);
-		verifyNoInteractions(buscarMembroMinisterioLiderMinisterioComFiltroUseCase);
+		verify(escalaStatusDomainService).recalcularStatusEvento(idEvento);
 	}
 
 	@Test

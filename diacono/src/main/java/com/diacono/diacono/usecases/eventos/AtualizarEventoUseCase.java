@@ -6,16 +6,14 @@ import com.diacono.diacono.applications.dtos.evento.EventoUpdateDTO;
 import com.diacono.diacono.applications.mappers.endereco.EnderecoEventoMapper;
 import com.diacono.diacono.domain.entity.EnderecoEvento;
 import com.diacono.diacono.domain.entity.Evento;
-import com.diacono.diacono.domain.entity.Ministerio;
 import com.diacono.diacono.domain.repository.EventoRepository;
+import com.diacono.diacono.domain.service.EscalaStatusDomainService;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.usecases.ministerio.BuscarMembroMinisterioLiderMinisterioComFiltroUseCase;
+import com.diacono.diacono.usecases.escalasevento.GerarEscalaEventoUseCase;
 import com.diacono.diacono.usecases.eventos.validation.ValidarIdExternoPreenchido;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -23,18 +21,18 @@ public class AtualizarEventoUseCase {
 
     private final EventoRepository eventoRepository;
     private final BuscarEnderecoEventoPorUUIDUseCase buscarEnderecoEventoPorUUIDUseCase;
-    private final BuscarMembroMinisterioLiderMinisterioComFiltroUseCase buscarMembroMinisterioLiderMinisterioComFiltroUseCase;
     private final ValidarIdExternoPreenchido validarIdExternoPreenchido;
     private final EnderecoEventoMapper enderecoEventoMapper;
-    private final BuscarMinisterioPorUUIDUseCase buscarMinisterioPorUUIDUseCase;
+    private final GerarEscalaEventoUseCase gerarEscalaEventoUseCase;
+    private final EscalaStatusDomainService escalaStatusDomainService;
 
-    public AtualizarEventoUseCase(EventoRepository eventoRepository, BuscarEnderecoEventoPorUUIDUseCase buscarEnderecoEventoPorUUIDUseCase, BuscarMembroMinisterioLiderMinisterioComFiltroUseCase buscarMembroMinisterioLiderMinisterioComFiltroUseCase, ValidarIdExternoPreenchido validarIdExternoPreenchido, EnderecoEventoMapper enderecoEventoMapper, BuscarMinisterioPorUUIDUseCase buscarMinisterioPorUUIDUseCase) {
+    public AtualizarEventoUseCase(EventoRepository eventoRepository, BuscarEnderecoEventoPorUUIDUseCase buscarEnderecoEventoPorUUIDUseCase, ValidarIdExternoPreenchido validarIdExternoPreenchido, EnderecoEventoMapper enderecoEventoMapper, GerarEscalaEventoUseCase gerarEscalaEventoUseCase, EscalaStatusDomainService escalaStatusDomainService) {
         this.eventoRepository = eventoRepository;
         this.buscarEnderecoEventoPorUUIDUseCase = buscarEnderecoEventoPorUUIDUseCase;
-        this.buscarMembroMinisterioLiderMinisterioComFiltroUseCase = buscarMembroMinisterioLiderMinisterioComFiltroUseCase;
         this.validarIdExternoPreenchido = validarIdExternoPreenchido;
         this.enderecoEventoMapper = enderecoEventoMapper;
-        this.buscarMinisterioPorUUIDUseCase = buscarMinisterioPorUUIDUseCase;
+        this.gerarEscalaEventoUseCase = gerarEscalaEventoUseCase;
+        this.escalaStatusDomainService = escalaStatusDomainService;
     }
 
     @Transactional
@@ -58,9 +56,7 @@ public class AtualizarEventoUseCase {
         //validar outros campos que precisam ser atualizados
 
         if(request.fkMinisterios() != null && !request.fkMinisterios().isEmpty()){
-            Set<Ministerio> ministerios = new HashSet<>(buscarMinisterioPorUUIDUseCase.execute(request.fkMinisterios()));
-            evento.getMinisterios().clear();
-            evento.getMinisterios().addAll(ministerios);
+            evento.setEscalaEvento(gerarEscalaEventoUseCase.executeParaAtualizacao(evento, evento.getEscalaEvento(), request.fkMinisterios()));
         }
 
         if (request.nome() != null) {
@@ -88,6 +84,7 @@ public class AtualizarEventoUseCase {
         }
 
         eventoRepository.save(evento);
+        escalaStatusDomainService.recalcularStatusEvento(idExterno);
 
         return new RestResponseMessageDTO(HttpStatus.OK, "Evento atualizado com sucesso");
 
@@ -96,11 +93,8 @@ public class AtualizarEventoUseCase {
     //metodos para validar
 
     private Evento buscarEventoPorUUID(UUID idExterno){
-
-        Evento evento = eventoRepository.findByIdExterno(idExterno)
-                .orElseThrow(() -> new ObjectNotFoundException("Evento não encontrado"));;
-
-        return evento;
+        return eventoRepository.findByIdExterno(idExterno)
+                .orElseThrow(() -> new ObjectNotFoundException("Evento não encontrado"));
     }
 
     private boolean validarEnderecoDiferente(EnderecoEvento endereco, EnderecoEventoDTO enderecoEventoDTO){
