@@ -47,7 +47,7 @@ public class DiaconoApplication {
             LocalDate dataNascimento = LocalDate.of(2002, 10, 24);
 
 
-            String senha = "izael123";
+            String senha = "urubu@100";
 
 
 
