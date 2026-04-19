@@ -47,8 +47,11 @@ public class EventoProducer {
                 evento.getIdExterno(),
                 evento.getNome(),
                 evento.getDescricao(),
+                evento.getCusto(),
+                evento.getPublicoAlvo(),
                 evento.getDataHoraInicio(),
                 evento.getDataHoraFim(),
+                evento.getEnderecoEvento().toString(),
                 evento.getIgreja().getIdExterno(),
                 evento.getOrganizador().getIdExterno()
         );
