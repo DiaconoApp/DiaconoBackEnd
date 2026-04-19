@@ -43,7 +43,7 @@ public class BuscarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCase {
 
         List<EscalaMembroMinisterioDTO> membrosMinisterio = buscarMembroMinisterioByEscalaEventoId(igrejaId, escalaEventoId);
         List<EscalaMembroMinisterioDTO> membrosDisponiveis = filtrarMembrosDisponiveis(igrejaId, escalaEventoId, membrosMinisterio);
-        // validarQuantidadeMembrosRandomizados(quantidadeMembrosRandomizados);
+        validarQuantidadeMembrosRandomizados(quantidadeMembrosRandomizados, membrosDisponiveis);
 
         List<EscalaMembroMinisterioDTO> membrosRandomizados = randomizarMembros(membrosDisponiveis);
 
@@ -62,9 +62,8 @@ public class BuscarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCase {
         }
 
         if(quantidadeMembrosRandomizados > membrosDisponiveis.size()) {
-            throw new FieldInvalidException("A quantidade de membros randomizados não pode ser maior que a quantidade de membros disponíveis.");
+            throw new FieldInvalidException("A quantidade de membros randomizados não pode ser maior que a quantidade de membros disponíveis. Membros disponíveis: " + membrosDisponiveis.size());
         }
-
     }
 
     private void validarEscalaEventoId(UUID escalaEventoId, UUID igrejaId, UUID membroId) {
