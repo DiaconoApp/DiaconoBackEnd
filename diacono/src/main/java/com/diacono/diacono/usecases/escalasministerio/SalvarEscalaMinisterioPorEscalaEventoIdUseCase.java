@@ -3,36 +3,32 @@ package com.diacono.diacono.usecases.escalasministerio;
 import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
 import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMembroMinisterioDTO;
 import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMinisterioSalvarDTO;
-import com.diacono.diacono.applications.dtos.ministerio.MinisterioSuperSimplificadoDTO;
 import com.diacono.diacono.domain.entity.EscalaEvento;
+import com.diacono.diacono.domain.entity.EscalaMinisterio;
+import com.diacono.diacono.domain.entity.MembroMinisterio;
+import com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio;
 import com.diacono.diacono.domain.repository.EscalaEventoRepository;
 import com.diacono.diacono.domain.repository.EscalaMinisterioRepository;
-import com.diacono.diacono.domain.repository.MembroMinisterioRepository;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class SalvarEscalaMinisterioPorEscalaEventoIdUseCase {
 
     private final EscalaMinisterioRepository escalaMinisterioRepository;
     private final EscalaEventoRepository escalaEventoRepository;
-    private final MembroMinisterioRepository membroMinisterioRepository;
 
     public SalvarEscalaMinisterioPorEscalaEventoIdUseCase(
             EscalaMinisterioRepository escalaMinisterioRepository,
-            EscalaEventoRepository escalaEventoRepository,
-            MembroMinisterioRepository membroMinisterioRepository
+            EscalaEventoRepository escalaEventoRepository
     ) {
         this.escalaMinisterioRepository = escalaMinisterioRepository;
         this.escalaEventoRepository = escalaEventoRepository;
-        this.membroMinisterioRepository = membroMinisterioRepository;
     }
 
     @Transactional
@@ -49,7 +45,12 @@ public class SalvarEscalaMinisterioPorEscalaEventoIdUseCase {
 
         EscalaEvento escalaEvento = buscarEscalaEvento(igrejaId, escalaEventoId);
 
-        escalaMinisterioRepository.replaceEscalaMinisterioByEscalaEventoId(igrejaId, escalaEventoId, escalaEvento, escalasMinisterio);
+        List<UUID> idsMembrosMinisterioDisponiveis = extrairIdsMembrosMinisterioDisponiveis(igrejaId, escalaEventoId);
+        Map<UUID, MembroMinisterio> membrosMinisterioPorId = buscarMembrosMinisterioPorId(igrejaId, escalaEventoId, idsMembrosMinisterioDisponiveis);
+
+        List<EscalaMinisterio> escalasParaSalvar = montarEscalasParaSalver(membrosMinisterioPorId, escalaEvento, escalasMinisterio);
+
+        escalaMinisterioRepository.replaceEscalaMinisterioByEscalaEventoId(igrejaId, escalaEventoId, escalasParaSalvar);
 
         return new RestResponseMessageDTO(HttpStatus.OK, "Escala de membros do ministério atualizada com sucesso");
     }
@@ -83,16 +84,6 @@ public class SalvarEscalaMinisterioPorEscalaEventoIdUseCase {
 
         if (ministerioId == null) {
             throw new ObjectNotFoundException("Escala evento não encontrada para a igreja informada.");
-        }
-
-        List<UUID> listaMinisteriosLider = membroMinisterioRepository
-                .buscarMinisterioLider(membroId, igrejaId)
-                .stream()
-                .map(MinisterioSuperSimplificadoDTO::idExterno)
-                .toList();
-
-        if (!listaMinisteriosLider.contains(ministerioId)) {
-            throw new ObjectNotFoundException("O líder informado não possui vínculo com o ministério solicitado.");
         }
     }
 
@@ -142,6 +133,35 @@ public class SalvarEscalaMinisterioPorEscalaEventoIdUseCase {
         }
 
         return escalaEvento;
+    }
+
+    private List<UUID> extrairIdsMembrosMinisterioDisponiveis(UUID igrejaId, UUID escalaEventoId) {
+        return escalaMinisterioRepository
+                .findEscalaMembroMinisterioByEscalaEventoId(igrejaId, escalaEventoId)
+                .stream()
+                .map(EscalaMembroMinisterioDTO::membroMinisterioId)
+                .toList();
+    }
+
+    private Map<UUID, MembroMinisterio> buscarMembrosMinisterioPorId(UUID igrejaId, UUID escalaEventoId, List<UUID> idsMembrosMinisterio) {
+        return escalaMinisterioRepository.findMembrosMinisterioByEscalaEventoIdAndIds (igrejaId, escalaEventoId, idsMembrosMinisterio);
+    }
+
+    private List<EscalaMinisterio> montarEscalasParaSalver (
+            Map<UUID, MembroMinisterio> membrosMinisterioPorId,
+            EscalaEvento escalaEvento,
+            List<EscalaMinisterioSalvarDTO> escalasMinisterio
+    ) {
+        List<EscalaMinisterio> escalasParaSalvar = new ArrayList<>();
+        for (EscalaMinisterioSalvarDTO item : escalasMinisterio) {
+            escalasParaSalvar.add(EscalaMinisterio.builder()
+                    .escalaEvento(escalaEvento)
+                    .membroMinisterio(membrosMinisterioPorId.get(item.idExternoMembroMinisterio()))
+                    .statusEscalaMinisterio(item.status() == null ? EnumStatusEscalaMinisterio.CONFIRMADO : item.status())
+                    .build());
+        }
+
+        return escalasParaSalvar;
     }
 }
 

@@ -105,29 +105,16 @@ public class EscalaMinisterioRepositoryImpl implements EscalaMinisterioRepositor
         return jpaRepository.findMembrosMinisterioOcupadosByEscalaEventoId(igrejaId, escalaEventoId);
     }
 
-    @Override
-    public void replaceEscalaMinisterioByEscalaEventoId(UUID igrejaId, UUID escalaEventoId, EscalaEvento escalaEvento, List<EscalaMinisterioSalvarDTO> escalasMinisterio) {
-        jpaRepository.deleteByEscalaEventoIdAndIgrejaId(igrejaId, escalaEventoId);
-
-
-        List<UUID> idsMembrosMinisterio = escalasMinisterio.stream()
-                .map(EscalaMinisterioSalvarDTO::idExternoMembroMinisterio)
-                .distinct()
-                .toList();
-
-        Map<UUID, MembroMinisterio> membrosMinisterioPorId = jpaRepository
+    public Map<UUID, MembroMinisterio> findMembrosMinisterioByEscalaEventoIdAndIds (UUID igrejaId, UUID escalaEventoId, List<UUID> idsMembrosMinisterio) {
+        return jpaRepository
                 .findMembrosMinisterioByEscalaEventoIdAndIds(igrejaId, escalaEventoId, idsMembrosMinisterio)
                 .stream()
                 .collect(java.util.stream.Collectors.toMap(MembroMinisterio::getIdExterno, Function.identity()));
+    }
 
-        List<EscalaMinisterio> escalasParaSalvar = new ArrayList<>();
-        for (EscalaMinisterioSalvarDTO item : escalasMinisterio) {
-            escalasParaSalvar.add(EscalaMinisterio.builder()
-                    .escalaEvento(escalaEvento)
-                    .membroMinisterio(membrosMinisterioPorId.get(item.idExternoMembroMinisterio()))
-                    .statusEscalaMinisterio(item.status() == null ? EnumStatusEscalaMinisterio.CONFIRMADO : item.status())
-                    .build());
-        }
+    @Override
+    public void replaceEscalaMinisterioByEscalaEventoId(UUID igrejaId, UUID escalaEventoId, List<EscalaMinisterio> escalasParaSalvar) {
+        jpaRepository.deleteByEscalaEventoIdAndIgrejaId(igrejaId, escalaEventoId);
 
         jpaRepository.saveAll(escalasParaSalvar);
     }

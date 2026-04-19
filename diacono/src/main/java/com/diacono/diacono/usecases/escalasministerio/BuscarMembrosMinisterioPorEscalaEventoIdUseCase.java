@@ -16,7 +16,6 @@ import java.util.UUID;
 @Service
 public class BuscarMembrosMinisterioPorEscalaEventoIdUseCase {
     // TODO: Adicionar valicao se escala evento faz parte de ministerio que o usuario lidera
-    // TODO: Refatorar busca unica no banco para duas buscas
 
     private final EscalaMinisterioRepository escalaMinisterioRepository;
     private final EscalaEventoRepository escalaEventoRepository;
