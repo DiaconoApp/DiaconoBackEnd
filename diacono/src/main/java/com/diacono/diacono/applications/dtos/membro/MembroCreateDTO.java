@@ -7,6 +7,7 @@ import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.br.CPF;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -37,7 +38,7 @@ public record MembroCreateDTO(
         String senha,
 
 
-        UUID idExternoMinisterios,
+        List<UUID> idExternoMinisterios,
 
         @NotNull(message = "O cargo do membro deve ser informado.")
         EnumCargoMembro cargo,

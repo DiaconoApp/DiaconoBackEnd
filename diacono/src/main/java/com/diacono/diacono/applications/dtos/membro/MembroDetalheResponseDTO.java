@@ -16,7 +16,6 @@ public record MembroDetalheResponseDTO(
         LocalDate dataNascimento,
         String email,
         String celular,
-        UUID idExternoMinisterios,
         EnumCargoMembro cargo,
         EnumGeneroMembro generoMembro,
         EnderecoMembroDTO membroEnderecoDTO,

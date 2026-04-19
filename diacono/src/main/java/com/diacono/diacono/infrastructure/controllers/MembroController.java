@@ -1,6 +1,7 @@
 package com.diacono.diacono.infrastructure.controllers;
 
 import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
+import com.diacono.diacono.applications.dtos.membro.MembroDetalheResponseDTO;
 import com.diacono.diacono.applications.dtos.membro.MembroUpdateDTO;
 import com.diacono.diacono.global.error.comuns.ApiErrorsComuns;
 import com.diacono.diacono.applications.dtos.membro.MembroCreateDTO;
@@ -66,8 +67,8 @@ public class MembroController {
     @ApiErrorsComuns
     @ApiResponse(responseCode = "200", description = "Membro encontrado com sucesso")
     @GetMapping("/{idExterno}")
-    public ResponseEntity<MembroResponseDTO> buscarPorId(@PathVariable UUID idExterno) {
-        MembroResponseDTO response = buscarMembroPorUUIDUseCase.execute(idExterno);
+    public ResponseEntity<MembroDetalheResponseDTO> buscarPorId(@PathVariable UUID idExterno) {
+        MembroDetalheResponseDTO response = buscarMembroPorUUIDUseCase.execute(idExterno);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
