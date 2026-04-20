@@ -30,4 +30,29 @@ public class EnderecoEvento extends IdEntityUtils {
 
     private String apelido;
 
+    @Override
+    public String toString() {
+        StringBuilder endereco = new StringBuilder();
+        appendCampo(endereco, rua);
+        appendCampo(endereco, numero);
+        appendCampo(endereco, complemento);
+        appendCampo(endereco, bairro);
+        appendCampo(endereco, cidade);
+        appendCampo(endereco, estado);
+        appendCampo(endereco, cep);
+        return endereco.toString();
+    }
+
+    private void appendCampo(StringBuilder builder, String valor) {
+        if (valor == null || valor.trim().isEmpty()) {
+            return;
+        }
+
+        if (!builder.isEmpty()) {
+            builder.append(" - ");
+        }
+
+        builder.append(valor.trim());
+    }
+
 }

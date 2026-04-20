@@ -20,6 +20,7 @@ import com.diacono.diacono.domain.repository.MembroRepository;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.util.JwtUtils;
+import com.diacono.diacono.infrastructure.messaging.EventoProducer;
 import com.diacono.diacono.usecases.escalasevento.GerarEscalaEventoUseCase;
 import com.diacono.diacono.usecases.eventos.validation.ValidarHora;
 import com.diacono.diacono.usecases.igreja.BuscarIgrejaPorUUIDUseCase;
@@ -83,6 +84,9 @@ class CriarEventoUseCaseTest {
 	private BuscarMinisterioPorUUIDUseCase buscarMinisterioPorUUIDUseCase;
 
 	@Mock
+	private EventoProducer eventoProducer;
+  
+  @Mock
 	private GerarEscalaEventoUseCase gerarEscalaEventoUseCase;
 
 	@InjectMocks
