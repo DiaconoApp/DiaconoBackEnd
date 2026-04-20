@@ -65,7 +65,7 @@ public class BuscarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCase {
 
     private void validarQuantidadeMembrosRandomizados(int quantidadeMembrosRandomizados, List<EscalaMembroMinisterioDTO> membrosDisponiveis) {
         if(quantidadeMembrosRandomizados > membrosDisponiveis.size()) {
-            throw new FieldInvalidException("A quantidade de membros randomizados não pode ser maior que a quantidade de membros disponíveis. Membros disponíveis: " + membrosDisponiveis.size());
+            throw new FieldInvalidException("A quantidade de membros disponíveis é "+ membrosDisponiveis.size() +  ". Tente novamente.");
         }
     }
 
