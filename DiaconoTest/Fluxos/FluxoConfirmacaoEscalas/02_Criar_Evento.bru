@@ -28,7 +28,7 @@ script:pre-request {
     n = Math.floor(n / 26);
   }
 
-  bru.setVar("nomeEvento", `FLUXO CONFIRMACAO ${suffix}`);
+  bru.setVar("nomeEvento", `Culto de celebração ${suffix}`);
 }
 
 body:json {
@@ -54,7 +54,7 @@ body:json {
       "dataTerminoRecorrencia": null
     },
     "nome": "{{nomeEvento}}",
-    "descricao": "VALIDACAO FLUXO STATUS ESCALAS",
+    "descricao": "Culto de celebracao para reuniao da igreja",
     "publicoAlvo": "MEMBROS",
     "dataHoraInicio": "{{dataHoraInicio}}",
     "dataHoraFim": "{{dataHoraFim}}",
