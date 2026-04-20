@@ -1,0 +1,20 @@
+meta {
+  name: escalasMinisterioRandomizados
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/v1/escalas-ministerio/lider-ministerio/{{escalaEventoId}}/{{quantidadeMembrosRandomizados}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

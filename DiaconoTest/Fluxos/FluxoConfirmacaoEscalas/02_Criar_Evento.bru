@@ -1,0 +1,72 @@
+meta {
+  name: 02 Criar Evento
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/eventos
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  content-type: application/json
+}
+
+script:pre-request {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let n = Date.now();
+  let suffix = "";
+
+  for (let i = 0; i < 6; i++) {
+    suffix += chars[n % 26];
+    n = Math.floor(n / 26);
+  }
+
+  bru.setVar("nomeEvento", `FLUXO CONFIRMACAO ${suffix}`);
+}
+
+body:json {
+  {
+    "fkMinisterios": [
+      "{{ministerioId1}}",
+      "{{ministerioId2}}"
+    ],
+    "endereco": {
+      "idExterno": null,
+      "cep": "04094000",
+      "estado": "SP",
+      "cidade": "SAO PAULO",
+      "bairro": "VILA MARIANA",
+      "rua": "PARQUE IBIRAPUERA",
+      "complemento": "PORTAO PRINCIPAL",
+      "numero": "S N",
+      "apelido": "LOCAL EVENTO"
+    },
+    "recorrencia": {
+      "tipoRecorrencia": "NAO_REPETE",
+      "dataInicioRecorrencia": null,
+      "dataTerminoRecorrencia": null
+    },
+    "nome": "{{nomeEvento}}",
+    "descricao": "VALIDACAO FLUXO STATUS ESCALAS",
+    "publicoAlvo": "MEMBROS",
+    "dataHoraInicio": "{{dataHoraInicio}}",
+    "dataHoraFim": "{{dataHoraFim}}",
+    "custo": 0
+  }
+}
+
+tests {
+  test("deve criar evento com dois ministerios", function () {
+    expect(res.getStatus()).to.equal(201);
+    const body = res.getBody();
+    expect(body.message).to.contain("criado com sucesso");
+  });
+}
+

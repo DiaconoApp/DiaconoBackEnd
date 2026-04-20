@@ -2,12 +2,14 @@ package com.diacono.diacono.usecases.membro;
 
 import com.diacono.diacono.applications.dtos.CadastroExternoDTO;
 import com.diacono.diacono.applications.dtos.membro.EnderecoMembroDTO;
+import com.diacono.diacono.domain.entity.Igreja;
 import com.diacono.diacono.applications.mappers.membro.MembroMapper;
 import com.diacono.diacono.domain.entity.Membro;
+import com.diacono.diacono.domain.enums.EnumCargoMembro;
 import com.diacono.diacono.domain.enums.EnumGeneroMembro;
+import com.diacono.diacono.domain.enums.EnumStatusMembro;
 import com.diacono.diacono.domain.repository.MembroRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectExistsException;
-import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
 import com.diacono.diacono.usecases.igreja.BuscarIgrejaPorUUIDUseCase;
 import com.diacono.diacono.usecases.membro.validation.ValidarCriacaoMembro;
@@ -61,18 +63,31 @@ class CadastrarMembroUseCaseTest {
 
 		ObjectExistsException ex = assertThrows(ObjectExistsException.class, () -> useCase.criarMembroExterno(dto));
 
-		assertEquals("Erro ao se cadastrar", ex.getMessage());
+		assertEquals("Email ou CPF ja cadastrado", ex.getMessage());
 	}
 
 	@Test
-	void deveLancarExcecaoQuandoMembroNaoForEncontradoNaBuscaInicial() {
+	void deveCriarMembroQuandoNaoExistirNaBuscaInicial() {
 		CadastroExternoDTO dto = criarCadastroDTO();
+		Membro membroMapeado = new Membro();
+		Igreja igreja = new Igreja();
+		Membro membroSalvo = new Membro();
+		String senhaHash = "senha-hash";
 
 		when(membroRepository.findByEmailOrCpf(dto.email(), dto.cpf())).thenReturn(Optional.empty());
+		when(membroMapper.paraMembro(dto)).thenReturn(membroMapeado);
+		when(buscarIgrejaPorUUIDUseCase.execute(dto.fkIgreja())).thenReturn(igreja);
+		when(validarCriacaoMembro.hashSenha(dto.senha())).thenReturn(senhaHash);
+		when(membroRepository.save(membroMapeado)).thenReturn(membroSalvo);
 
-		ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> useCase.criarMembroExterno(dto));
+		Membro response = useCase.criarMembroExterno(dto);
 
-		assertEquals("Membro não encontrado", ex.getMessage());
+		assertEquals(membroSalvo, response);
+		assertEquals(EnumStatusMembro.ATIVO, membroMapeado.getStatus());
+		assertEquals(EnumCargoMembro.MEMBRO, membroMapeado.getCargoMembro());
+		assertEquals(igreja, membroMapeado.getIgreja());
+		assertEquals(dto.generoMembro(), membroMapeado.getGeneroMembro());
+		assertEquals(senhaHash, membroMapeado.getSenha());
 	}
 
 	private CadastroExternoDTO criarCadastroDTO() {

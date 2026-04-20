@@ -1,0 +1,37 @@
+meta {
+  name: 01 Login
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+    "email": "{{email}}",
+    "senha": "{{senha}}"
+  }
+}
+
+script:post-response {
+  const body = res.getBody();
+  bru.setVar("token", body.acessToken);
+}
+
+tests {
+  test("deve autenticar", function () {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(body.acessToken).to.be.a("string");
+    expect(body.acessToken.length).to.be.greaterThan(10);
+  });
+}
+

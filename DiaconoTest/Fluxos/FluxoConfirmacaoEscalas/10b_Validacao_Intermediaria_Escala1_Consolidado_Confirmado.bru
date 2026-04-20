@@ -1,0 +1,28 @@
+meta {
+  name: 10b Validacao Intermediaria Escala1 Consolidado Confirmado
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/api/v1/escalas-ministerio/lider-ministerio?mes={{mesEvento}}&ano={{anoEvento}}&nomeEvento={{nomeEvento}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+tests {
+  test("escala ministerio consolidada da escala 1 deve estar confirmada", function () {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(Array.isArray(body)).to.equal(true);
+
+    const escala1 = body.find((item) => item.idExternoEscalaEvento === bru.getVar("escalaEventoId1"));
+    expect(escala1).to.not.equal(undefined);
+    expect(escala1.status).to.equal("CONFIRMADO");
+  });
+}
+

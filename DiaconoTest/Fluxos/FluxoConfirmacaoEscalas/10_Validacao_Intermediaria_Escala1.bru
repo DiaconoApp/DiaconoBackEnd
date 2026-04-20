@@ -1,0 +1,28 @@
+meta {
+  name: 10 Validacao Intermediaria Escala1 Confirmada
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/api/v1/escalas-ministerio/lider-ministerio/{{escalaEventoId1}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+tests {
+  test("escala 1 deve estar confirmada", function () {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(Array.isArray(body)).to.equal(true);
+    expect(body.length).to.be.greaterThan(0);
+
+    const todosConfirmados = body.every((m) => m.status === "CONFIRMADO");
+    expect(todosConfirmados).to.equal(true);
+  });
+}
+

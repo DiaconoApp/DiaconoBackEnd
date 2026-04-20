@@ -18,6 +18,7 @@ import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.infrastructure.messaging.EventoProducer;
+import com.diacono.diacono.usecases.escalasevento.GerarEscalaEventoUseCase;
 import com.diacono.diacono.usecases.igreja.BuscarIgrejaPorUUIDUseCase;
 import com.diacono.diacono.usecases.eventos.validation.ValidarHora;
 import com.diacono.diacono.usecases.ministerio.BuscarMembroMinisterioLiderMinisterioComFiltroUseCase;
@@ -29,7 +30,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,8 +48,9 @@ public class CriarEventoUseCase {
     private final EnderecoEventoMapper enderecoEventoMapper;
     private final BuscarMinisterioPorUUIDUseCase buscarMinisterioPorUUIDUseCase;
     private final EventoProducer eventoProducer;
+    private final GerarEscalaEventoUseCase gerarEscalaEventoUseCase;
 
-    public CriarEventoUseCase(EventoRepository eventoRepository, EventoMapper eventoMapper, BuscarEnderecoEventoPorUUIDUseCase buscarEnderecoEventoPorUUIDUseCase, RecorrenciaMapper recorrenciaMapper, BuscarMembroMinisterioLiderMinisterioComFiltroUseCase buscarMembroMinisterioLiderMinisterioComFiltroUseCase, MembroRepository membroRepository, BuscarIgrejaPorUUIDUseCase buscarIgrejaPorUUIDUseCase, JwtUtils jwtUtils, ValidarHora validarHora, EnderecoEventoMapper enderecoEventoMapper, BuscarMinisterioPorUUIDUseCase buscarMinisterioPorUUIDUseCase, EventoProducer eventoProducer) {
+    public CriarEventoUseCase(EventoRepository eventoRepository, EventoMapper eventoMapper, BuscarEnderecoEventoPorUUIDUseCase buscarEnderecoEventoPorUUIDUseCase, RecorrenciaMapper recorrenciaMapper, BuscarMembroMinisterioLiderMinisterioComFiltroUseCase buscarMembroMinisterioLiderMinisterioComFiltroUseCase, MembroRepository membroRepository, BuscarIgrejaPorUUIDUseCase buscarIgrejaPorUUIDUseCase, JwtUtils jwtUtils, ValidarHora validarHora, EnderecoEventoMapper enderecoEventoMapper, BuscarMinisterioPorUUIDUseCase buscarMinisterioPorUUIDUseCase, EventoProducer eventoProducer, GerarEscalaEventoUseCase gerarEscalaEventoUseCase) {
         this.eventoRepository = eventoRepository;
         this.eventoMapper = eventoMapper;
         this.buscarEnderecoEventoPorUUIDUseCase = buscarEnderecoEventoPorUUIDUseCase;
@@ -62,6 +63,7 @@ public class CriarEventoUseCase {
         this.enderecoEventoMapper = enderecoEventoMapper;
         this.buscarMinisterioPorUUIDUseCase = buscarMinisterioPorUUIDUseCase;
         this.eventoProducer = eventoProducer;
+        this.gerarEscalaEventoUseCase = gerarEscalaEventoUseCase;
     }
 
     @Transactional
@@ -163,7 +165,6 @@ public class CriarEventoUseCase {
             novoEvento.setIgreja(evento.getIgreja());
             novoEvento.setOrganizador(evento.getOrganizador());
             novoEvento.setEnderecoEvento(evento.getEnderecoEvento());
-            novoEvento.setMinisterios(new HashSet<>(evento.getMinisterios()));
             novoEvento.setRecorrencia(evento.getRecorrencia());
             novoEvento.setNome(evento.getNome());
             novoEvento.setDescricao(evento.getDescricao());
@@ -171,6 +172,7 @@ public class CriarEventoUseCase {
             novoEvento.setDataHoraInicio(evento.getDataHoraInicio().plusWeeks(i));
             novoEvento.setDataHoraFim(evento.getDataHoraFim().plusWeeks(i));
             novoEvento.setCusto(evento.getCusto());
+            novoEvento.setEscalaEvento(gerarEscalaEventoUseCase.executeParaClonagem(novoEvento, evento.getEscalaEvento()));
 
             eventos.add(novoEvento);
         }
@@ -198,7 +200,6 @@ public class CriarEventoUseCase {
             novoEvento.setIgreja(eventoBase.getIgreja());
             novoEvento.setOrganizador(eventoBase.getOrganizador());
             novoEvento.setEnderecoEvento(eventoBase.getEnderecoEvento());
-            novoEvento.setMinisterios(new HashSet<>(eventoBase.getMinisterios()));
             novoEvento.setRecorrencia(eventoBase.getRecorrencia());
             novoEvento.setNome(eventoBase.getNome());
             novoEvento.setDescricao(eventoBase.getDescricao());
@@ -206,6 +207,7 @@ public class CriarEventoUseCase {
             novoEvento.setDataHoraInicio(eventoBase.getDataHoraInicio().plusMonths(i));
             novoEvento.setDataHoraFim(eventoBase.getDataHoraFim().plusMonths(i));
             novoEvento.setCusto(eventoBase.getCusto());
+            novoEvento.setEscalaEvento(gerarEscalaEventoUseCase.executeParaClonagem(novoEvento, eventoBase.getEscalaEvento()));
 
             eventos.add(novoEvento);
         }
@@ -233,7 +235,7 @@ public class CriarEventoUseCase {
         evento.setRecorrencia(recorrencia);
         evento.setOrganizador(buscarPorUUID(jwtUtils.getSubject()));
         evento.setIgreja(buscarIgrejaPorUUIDUseCase.execute(jwtUtils.getIgrejaId()));
-        evento.setMinisterios(buscarMinisterioPorUUIDUseCase.execute(request.fkMinisterios()));
+        evento.setEscalaEvento(gerarEscalaEventoUseCase.executeParaCriacao(evento, request.fkMinisterios()));
 
         Evento eventoSalvo = eventoRepository.save(evento);
         eventoProducer.publicarEventoCriadoAposCommit(eventoSalvo);

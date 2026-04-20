@@ -5,20 +5,23 @@ meta {
 }
 
 post {
-  url: http://localhost:8080/api/v1/ministerios/governo
+  url: {{baseUrl}}/api/v1/ministerios/governo
   body: json
   auth: bearer
 }
 
 auth:bearer {
-  token: {{acessToken}}
+  token: {{token}}
+}
+
+headers {
+  content-type: application/json
 }
 
 body:json {
   {
-    "idLider": "2bcfb182-0856-4bbe-8a9f-b60f343c1931",
-      "nome": "teste1"
-  
+    "idLider": "{{membroId}}",
+    "nome": "MINISTERIO TESTE"
   }
 }
 

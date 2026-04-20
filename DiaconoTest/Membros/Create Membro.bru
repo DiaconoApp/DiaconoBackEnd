@@ -5,35 +5,40 @@ meta {
 }
 
 post {
-  url: http://localhost:8080/membros
+  url: {{baseUrl}}/membros
   body: json
   auth: bearer
 }
 
 auth:bearer {
-  token: {{acessToken}}
+  token: {{token}}
+}
+
+headers {
+  content-type: application/json
 }
 
 body:json {
   {
-    "fkIgreja": "550e8400-e29b-41d4-a716-446655440000",
+    "fkIgreja": "{{igrejaId}}",
     "nome": "Lucas Oliveira",
-    "cpf": "123.456.789-09",
+    "cpf": "12345678909",
     "dataNascimento": "1992-03-15",
     "email": "lucas.oliveira@email.com",
     "celular": "11912345678",
     "senha": "Senha@123",
-    "idExternoMinisterios": null,
+    "idExternoMinisterios": "{{ministerioId}}",
     "cargo": "MEMBRO",
+    "generoMembro": "MASCULINO",
     "membroEnderecoDTO": {
       "cep": "01310100",
-      "logradouro": "Avenida Paulista",
-      "bairro": "Bela Vista",
-      "cidade": "São Paulo",
-      "rua": "Rua Ilha dos Ratones",
+      "logradouro": "AVENIDA PAULISTA",
+      "bairro": "BELA VISTA",
+      "cidade": "SAO PAULO",
+      "rua": "RUA ILHA DOS RATONES",
       "estado": "SP",
       "numero": "1500",
-      "complemento": "Apto 304"
+      "complemento": "APTO 304"
     }
   }
 }
