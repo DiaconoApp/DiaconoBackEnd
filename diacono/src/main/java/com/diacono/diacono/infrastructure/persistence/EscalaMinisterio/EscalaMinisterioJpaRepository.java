@@ -29,20 +29,29 @@ public interface EscalaMinisterioJpaRepository extends JpaRepository<EscalaMinis
                 e.dataHoraInicio,
                 cast(count(em) as integer),
                 cast(sum(case when em.statusEscalaMinisterio = com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio.CONFIRMADO then 1 else 0 end) as integer),
-                em.statusEscalaMinisterio
+                case
+                    when em.idInterno is null then com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio.PENDENTE
+                    else em.statusEscalaMinisterio
+                end
             )
-            FROM EscalaMinisterio em
-            JOIN em.escalaEvento ee
+            FROM EscalaEvento ee
+            LEFT JOIN EscalaMinisterio em ON em.escalaEvento = ee
             JOIN ee.evento e
                 JOIN ee.ministerio m
-            JOIN em.membroMinisterio mm
             WHERE e.dataHoraInicio BETWEEN :dataInicio AND :dataFim
               AND e.igreja.idExterno = :igrejaId
               AND (:listaMinisterios IS NULL OR ee.ministerio.idExterno IN :listaMinisterios)
-              AND mm.ministerio.idExterno = ee.ministerio.idExterno
               AND (:nomeEvento IS NULL OR LOWER(e.nome) LIKE CONCAT('%', LOWER(:nomeEvento), '%'))
-              AND (:status IS NULL OR em.statusEscalaMinisterio = :status)
-            GROUP BY ee.idExterno, e.idExterno, m.idExterno, e.nome, m.nome, e.dataHoraFim, e.dataHoraInicio, em.statusEscalaMinisterio
+              AND (
+                    :status IS NULL
+                    OR em.statusEscalaMinisterio = :status
+                    OR (:status = com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio.PENDENTE AND em.idInterno IS NULL)
+                  )
+            GROUP BY ee.idExterno, e.idExterno, m.idExterno, e.nome, m.nome, e.dataHoraFim, e.dataHoraInicio,
+                     case
+                         when em.idInterno is null then com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio.PENDENTE
+                         else em.statusEscalaMinisterio
+                     end
             ORDER BY e.dataHoraInicio ASC
             """)
     List<EscalaMinisterioConsolidadoQueryResult> findEscalaMinisterioConsolidadoByPeriodo(
@@ -56,6 +65,7 @@ public interface EscalaMinisterioJpaRepository extends JpaRepository<EscalaMinis
 
     @Query("""
             SELECT new com.diacono.diacono.infrastructure.persistence.dtos.EscalaMinisterioQueryResult(
+                e.idExterno,
                 em.idExterno,
                 e.nome,
                 mi.nome,

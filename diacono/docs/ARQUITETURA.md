@@ -2,13 +2,13 @@
 
 - nome: domain
   responsabilidade: "Regras centrais de negócio, entidades, contratos de repositório e serviço de domínio."
-  principais_classes: [Membro, Ministerio, Evento, EscalaEvento, EscalaMinisterio, Igreja, Recorrencia, EnderecoMembro, EnderecoEvento, EnderecoIgreja, GoogleRefreshTokenMembro, MembroMinisterio, MembroRepository, MinisteriosRepository, EventoRepository, EscalaStatusDomainService, EscalaStatusDomainServiceImpl, EnderecoEventoRepository, IgrejaRepository, RecorrenciaRepository]
+  principais_classes: [Membro, Ministerio, Evento, EscalaEvento, EscalaMinisterio, Igreja, Recorrencia, EnderecoMembro, EnderecoEvento, EnderecoIgreja, GoogleRefreshTokenMembro, MembroMinisterio, MembroRepository, MinisteriosRepository, FindMinisteriosMembrosRepository, EventoRepository, EscalaStatusDomainService, EscalaStatusDomainServiceImpl, EnderecoEventoRepository, IgrejaRepository, RecorrenciaRepository]
 - nome: application
   responsabilidade: "Orquestração de casos de uso, validações de aplicação, mapeamentos e DTOs."
-  principais_classes: [CriarMembroUseCase, CadastrarMembroUseCase, BuscarTodosSemFiltroUseCase, BuscarTodosComFiltroUseCase, CriarEventoUseCase, AtualizarEventoUseCase, BuscarKpiMembrosDashUseCase, BuscarKpiMinisteriosDashUseCase, BuscarKpiEvolucaoMembrosDashUseCase, BuscarKpiGeneroMembrosDashUseCase, BuscarKpiEvolucaoMinisteriosDashUseCase, SalvarEscalaMinisterioPorEscalaEventoIdUseCase, AtualizarEscalaEventoPorEventoIdUseCase, LoginServiceUseCase, LoginGoogleUseCase, GenerateTokenUseCase, BuscasIgrejasUseCase]
+  principais_classes: [CriarMembroUseCase, CadastrarMembroUseCase, BuscarTodosSemFiltroUseCase, BuscarTodosComFiltroUseCase, CriarEventoUseCase, AtualizarEventoUseCase, BuscarKpiMembrosDashUseCase, BuscarKpiMinisteriosDashUseCase, BuscarKpiEvolucaoMembrosDashUseCase, BuscarKpiGeneroMembrosDashUseCase, BuscarKpiEvolucaoMinisteriosDashUseCase, SalvarEscalaMinisterioPorEscalaEventoIdUseCase, AtualizarEscalaEventoPorEventoIdUseCase, LoginServiceUseCase, LoginGoogleUseCase, GenerateTokenUseCase, BuscasIgrejasUseCase, BuscarMinisteriosMembroUseCase]
 - nome: infrastructure
   responsabilidade: "Implementações técnicas de persistência, autenticação externa e integração com framework."
-  principais_classes: [MembroRepositoryImpl, MinisteriosRepositoryImpl, EventoRepositoryImpl, EscalaEventoRepositoryImpl, EscalaMinisterioRepositoryImpl, GoogleRefreshTokenMembroRepositoryImpl, GoogleIdTokenVerifierImpl, MembroJpaRepository, SecurityConfig, JwtUtils]
+  principais_classes: [MembroRepositoryImpl, MinisteriosRepositoryImpl, FindMinisteriosMembrosRepositoryImpl, EventoRepositoryImpl, EscalaEventoRepositoryImpl, EscalaMinisterioRepositoryImpl, GoogleRefreshTokenMembroRepositoryImpl, GoogleIdTokenVerifierImpl, MembroJpaRepository, FindMinisteriosMembrosJpaRepository, SecurityConfig, JwtUtils]
 - nome: interfaces
   responsabilidade: "Exposição de endpoints HTTP e entrada/saída da API."
   principais_classes: [MembroController, EventoController, MinisteriosController, DashboardController, EscalaEventoController, EscalaMinisterioController, LoginController, GoogleAuthController, CadastroController]
@@ -61,6 +61,11 @@
   usecase: "BuscarKpiMinisteriosDashUseCase.execute"
   domain_services: []
   repositories: [MinisteriosRepository, EventoRepository]
+- nome: "Consulta de ministérios do membro"
+  controller: "MinisteriosController.buscarMinisteriosMembro"
+  usecase: "BuscarMinisteriosMembroUseCase.execute"
+  domain_services: []
+  repositories: [FindMinisteriosMembrosRepository]
 - nome: "Consulta de escala de evento consolidada"
   controller: "EscalaEventoController.buscarEscalaEventoConsolidadoPorMesAno"
   usecase: "BuscarEscalaEventoConsolidadoPorMesAnoUseCase.execute"

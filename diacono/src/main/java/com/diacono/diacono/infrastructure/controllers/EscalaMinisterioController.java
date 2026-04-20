@@ -99,7 +99,7 @@ public class EscalaMinisterioController {
                 ));
     }
 
-    @GetMapping("/lider-ministerio/{escalaEventoId}/revisar-randomizacao/{membroMinisterioIdASerTrocado}")
+    @PostMapping("/lider-ministerio/{escalaEventoId}/revisar-randomizacao/{membroMinisterioIdASerTrocado}")
     public ResponseEntity<List<EscalaMembroMinisterioSimplificadoDTO>> RevisarMembrosMinisterioRandomizadosPorEscalaEventoId(
             @PathVariable UUID escalaEventoId,
             @PathVariable UUID membroMinisterioIdASerTrocado,

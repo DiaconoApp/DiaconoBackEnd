@@ -33,11 +33,12 @@ public class MinisteriosController {
     private final RemoverMembroMinisterioLiderMinisterioUseCase removerMembroMinisterioLiderMinisterioUseCase;
     private final AdicionarMembroMinisterioLiderMinisterioUseCase adicionarMembroMinisterioLiderMinisterioUseCase;
     private final BuscarMinisteriosLiderMinisterioUseCase buscarMinisteriosLiderMinisterioUseCase;
+    private final BuscarMinisteriosMembroUseCase buscarMinisteriosMembroUseCase;
     private final BuscarMinisteriosGovernoSemFiltroUseCase buscarMinisteriosGovernoSemFiltroUseCase;
     private final BuscarMinisteriosGovernoComFiltroUseCase buscarMinisteriosGovernoComFiltroUseCase;
     private final BuscarMembroMinisterioLiderMinisterioSemFiltroUseCase buscarMembroMinisterioLiderMinisterioSemFiltroUseCase;
 
-    public MinisteriosController(BuscarMembroMinisterioLiderMinisterioComFiltroUseCase buscarMembroMinisterioLiderMinisterioComFiltroUseCase, BuscarMinisteriosGeraisUseCase buscarMinisteriosGeraisUseCase, AdicionarMinisterioUseCase adicionarMinisterioUseCase, EditarMinisterioUseCase editarMinisterioUseCase, RemoverMembroMinisterioLiderMinisterioUseCase removerMembroMinisterioLiderMinisterioUseCase, AdicionarMembroMinisterioLiderMinisterioUseCase adicionarMembroMinisterioLiderMinisterioUseCase, BuscarMinisteriosLiderMinisterioUseCase buscarMinisteriosLiderMinisterioUseCase, BuscarMinisteriosGovernoSemFiltroUseCase buscarMinisteriosGovernoSemFiltroUseCase, BuscarMinisteriosGovernoComFiltroUseCase buscarMinisteriosGovernoComFiltroUseCase, BuscarMembroMinisterioLiderMinisterioSemFiltroUseCase buscarMembroMinisterioLiderMinisterioSemFiltroUseCase) {
+    public MinisteriosController(BuscarMembroMinisterioLiderMinisterioComFiltroUseCase buscarMembroMinisterioLiderMinisterioComFiltroUseCase, BuscarMinisteriosGeraisUseCase buscarMinisteriosGeraisUseCase, AdicionarMinisterioUseCase adicionarMinisterioUseCase, EditarMinisterioUseCase editarMinisterioUseCase, RemoverMembroMinisterioLiderMinisterioUseCase removerMembroMinisterioLiderMinisterioUseCase, AdicionarMembroMinisterioLiderMinisterioUseCase adicionarMembroMinisterioLiderMinisterioUseCase, BuscarMinisteriosLiderMinisterioUseCase buscarMinisteriosLiderMinisterioUseCase, BuscarMinisteriosMembroUseCase buscarMinisteriosMembroUseCase, BuscarMinisteriosGovernoSemFiltroUseCase buscarMinisteriosGovernoSemFiltroUseCase, BuscarMinisteriosGovernoComFiltroUseCase buscarMinisteriosGovernoComFiltroUseCase, BuscarMembroMinisterioLiderMinisterioSemFiltroUseCase buscarMembroMinisterioLiderMinisterioSemFiltroUseCase) {
         this.buscarMembroMinisterioLiderMinisterioComFiltroUseCase = buscarMembroMinisterioLiderMinisterioComFiltroUseCase;
         this.buscarMinisteriosGeraisUseCase = buscarMinisteriosGeraisUseCase;
         this.adicionarMinisterioUseCase = adicionarMinisterioUseCase;
@@ -45,6 +46,7 @@ public class MinisteriosController {
         this.removerMembroMinisterioLiderMinisterioUseCase = removerMembroMinisterioLiderMinisterioUseCase;
         this.adicionarMembroMinisterioLiderMinisterioUseCase = adicionarMembroMinisterioLiderMinisterioUseCase;
         this.buscarMinisteriosLiderMinisterioUseCase = buscarMinisteriosLiderMinisterioUseCase;
+        this.buscarMinisteriosMembroUseCase = buscarMinisteriosMembroUseCase;
         this.buscarMinisteriosGovernoSemFiltroUseCase = buscarMinisteriosGovernoSemFiltroUseCase;
         this.buscarMinisteriosGovernoComFiltroUseCase = buscarMinisteriosGovernoComFiltroUseCase;
         this.buscarMembroMinisterioLiderMinisterioSemFiltroUseCase = buscarMembroMinisterioLiderMinisterioSemFiltroUseCase;
@@ -120,6 +122,14 @@ public class MinisteriosController {
     public ResponseEntity<List<MinisterioSuperSimplificadoDTO>> buscarMinisteriosLiderMinisterio() {
 
         List<MinisterioSuperSimplificadoDTO> listaMinisterios = buscarMinisteriosLiderMinisterioUseCase.execute();
+
+        return ResponseEntity.status(HttpStatus.OK).body(listaMinisterios);
+    }
+
+    @GetMapping("/membro")
+    public ResponseEntity<List<MinisterioSuperSimplificadoDTO>> buscarMinisteriosMembro() {
+
+        List<MinisterioSuperSimplificadoDTO> listaMinisterios = buscarMinisteriosMembroUseCase.execute();
 
         return ResponseEntity.status(HttpStatus.OK).body(listaMinisterios);
     }
