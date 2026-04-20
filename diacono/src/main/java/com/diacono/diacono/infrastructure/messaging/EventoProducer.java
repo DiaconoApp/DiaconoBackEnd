@@ -52,8 +52,7 @@ public class EventoProducer {
                 evento.getDataHoraInicio(),
                 evento.getDataHoraFim(),
                 evento.getEnderecoEvento().toString(),
-                evento.getIgreja().getIdExterno(),
-                evento.getOrganizador().getIdExterno()
+                evento.getIgreja().getIdExterno()
         );
     }
 }

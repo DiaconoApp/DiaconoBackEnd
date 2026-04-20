@@ -5,15 +5,14 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record EventoCriadoMessageDTO(
-        UUID idExternoEvento,
+        UUID idEvento,
         String nome,
         String descricao,
         BigDecimal custo,
-        String PublicoAlvo,
+        String publicoAlvo,
         LocalDateTime dataHoraInicio,
         LocalDateTime dataHoraFim,
-        String Localizacao,
-        UUID idExternoIgreja,
-        UUID idExternoOrganizador
+        String localizacao,
+        UUID idIgreja
 ) {
 }
