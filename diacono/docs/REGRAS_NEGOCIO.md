@@ -632,6 +632,17 @@ ausentes:
     metodo: "getIgrejaId"
   dependencias: []
 
+- id: REGRA_057
+  nome: "Consulta de ministerios do membro autenticado"
+  descricao: "O membro autenticado deve possuir ministerios vinculados na mesma igreja para que a consulta retorne resultado."
+  entidade: "MembroMinisterio"
+  condicao: "buscaMinisteriosMembro retorna lista vazia"
+  acao: "lanca ObjectNotFoundException"
+  origem_codigo:
+    classe: "BuscarMinisteriosMembroUseCase"
+    metodo: "execute"
+  dependencias: ["REGRA_056"]
+
 ANALISE
 
 duplicadas: []

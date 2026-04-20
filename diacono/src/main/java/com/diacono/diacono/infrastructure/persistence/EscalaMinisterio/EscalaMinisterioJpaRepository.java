@@ -65,6 +65,7 @@ public interface EscalaMinisterioJpaRepository extends JpaRepository<EscalaMinis
 
     @Query("""
             SELECT new com.diacono.diacono.infrastructure.persistence.dtos.EscalaMinisterioQueryResult(
+                e.idExterno,
                 em.idExterno,
                 e.nome,
                 mi.nome,

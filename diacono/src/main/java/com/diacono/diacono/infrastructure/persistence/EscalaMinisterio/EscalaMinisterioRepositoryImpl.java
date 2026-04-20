@@ -72,6 +72,7 @@ public class EscalaMinisterioRepositoryImpl implements EscalaMinisterioRepositor
 
         return queryResults.stream()
                 .map(result -> new EscalaMinisterioDTO(
+                        result.idExternoEvento(),
                         result.idExternoEscalaMinisterio(),
                         result.nomeReuniao(),
                         result.nomeMinisterio(),

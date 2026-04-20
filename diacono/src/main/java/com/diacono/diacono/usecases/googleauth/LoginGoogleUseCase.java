@@ -32,11 +32,8 @@ public class LoginGoogleUseCase {
         String email = googleClaims.email();
 
         Membro membro = buscarMembro(email);
-        System.out.println("Autenticado o usuario" + email);
-        System.out.printf("Sua requisicao eh:" + googleAuthRequestDTO.toString());
+
         if (googleAuthRequestDTO.refreshToken() != null) {
-            System.out.println("Atualizando refresh token do Google para o membro: " + email);
-            System.out.printf("Refresh token é" + googleAuthRequestDTO.refreshToken());
             atualizarSecretGoogleUseCase.execute(membro.getIdExterno(), email, googleAuthRequestDTO.refreshToken());
         }
 

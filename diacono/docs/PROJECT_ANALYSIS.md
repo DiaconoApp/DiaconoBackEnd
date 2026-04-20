@@ -135,6 +135,9 @@ JPA implementations and query results:
 - `MembroJpaRepository` - Spring Data JPA interface
 - `MembroRepositoryImpl` - Custom implementation
 
+**Ministry-member lookup**:
+- `MinisteriosMembros/` - consultas de ministérios do membro autenticado
+
 **Query Results** (specialized DTOs for complex queries):
 - `EscalaEventoEscaladoQueryResult`
 - `EscalaEventoQueryResult`
@@ -142,6 +145,8 @@ JPA implementations and query results:
 - `EscalaMembroMinisterioSimplificadoQueryResult`
 - `EscalaMinisterioConsolidadoQueryResult`
 - `EscalaMinisterioQueryResult`
+
+Observação: a consulta de ministérios do membro usa projeção direta para `MinisterioSuperSimplificadoDTO`; não existe `MinisterioSuperSimplificadoQueryResult` no código atual.
 
 **Other Persistence Folders**:
 - `EnderecoEvento/`, `EscalaEvento/`, `EscalaMinisterio/` - Specific entity implementations
@@ -188,6 +193,7 @@ Ministry and member-ministry operations:
 - `BuscarMinisteriosGovernoSemFiltroUseCase` - Admin view without filters
 - `BuscarMinisteriosGovernoComFiltroUseCase` - Admin view with search/status filters
 - `BuscarMinisteriosLiderMinisterioUseCase` - Ministry leader's ministries
+- `BuscarMinisteriosMembroUseCase` - Authenticated member's ministries
 - `BuscarMembroMinisterioLiderMinisterioSemFiltroUseCase` - List ministry members
 - `BuscarMembroMinisterioLiderMinisterioComFiltroUseCase` - Filter ministry members
 - `AdicionarMembroMinisterioLiderMinisterioUseCase` - Add member to ministry
@@ -285,6 +291,7 @@ Cross-cutting concerns
 | GET | `/api/v1/ministerios` | Get all active ministries |
 | GET | `/api/v1/ministerios/governo` | Admin view of ministries (with filters) |
 | GET | `/api/v1/ministerios/lider` | Ministry leader's view |
+| GET | `/api/v1/ministerios/membro` | Authenticated member's ministries |
 | GET | `/api/v1/ministerios/{id}/membros` | Members of specific ministry |
 | POST | `/api/v1/ministerios/{id}/membros` | Add member to ministry |
 | DELETE | `/api/v1/ministerios/{id}/membros/{membroId}` | Remove member from ministry |
@@ -380,6 +387,8 @@ External registration for non-members
 - `KpisMembrosDTO` - Member KPIs
 - `KpisMinisteriosDTO` - Ministry KPIs
 
+`MinisterioSuperSimplificadoDTO` is used directly in JPQL projections for leader/member ministry lookups.
+
 #### Scale DTOs
 
 **Event Scales** (`dtos/escalasevento/`):
@@ -406,6 +415,8 @@ Query result objects for complex database queries (read-only):
 - `EscalaMembroMinisterioSimplificadoQueryResult`
 - `EscalaMinisterioConsolidadoQueryResult`
 - `EscalaMinisterioQueryResult`
+
+Ministry lookups currently project directly to `MinisterioSuperSimplificadoDTO`; there is no dedicated `MinisterioSuperSimplificadoQueryResult`.
 
 ---
 

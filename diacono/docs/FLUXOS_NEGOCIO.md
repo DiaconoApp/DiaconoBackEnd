@@ -116,6 +116,32 @@ FLUXOS
     antes: ["Membros existentes na igreja do token"]
     depois: ["Nenhuma alteracao de estado"]
   regras_aplicadas: ["sem filtros chama fluxo sem filtro", "com filtros chama fluxo com filtro", "se lista/pagina vazia retorna erro de nao encontrado", "filtro por ministerio exige vinculo em MembroMinisterio"]
+- nome: "CONSULTA_MINISTERIOS_MEMBRO"
+  descricao: "Busca os ministérios do membro autenticado na igreja do token."
+  entrada:
+    endpoint: "/api/v1/ministerios/membro"
+    metodo: "GET"
+  sequencia:
+    - passo: 1
+      tipo: controller
+      nome: "MinisteriosController.buscarMinisteriosMembro"
+    - passo: 2
+      tipo: usecase
+      nome: "BuscarMinisteriosMembroUseCase.execute"
+    - passo: 3
+      tipo: usecase
+      nome: "BuscarMinisteriosMembroUseCase.buscarMinisteriosMembro"
+    - passo: 4
+      tipo: repository
+      nome: "FindMinisteriosMembrosRepository.buscarMinisteriosMembro"
+    - passo: 5
+      tipo: repository
+      nome: "FindMinisteriosMembrosJpaRepository.buscarMinisteriosMembro"
+  entidades_afetadas: [Membro, MembroMinisterio, Ministerio]
+  estados:
+    antes: ["Membro autenticado com vínculo de igreja via JWT"]
+    depois: ["Nenhuma alteracao de estado"]
+  regras_aplicadas: ["consulta respeita o subject e a igreja do JWT", "retorno vazio gera ObjectNotFoundException", "resultado usa projeção direta para MinisterioSuperSimplificadoDTO"]
 - nome: "CRIACAO_EVENTO"
   descricao: "Cria evento unico ou recorrente e gera escalas de evento."
   entrada:
