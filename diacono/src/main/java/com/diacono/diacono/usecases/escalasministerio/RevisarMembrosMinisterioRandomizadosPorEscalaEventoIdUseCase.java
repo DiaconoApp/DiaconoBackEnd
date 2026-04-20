@@ -142,6 +142,10 @@ public class RevisarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCase {
             List<EscalaMembroMinisterioSimplificadoDTO> membrosSelecionados,
             UUID membroMinisterioIdASerTrocado
     ) {
+        if (membroMinisterioIdASerTrocado == null) {
+            throw new FieldInvalidException("O ID do membro a ser trocado deve ser fornecido.");
+        }
+
         for (int i = 0; i < membrosSelecionados.size(); i++) {
             if (Objects.equals(membrosSelecionados.get(i).idExternoMembroMinisterio(), membroMinisterioIdASerTrocado)) {
                 return i;

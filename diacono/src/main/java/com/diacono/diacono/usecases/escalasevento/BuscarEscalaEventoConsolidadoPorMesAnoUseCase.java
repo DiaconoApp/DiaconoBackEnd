@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -32,7 +33,16 @@ public class BuscarEscalaEventoConsolidadoPorMesAnoUseCase {
         LocalDateTime inicioMes = anoMes.atDay(1).atStartOfDay();
         LocalDateTime fimMes = anoMes.atEndOfMonth().atTime(23, 59, 59);
 
+        String nomeEventoNormalizado = normalizarNomeEvento(nomeEvento);
+
         return escalaEventoRepository
-                .findEscalaEventoConsolidadoByPeriodo(idIgreja, inicioMes, fimMes, status, ministerioId, nomeEvento);
+                .findEscalaEventoConsolidadoByPeriodo(idIgreja, inicioMes, fimMes, status, ministerioId, nomeEventoNormalizado);
+    }
+
+    private String normalizarNomeEvento(String nomeEvento) {
+        return Optional.ofNullable(nomeEvento)
+                .map(String::trim)
+                .filter(nome -> !nome.isBlank())
+                .orElse(null);
     }
 }

@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -52,13 +53,17 @@ class BuscarEscalaEventoConsolidadoPorMesAnoUseCaseTest {
                 )
         );
 
+        String nomeNormalizado = invokeNormalizarNomeEvento("  CuLtO  ");
+
+        assertEquals("CuLtO", nomeNormalizado);
+
         when(escalaEventoRepository.findEscalaEventoConsolidadoByPeriodo(
                 eq(idIgreja),
                 any(LocalDateTime.class),
                 any(LocalDateTime.class),
                 eq(EnumStatusEvento.CONFIRMADO),
                 eq(idMinisterio),
-                eq("CuLtO")
+                eq(nomeNormalizado)
         )).thenReturn(esperado);
 
         List<EscalaEventoConsolidadoDTO> response = useCase.execute(
@@ -77,13 +82,16 @@ class BuscarEscalaEventoConsolidadoPorMesAnoUseCaseTest {
                 any(LocalDateTime.class),
                 eq(EnumStatusEvento.CONFIRMADO),
                 eq(idMinisterio),
-                eq("CuLtO")
+                eq(nomeNormalizado)
         );
     }
 
     @Test
     void deveTransformarNomeEventoEmBrancoParaNull() {
         UUID idIgreja = UUID.randomUUID();
+        String nomeNormalizado = invokeNormalizarNomeEvento("   ");
+
+        assertEquals(null, nomeNormalizado);
 
         when(escalaEventoRepository.findEscalaEventoConsolidadoByPeriodo(
                 eq(idIgreja),
@@ -91,7 +99,7 @@ class BuscarEscalaEventoConsolidadoPorMesAnoUseCaseTest {
                 any(LocalDateTime.class),
                 eq(null),
                 eq(null),
-                eq(null)
+                eq(nomeNormalizado)
         )).thenReturn(List.of());
 
         List<EscalaEventoConsolidadoDTO> response = useCase.execute(
@@ -110,7 +118,7 @@ class BuscarEscalaEventoConsolidadoPorMesAnoUseCaseTest {
                 any(LocalDateTime.class),
                 eq(null),
                 eq(null),
-                eq(null)
+                eq(nomeNormalizado)
         );
     }
 
@@ -122,5 +130,16 @@ class BuscarEscalaEventoConsolidadoPorMesAnoUseCaseTest {
         );
 
         assertEquals("O mês precisa estar entre 1 e 12", ex.getMessage());
+    }
+
+    private String invokeNormalizarNomeEvento(String nomeEvento) {
+        try {
+            Method method = BuscarEscalaEventoConsolidadoPorMesAnoUseCase.class
+                    .getDeclaredMethod("normalizarNomeEvento", String.class);
+            method.setAccessible(true);
+            return (String) method.invoke(useCase, nomeEvento);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }

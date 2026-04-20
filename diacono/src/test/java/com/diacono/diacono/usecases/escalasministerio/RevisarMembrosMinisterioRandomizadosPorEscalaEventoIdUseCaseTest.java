@@ -84,37 +84,34 @@ class RevisarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCaseTest {
     }
 
     @Test
-    void deveAceitarListaSelecionadosNulaERetornarUmMembroNovo() {
+    void deveLancarExcecaoQuandoIdMembroASerTrocadoForNulo() {
         UUID igrejaId = UUID.fromString("11111111-1111-1111-1111-111111111111");
         UUID escalaEventoId = UUID.fromString("22222222-2222-2222-2222-222222222222");
         UUID membroId = UUID.fromString("33333333-3333-3333-3333-333333333333");
         UUID ministerioId = UUID.fromString("44444444-4444-4444-4444-444444444444");
         UUID membroA = UUID.fromString("55555555-5555-5555-5555-555555555555");
-        UUID membroASerTrocado = UUID.fromString("99999999-9999-9999-9999-999999999999");
+        UUID membroASerTrocado = null;
 
         when(escalaEventoRepository.findMinisterioIdByEscalaEventoId(igrejaId, escalaEventoId))
                 .thenReturn(ministerioId);
         when(membroMinisterioRepository.buscarMinisterioLider(membroId, igrejaId))
                 .thenReturn(List.of(new MinisterioSuperSimplificadoDTO(ministerioId, "Louvor")));
-        when(escalaMinisterioRepository.findEscalaMembroMinisterioByEscalaEventoId(igrejaId, escalaEventoId))
-                .thenReturn(List.of(new EscalaMembroMinisterioDTO(membroA, "Ana", null, null)));
-        when(escalaMinisterioRepository.findMembrosMinisterioOcupadosByEscalaEventoId(igrejaId, escalaEventoId))
-                .thenReturn(List.of());
-
-        List<EscalaMembroMinisterioSimplificadoDTO> response = useCase.execute(
-                escalaEventoId,
-                igrejaId,
-                membroId,
-                membroASerTrocado,
-                null
+        FieldInvalidException ex = assertThrows(
+                FieldInvalidException.class,
+                () -> useCase.execute(
+                        escalaEventoId,
+                        igrejaId,
+                        membroId,
+                        membroASerTrocado,
+                        null
+                )
         );
 
-        assertEquals(1, response.size());
-        assertEquals(membroA, response.getFirst().idExternoMembroMinisterio());
+        assertEquals("O ID do membro a ser trocado deve ser fornecido.", ex.getMessage());
     }
 
     @Test
-    void deveAdicionarAoFinalQuandoMembroASerTrocadoNaoEstiverNaLista() {
+    void deveLancarExcecaoQuandoMembroASerTrocadoNaoEstiverNaLista() {
         UUID igrejaId = UUID.fromString("11111111-1111-1111-1111-111111111111");
         UUID escalaEventoId = UUID.fromString("22222222-2222-2222-2222-222222222222");
         UUID membroId = UUID.fromString("33333333-3333-3333-3333-333333333333");
@@ -127,29 +124,22 @@ class RevisarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCaseTest {
                 .thenReturn(ministerioId);
         when(membroMinisterioRepository.buscarMinisterioLider(membroId, igrejaId))
                 .thenReturn(List.of(new MinisterioSuperSimplificadoDTO(ministerioId, "Louvor")));
-        when(escalaMinisterioRepository.findEscalaMembroMinisterioByEscalaEventoId(igrejaId, escalaEventoId))
-                .thenReturn(List.of(
-                        new EscalaMembroMinisterioDTO(membroA, "Ana", null, null),
-                        new EscalaMembroMinisterioDTO(membroB, "Bruno", null, null)
-                ));
-        when(escalaMinisterioRepository.findMembrosMinisterioOcupadosByEscalaEventoId(igrejaId, escalaEventoId))
-                .thenReturn(List.of());
-
         List<EscalaMembroMinisterioSimplificadoDTO> selecionados = List.of(
                 new EscalaMembroMinisterioSimplificadoDTO(membroB, "Bruno")
         );
 
-        List<EscalaMembroMinisterioSimplificadoDTO> response = useCase.execute(
-                escalaEventoId,
-                igrejaId,
-                membroId,
-                membroASerTrocado,
-                selecionados
+        FieldInvalidException ex = assertThrows(
+                FieldInvalidException.class,
+                () -> useCase.execute(
+                        escalaEventoId,
+                        igrejaId,
+                        membroId,
+                        membroASerTrocado,
+                        selecionados
+                )
         );
 
-        assertEquals(2, response.size());
-        assertEquals(membroB, response.get(0).idExternoMembroMinisterio());
-        assertEquals(membroA, response.get(1).idExternoMembroMinisterio());
+        assertEquals("O membro a ser trocado não foi encontrado na lista de membros selecionados.", ex.getMessage());
     }
 
     @Test
@@ -159,7 +149,7 @@ class RevisarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCaseTest {
         UUID membroId = UUID.fromString("33333333-3333-3333-3333-333333333333");
         UUID ministerioId = UUID.fromString("44444444-4444-4444-4444-444444444444");
         UUID membroA = UUID.fromString("55555555-5555-5555-5555-555555555555");
-        UUID membroASerTrocado = UUID.fromString("99999999-9999-9999-9999-999999999999");
+        UUID membroASerTrocado = membroA;
 
         when(escalaEventoRepository.findMinisterioIdByEscalaEventoId(igrejaId, escalaEventoId))
                 .thenReturn(ministerioId);
