@@ -1,6 +1,8 @@
 package com.diacono.diacono.infrastructure.persistence.EscalaMinisterio;
 
 import com.diacono.diacono.domain.entity.EscalaMinisterio;
+import com.diacono.diacono.infrastructure.persistence.springdata.EscalaMinisterioJpaRepository;
+import com.diacono.diacono.infrastructure.persistence.gateway.EscalaMinisterioRepositoryImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

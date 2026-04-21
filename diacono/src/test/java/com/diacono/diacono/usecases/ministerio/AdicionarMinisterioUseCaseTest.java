@@ -11,7 +11,7 @@ import com.diacono.diacono.domain.enums.EnumCargoMembroMinisterio;
 import com.diacono.diacono.domain.enums.EnumStatusMinisterio;
 import com.diacono.diacono.domain.repository.MinisteriosRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.infrastructure.persistence.Membro.MembroJpaRepository;
+import com.diacono.diacono.infrastructure.persistence.springdata.MembroJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

@@ -9,7 +9,7 @@ import com.diacono.diacono.domain.enums.EnumCargoMembro;
 import com.diacono.diacono.domain.enums.EnumCargoMembroMinisterio;
 import com.diacono.diacono.domain.repository.MinisteriosRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.infrastructure.persistence.Membro.MembroJpaRepository;
+import com.diacono.diacono.infrastructure.persistence.springdata.MembroJpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,7 +1,7 @@
 package com.diacono.diacono.usecases.ministerio;
 
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioSuperSimplificadoDTO;
-import com.diacono.diacono.domain.repository.FindMinisteriosMembrosRepository;
+import com.diacono.diacono.domain.repository.MinisteriosRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.util.JwtUtils;
 import org.junit.jupiter.api.Test;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 class BuscarMinisteriosMembroUseCaseTest {
 
     @Mock
-    private FindMinisteriosMembrosRepository findMinisteriosMembrosRepository;
+    private MinisteriosRepository ministeriosRepository;
 
     @Mock
     private JwtUtils jwtUtils;
@@ -41,7 +41,7 @@ class BuscarMinisteriosMembroUseCaseTest {
 
         when(jwtUtils.getSubject()).thenReturn(idMembro);
         when(jwtUtils.getIgrejaId()).thenReturn(idIgreja);
-        when(findMinisteriosMembrosRepository.buscarMinisteriosMembro(idMembro, idIgreja)).thenReturn(List.of(dto));
+        when(ministeriosRepository.buscarMinisteriosMembro(idMembro, idIgreja)).thenReturn(List.of(dto));
 
         List<MinisterioSuperSimplificadoDTO> response = useCase.execute();
 
@@ -49,7 +49,7 @@ class BuscarMinisteriosMembroUseCaseTest {
         assertEquals(dto, response.getFirst());
         verify(jwtUtils).getSubject();
         verify(jwtUtils).getIgrejaId();
-        verify(findMinisteriosMembrosRepository).buscarMinisteriosMembro(idMembro, idIgreja);
+        verify(ministeriosRepository).buscarMinisteriosMembro(idMembro, idIgreja);
     }
 
     @Test
@@ -61,7 +61,7 @@ class BuscarMinisteriosMembroUseCaseTest {
                 "Intercessao"
         );
 
-        when(findMinisteriosMembrosRepository.buscarMinisteriosMembro(idMembro, idIgreja)).thenReturn(List.of(dto));
+        when(ministeriosRepository.buscarMinisteriosMembro(idMembro, idIgreja)).thenReturn(List.of(dto));
 
         List<MinisterioSuperSimplificadoDTO> response = useCase.buscarMinisteriosMembro(idMembro, idIgreja);
 
@@ -74,7 +74,7 @@ class BuscarMinisteriosMembroUseCaseTest {
         UUID idMembro = UUID.fromString("11111111-1111-1111-1111-111111111111");
         UUID idIgreja = UUID.fromString("22222222-2222-2222-2222-222222222222");
 
-        when(findMinisteriosMembrosRepository.buscarMinisteriosMembro(idMembro, idIgreja)).thenReturn(List.of());
+        when(ministeriosRepository.buscarMinisteriosMembro(idMembro, idIgreja)).thenReturn(List.of());
 
         ObjectNotFoundException ex = assertThrows(
                 ObjectNotFoundException.class,
