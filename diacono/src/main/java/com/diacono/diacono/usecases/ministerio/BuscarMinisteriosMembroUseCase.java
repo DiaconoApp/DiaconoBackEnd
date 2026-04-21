@@ -1,7 +1,7 @@
 package com.diacono.diacono.usecases.ministerio;
 
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioSuperSimplificadoDTO;
-import com.diacono.diacono.domain.repository.FindMinisteriosMembrosRepository;
+import com.diacono.diacono.domain.repository.MinisteriosRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.util.JwtUtils;
 import org.springframework.stereotype.Service;
@@ -13,11 +13,11 @@ import java.util.UUID;
 @Service
 public class BuscarMinisteriosMembroUseCase {
 
-    private final FindMinisteriosMembrosRepository findMinisteriosMembrosRepository;
+    private final MinisteriosRepository ministeriosRepository;
     private final JwtUtils jwtUtils;
 
-    public BuscarMinisteriosMembroUseCase(FindMinisteriosMembrosRepository findMinisteriosMembrosRepository, JwtUtils jwtUtils) {
-        this.findMinisteriosMembrosRepository = findMinisteriosMembrosRepository;
+    public BuscarMinisteriosMembroUseCase(MinisteriosRepository ministeriosRepository, JwtUtils jwtUtils) {
+        this.ministeriosRepository = ministeriosRepository;
         this.jwtUtils = jwtUtils;
     }
 
@@ -30,7 +30,7 @@ public class BuscarMinisteriosMembroUseCase {
     }
 
     public List<MinisterioSuperSimplificadoDTO> buscarMinisteriosMembro(UUID idMembro, UUID idIgreja) {
-        List<MinisterioSuperSimplificadoDTO> ministerios = findMinisteriosMembrosRepository.buscarMinisteriosMembro(idMembro, idIgreja);
+        List<MinisterioSuperSimplificadoDTO> ministerios = ministeriosRepository.buscarMinisteriosMembro(idMembro, idIgreja);
 
         if (ministerios.isEmpty()) {
             throw new ObjectNotFoundException("Nenhum ministério encontrado para o membro informado.");

@@ -1,6 +1,7 @@
 package com.diacono.diacono.domain.repository;
 
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioKpisResponseDTO;
+import com.diacono.diacono.applications.dtos.ministerio.MinisterioSuperSimplificadoDTO;
 import com.diacono.diacono.domain.entity.Ministerio;
 import com.diacono.diacono.domain.enums.EnumStatusMinisterio;
 import org.springframework.data.domain.Page;
@@ -20,6 +21,7 @@ public interface MinisteriosRepository {
 
     Page<Ministerio> buscarComFiltros(Pageable pageable, String busca, EnumStatusMinisterio status, UUID fkIgreja);
     Optional<Long> buscarIdPorUUID(UUID idExterno);
+    List<MinisterioSuperSimplificadoDTO> buscarMinisteriosMembro(UUID idExternoMembro, UUID idExternoIgreja);
 
     Ministerio save(Ministerio ministerio);
     MinisterioKpisResponseDTO buscarKpis(UUID fkIgreja, int dataFim);

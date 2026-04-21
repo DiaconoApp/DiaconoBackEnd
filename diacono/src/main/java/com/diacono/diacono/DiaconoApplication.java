@@ -7,7 +7,7 @@ import com.diacono.diacono.domain.enums.EnumCargoMembro;
 import com.diacono.diacono.domain.enums.EnumGeneroMembro;
 import com.diacono.diacono.domain.enums.EnumStatusMembro;
 import com.diacono.diacono.domain.repository.IgrejaRepository;
-import com.diacono.diacono.infrastructure.persistence.Membro.MembroJpaRepository;
+import com.diacono.diacono.infrastructure.persistence.springdata.MembroJpaRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
