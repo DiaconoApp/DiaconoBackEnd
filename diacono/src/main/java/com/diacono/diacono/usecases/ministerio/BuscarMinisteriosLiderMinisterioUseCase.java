@@ -3,7 +3,8 @@ package com.diacono.diacono.usecases.ministerio;
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioSuperSimplificadoDTO;
 import com.diacono.diacono.domain.repository.MembroMinisterioRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.global.util.JwtUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,30 +14,26 @@ import java.util.UUID;
 @Service
 public class BuscarMinisteriosLiderMinisterioUseCase {
 
-    private final MembroMinisterioRepository membroMinisterioRepository;
-    private final JwtUtils jwtUtils;
+    private static final Logger logger = LoggerFactory.getLogger(BuscarMinisteriosLiderMinisterioUseCase.class);
 
-public BuscarMinisteriosLiderMinisterioUseCase(MembroMinisterioRepository membroMinisterioRepository, JwtUtils jwtUtils) {
+    private final MembroMinisterioRepository membroMinisterioRepository;
+
+    public BuscarMinisteriosLiderMinisterioUseCase(MembroMinisterioRepository membroMinisterioRepository) {
         this.membroMinisterioRepository = membroMinisterioRepository;
-        this.jwtUtils = jwtUtils;
     }
 
     @Transactional(readOnly = true)
-    public List<MinisterioSuperSimplificadoDTO> execute() {
-        UUID idExternoMembro = jwtUtils.getSubject();
-        UUID idIgreja = jwtUtils.getIgrejaId();
+    public List<MinisterioSuperSimplificadoDTO> execute(UUID igrejaId, UUID membroId) {
 
-        return buscarMinisterioLider(idExternoMembro, idIgreja);
-    }
+        List<MinisterioSuperSimplificadoDTO> ministerios = membroMinisterioRepository.buscarMinisterioLider(membroId, igrejaId);
 
-    public List<MinisterioSuperSimplificadoDTO> buscarMinisterioLider(UUID idMembro, UUID idIgreja){
-
-        List<MinisterioSuperSimplificadoDTO> ministerios = membroMinisterioRepository.buscarMinisterioLider(idMembro, idIgreja);
-
-        if(ministerios.isEmpty()){
+        if (ministerios.isEmpty()) {
+            logger.warn("Nenhum ministério encontrado para o líder. membroId=[{}] igrejaId=[{}]", membroId, igrejaId);
             throw new ObjectNotFoundException("Nenhum ministério encontrado para o líder informado.");
         }
 
         return ministerios;
+
     }
+
 }

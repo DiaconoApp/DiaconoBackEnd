@@ -12,8 +12,9 @@ import com.diacono.diacono.domain.repository.MinisteriosRepository;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
-import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.infrastructure.persistence.springdata.MembroJpaRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,32 +26,41 @@ import java.util.UUID;
 @Service
 public class AdicionarMembroMinisterioLiderMinisterioUseCase {
 
+    private static final Logger logger = LoggerFactory.getLogger(AdicionarMembroMinisterioLiderMinisterioUseCase.class);
+
     private final MinisteriosRepository ministeriosRepository;
     private final MembroJpaRepository membroRepository;
     private final MembroMinisterioRepository membroMinisterioRepository;
-    private final JwtUtils jwtUtils;
 
-    public AdicionarMembroMinisterioLiderMinisterioUseCase(MinisteriosRepository ministeriosRepository, MembroJpaRepository membroRepository, MembroMinisterioRepository membroMinisterioRepository, JwtUtils jwtUtils) {
+    public AdicionarMembroMinisterioLiderMinisterioUseCase(MinisteriosRepository ministeriosRepository, MembroJpaRepository membroRepository, MembroMinisterioRepository membroMinisterioRepository) {
         this.ministeriosRepository = ministeriosRepository;
         this.membroRepository = membroRepository;
         this.membroMinisterioRepository = membroMinisterioRepository;
-        this.jwtUtils = jwtUtils;
     }
 
     @Transactional
     public RestResponseMessageDTO execute(UUID idMinisterio, MembroMinisterioCreateDTO dto, UUID igrejaIdToken, UUID membroIdToken) {
 
         if (dto == null) {
+            logger.warn("Tentativa de adicionar membro com DTO nulo. membroId=[{}] igrejaId=[{}]", membroIdToken, igrejaIdToken);
             throw new FieldInvalidException("Dados do membro do ministério não podem ser nulos");
         }
 
         Long idMinisterioNovo = ministeriosRepository.buscarIdPorUUID(idMinisterio)
-                .orElseThrow(() -> new ObjectNotFoundException("Ministério não encontrado"));
+                .orElseThrow(() -> {
+                    logger.warn("Ministério não encontrado. ministerioId=[{}] membroId=[{}]", idMinisterio, membroIdToken);
+                    return new ObjectNotFoundException("Ministério não encontrado");
+                });
 
         Ministerio ministerioVerificado = ministeriosRepository.findByIdExterno(idMinisterio)
-                .orElseThrow(() -> new ObjectNotFoundException("Ministério não encontrado"));
+                .orElseThrow(() -> {
+                    logger.warn("Ministério não encontrado (findByIdExterno). ministerioId=[{}] membroId=[{}]", idMinisterio, membroIdToken);
+                    return new ObjectNotFoundException("Ministério não encontrado");
+                });
 
         if (!ministerioVerificado.getIgreja().getIdExterno().equals(igrejaIdToken)) {
+            logger.warn("Tentativa de acesso a ministério de outra igreja. ministerioId=[{}] igrejaToken=[{}] membroId=[{}]",
+                    idMinisterio, igrejaIdToken, membroIdToken);
             throw new ObjectNotFoundException("Ministério não encontrado para a igreja do usuário");
         }
 
@@ -59,19 +69,23 @@ public class AdicionarMembroMinisterioLiderMinisterioUseCase {
         Long idMembroNovo = membroRepository.buscarIdPorUUID(dto.idExterno());
 
         if (idMembroNovo == null) {
+            logger.warn("Tentativa de adicionar membro inexistente. membroIdAlvo=[{}] executor=[{}]", dto.idExterno(), membroIdToken);
             throw new ObjectNotFoundException("Membro não encontrado");
         }
 
         adicionarMembroMinisterioLiderMinisterio(idMinisterioNovo, idMembroNovo);
 
+        logger.info("Membro adicionado ao ministério com sucesso. ministerioId=[{}] membroAdicionado=[{}] executor=[{}]",
+                idMinisterio, dto.idExterno(), membroIdToken);
+
         return new RestResponseMessageDTO(HttpStatus.OK, "Membro adicionado ao ministério com sucesso");
     }
 
     private void validarLiderMinisterio(UUID membroId, UUID igrejaId, UUID ministerioId) {
-        List<MinisterioSuperSimplificadoDTO> ministériosLider = membroMinisterioRepository
+        List<MinisterioSuperSimplificadoDTO> ministeriosLider = membroMinisterioRepository
                 .buscarMinisterioLider(membroId, igrejaId);
 
-        if (ministériosLider.isEmpty() || ministériosLider.stream()
+        if (ministeriosLider.isEmpty() || ministeriosLider.stream()
                 .noneMatch(m -> m.idExterno().equals(ministerioId))) {
             throw new ObjectNotFoundException("O líder informado não possui vínculo com o ministério solicitado");
         }

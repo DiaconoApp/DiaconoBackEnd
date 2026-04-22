@@ -10,7 +10,6 @@ import com.diacono.diacono.domain.entity.Membro;
 import com.diacono.diacono.domain.enums.EnumStatusMinisterio;
 import com.diacono.diacono.domain.repository.MinisteriosRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.infrastructure.persistence.springdata.MembroJpaRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +25,7 @@ import java.util.UUID;
 @Service
 public class AdicionarMinisterioUseCase {
 
-    private static final Logger log = LoggerFactory.getLogger(AdicionarMinisterioUseCase.class);
+    private static final Logger logger = LoggerFactory.getLogger(AdicionarMinisterioUseCase.class);
 
     private final MinisteriosRepository ministeriosRepository;
     private final MembroJpaRepository membroRepository;
@@ -45,18 +44,18 @@ public class AdicionarMinisterioUseCase {
         Membro liderMinisterio = membroRepository.findByIdExterno(ministerioDTO.idLider());
 
         if (liderMinisterio == null) {
-            log.warn("Tentativa de criar ministério com líder inexistente. idLider=[{}]", ministerioDTO.idLider());
+            logger.warn("Tentativa de criar ministério com líder inexistente. idLider=[{}]", ministerioDTO.idLider());
             throw new ObjectNotFoundException("Líder do ministério não encontrado");
         }
 
-        if (liderMinisterio.getIgreja() == null || !liderMinisterio.getIgreja().getIdExterno().toString().equals(igrejaIdToken)) {
-            log.warn("Tentativa de criar ministério com líder de outra igreja. idLider=[{}] igrejaToken=[{}]",
+        if (liderMinisterio.getIgreja() == null || !liderMinisterio.getIgreja().getIdExterno().equals(igrejaIdToken)) {
+            logger.warn("Tentativa de criar ministério com líder de outra igreja. idLider=[{}] igrejaToken=[{}]",
                     ministerioDTO.idLider(), igrejaIdToken);
             throw new ObjectNotFoundException("Líder do ministério não encontrado");
         }
 
         if (liderMinisterio.getCargoMembro() != EnumCargoMembro.LIDER_MINISTERIO) {
-            log.info("Promovendo membro a líder de ministério. membroId=[{}]", ministerioDTO.idLider());
+            logger.info("Promovendo membro a líder de ministério. membroId=[{}]", ministerioDTO.idLider());
             liderMinisterio.setCargoMembro(EnumCargoMembro.LIDER_MINISTERIO);
         }
 
@@ -89,7 +88,7 @@ public class AdicionarMinisterioUseCase {
         novoMinisterio.setMembros(membroMinisterios);
         ministeriosRepository.save(novoMinisterio);
 
-        log.info("Ministério criado com sucesso. nome=[{}] igrejaId=[{}]", ministerioDTO.nome(), igrejaIdToken);
+        logger.info("Ministério criado com sucesso. nome=[{}] igrejaId=[{}]", ministerioDTO.nome(), igrejaIdToken);
 
         return new RestResponseMessageDTO(HttpStatus.CREATED, "Ministério criado com sucesso");
     }

@@ -69,16 +69,21 @@ public class MinisteriosController {
     @GetMapping
     @PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO', 'SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<List<MinisterioSimplificadoDTO>> buscarMinisteriosGerais() {
+        UUID igrejaId = jwtUtils.getIgrejaId();
 
-        return ResponseEntity.status(HttpStatus.OK).body(buscarMinisteriosGeraisUseCase.execute());
+        return ResponseEntity.status(HttpStatus.OK).body(buscarMinisteriosGeraisUseCase.execute(igrejaId));
     }
 
     //VISAO GOVERNO
 
     @GetMapping("/governo")
     @PreAuthorize("hasAuthority('SCOPE_GOVERNO')")
-    public ResponseEntity<Page<MinisterioSimplificadoDTO>> buscarMinisteriosGoverno(Pageable pageable, @RequestParam(required = false, defaultValue = "") @Size(max = 120) String buscaGeral,
-                                                                                    @RequestParam(required = false) EnumStatusMinisterio status) {
+    public ResponseEntity<Page<MinisterioSimplificadoDTO>> buscarMinisteriosGoverno(
+            Pageable pageable,
+            @RequestParam(required = false, defaultValue = "") @Size(max = 120) String buscaGeral,
+            @RequestParam(required = false) EnumStatusMinisterio status
+    ) {
+        UUID igrejaId = jwtUtils.getIgrejaId();
 
         String buscaNormalizada = buscaGeral == null ? "" : buscaGeral.trim();
 
@@ -88,11 +93,11 @@ public class MinisteriosController {
         Page<MinisterioSimplificadoDTO> pagina;
 
         if (semBusca && semStatus) {
-            pagina = buscarMinisteriosGovernoSemFiltroUseCase.execute(pageable);
+            pagina = buscarMinisteriosGovernoSemFiltroUseCase.execute(pageable, igrejaId);
             return ResponseEntity.status(HttpStatus.OK).body(pagina);
         }
 
-        pagina = buscarMinisteriosGovernoComFiltroUseCase.execute(pageable, buscaNormalizada, status);
+        pagina = buscarMinisteriosGovernoComFiltroUseCase.execute(pageable, buscaNormalizada, status, igrejaId);
         return ResponseEntity.status(HttpStatus.OK).body(
                 pagina
         );
@@ -117,8 +122,10 @@ public class MinisteriosController {
     @PatchMapping("/governo/{idMinisterio}") //OK
     @PreAuthorize("hasAuthority('SCOPE_GOVERNO')")
     public ResponseEntity<RestResponseMessageDTO> editarMinisterio(@PathVariable @NotNull UUID idMinisterio, @RequestBody @Valid MinisterioUpdateDTO ministerioUpdateDTO) {
+        UUID  igrejaIdToken = jwtUtils.getIgrejaId();
+
         try {
-            RestResponseMessageDTO response = editarMinisterioUseCase.execute(ministerioUpdateDTO, idMinisterio);
+            RestResponseMessageDTO response = editarMinisterioUseCase.execute(ministerioUpdateDTO, idMinisterio, igrejaIdToken);
             logger.info("Operacao de edicao de ministerio executada. idMinisterio={}", idMinisterio);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
         } catch (RuntimeException ex) {
@@ -158,8 +165,10 @@ public class MinisteriosController {
     @GetMapping("/lider-ministerio")
     @PreAuthorize("hasAnyAuthority('SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<List<MinisterioSuperSimplificadoDTO>> buscarMinisteriosLiderMinisterio() {
+        UUID membroId = jwtUtils.getSubject();
+        UUID igrejaId = jwtUtils.getIgrejaId();
 
-        List<MinisterioSuperSimplificadoDTO> listaMinisterios = buscarMinisteriosLiderMinisterioUseCase.execute();
+        List<MinisterioSuperSimplificadoDTO> listaMinisterios = buscarMinisteriosLiderMinisterioUseCase.execute(igrejaId, membroId);
 
         return ResponseEntity.status(HttpStatus.OK).body(listaMinisterios);
     }
@@ -167,8 +176,10 @@ public class MinisteriosController {
     @GetMapping("/membro")
     @PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO', 'SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<List<MinisterioSuperSimplificadoDTO>> buscarMinisteriosMembro() {
+        UUID membroId = jwtUtils.getSubject();
+        UUID igrejaId = jwtUtils.getIgrejaId();
 
-        List<MinisterioSuperSimplificadoDTO> listaMinisterios = buscarMinisteriosMembroUseCase.execute();
+        List<MinisterioSuperSimplificadoDTO> listaMinisterios = buscarMinisteriosMembroUseCase.execute(igrejaId, membroId);
 
         return ResponseEntity.status(HttpStatus.OK).body(listaMinisterios);
     }
@@ -198,8 +209,10 @@ public class MinisteriosController {
             @PathVariable UUID idMinisterio,
             @PathVariable UUID idMembroMinisterio
     ) {
+        UUID  igrejaIdToken = jwtUtils.getIgrejaId();
+
         try {
-            RestResponseMessageDTO response = removerMembroMinisterioLiderMinisterioUseCase.execute(idMinisterio, idMembroMinisterio);
+            RestResponseMessageDTO response = removerMembroMinisterioLiderMinisterioUseCase.execute(idMinisterio, idMembroMinisterio, igrejaIdToken);
             logger.info("Operacao de remocao de membro de ministerio executada. idMinisterio={} idMembroMinisterio={}", idMinisterio, idMembroMinisterio);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
         } catch (RuntimeException ex) {
