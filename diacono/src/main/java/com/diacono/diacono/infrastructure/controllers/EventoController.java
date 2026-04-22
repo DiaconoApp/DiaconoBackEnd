@@ -11,8 +11,11 @@ import com.diacono.diacono.global.error.comuns.ApiErrorsComuns;
 import com.diacono.diacono.usecases.eventos.*;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -20,6 +23,8 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/eventos")
 public class EventoController {
+
+    private static final Logger logger = LoggerFactory.getLogger(EventoController.class);
 
     private final BuscarEventosPorMesEAnoUseCase buscarEventosPorMesEAnoUseCase;
     private final BuscarEventoEspecificoUseCase buscarEventoEspecificoUseCase;
@@ -42,7 +47,7 @@ public class EventoController {
     @ApiErrorsComuns
     @ApiResponse(responseCode = "200", description = "Eventos encontrados com sucesso")
     @GetMapping
-    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<EventoSimplificadoDTO> buscarEventosPorMesEAno(@RequestParam int mes, @RequestParam int ano){
         //completo
         return ResponseEntity.status(HttpStatus.OK).body(buscarEventosPorMesEAnoUseCase.execute(mes, ano));
@@ -51,7 +56,7 @@ public class EventoController {
     @ApiErrorsComuns
     @ApiResponse(responseCode = "200", description = "Evento encontrado com sucesso")
     @GetMapping("/{id}")
-    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO', 'SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO', 'SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<EventoCompletoDTO> buscarEventoEspecifico(@PathVariable("id") UUID id){
         //COMPLETO
         return ResponseEntity.status(HttpStatus.OK).body(buscarEventoEspecificoUseCase.execute(id));
@@ -60,7 +65,7 @@ public class EventoController {
     @ApiErrorsComuns
     @ApiResponse(responseCode = "200", description = "Evento encontrado com sucesso")
     @GetMapping("/enderecos")
-    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO', 'SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO', 'SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<EnderecoEventoSimplificadoDTO> buscarEnderecoEvento(){
         //COMPLETO
         //COLOCAR ISSO NUM CACHE
@@ -70,44 +75,54 @@ public class EventoController {
     @ApiErrorsComuns
     @ApiResponse(responseCode = "201", description = "Evento criado com sucesso")
     @PostMapping
+    @PreAuthorize("hasAnyAuthority('SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<RestResponseMessageDTO> criarEvento(@RequestBody @Valid EventoCreateDTO request){
         //CONCLUIDO
-        return ResponseEntity.status(HttpStatus.CREATED).body(criarEventoUseCase.execute(request));
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(criarEventoUseCase.execute(request));
+        } catch (RuntimeException ex) {
+            logger.warn("Falha ao criar evento.");
+            throw ex;
+        }
     }
 
     @ApiErrorsComuns
     @ApiResponse(responseCode = "204", description = "Evento deletado com sucesso")
     @DeleteMapping("/unico/{id}")
+    @PreAuthorize("hasAnyAuthority('SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<RestResponseMessageDTO> apagarEventoUnico(@PathVariable UUID id){
-       return ResponseEntity.status(HttpStatus.NO_CONTENT).body(apagarEventoUseCase.execute(id));
+       try {
+           return ResponseEntity.status(HttpStatus.NO_CONTENT).body(apagarEventoUseCase.execute(id));
+       } catch (RuntimeException ex) {
+           logger.warn("Falha ao apagar evento unico. id={}", id);
+           throw ex;
+       }
     }
 
     @ApiErrorsComuns
     @ApiResponse(responseCode = "204", description = "Eventos deletados com sucesso")
     @DeleteMapping("/multiplos/{id}")
+    @PreAuthorize("hasAnyAuthority('SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<RestResponseMessageDTO> apagarEventosMultiplos(@PathVariable UUID id){
         //completo
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(apagarEventosMultiplosUseCase.execute(id));
+        try {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(apagarEventosMultiplosUseCase.execute(id));
+        } catch (RuntimeException ex) {
+            logger.warn("Falha ao apagar eventos multiplos. id={}", id);
+            throw ex;
+        }
     }
 
     @ApiErrorsComuns
     @ApiResponse(responseCode = "204", description = "Evento atualizado com sucesso")
     @PatchMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<RestResponseMessageDTO> atualizarEvento(@RequestBody @Valid EventoUpdateDTO evento, @PathVariable("id") UUID id){
-
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(atualizarEventoUseCase.execute(evento, id));
+        try {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(atualizarEventoUseCase.execute(evento, id));
+        } catch (RuntimeException ex) {
+            logger.warn("Falha ao atualizar evento. id={}", id);
+            throw ex;
+        }
     }
-
-    // Utilizado para escalas
-//    @ApiErrorsComuns
-//    @ApiResponse(responseCode = "200", description = "Eventos encontrados com sucesso")
-//    @GetMapping("/evento-ministerio")
-//    public ResponseEntity<List<EventoComEventoMinisterioDTO>> buscarEventosComEventoMinisterioPorMesAno(
-//            @RequestParam int mes,
-//            @RequestParam int ano
-//    ) {
-//        return ResponseEntity.status(HttpStatus.OK)
-//                .body(eventoService.buscarEventosComEventoMinisterioPorMesAno(mes, ano));
-//    }
-
 }

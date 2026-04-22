@@ -2,6 +2,7 @@ package com.diacono.diacono.infrastructure.controllers;
 
 
 import com.diacono.diacono.applications.dtos.ministerio.KpisMinisteriosDTO;
+import com.diacono.diacono.global.error.comuns.ApiErrorsComuns;
 import com.diacono.diacono.usecases.dashboard.membros.BuscarKpiEvolucaoMembrosDashUseCase;
 import com.diacono.diacono.usecases.dashboard.membros.BuscarKpiFaixaEtariaMembrosDashUseCase;
 import com.diacono.diacono.usecases.dashboard.membros.BuscarKpiGeneroMembrosDashUseCase;
@@ -17,6 +18,7 @@ import com.diacono.diacono.applications.dtos.ministerio.MinisterioDashQuantidade
 import com.diacono.diacono.usecases.dashboard.ministerios.BuscarKpiEvolucaoMinisteriosDashUseCase;
 import com.diacono.diacono.usecases.dashboard.ministerios.BuscarKpiMinisteriosDashUseCase;
 import com.diacono.diacono.usecases.dashboard.ministerios.BuscarKpiQuantidadeMembrosPorMinisterioDashUseCase;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -50,29 +52,33 @@ public class DashboardController {
 
     //Membros
 
+    @ApiErrorsComuns
     @GetMapping("/membros/kpis")
-    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<KpisMembrosDTO> buscarKpisMembros(@RequestParam int anoInicio, @RequestParam int anoFim) {
 
         return ResponseEntity.status(HttpStatus.OK).body(buscarKpiMembrosDashUseCase.execute(anoInicio, anoFim));
     }
 
+    @ApiErrorsComuns
     @GetMapping("/membros/evolucao")
-    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<List<MembroDashEvolucaoDTO>> buscarEvolucaoMembros(@RequestParam int anoInicio, @RequestParam int anoFim) {
 
         return ResponseEntity.status(HttpStatus.OK).body(buscarKpiEvolucaoMembrosDashUseCase.execute(anoInicio, anoFim));
     }
 
+    @ApiErrorsComuns
     @GetMapping("/membros/faixa-etaria")
-    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<DashboardFaixaEtariaMembroDTO> buscarFaixaEtariaMembros(@RequestParam int anoInicio, @RequestParam int anoFim) {
 
         return ResponseEntity.status(HttpStatus.OK).body(buscarKpiFaixaEtariaMembrosDashUseCase.execute(anoInicio, anoFim));
     }
 
+    @ApiErrorsComuns
     @GetMapping("/membros/genero")
-    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<DashboardGeneroMembroDTO> buscarGeneroMembros(@RequestParam int anoInicio, @RequestParam int anoFim) {
 
         return ResponseEntity.status(HttpStatus.OK).body(buscarKpiGeneroMembrosDashUseCase.execute(anoInicio, anoFim));
@@ -80,29 +86,33 @@ public class DashboardController {
 
     //Ministerios
 
+    @ApiErrorsComuns
     @GetMapping("/ministerios/kpis")
-    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<KpisMinisteriosDTO> buscarKpisMinisterios(@RequestParam int anoInicio, @RequestParam int anoFim) {
 
         return ResponseEntity.status(HttpStatus.OK).body(buscarKpiMinisteriosDashUseCase.execute(anoInicio, anoFim));
     }
 
+    @ApiErrorsComuns
     @GetMapping("/ministerios/evolucao/{idMinisterio}")
-    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<List<MinisterioDashEvolucaoDTO>> buscarEvolucaoMinisterio(@RequestParam int anoInicio, @RequestParam int anoFim, @PathVariable UUID idMinisterio) {
 
         return ResponseEntity.status(HttpStatus.OK).body(buscarKpiEvolucaoMinisteriosDashUseCase.execute(anoInicio, anoFim, idMinisterio));
     }
 
+    @ApiErrorsComuns
     @GetMapping("/ministerios/quantidade-membros")
-    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<List<MinisterioDashQuantidadeMembrosDTO>> buscarQuantidadeMembrosPorMinisterio(@RequestParam int anoInicio, @RequestParam int anoFim) {
 
         return ResponseEntity.status(HttpStatus.OK).body(buscarKpiQuantidadeMembrosPorMinisterioDashUseCase.execute(anoInicio, anoFim));
     }
 
+    @ApiErrorsComuns
     @GetMapping("/ministerios/quantidade-eventos")
-    //@PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<List<MinisterioEventoDashDTO>> buscarQuantidadeEventosPorMinisterio(@RequestParam int anoInicio, @RequestParam int anoFim) {
 
         return ResponseEntity.status(HttpStatus.OK).body(buscarKpiQuantidadeEventosPorMinisterioDashUseCase.execute(anoInicio, anoFim));
