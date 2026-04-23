@@ -2,6 +2,7 @@ package com.diacono.diacono.usecases.ministerio;
 
 import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioUpdateDTO;
+import com.diacono.diacono.domain.entity.Igreja;
 import com.diacono.diacono.domain.entity.Membro;
 import com.diacono.diacono.domain.entity.MembroMinisterio;
 import com.diacono.diacono.domain.entity.Ministerio;
@@ -27,9 +28,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class EditarMinisterioUseCaseTest {
@@ -43,19 +42,37 @@ class EditarMinisterioUseCaseTest {
 	@InjectMocks
 	private EditarMinisterioUseCase useCase;
 
-	@Test
-	void deveAtualizarNomeEStatusComSucessoSemTrocarLider() {
-		UUID idMinisterio = UUID.fromString("11111111-1111-1111-1111-111111111111");
-		Ministerio ministerioExistente = Ministerio.builder()
+	private static final UUID ID_MINISTERIO   = UUID.fromString("11111111-1111-1111-1111-111111111111");
+	private static final UUID ID_NOVO_LIDER   = UUID.fromString("22222222-2222-2222-2222-222222222222");
+	private static final UUID ID_LIDER_ATUAL  = UUID.fromString("33333333-3333-3333-3333-333333333333");
+	private static final UUID ID_IGREJA       = UUID.fromString("44444444-4444-4444-4444-444444444444");
+	private static final UUID ID_OUTRA_IGREJA = UUID.fromString("55555555-5555-5555-5555-555555555555");
+
+	private Igreja igreja(UUID igrejaId) {
+		Igreja igreja = new Igreja();
+		when(igreja.getIdExterno()).thenReturn(igrejaId);
+		return igreja;
+	}
+
+	private Ministerio ministerioComIgreja(UUID igrejaId) {
+		Ministerio ministerio = Ministerio.builder()
 				.nome("Nome Antigo")
 				.status(EnumStatusMinisterio.ATIVO)
 				.build();
+		ReflectionTestUtils.setField(ministerio, "idExterno", ID_MINISTERIO);
+		ministerio.setIgreja(igreja(igrejaId));
+		ministerio.setMembros(new HashSet<>());
+		return ministerio;
+	}
 
+	@Test
+	void deveAtualizarNomeEStatusComSucessoSemTrocarLider() {
+		Ministerio ministerioExistente = ministerioComIgreja(ID_IGREJA);
 		MinisterioUpdateDTO dto = new MinisterioUpdateDTO("Nome Novo", EnumStatusMinisterio.INATIVO, null);
 
-		when(ministeriosRepository.findByIdExterno(idMinisterio)).thenReturn(Optional.of(ministerioExistente));
+		when(ministeriosRepository.findByIdExterno(ID_MINISTERIO)).thenReturn(Optional.of(ministerioExistente));
 
-		RestResponseMessageDTO response = useCase.execute(dto, idMinisterio);
+		RestResponseMessageDTO response = useCase.execute(dto, ID_MINISTERIO, ID_IGREJA);
 
 		assertEquals(HttpStatus.OK, response.getStatus());
 		assertEquals("Ministério atualizado com sucesso", response.getMessage());
@@ -67,14 +84,13 @@ class EditarMinisterioUseCaseTest {
 
 	@Test
 	void deveLancarExcecaoQuandoMinisterioNaoForEncontrado() {
-		UUID idMinisterio = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		MinisterioUpdateDTO dto = new MinisterioUpdateDTO("Nome Novo", EnumStatusMinisterio.ATIVO, null);
 
-		when(ministeriosRepository.findByIdExterno(idMinisterio)).thenReturn(Optional.empty());
+		when(ministeriosRepository.findByIdExterno(ID_MINISTERIO)).thenReturn(Optional.empty());
 
 		ObjectNotFoundException ex = assertThrows(
 				ObjectNotFoundException.class,
-				() -> useCase.execute(dto, idMinisterio)
+				() -> useCase.execute(dto, ID_MINISTERIO, ID_IGREJA)
 		);
 
 		assertEquals("Ministério não encontrado", ex.getMessage());
@@ -82,21 +98,54 @@ class EditarMinisterioUseCaseTest {
 	}
 
 	@Test
-	void deveLancarExcecaoQuandoNovoLiderNaoForEncontrado() {
-		UUID idMinisterio = UUID.fromString("11111111-1111-1111-1111-111111111111");
-		UUID idNovoLider = UUID.fromString("22222222-2222-2222-2222-222222222222");
+	void deveLancarExcecaoQuandoMinisterioPertenceAOutraIgreja() {
+		Ministerio ministerioOutraIgreja = ministerioComIgreja(ID_OUTRA_IGREJA);
+		MinisterioUpdateDTO dto = new MinisterioUpdateDTO("Nome Novo", null, null);
 
-		Ministerio ministerioExistente = Ministerio.builder().nome("Louvor").build();
-		ministerioExistente.setMembros(new HashSet<>());
-
-		MinisterioUpdateDTO dto = new MinisterioUpdateDTO(null, null, idNovoLider);
-
-		when(ministeriosRepository.findByIdExterno(idMinisterio)).thenReturn(Optional.of(ministerioExistente));
-		when(membroRepository.findByIdExterno(idNovoLider)).thenReturn(null);
+		when(ministeriosRepository.findByIdExterno(ID_MINISTERIO)).thenReturn(Optional.of(ministerioOutraIgreja));
 
 		ObjectNotFoundException ex = assertThrows(
 				ObjectNotFoundException.class,
-				() -> useCase.execute(dto, idMinisterio)
+				() -> useCase.execute(dto, ID_MINISTERIO, ID_IGREJA)
+		);
+
+		assertEquals("Ministério não encontrado", ex.getMessage());
+		verify(ministeriosRepository, never()).save(any());
+		verifyNoInteractions(membroRepository);
+	}
+
+	@Test
+	void deveLancarExcecaoQuandoNovoLiderNaoForEncontrado() {
+		Ministerio ministerioExistente = ministerioComIgreja(ID_IGREJA);
+		MinisterioUpdateDTO dto = new MinisterioUpdateDTO(null, null, ID_NOVO_LIDER);
+
+		when(ministeriosRepository.findByIdExterno(ID_MINISTERIO)).thenReturn(Optional.of(ministerioExistente));
+		when(membroRepository.findByIdExterno(ID_NOVO_LIDER)).thenReturn(null);
+
+		ObjectNotFoundException ex = assertThrows(
+				ObjectNotFoundException.class,
+				() -> useCase.execute(dto, ID_MINISTERIO, ID_IGREJA)
+		);
+
+		assertEquals("Novo líder não encontrado", ex.getMessage());
+		verify(ministeriosRepository, never()).save(any());
+	}
+
+	@Test
+	void deveLancarExcecaoQuandoNovoLiderPertenceAOutraIgreja() {
+		Ministerio ministerioExistente = ministerioComIgreja(ID_IGREJA);
+		MinisterioUpdateDTO dto = new MinisterioUpdateDTO(null, null, ID_NOVO_LIDER);
+
+		Membro liderOutraIgreja = new Membro();
+		liderOutraIgreja.setIgreja(igreja(ID_OUTRA_IGREJA));
+		ReflectionTestUtils.setField(liderOutraIgreja, "idExterno", ID_NOVO_LIDER);
+
+		when(ministeriosRepository.findByIdExterno(ID_MINISTERIO)).thenReturn(Optional.of(ministerioExistente));
+		when(membroRepository.findByIdExterno(ID_NOVO_LIDER)).thenReturn(liderOutraIgreja);
+
+		ObjectNotFoundException ex = assertThrows(
+				ObjectNotFoundException.class,
+				() -> useCase.execute(dto, ID_MINISTERIO, ID_IGREJA)
 		);
 
 		assertEquals("Novo líder não encontrado", ex.getMessage());
@@ -105,25 +154,20 @@ class EditarMinisterioUseCaseTest {
 
 	@Test
 	void deveTrocarLiderQuandoNovoLiderJaPertencerAoMinisterio() {
-		UUID idMinisterio = UUID.fromString("11111111-1111-1111-1111-111111111111");
-		UUID idNovoLider = UUID.fromString("22222222-2222-2222-2222-222222222222");
-		UUID idLiderAtual = UUID.fromString("33333333-3333-3333-3333-333333333333");
-
 		Membro liderAtualMembro = new Membro();
 		liderAtualMembro.setNome("Lider Antigo");
 		liderAtualMembro.setCargoMembro(EnumCargoMembro.LIDER_MINISTERIO);
-		ReflectionTestUtils.setField(liderAtualMembro, "idExterno", idLiderAtual);
+		liderAtualMembro.setIgreja(igreja(ID_IGREJA));
+		ReflectionTestUtils.setField(liderAtualMembro, "idExterno", ID_LIDER_ATUAL);
 
 		Membro novoLiderMembro = new Membro();
 		novoLiderMembro.setNome("Lider Novo");
 		novoLiderMembro.setCargoMembro(EnumCargoMembro.MEMBRO);
-		ReflectionTestUtils.setField(novoLiderMembro, "idExterno", idNovoLider);
+		novoLiderMembro.setIgreja(igreja(ID_IGREJA));
+		ReflectionTestUtils.setField(novoLiderMembro, "idExterno", ID_NOVO_LIDER);
 
-		Ministerio ministerioExistente = Ministerio.builder()
-				.nome("Louvor")
-				.nomeLider("Lider Antigo")
-				.build();
-		ReflectionTestUtils.setField(ministerioExistente, "idExterno", idMinisterio);
+		Ministerio ministerioExistente = ministerioComIgreja(ID_IGREJA);
+		ministerioExistente.setNomeLider("Lider Antigo");
 
 		MembroMinisterio liderAtualRelacao = MembroMinisterio.builder()
 				.membro(liderAtualMembro)
@@ -144,12 +188,12 @@ class EditarMinisterioUseCaseTest {
 		membros.add(novoLiderRelacao);
 		ministerioExistente.setMembros(membros);
 
-		MinisterioUpdateDTO dto = new MinisterioUpdateDTO(null, null, idNovoLider);
+		MinisterioUpdateDTO dto = new MinisterioUpdateDTO(null, null, ID_NOVO_LIDER);
 
-		when(ministeriosRepository.findByIdExterno(idMinisterio)).thenReturn(Optional.of(ministerioExistente));
-		when(membroRepository.findByIdExterno(idNovoLider)).thenReturn(novoLiderMembro);
+		when(ministeriosRepository.findByIdExterno(ID_MINISTERIO)).thenReturn(Optional.of(ministerioExistente));
+		when(membroRepository.findByIdExterno(ID_NOVO_LIDER)).thenReturn(novoLiderMembro);
 
-		useCase.execute(dto, idMinisterio);
+		useCase.execute(dto, ID_MINISTERIO, ID_IGREJA);
 
 		assertEquals("Lider Novo", ministerioExistente.getNomeLider());
 		assertEquals(EnumCargoMembro.LIDER_MINISTERIO, novoLiderMembro.getCargoMembro());

@@ -7,18 +7,37 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import java.lang.annotation.*;
+
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@Target({ ElementType.METHOD, ElementType.TYPE })
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "404", description = "Recurso não encontrado",
+        @ApiResponse(
+                responseCode = "400",
+                description = "Requisição inválida (dados incorretos, ausentes, ou conflito de validação)",
                 content = @Content(mediaType = APPLICATION_JSON_VALUE,
                         schema = @Schema(implementation = RestErrorMessage.class))),
-        @ApiResponse(responseCode = "400", description = "Requisição inválida (dados incorretos, ausentes, ou conflito de validação)",
+        @ApiResponse(
+                responseCode = "401",
+                description = "Não autenticado — token ausente, inválido ou expirado",
                 content = @Content(mediaType = APPLICATION_JSON_VALUE,
                         schema = @Schema(implementation = RestErrorMessage.class))),
-        @ApiResponse(responseCode = "500", description = "Erro interno do servidor (falha não esperada)")
+        @ApiResponse(
+                responseCode = "403",
+                description = "Acesso negado — sem permissão para executar esta operação",
+                content = @Content(mediaType = APPLICATION_JSON_VALUE,
+                        schema = @Schema(implementation = RestErrorMessage.class))),
+        @ApiResponse(
+                responseCode = "404",
+                description = "Recurso não encontrado",
+                content = @Content(mediaType = APPLICATION_JSON_VALUE,
+                        schema = @Schema(implementation = RestErrorMessage.class))),
+        @ApiResponse(
+                responseCode = "500",
+                description = "Erro interno do servidor (falha não esperada)",
+                content = @Content(mediaType = APPLICATION_JSON_VALUE,
+                        schema = @Schema(implementation = RestErrorMessage.class)))
 })
 public @interface ApiErrorsComuns {
 }
