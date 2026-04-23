@@ -64,7 +64,7 @@ class BuscarMinisteriosGovernoComFiltroUseCaseTest {
 		when(ministeriosRepository.buscarComFiltros(pageable, "%LOUVOR%", status, idIgreja)).thenReturn(page);
 		when(mapper.paraMinisterioSimplificadoDTO(ministerio)).thenReturn(dto);
 
-		Page<MinisterioSimplificadoDTO> response = useCase.execute(pageable, busca, status);
+		Page<MinisterioSimplificadoDTO> response = useCase.execute(pageable, busca, status, idIgreja);
 
 		assertEquals(1, response.getTotalElements());
 		assertEquals(dto, response.getContent().getFirst());
@@ -84,7 +84,7 @@ class BuscarMinisteriosGovernoComFiltroUseCaseTest {
 
 		ObjectNotFoundException ex = assertThrows(
 				ObjectNotFoundException.class,
-				() -> useCase.execute(pageable, "louvor", EnumStatusMinisterio.ATIVO)
+				() -> useCase.execute(pageable, "louvor", EnumStatusMinisterio.ATIVO, idIgreja)
 		);
 
 		assertEquals("Nenhum ministério encontrado", ex.getMessage());

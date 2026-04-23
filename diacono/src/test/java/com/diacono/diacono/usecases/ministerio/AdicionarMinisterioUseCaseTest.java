@@ -46,6 +46,7 @@ class AdicionarMinisterioUseCaseTest {
 	@Test
 	void deveCriarMinisterioComSucessoEPromoverLider() {
 		UUID idLider = UUID.fromString("11111111-1111-1111-1111-111111111111");
+		UUID igrejaId = UUID.fromString("2222222-2222-2222-2222-222222222222");
 		MinisterioCreateDTO dto = new MinisterioCreateDTO(idLider, "Louvor");
 
 		Igreja igreja = new Igreja();
@@ -58,7 +59,7 @@ class AdicionarMinisterioUseCaseTest {
 
 		when(membroRepository.findByIdExterno(idLider)).thenReturn(lider);
 
-		RestResponseMessageDTO response = useCase.execute(dto);
+		RestResponseMessageDTO response = useCase.execute(dto, igrejaId);
 
 		assertEquals(HttpStatus.CREATED, response.getStatus());
 		assertEquals("Ministério criado com sucesso", response.getMessage());
@@ -87,13 +88,14 @@ class AdicionarMinisterioUseCaseTest {
 	@Test
 	void deveLancarExcecaoQuandoLiderNaoForEncontrado() {
 		UUID idLider = UUID.fromString("11111111-1111-1111-1111-111111111111");
+		UUID igrejaId = UUID.fromString("2222222-2222-2222-2222-222222222222");
 		MinisterioCreateDTO dto = new MinisterioCreateDTO(idLider, "Louvor");
 
 		when(membroRepository.findByIdExterno(idLider)).thenReturn(null);
 
 		ObjectNotFoundException ex = assertThrows(
 				ObjectNotFoundException.class,
-				() -> useCase.execute(dto)
+				() -> useCase.execute(dto, igrejaId)
 		);
 
 		assertEquals("Líder do ministério não encontrado", ex.getMessage());

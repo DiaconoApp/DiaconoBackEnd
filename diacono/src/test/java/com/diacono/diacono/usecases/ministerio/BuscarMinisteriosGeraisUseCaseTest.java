@@ -54,7 +54,7 @@ class BuscarMinisteriosGeraisUseCaseTest {
 		when(ministeriosRepository.findByIgrejaIdExterno(idIgreja)).thenReturn(List.of(ministerio));
 		when(ministerioMapper.paraMinisterioSimplificadoDTO(ministerio)).thenReturn(dto);
 
-		List<MinisterioSimplificadoDTO> response = useCase.execute();
+		List<MinisterioSimplificadoDTO> response = useCase.execute(idIgreja);
 
 		assertEquals(1, response.size());
 		assertEquals(dto, response.getFirst());
@@ -70,7 +70,7 @@ class BuscarMinisteriosGeraisUseCaseTest {
 		when(jwtUtils.getIgrejaId()).thenReturn(idIgreja);
 		when(ministeriosRepository.findByIgrejaIdExterno(idIgreja)).thenReturn(List.of());
 
-		ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> useCase.execute());
+		ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> useCase.execute(idIgreja));
 
 		assertEquals("Nenhum ministério encontrado", ex.getMessage());
 		verify(ministerioMapper, never()).paraMinisterioSimplificadoDTO(org.mockito.ArgumentMatchers.any());

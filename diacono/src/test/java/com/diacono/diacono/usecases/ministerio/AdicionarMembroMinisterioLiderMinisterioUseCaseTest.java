@@ -48,6 +48,8 @@ class AdicionarMembroMinisterioLiderMinisterioUseCaseTest {
 	void deveAdicionarMembroAoMinisterioComSucesso() {
 		UUID idMinisterio = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		UUID idMembro = UUID.fromString("22222222-2222-2222-2222-222222222222");
+		UUID igrejaId = UUID.fromString("33333333-3333-3333-3333-333333333333");
+		UUID membroExecutor = UUID.fromString("44444444-4444-4444-4444-444444444444");
 		MembroMinisterioCreateDTO dto = new MembroMinisterioCreateDTO(idMembro);
 
 		when(ministeriosRepository.buscarIdPorUUID(idMinisterio)).thenReturn(Optional.of(10L));
@@ -55,7 +57,7 @@ class AdicionarMembroMinisterioLiderMinisterioUseCaseTest {
 		when(membroMinisterioRepository.save(any(MembroMinisterio.class)))
 				.thenReturn(MembroMinisterio.builder().idInterno(99L).build());
 
-		RestResponseMessageDTO response = useCase.execute(idMinisterio, dto);
+		RestResponseMessageDTO response = useCase.execute(idMinisterio, dto, igrejaId, membroExecutor);
 
 		assertEquals(HttpStatus.OK, response.getStatus());
 		assertEquals("Membro adicionado ao ministério com sucesso", response.getMessage());
@@ -73,10 +75,12 @@ class AdicionarMembroMinisterioLiderMinisterioUseCaseTest {
 	@Test
 	void deveLancarExcecaoQuandoDtoForNulo() {
 		UUID idMinisterio = UUID.fromString("11111111-1111-1111-1111-111111111111");
+		UUID idMembro = UUID.fromString("22222222-2222-2222-2222-222222222222");
+		UUID igrejaId = UUID.fromString("33333333-3333-3333-3333-333333333333");
 
 		FieldInvalidException ex = assertThrows(
 				FieldInvalidException.class,
-				() -> useCase.execute(idMinisterio, null)
+				() -> useCase.execute(idMinisterio, null, igrejaId, idMembro)
 		);
 
 		assertEquals("Dados do membro do ministério não podem ser nulos", ex.getMessage());
@@ -91,12 +95,13 @@ class AdicionarMembroMinisterioLiderMinisterioUseCaseTest {
 		MembroMinisterioCreateDTO dto = new MembroMinisterioCreateDTO(
 				UUID.fromString("22222222-2222-2222-2222-222222222222")
 		);
+		UUID igrejaId = UUID.fromString("33333333-3333-3333-3333-333333333333");
 
 		when(ministeriosRepository.buscarIdPorUUID(idMinisterio)).thenReturn(Optional.empty());
 
 		ObjectNotFoundException ex = assertThrows(
 				ObjectNotFoundException.class,
-				() -> useCase.execute(idMinisterio, dto)
+				() -> useCase.execute(idMinisterio, dto, dto.idExterno(), igrejaId)
 		);
 
 		assertEquals("Ministério não encontrado", ex.getMessage());
@@ -108,6 +113,7 @@ class AdicionarMembroMinisterioLiderMinisterioUseCaseTest {
 	void deveLancarExcecaoQuandoMembroNaoForEncontrado() {
 		UUID idMinisterio = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		UUID idMembro = UUID.fromString("22222222-2222-2222-2222-222222222222");
+		UUID igrejaId = UUID.fromString("33333333-3333-3333-3333-333333333333");
 		MembroMinisterioCreateDTO dto = new MembroMinisterioCreateDTO(idMembro);
 
 		when(ministeriosRepository.buscarIdPorUUID(idMinisterio)).thenReturn(Optional.of(10L));
@@ -115,7 +121,7 @@ class AdicionarMembroMinisterioLiderMinisterioUseCaseTest {
 
 		ObjectNotFoundException ex = assertThrows(
 				ObjectNotFoundException.class,
-				() -> useCase.execute(idMinisterio, dto)
+				() -> useCase.execute(idMinisterio, dto, igrejaId, idMembro)
 		);
 
 		assertEquals("Membro não encontrado", ex.getMessage());
@@ -126,6 +132,7 @@ class AdicionarMembroMinisterioLiderMinisterioUseCaseTest {
 	void deveLancarExcecaoQuandoSalvarMembroMinisterioFalhar() {
 		UUID idMinisterio = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		UUID idMembro = UUID.fromString("22222222-2222-2222-2222-222222222222");
+		UUID igrejaId = UUID.fromString("33333333-3333-3333-3333-333333333333");
 		MembroMinisterioCreateDTO dto = new MembroMinisterioCreateDTO(idMembro);
 
 		when(ministeriosRepository.buscarIdPorUUID(idMinisterio)).thenReturn(Optional.of(10L));
@@ -135,7 +142,7 @@ class AdicionarMembroMinisterioLiderMinisterioUseCaseTest {
 
 		ObjectSaveErrorException ex = assertThrows(
 				ObjectSaveErrorException.class,
-				() -> useCase.execute(idMinisterio, dto)
+				() -> useCase.execute(idMinisterio, dto, igrejaId, idMembro)
 		);
 
 		assertEquals("Membro do ministério não foi salvo.", ex.getMessage());
