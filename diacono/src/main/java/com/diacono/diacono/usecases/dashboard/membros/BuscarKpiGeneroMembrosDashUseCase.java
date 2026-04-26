@@ -6,6 +6,7 @@ import com.diacono.diacono.domain.repository.MembroRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.usecases.dashboard.validation.DashboardPeriodoValidator;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -23,6 +24,7 @@ public class BuscarKpiGeneroMembrosDashUseCase {
         this.jwtUtils = jwtUtils;
     }
 
+    @Cacheable(cacheNames = "dashboard:membros:genero", keyGenerator = "dashboardCacheKey", sync = true)
     public DashboardGeneroMembroDTO execute(int anoInicio, int anoFim) {
 
         periodoValidator.validarAnoInicioEFim(anoInicio, anoFim);
@@ -51,8 +53,6 @@ public class BuscarKpiGeneroMembrosDashUseCase {
 
         MembroDashGeneroDTO response = membroRepository.buscarMembrosPorGenero(idExternoIgreja, anoFim);
 
-        System.out.println(response.feminino());
-        System.out.println(response.masculino());
 
         return response;
     }

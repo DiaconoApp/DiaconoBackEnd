@@ -5,6 +5,7 @@ import com.diacono.diacono.domain.repository.MembroRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.usecases.dashboard.validation.DashboardPeriodoValidator;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class BuscarKpiEvolucaoMembrosDashUseCase {
         this.jwtUtils = jwtUtils;
     }
 
+    @Cacheable(cacheNames = "dashboard:membros:evolucao", keyGenerator = "dashboardCacheKey", sync = true)
     public List<MembroDashEvolucaoDTO> execute(int anoInicio, int anoFim) {
         periodoValidator.validarAnoInicioEFim(anoInicio, anoFim);
 

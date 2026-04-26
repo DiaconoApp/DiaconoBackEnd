@@ -8,6 +8,7 @@ import com.diacono.diacono.domain.repository.MinisteriosRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.usecases.dashboard.validation.DashboardPeriodoValidator;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,6 +29,7 @@ public class BuscarKpiMinisteriosDashUseCase {
         this.eventoRepository = eventoRepository;
     }
 
+    @Cacheable(cacheNames = "dashboard:ministerios:kpis", keyGenerator = "dashboardCacheKey", sync = true)
     public KpisMinisteriosDTO execute(int anoInicio, int anoFim) {
 
         periodoValidator.validarAnoInicioEFim(anoInicio, anoFim);

@@ -5,6 +5,7 @@ import com.diacono.diacono.domain.repository.MembroMinisterioRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.usecases.dashboard.validation.DashboardPeriodoValidator;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class BuscarKpiQuantidadeMembrosPorMinisterioDashUseCase {
         this.jwtUtils = jwtUtils;
     }
 
+    @Cacheable(cacheNames = "dashboard:ministerios:quantidade-membros", keyGenerator = "dashboardCacheKey", sync = true)
     public List<MinisterioDashQuantidadeMembrosDTO> execute(int anoInicio, int anoFim) {
 
         periodoValidator.validarAnoInicioEFim(anoInicio, anoFim);

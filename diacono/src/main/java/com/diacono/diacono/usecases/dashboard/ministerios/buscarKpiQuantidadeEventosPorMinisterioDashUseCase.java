@@ -5,6 +5,7 @@ import com.diacono.diacono.domain.repository.EventoRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.usecases.dashboard.validation.DashboardPeriodoValidator;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class buscarKpiQuantidadeEventosPorMinisterioDashUseCase {
         this.eventoRepository = eventoRepository;
     }
 
+    @Cacheable(cacheNames = "dashboard:ministerios:quantidade-eventos", keyGenerator = "dashboardCacheKey", sync = true)
     public List<MinisterioEventoDashDTO> execute(int anoInicio, int anoFim) {
 
         periodoValidator.validarAnoInicioEFim(anoInicio, anoFim);
@@ -42,7 +44,6 @@ public class buscarKpiQuantidadeEventosPorMinisterioDashUseCase {
 
         List<MinisterioEventoDashDTO> response = eventoRepository.contarEventosPorMinisterioNoPeriodo(anoInicio, anoFim, idIgreja);
 
-        System.out.println(response);
 
         return response;
 

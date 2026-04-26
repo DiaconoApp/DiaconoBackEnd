@@ -5,6 +5,7 @@ import com.diacono.diacono.applications.dtos.membro.MembroKpiResponseDTO;
 import com.diacono.diacono.domain.repository.MembroRepository;
 import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.usecases.dashboard.validation.DashboardPeriodoValidator;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -22,6 +23,7 @@ public class BuscarKpiMembrosDashUseCase {
         this.jwtUtils = jwtUtils;
     }
 
+    @Cacheable(cacheNames = "dashboard:membros:kpis", keyGenerator = "dashboardCacheKey", sync = true)
     public KpisMembrosDTO execute(int anoInicio, int anoFim) {
         periodoValidator.validarAnoInicioEFim(anoInicio, anoFim);
 

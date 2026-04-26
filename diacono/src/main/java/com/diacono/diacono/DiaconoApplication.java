@@ -52,8 +52,8 @@ public class DiaconoApplication {
 
 
             Membro governo = Membro.builder()
-                    .nome("Tico")
-                    .email("fabiam.damaceno@gmail.com")
+                    .nome("Samuel")
+                    .email("samuelbelarmino620@gmail.com")
                     .igreja(igrejaIcf)
                     .enderecoMembro(enderecoMembro)
                     .cpf("74431506012")

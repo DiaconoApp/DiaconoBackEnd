@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   rabbitmq:
@@ -11,4 +10,11 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+
+  redis:
+    image: redis:7-alpine
+    container_name: diacono-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
 
