@@ -1,22 +1,26 @@
 meta {
   name: adicionarMembroMinisterio
   type: http
-  seq: 5
+  seq: 6
 }
 
 patch {
-  url: http://localhost:8080/api/v1/ministerios/lider-ministerio/cf26c539-b211-47ae-a7c1-257c2d7478cc
+  url: {{baseUrl}}/api/v1/ministerios/lider-ministerio/{{ministerioId}}
   body: json
   auth: bearer
 }
 
 auth:bearer {
-  token: {{acessToken}}
+  token: {{token}}
+}
+
+headers {
+  content-type: application/json
 }
 
 body:json {
   {
-    "idExterno": "d9bcaa33-b4e7-4fa4-a3f6-0045abce225f"
+    "idExterno": "{{membroId}}"
   }
 }
 

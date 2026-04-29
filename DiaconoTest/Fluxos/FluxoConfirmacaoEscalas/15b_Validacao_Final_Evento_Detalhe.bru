@@ -1,0 +1,25 @@
+meta {
+  name: 15b Validacao Final Evento Detalhe
+  type: http
+  seq: 15
+}
+
+get {
+  url: {{baseUrl}}/api/v1/eventos/{{eventoId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+tests {
+  test("detalhe do evento deve continuar acessivel no estado final", function () {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(body.nome).to.equal(bru.getVar("nomeEvento"));
+    expect(body.status).to.equal("CONFIRMADO");
+  });
+}
+

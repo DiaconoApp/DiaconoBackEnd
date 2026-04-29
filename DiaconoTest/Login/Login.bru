@@ -5,20 +5,33 @@ meta {
 }
 
 post {
-  url: http://localhost:8080/api/v1/auth/login
+  url: {{baseUrl}}/api/v1/auth/login
   body: json
-  auth: inherit
+  auth: none
+}
+
+headers {
+  content-type: application/json
 }
 
 body:json {
   {
-    "email":"oliveira@gmail.com" ,
-    "senha": "chocolate"
+    "email": "{{email}}",
+    "senha": "{{senha}}"
   }
 }
 
-vars:post-response {
-  acessToken: res.body.acessToken
+script:post-response {
+  const body = res.getBody();
+  bru.setVar("token", body.acessToken || body.accessToken || "");
+}
+
+tests {
+  test("deve autenticar", function () {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(Boolean(body.acessToken || body.accessToken)).to.equal(true);
+  });
 }
 
 settings {

@@ -4,42 +4,47 @@ meta {
   seq: 5
 }
 
-put {
-  url: http://localhost:8080/eventos/49a4d19c-3cae-4493-91d7-e6e7e80c1ef2
+patch {
+  url: {{baseUrl}}/api/v1/eventos/{{eventoId}}
   body: json
-  auth: inherit
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  content-type: application/json
 }
 
 body:json {
   {
     "fkMinisterios": [
-      "550e8400-e29b-41d4-a716-446655440020"
+      "{{ministerioId1}}",
+      "{{ministerioId2}}"
     ],
-    "nome": "Reunião de Líderes - Ajuste",
-    "descricao": "Reunião mensal com todos os líderes de ministério.",
-    "publicoAlvo": "Líderes de Ministérios",
-    "data": "2025-11-20",
-    "horaInicio": "18:00:00",
-    "horaFim": "20:00:00",
-    "custo": 15.50,
-    "tipoRecorrencia": "NAO_REPETE",
-    "dataInicioRecorrencia": null,
-    "dataTerminoRecorrencia": null,
-    "diasSemana": null,
-    "horarioRecorrencia": null,
-    "intervaloRecorrencia": 0,
+    "nome": "{{nomeEvento}}",
+    "descricao": "EVENTO ATUALIZADO",
+    "publicoAlvo": "MEMBROS",
+    "dataHoraInicio": "{{dataHoraInicio}}",
+    "dataHoraFim": "{{dataHoraFim}}",
+    "custo": 0,
     "endereco": {
-      "cep": "05000-000",
-      "rua": "Nova Rua",
-      "cidade": "São Paulo",
-      "bairro": "Nova Cidade",
-      "complemento": "Sala 101",
-      "numero": "300",
-      "apelido": "Sala de Reuniões"
+      "idExterno": null,
+      "cep": "04094000",
+      "rua": "PARQUE IBIRAPUERA",
+      "cidade": "SAO PAULO",
+      "estado": "SP",
+      "bairro": "VILA MARIANA",
+      "complemento": "PORTAO PRINCIPAL",
+      "numero": "S N",
+      "apelido": "LOCAL EVENTO"
     }
   }
 }
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

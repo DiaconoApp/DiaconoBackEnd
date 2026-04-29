@@ -1,0 +1,67 @@
+meta {
+  name: 04 Capturar EscalaEventoIds
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/escalas-evento/governo/{{eventoId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+script:post-response {
+  const body = res.getBody();
+  const normalize = (value) => String(value || "").trim().toLowerCase();
+  const sanitizeVar = (value) => {
+    const normalized = normalize(value);
+    return normalized.startsWith("{{") ? "" : normalized;
+  };
+
+  // Bruno pode nao expor variaveis de environment via bru.getVar em alguns contextos.
+  // Entao tentamos runtime var e depois placeholder resolvido no texto da requisicao.
+  let ministerioId1 = sanitizeVar(bru.getVar("ministerioId1")) || sanitizeVar("{{ministerioId1}}");
+  let ministerioId2 = sanitizeVar(bru.getVar("ministerioId2")) || sanitizeVar("{{ministerioId2}}");
+
+  const escalados = Array.isArray(body) ? body.filter((item) => item.isMinisterioEscalado === true) : [];
+
+  if ((!ministerioId1 || !ministerioId2) && escalados.length >= 2) {
+    ministerioId1 = normalize(escalados[0].idExternoMinisterio);
+    ministerioId2 = normalize(escalados[1].idExternoMinisterio);
+    bru.setVar("ministerioId1", ministerioId1);
+    bru.setVar("ministerioId2", ministerioId2);
+  }
+
+  const escala1 = body.find(
+    (item) => normalize(item.idExternoMinisterio) === ministerioId1 && item.isMinisterioEscalado === true
+  );
+  const escala2 = body.find(
+    (item) => normalize(item.idExternoMinisterio) === ministerioId2 && item.isMinisterioEscalado === true
+  );
+
+  if (!escala1 || !escala2) {
+    const idsRetornados = Array.isArray(body)
+      ? body.map((item) => `${item.idExternoMinisterio}:${item.idExternoEscalaEvento}:${item.isMinisterioEscalado}`).join(", ")
+      : "resposta invalida";
+    throw new Error(
+      `Nao foi possivel localizar as duas escalas do evento para os ministerios selecionados. Esperados: ${ministerioId1}, ${ministerioId2}. Retornados: ${idsRetornados}`
+    );
+  }
+
+  bru.setVar("escalaEventoId1", escala1.idExternoEscalaEvento);
+  bru.setVar("escalaEventoId2", escala2.idExternoEscalaEvento);
+}
+
+tests {
+  test("deve obter escalaEventoId1 e escalaEventoId2", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(Array.isArray(res.getBody())).to.equal(true);
+    expect(bru.getVar("escalaEventoId1")).to.be.a("string");
+    expect(bru.getVar("escalaEventoId2")).to.be.a("string");
+  });
+}
+

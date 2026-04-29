@@ -1,0 +1,55 @@
+meta {
+  name: createEventoRecorrencia
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/eventos
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+    "fkMinisterios": [
+      "{{ministerioId1}}",
+      "{{ministerioId2}}"
+    ],
+    "nome": "{{nomeEvento}}",
+    "descricao": "VALIDACAO EVENTO RECORRENTE",
+    "publicoAlvo": "MEMBROS",
+    "dataHoraInicio": "{{dataHoraInicio}}",
+    "dataHoraFim": "{{dataHoraFim}}",
+    "custo": 0,
+    "recorrencia": {
+      "tipoRecorrencia": "{{tipoRecorrencia}}",
+      "dataInicioRecorrencia": "{{dataInicioRecorrencia}}",
+      "dataTerminoRecorrencia": "{{dataTerminoRecorrencia}}"
+    },
+    "endereco": {
+      "idExterno": null,
+      "cep": "04094000",
+      "rua": "PARQUE IBIRAPUERA",
+      "cidade": "SAO PAULO",
+      "estado": "SP",
+      "bairro": "VILA MARIANA",
+      "complemento": "PORTAO PRINCIPAL",
+      "numero": "S N",
+      "apelido": "LOCAL EVENTO"
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

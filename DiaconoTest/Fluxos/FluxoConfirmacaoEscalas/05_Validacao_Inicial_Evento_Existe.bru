@@ -1,0 +1,25 @@
+meta {
+  name: 05 Validacao Inicial Evento Existe
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/eventos/{{eventoId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+tests {
+  test("deve retornar evento criado", function () {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(body.nome).to.equal(bru.getVar("nomeEvento"));
+    expect(body.status).to.not.equal("CONFIRMADO");
+  });
+}
+

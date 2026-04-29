@@ -1,0 +1,33 @@
+meta {
+  name: salvarEscalasMinisterio
+  type: http
+  seq: 9
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/escalas-ministerio/lider-ministerio/{{escalaEventoId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  [
+    {
+      "idExternoMembroMinisterio": "{{membroMinisterioId}}",
+      "status": "CONFIRMADO"
+    }
+  ]
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,22 +1,26 @@
 meta {
   name: readAllWithFilter
   type: http
-  seq: 2
+  seq: 3
 }
 
 get {
-  url: http://localhost:8080/membros?page=0&size=5&sort=nome,desc&buscaGeral=Oliveira&status=ATIVO&fkMinisterio=550e8400-e29b-41d4-a716-446655440020
+  url: {{baseUrl}}/membros?page={{page}}&size={{size}}&sort=nome,desc&buscaGeral={{buscaGeral}}&status={{statusMembro}}&fkMinisterio={{ministerioId}}
   body: none
-  auth: inherit
+  auth: bearer
 }
 
 params:query {
-  page: 0
-  size: 5
+  page: {{page}}
+  size: {{size}}
   sort: nome,desc
-  buscaGeral: Oliveira
-  status: ATIVO
-  fkMinisterio: 550e8400-e29b-41d4-a716-446655440020
+  buscaGeral: {{buscaGeral}}
+  status: {{statusMembro}}
+  fkMinisterio: {{ministerioId}}
+}
+
+auth:bearer {
+  token: {{token}}
 }
 
 settings {
