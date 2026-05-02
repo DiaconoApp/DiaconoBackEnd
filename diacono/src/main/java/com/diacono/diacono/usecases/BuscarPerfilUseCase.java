@@ -35,7 +35,7 @@ public class BuscarPerfilUseCase {
         Membro membro = membroRepository.findByIdExterno(membroId)
                 .filter(m -> m.getIgreja() != null && igrejaId.equals(m.getIgreja().getIdExterno()))
                 .orElseThrow(() -> {
-                    logger.warn("Perfil nao encontrado para o escopo da igreja autenticada.");
+                    logger.warn("Perfil não encontrado para o escopo da igreja autenticada.");
                     return new ObjectNotFoundException("Perfil do membro não encontrado");
                 });
 

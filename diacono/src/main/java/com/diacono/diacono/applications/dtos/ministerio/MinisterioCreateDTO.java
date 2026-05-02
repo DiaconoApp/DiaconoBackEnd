@@ -11,7 +11,7 @@ public record MinisterioCreateDTO(
         UUID idLider,
 
         @NotBlank(message = "É obrigatório informar o nome do ministério")
-        @Size(max = 100, message = "O nome do ministério deve ter no máximo 100 caracteres")
+        @Size(max = 100, message = "O nome do ministério deve ter no máximo {max} caracteres")
         String nome
 ) {
 }

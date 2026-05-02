@@ -4,6 +4,8 @@ import com.diacono.diacono.domain.entity.EscalaEvento;
 import com.diacono.diacono.domain.entity.Evento;
 import com.diacono.diacono.domain.entity.Ministerio;
 import com.diacono.diacono.usecases.eventos.BuscarMinisterioPorUUIDUseCase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -16,8 +18,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class GerarEscalaEventoUseCase {
-    // TODO: Refatorar e Validar Posts
+    // NOTE: Validacoes de acesso/scoping por Igreja sao responsabilidade do chamador (CriarEventoUseCase, AtualizarEventoUseCase)
 
+    private static final Logger logger = LoggerFactory.getLogger(GerarEscalaEventoUseCase.class);
     private final BuscarMinisterioPorUUIDUseCase buscarMinisterioPorUUIDUseCase;
 
     public GerarEscalaEventoUseCase(BuscarMinisterioPorUUIDUseCase buscarMinisterioPorUUIDUseCase) {
@@ -35,11 +38,13 @@ public class GerarEscalaEventoUseCase {
             escalasEvento.add(escala);
         }
 
+        logger.info("Escalas de evento geradas na criacao: quantidadeEscalas=[{}], eventoId=[{}]", escalasEvento.size(), evento.getIdExterno());
         return escalasEvento;
     }
 
     public Set<EscalaEvento> executeParaAtualizacao(Evento evento, Set<EscalaEvento> escalasEventoOrigem, List<UUID> ministeriosId) {
         if (ministeriosId == null || ministeriosId.isEmpty()) {
+            logger.debug("Atualizacao de escalas requerida com lista vazia de ministerios: eventoId=[{}]", evento.getIdExterno());
             return new HashSet<>();
         }
 
@@ -75,6 +80,7 @@ public class GerarEscalaEventoUseCase {
             escalasAtualizadas.add(novaEscala);
         }
 
+        logger.info("Escalas de evento atualizadas: quantidadeTotal=[{}], novasEscalas=[{}], eventoId=[{}]", escalasAtualizadas.size(), escalasAtualizadas.size() - escalasPorMinisterio.size(), evento.getIdExterno());
         return escalasAtualizadas;
     }
 

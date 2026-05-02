@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 import java.util.UUID;
 
 public record MinisterioUpdateDTO(
-        @Size(max = 100, message = "O nome do ministério deve ter no máximo 100 caracteres")
+        @Size(max = 100, message = "O nome do ministério deve ter no máximo {max} caracteres")
         String nome,
         EnumStatusMinisterio status,
         UUID idLider

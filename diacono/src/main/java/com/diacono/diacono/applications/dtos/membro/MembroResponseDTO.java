@@ -16,4 +16,5 @@ public record MembroResponseDTO(
         Set<MembroMinisterioDTO> ministerios,
         EnumStatusMembro status,
         EnumCargoMembro cargo
-        ) {}
+) {
+}

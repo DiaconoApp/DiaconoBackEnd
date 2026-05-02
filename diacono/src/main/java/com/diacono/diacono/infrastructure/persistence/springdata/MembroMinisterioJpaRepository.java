@@ -62,6 +62,7 @@ public interface MembroMinisterioJpaRepository extends JpaRepository<MembroMinis
             WHERE m.idExterno = :idExternoMembro
             AND ms.igreja.idExterno = :idExternoIgreja
             AND mm.cargoMembro = com.diacono.diacono.domain.enums.EnumCargoMembroMinisterio.MEMBRO_MINISTERIO
+            AND m.igreja.idExterno = :idExternoIgreja
             """)
     List<MinisterioSuperSimplificadoDTO> buscarMembro(
             @Param("idExternoMembro") UUID idExternoMembro,
@@ -78,6 +79,7 @@ public interface MembroMinisterioJpaRepository extends JpaRepository<MembroMinis
             JOIN mm.membro m
             WHERE m.idExterno = :idExternoMembro
             AND ms.igreja.idExterno = :idExternoIgreja
+            AND m.igreja.idExterno = :idExternoIgreja
             AND mm.cargoMembro = com.diacono.diacono.domain.enums.EnumCargoMembroMinisterio.LIDER_MINISTERIO
             AND ms.status = com.diacono.diacono.domain.enums.EnumStatusMinisterio.ATIVO
             AND m.status = com.diacono.diacono.domain.enums.EnumStatusMembro.ATIVO

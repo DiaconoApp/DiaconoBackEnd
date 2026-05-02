@@ -29,6 +29,7 @@ public class LoginServiceUseCase {
     }
 
     public LoginResponseDTO execute(LoginRequestDTO loginRequestDTO){
+        validateLoginRequest(loginRequestDTO);
 
         Membro membro;
         try {
@@ -36,12 +37,12 @@ public class LoginServiceUseCase {
         } catch (ObjectNotFoundException ex) {
             // Mantem tempo de resposta semelhante ao caso de senha incorreta para reduzir enumeração de usuário.
             matchesSafely(loginRequestDTO.senha(), DUMMY_BCRYPT_HASH);
-            logger.warn("Falha de autenticacao: credenciais inválidas.");
+            logger.warn("Falha de autenticacao: credenciais inválidas. loginId={}", loginRequestDTO.email());
             throw new BadCredentialsException(INVALID_CREDENTIALS_MESSAGE);
         }
 
         if(membro == null || !matchesSafely(loginRequestDTO.senha(), membro.getSenha())){
-            logger.warn("Falha de autenticacao: credenciais inválidas.");
+            logger.warn("Falha de autenticacao: credenciais inválidas. loginId={}", loginRequestDTO.email());
             throw new BadCredentialsException(INVALID_CREDENTIALS_MESSAGE);
         }
 
@@ -51,7 +52,17 @@ public class LoginServiceUseCase {
         return new LoginResponseDTO(jwtValue, expiresIn);
     }
 
+    private void validateLoginRequest(LoginRequestDTO loginRequestDTO) {
+        if (loginRequestDTO == null || loginRequestDTO.email() == null || loginRequestDTO.email().isBlank() || loginRequestDTO.senha() == null || loginRequestDTO.senha().isBlank()) {
+            logger.warn("Falha de autenticacao: payload invalido recebido no login.");
+            throw new BadCredentialsException(INVALID_CREDENTIALS_MESSAGE);
+        }
+    }
+
     private boolean matchesSafely(String rawPassword, String encodedPassword) {
+        if (rawPassword == null || encodedPassword == null) {
+            return false;
+        }
         try {
             return bCryptPasswordEncoder.matches(rawPassword, encodedPassword);
         } catch (IllegalArgumentException ex) {

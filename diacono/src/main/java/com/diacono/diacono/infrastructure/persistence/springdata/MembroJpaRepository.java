@@ -13,12 +13,23 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface MembroJpaRepository extends JpaRepository<Membro, Long> {
 
+    /**
+     * @deprecated Sem scoping por igreja — sujeito a IDOR cross-tenant.
+     * Usar {@link #findByIdExternoAndIgrejaIdExterno(UUID, UUID)} em substituição.
+     */
+    @Deprecated
     Membro findByIdExterno(UUID idExterno);
+
+    /**
+     * Busca membro por UUID garantindo que pertence à igreja informada.
+     */
+    Optional<Membro> findByIdExternoAndIgrejaIdExterno(UUID idExterno, UUID igrejaIdExterno);
 
     Page<Membro> findByIgreja_IdExterno(UUID fkIgreja, Pageable pageable);
 
@@ -32,13 +43,13 @@ public interface MembroJpaRepository extends JpaRepository<Membro, Long> {
     Long countMembrosDiscipulados();
 
     @Query("""
-            SELECT m FROM Membro m  
-            WHERE 
+            SELECT m FROM Membro m
+            WHERE
             (:buscaGeral IS NULL OR
-            LOWER(nome) LIKE LOWER(:buscaGeral)  
-            OR LOWER(email) LIKE LOWER(:buscaGeral) 
-            OR LOWER(celular) LIKE LOWER(:buscaGeral)) 
-            AND m.igreja.idExterno = :fkIgreja  
+            LOWER(nome) LIKE LOWER(:buscaGeral)
+            OR LOWER(email) LIKE LOWER(:buscaGeral)
+            OR LOWER(celular) LIKE LOWER(:buscaGeral))
+            AND m.igreja.idExterno = :fkIgreja
             ORDER BY nome
             """
     )
@@ -69,13 +80,38 @@ public interface MembroJpaRepository extends JpaRepository<Membro, Long> {
 //                                                                @Param("horarioInicio") LocalDateTime horarioInicio,
 //                                                                @Param("horarioFim") LocalDateTime horarioFim);
 
+    /**
+     * @deprecated Sem scoping por igreja — expõe ID interno de qualquer tenant por UUID conhecido.
+     * Usar {@link #buscarIdPorUUIDAndIgrejaIdExterno(UUID, UUID)} em substituição.
+     */
+    @Deprecated
     @Query("""
                 SELECT m.id FROM Membro m
                 WHERE m.idExterno = :idExterno
             """)
     Long buscarIdPorUUID(UUID idExterno);
 
+    /**
+     * Busca ID interno do membro garantindo que pertence à igreja informada.
+     * Previne exposição cross-tenant de IDs internos.
+     */
+    @Query("""
+                SELECT m.id FROM Membro m
+                WHERE m.idExterno = :idExterno
+                AND m.igreja.idExterno = :igrejaId
+            """)
+    Long buscarIdPorUUIDAndIgrejaIdExterno(
+            @Param("idExterno") UUID idExterno,
+            @Param("igrejaId") UUID igrejaId
+    );
 
+
+    /**
+     * @deprecated Retorna membro de qualquer igreja por UUID — sujeito a IDOR.
+     * Sem scoping por igreja. Não utilize em novos desenvolvimentos.
+     * Usar {@link #findByIdExternoAndIgrejaIdExterno(UUID, UUID)} em substituição.
+     */
+    @Deprecated
     Membro findAllByIgreja_IdExterno(UUID idExterno);
 
     //dashboards

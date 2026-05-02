@@ -34,7 +34,8 @@ public class GenerateTokenUseCase {
                 || membro.getCargoMembro() == null
                 || membro.getIgreja() == null
                 || membro.getIgreja().getIdExterno() == null) {
-            logger.warn("Falha ao gerar JWT: membro sem dados mínimos de autenticação/autorização.");
+            String memberId = membro != null && membro.getIdExterno() != null ? membro.getIdExterno().toString() : "desconhecido";
+            logger.warn("Falha ao gerar JWT: membro sem dados minimos de autenticacao/autorizacao. memberId={}", memberId);
             throw new IllegalArgumentException("Membro inválido para geração de token.");
         }
 
@@ -55,9 +56,5 @@ public class GenerateTokenUseCase {
                 .build();
 
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
-    }
-
-    public long getExpiresIn() {
-        return expiresIn;
     }
 }

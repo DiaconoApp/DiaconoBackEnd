@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -80,12 +81,26 @@ public interface EscalaEventoJpaRepository extends JpaRepository<EscalaEvento, L
             @Param("escalaEventoId") UUID escalaEventoId
     );
 
+    @Deprecated
     @Query("""
             SELECT ee.evento.idExterno
             FROM EscalaEvento ee
             WHERE ee.idExterno = :escalaEventoId
             """)
     UUID findEventoIdByEscalaEventoId(@Param("escalaEventoId") UUID escalaEventoId);
+
+    /**
+     * Variante com scoping por igreja para evitar leitura de dados de outro tenant.
+     */
+    @Query("""
+            SELECT ee.evento.idExterno
+            FROM EscalaEvento ee
+            JOIN ee.evento e
+            WHERE ee.idExterno = :escalaEventoId
+              AND e.igreja.idExterno = :igrejaId
+            """)
+    UUID findEventoIdByEscalaEventoIdAndIgrejaId(@Param("escalaEventoId") UUID escalaEventoId,
+                                                @Param("igrejaId") UUID igrejaId);
 
     @Query("""
             SELECT CASE
@@ -98,7 +113,23 @@ public interface EscalaEventoJpaRepository extends JpaRepository<EscalaEvento, L
             """)
     boolean areAllConfirmadosByEventoId(@Param("eventoId") UUID eventoId);
 
+    @Deprecated
+    @Query("""
+            SELECT CASE
+                WHEN COUNT(ee) > 0 AND SUM(CASE WHEN ee.statusEscalaEvento = com.diacono.diacono.domain.enums.EnumStatusEvento.CONFIRMADO THEN 1 ELSE 0 END) = COUNT(ee)
+                THEN true
+                ELSE false
+            END
+            FROM EscalaEvento ee
+            JOIN ee.evento e
+            WHERE e.igreja.idExterno = :igrejaId
+              AND ee.evento.idExterno = :eventoId
+            """)
+    boolean areAllConfirmadosByEventoIdAndIgrejaId(@Param("eventoId") UUID eventoId, @Param("igrejaId") UUID igrejaId);
+
+    @Deprecated
     @Modifying
+    @Transactional
     @Query("""
             UPDATE EscalaEvento ee
             SET ee.statusEscalaEvento = :status
@@ -106,4 +137,18 @@ public interface EscalaEventoJpaRepository extends JpaRepository<EscalaEvento, L
               AND ee.statusEscalaEvento <> :status
             """)
     void updateStatusByEscalaEventoId(@Param("escalaEventoId") UUID escalaEventoId, @Param("status") EnumStatusEvento status);
+
+    /**
+     * Variante com scoping por igreja para evitar leitura de dados de outro tenant.
+     */
+    @Modifying
+    @Transactional
+    @Query("""
+            UPDATE EscalaEvento ee
+            SET ee.statusEscalaEvento = :status
+            WHERE ee.idExterno = :escalaEventoId
+              AND ee.evento.igreja.idExterno = :igrejaId
+              AND ee.statusEscalaEvento <> :status
+            """)
+    void updateStatusByEscalaEventoIdAndIgrejaId(@Param("escalaEventoId") UUID escalaEventoId, @Param("igrejaId") UUID igrejaId, @Param("status") EnumStatusEvento status);
 }

@@ -13,7 +13,7 @@ public record EventoCreateDTO(
 
         @NotNull
         @Size(min = 1, message = "O evento deve ter ao menos um ministério participando.")
-        List<UUID> fkMinisterios,
+        List<@NotNull UUID> fkMinisterios,
 
         @NotNull(message = "É necessário que o evento tenha um endereço vinculado a ele.")
         @Valid
@@ -24,16 +24,17 @@ public record EventoCreateDTO(
         RecorrenciaCreateDTO recorrencia,
 
         @NotBlank
-        @Size(max = 100, message = "O nome deve ter no máximo 100 caracteres.")
+        @Size(max = 100, message = "O nome deve ter no máximo {max} caracteres.")
         @Pattern(regexp = "^[A-Za-zÀ-ÿ ]+$", message = "Deve conter apenas letras e espaços")
         String nome,
 
         @NotBlank
-        @Size(max = 400, message = "A descrição deve ter no máximo 400 caracteres.")
+        @Size(max = 400, message = "A descrição deve ter no máximo {max} caracteres.")
         @Pattern(regexp = "^[A-Za-zÀ-ÿ ]+$", message = "Deve conter apenas letras e espaços")
         String descricao,
 
         @NotBlank(message = "O evento precisa ter um público-alvo.")
+        @Size(max = 100, message = "O público-alvo deve ter no máximo {max} caracteres.")
         @Pattern(regexp = "^[A-Za-zÀ-ÿ ]+$", message = "Deve conter apenas letras e espaços")
         String publicoAlvo,
 

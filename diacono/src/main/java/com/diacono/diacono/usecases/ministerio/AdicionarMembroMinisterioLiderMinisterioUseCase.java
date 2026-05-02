@@ -48,30 +48,34 @@ public class AdicionarMembroMinisterioLiderMinisterioUseCase {
 
         Long idMinisterioNovo = ministeriosRepository.buscarIdPorUUID(idMinisterio)
                 .orElseThrow(() -> {
-                    logger.warn("Ministério não encontrado. ministerioId=[{}] membroId=[{}]", idMinisterio, membroIdToken);
+                    logger.warn("Ministério não encontrado no escopo da igreja autenticada. ministerioId=[{}] igrejaId=[{}] membroId=[{}]",
+                            idMinisterio, igrejaIdToken, membroIdToken);
                     return new ObjectNotFoundException("Ministério não encontrado");
                 });
 
-        Ministerio ministerioVerificado = ministeriosRepository.findByIdExterno(idMinisterio)
+        ministeriosRepository.findByIdExternoAndIgrejaId(idMinisterio, igrejaIdToken)
                 .orElseThrow(() -> {
-                    logger.warn("Ministério não encontrado (findByIdExterno). ministerioId=[{}] membroId=[{}]", idMinisterio, membroIdToken);
+                    logger.warn("Ministério não encontrado no escopo da igreja autenticada (findByIdExternoAndIgrejaId). ministerioId=[{}] igrejaId=[{}] membroId=[{}]",
+                            idMinisterio, igrejaIdToken, membroIdToken);
                     return new ObjectNotFoundException("Ministério não encontrado");
                 });
-
-        if (!ministerioVerificado.getIgreja().getIdExterno().equals(igrejaIdToken)) {
-            logger.warn("Tentativa de acesso a ministério de outra igreja. ministerioId=[{}] igrejaToken=[{}] membroId=[{}]",
-                    idMinisterio, igrejaIdToken, membroIdToken);
-            throw new ObjectNotFoundException("Ministério não encontrado para a igreja do usuário");
-        }
 
         validarLiderMinisterio(membroIdToken, igrejaIdToken, idMinisterio);
 
-        Long idMembroNovo = membroRepository.buscarIdPorUUID(dto.idExterno());
+        Membro membroVerificado = membroRepository.findByIdExterno(dto.idExterno());
 
-        if (idMembroNovo == null) {
+        if (membroVerificado == null) {
             logger.warn("Tentativa de adicionar membro inexistente. membroIdAlvo=[{}] executor=[{}]", dto.idExterno(), membroIdToken);
             throw new ObjectNotFoundException("Membro não encontrado");
         }
+
+        if (membroVerificado.getIgreja() == null || !membroVerificado.getIgreja().getIdExterno().equals(igrejaIdToken)) {
+            logger.warn("Tentativa de adicionar membro de outra igreja ao ministério. membroIdAlvo=[{}] ministerioId=[{}] igrejaToken=[{}] executor=[{}]",
+                    dto.idExterno(), idMinisterio, igrejaIdToken, membroIdToken);
+            throw new ObjectNotFoundException("Membro não encontrado");
+        }
+
+        Long idMembroNovo = membroVerificado.getIdInterno();
 
         adicionarMembroMinisterioLiderMinisterio(idMinisterioNovo, idMembroNovo);
 
@@ -87,6 +91,8 @@ public class AdicionarMembroMinisterioLiderMinisterioUseCase {
 
         if (ministeriosLider.isEmpty() || ministeriosLider.stream()
                 .noneMatch(m -> m.idExterno().equals(ministerioId))) {
+            logger.warn("Tentativa de operação sem vínculo de liderança com o ministério. ministerioId=[{}] membroId=[{}] igrejaId=[{}]",
+                    ministerioId, membroId, igrejaId);
             throw new ObjectNotFoundException("O líder informado não possui vínculo com o ministério solicitado");
         }
     }

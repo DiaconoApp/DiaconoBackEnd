@@ -23,6 +23,5 @@ public record EventoCompletoDTO(
         IgrejaSimplificadoDTO igreja,
         RecorrenciaSimplificadaDTO recorrencia,
         EnumStatusEvento status
-
 ) {
 }
