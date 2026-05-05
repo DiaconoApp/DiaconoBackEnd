@@ -6,7 +6,6 @@ import com.diacono.diacono.domain.entity.Ministerio;
 import com.diacono.diacono.domain.enums.EnumStatusMinisterio;
 import com.diacono.diacono.domain.repository.MinisteriosRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.global.util.JwtUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,9 +36,6 @@ class BuscarMinisteriosGovernoSemFiltroUseCaseTest {
 	@Mock
 	private MinisterioMapper ministerioMapper;
 
-	@Mock
-	private JwtUtils jwtUtils;
-
 	@InjectMocks
 	private BuscarMinisteriosGovernoSemFiltroUseCase useCase;
 
@@ -58,7 +54,6 @@ class BuscarMinisteriosGovernoSemFiltroUseCaseTest {
 				LocalDate.of(2026, 1, 1)
 		);
 
-		when(jwtUtils.getIgrejaId()).thenReturn(idIgreja);
 		when(ministeriosRepository.findByIgrejaIdExterno(idIgreja, pageable)).thenReturn(page);
 		when(ministerioMapper.paraMinisterioSimplificadoDTO(ministerio)).thenReturn(dto);
 
@@ -66,7 +61,6 @@ class BuscarMinisteriosGovernoSemFiltroUseCaseTest {
 
 		assertEquals(1, response.getTotalElements());
 		assertEquals(dto, response.getContent().getFirst());
-		verify(jwtUtils).getIgrejaId();
 		verify(ministeriosRepository).findByIgrejaIdExterno(idIgreja, pageable);
 		verify(ministerioMapper).paraMinisterioSimplificadoDTO(ministerio);
 	}
@@ -76,7 +70,6 @@ class BuscarMinisteriosGovernoSemFiltroUseCaseTest {
 		UUID idIgreja = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		Pageable pageable = PageRequest.of(0, 10);
 
-		when(jwtUtils.getIgrejaId()).thenReturn(idIgreja);
 		when(ministeriosRepository.findByIgrejaIdExterno(idIgreja, pageable)).thenReturn(Page.empty());
 
 		ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> useCase.execute(pageable, idIgreja));

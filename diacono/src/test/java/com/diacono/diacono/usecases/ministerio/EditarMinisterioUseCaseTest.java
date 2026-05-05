@@ -49,8 +49,8 @@ class EditarMinisterioUseCaseTest {
 	private static final UUID ID_OUTRA_IGREJA = UUID.fromString("55555555-5555-5555-5555-555555555555");
 
 	private Igreja igreja(UUID igrejaId) {
-		Igreja igreja = new Igreja();
-		when(igreja.getIdExterno()).thenReturn(igrejaId);
+		Igreja igreja = Igreja.builder().nome("Igreja Teste").build();
+		ReflectionTestUtils.setField(igreja, "idExterno", igrejaId);
 		return igreja;
 	}
 

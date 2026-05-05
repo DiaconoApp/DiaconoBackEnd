@@ -121,7 +121,6 @@ class CriarEventoUseCaseTest {
 		when(eventoMapper.paraEvento(request)).thenReturn(evento);
 		when(jwtUtils.getSubject()).thenReturn(idMembro);
 		when(membroRepository.findByIdExterno(idMembro)).thenReturn(Optional.of(membro));
-		when(jwtUtils.getIgrejaId()).thenReturn(idIgreja);
 		when(buscarIgrejaPorUUIDUseCase.execute(idIgreja)).thenReturn(igreja);
 		when(gerarEscalaEventoUseCase.executeParaCriacao(evento, List.of(idMinisterio), idIgreja)).thenReturn(new HashSet<>(Set.of(escalaEvento)));
 		when(eventoRepository.save(evento)).thenReturn(evento);

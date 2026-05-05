@@ -38,8 +38,14 @@ class RemoverMembroMinisterioLiderMinisterioUseCaseTest {
 	private static final UUID ID_OUTRA_IGREJA = UUID.fromString("44444444-4444-4444-4444-444444444444");
 
 	private Ministerio ministerioComIgreja(UUID igrejaId) {
-		Igreja igreja = mock(Igreja.class);
-		when(igreja.getIdExterno()).thenReturn(igrejaId);
+		Igreja igreja = new Igreja();
+		try {
+			java.lang.reflect.Field idField = com.diacono.diacono.global.util.IdEntityUtils.class.getDeclaredField("idExterno");
+			idField.setAccessible(true);
+			idField.set(igreja, igrejaId);
+		} catch (ReflectiveOperationException e) {
+			throw new RuntimeException(e);
+		}
 
 		Ministerio ministerio = new Ministerio();
 		ministerio.setIgreja(igreja);

@@ -19,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -46,11 +47,14 @@ class AdicionarMinisterioUseCaseTest {
 	@Test
 	void deveCriarMinisterioComSucessoEPromoverLider() {
 		UUID idLider = UUID.fromString("11111111-1111-1111-1111-111111111111");
-		UUID igrejaId = UUID.fromString("2222222-2222-2222-2222-222222222222");
+		UUID igrejaId = UUID.fromString("22222222-2222-2222-2222-222222222222");
 		MinisterioCreateDTO dto = new MinisterioCreateDTO(idLider, "Louvor");
 
-		Igreja igreja = new Igreja();
-		igreja.setNome("Igreja Central");
+		Igreja igreja = Igreja.builder()
+				.nome("Igreja Central")
+				.build();
+		// Força o idExterno para simular que pertence à mesma Igreja do token
+		ReflectionTestUtils.setField(igreja, "idExterno", igrejaId);
 
 		Membro lider = new Membro();
 		lider.setNome("Samuel");
@@ -88,10 +92,61 @@ class AdicionarMinisterioUseCaseTest {
 	@Test
 	void deveLancarExcecaoQuandoLiderNaoForEncontrado() {
 		UUID idLider = UUID.fromString("11111111-1111-1111-1111-111111111111");
-		UUID igrejaId = UUID.fromString("2222222-2222-2222-2222-222222222222");
+		UUID igrejaId = UUID.fromString("22222222-2222-2222-2222-222222222222");
 		MinisterioCreateDTO dto = new MinisterioCreateDTO(idLider, "Louvor");
 
 		when(membroRepository.findByIdExterno(idLider)).thenReturn(null);
+
+		ObjectNotFoundException ex = assertThrows(
+				ObjectNotFoundException.class,
+				() -> useCase.execute(dto, igrejaId)
+		);
+
+		assertEquals("Líder do ministério não encontrado", ex.getMessage());
+		verify(ministeriosRepository, never()).save(any());
+	}
+
+	@Test
+	void deveLancarExcecaoQuandoLiderPertenceAOutraIgreja() {
+		UUID idLider = UUID.fromString("11111111-1111-1111-1111-111111111111");
+		UUID igrejaId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+		UUID outkaIgrejaId = UUID.fromString("33333333-3333-3333-3333-333333333333");
+		MinisterioCreateDTO dto = new MinisterioCreateDTO(idLider, "Louvor");
+
+		Igreja igrejaOutra = Igreja.builder()
+				.nome("Outra Igreja")
+				.build();
+		// Força o idExterno para simular uma Igreja diferente
+		ReflectionTestUtils.setField(igrejaOutra, "idExterno", outkaIgrejaId);
+
+		Membro lider = new Membro();
+		lider.setNome("Samuel");
+		lider.setIgreja(igrejaOutra);
+		lider.setCargoMembro(EnumCargoMembro.MEMBRO);
+
+		when(membroRepository.findByIdExterno(idLider)).thenReturn(lider);
+
+		ObjectNotFoundException ex = assertThrows(
+				ObjectNotFoundException.class,
+				() -> useCase.execute(dto, igrejaId)
+		);
+
+		assertEquals("Líder do ministério não encontrado", ex.getMessage());
+		verify(ministeriosRepository, never()).save(any());
+	}
+
+	@Test
+	void deveLancarExcecaoQuandoIgrejaDoLiderForNula() {
+		UUID idLider = UUID.fromString("11111111-1111-1111-1111-111111111111");
+		UUID igrejaId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+		MinisterioCreateDTO dto = new MinisterioCreateDTO(idLider, "Louvor");
+
+		Membro lider = new Membro();
+		lider.setNome("Samuel");
+		lider.setIgreja(null);
+		lider.setCargoMembro(EnumCargoMembro.MEMBRO);
+
+		when(membroRepository.findByIdExterno(idLider)).thenReturn(lider);
 
 		ObjectNotFoundException ex = assertThrows(
 				ObjectNotFoundException.class,

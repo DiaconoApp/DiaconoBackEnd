@@ -40,7 +40,6 @@ class GerarEscalaEventoUseCaseTest {
         UUID idMinisterioExistente = UUID.fromString("22222222-2222-2222-2222-222222222222");
         UUID idMinisterioNovo = UUID.fromString("33333333-3333-3333-3333-333333333333");
 
-        // A01: Criar Igreja para validar scoping
         Igreja igreja = Igreja.builder().nome("Igreja Pentecostal").build();
         ReflectionTestUtils.setField(igreja, "idExterno", idIgreja);
 
@@ -87,11 +86,13 @@ class GerarEscalaEventoUseCaseTest {
     @Test
     void deveRetornarEscalaVaziaQuandoNaoHouverMinisteriosSelecionados() {
         UUID idIgreja = UUID.fromString("44444444-4444-4444-4444-444444444444");
+        UUID idEvento = UUID.fromString("11111111-1111-1111-1111-111111111111");
 
         Igreja igreja = Igreja.builder().nome("Igreja Pentecostal").build();
         ReflectionTestUtils.setField(igreja, "idExterno", idIgreja);
 
         Evento evento = Evento.builder().build();
+        ReflectionTestUtils.setField(evento, "idExterno", idEvento);
         evento.setIgreja(igreja);
 
             Set<EscalaEvento> resultado = useCase.executeParaAtualizacao(evento, new HashSet<>(), List.of(), idIgreja);

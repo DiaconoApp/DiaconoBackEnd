@@ -6,7 +6,6 @@ import com.diacono.diacono.domain.entity.Ministerio;
 import com.diacono.diacono.domain.enums.EnumStatusMinisterio;
 import com.diacono.diacono.domain.repository.MinisteriosRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.global.util.JwtUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,9 +36,6 @@ class BuscarMinisteriosGovernoComFiltroUseCaseTest {
 	@Mock
 	private MinisterioMapper mapper;
 
-	@Mock
-	private JwtUtils jwtUtils;
-
 	@InjectMocks
 	private BuscarMinisteriosGovernoComFiltroUseCase useCase;
 
@@ -60,16 +56,14 @@ class BuscarMinisteriosGovernoComFiltroUseCaseTest {
 				LocalDate.of(2026, 1, 1)
 		);
 
-		when(jwtUtils.getIgrejaId()).thenReturn(idIgreja);
-		when(ministeriosRepository.buscarComFiltros(pageable, "%LOUVOR%", status, idIgreja)).thenReturn(page);
+		when(ministeriosRepository.buscarComFiltros(pageable, "LOUVOR", status, idIgreja)).thenReturn(page);
 		when(mapper.paraMinisterioSimplificadoDTO(ministerio)).thenReturn(dto);
 
 		Page<MinisterioSimplificadoDTO> response = useCase.execute(pageable, busca, status, idIgreja);
 
 		assertEquals(1, response.getTotalElements());
 		assertEquals(dto, response.getContent().getFirst());
-		verify(jwtUtils).getIgrejaId();
-		verify(ministeriosRepository).buscarComFiltros(pageable, "%LOUVOR%", status, idIgreja);
+		verify(ministeriosRepository).buscarComFiltros(pageable, "LOUVOR", status, idIgreja);
 		verify(mapper).paraMinisterioSimplificadoDTO(ministerio);
 	}
 
@@ -78,8 +72,7 @@ class BuscarMinisteriosGovernoComFiltroUseCaseTest {
 		UUID idIgreja = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		Pageable pageable = PageRequest.of(0, 10);
 
-		when(jwtUtils.getIgrejaId()).thenReturn(idIgreja);
-		when(ministeriosRepository.buscarComFiltros(pageable, "%LOUVOR%", EnumStatusMinisterio.ATIVO, idIgreja))
+		when(ministeriosRepository.buscarComFiltros(pageable, "LOUVOR", EnumStatusMinisterio.ATIVO, idIgreja))
 				.thenReturn(Page.empty());
 
 		ObjectNotFoundException ex = assertThrows(
