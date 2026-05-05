@@ -67,7 +67,7 @@ class AtualizarEscalaEventoPorEventoIdUseCaseTest {
         Set<EscalaEvento> escalaAtualizada = new HashSet<>();
 
         when(eventoRepository.findByIdExterno(eventoId)).thenReturn(Optional.of(evento));
-        when(gerarEscalaEventoUseCase.executeParaAtualizacao(evento, evento.getEscalaEvento(), List.of(ministerioIdUm, ministerioIdDois)))
+            when(gerarEscalaEventoUseCase.executeParaAtualizacao(evento, evento.getEscalaEvento(), List.of(ministerioIdUm, ministerioIdDois), igrejaId))
                 .thenReturn(escalaAtualizada);
 
         RestResponseMessageDTO response = useCase.execute(igrejaId, eventoId, request);

@@ -8,6 +8,7 @@ import com.diacono.diacono.applications.dtos.evento.EventoCompletoDTO;
 import com.diacono.diacono.applications.dtos.evento.EventoSimplificadoDTO;
 import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
 import com.diacono.diacono.global.error.comuns.ApiErrorsComuns;
+import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.usecases.eventos.*;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
@@ -33,8 +34,9 @@ public class EventoController {
     private final ApagarEventoUnicoUseCase apagarEventoUseCase;
     private final ApagarEventosMultiplosUseCase apagarEventosMultiplosUseCase;
     private final AtualizarEventoUseCase atualizarEventoUseCase;
+    private final JwtUtils jwtUtils;
 
-    public EventoController(BuscarEventosPorMesEAnoUseCase buscarEventosPorMesEAnoUseCase, BuscarEventoEspecificoUseCase buscarEventoEspecificoUseCase, BuscarEnderecoEventoUseCase buscarEnderecoEventoUseCase, CriarEventoUseCase criarEventoUseCase, ApagarEventoUnicoUseCase apagarEventoUseCase, ApagarEventosMultiplosUseCase apagarEventosMultiplosUseCase, AtualizarEventoUseCase atualizarEventoUseCase) {
+    public EventoController(BuscarEventosPorMesEAnoUseCase buscarEventosPorMesEAnoUseCase, BuscarEventoEspecificoUseCase buscarEventoEspecificoUseCase, BuscarEnderecoEventoUseCase buscarEnderecoEventoUseCase, CriarEventoUseCase criarEventoUseCase, ApagarEventoUnicoUseCase apagarEventoUseCase, ApagarEventosMultiplosUseCase apagarEventosMultiplosUseCase, AtualizarEventoUseCase atualizarEventoUseCase, JwtUtils jwtUtils) {
         this.buscarEventosPorMesEAnoUseCase = buscarEventosPorMesEAnoUseCase;
         this.buscarEventoEspecificoUseCase = buscarEventoEspecificoUseCase;
         this.buscarEnderecoEventoUseCase = buscarEnderecoEventoUseCase;
@@ -42,6 +44,7 @@ public class EventoController {
         this.apagarEventoUseCase = apagarEventoUseCase;
         this.apagarEventosMultiplosUseCase = apagarEventosMultiplosUseCase;
         this.atualizarEventoUseCase = atualizarEventoUseCase;
+        this.jwtUtils = jwtUtils;
     }
 
     @ApiErrorsComuns
@@ -50,7 +53,7 @@ public class EventoController {
     @PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO','SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<EventoSimplificadoDTO> buscarEventosPorMesEAno(@RequestParam int mes, @RequestParam int ano){
         //completo
-        return ResponseEntity.status(HttpStatus.OK).body(buscarEventosPorMesEAnoUseCase.execute(mes, ano));
+        return ResponseEntity.status(HttpStatus.OK).body(buscarEventosPorMesEAnoUseCase.execute(mes, ano, jwtUtils.getIgrejaId()));
     }
 
     @ApiErrorsComuns
@@ -59,7 +62,7 @@ public class EventoController {
     @PreAuthorize("hasAnyAuthority('SCOPE_MEMBRO', 'SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<EventoCompletoDTO> buscarEventoEspecifico(@PathVariable("id") UUID id){
         //COMPLETO
-        return ResponseEntity.status(HttpStatus.OK).body(buscarEventoEspecificoUseCase.execute(id));
+        return ResponseEntity.status(HttpStatus.OK).body(buscarEventoEspecificoUseCase.execute(id, jwtUtils.getIgrejaId()));
     }
 
     @ApiErrorsComuns
@@ -69,7 +72,7 @@ public class EventoController {
     public ResponseEntity<EnderecoEventoSimplificadoDTO> buscarEnderecoEvento(){
         //COMPLETO
         //COLOCAR ISSO NUM CACHE
-        return ResponseEntity.status(HttpStatus.OK).body(buscarEnderecoEventoUseCase.execute());
+        return ResponseEntity.status(HttpStatus.OK).body(buscarEnderecoEventoUseCase.execute(jwtUtils.getIgrejaId()));
     }
 
     @ApiErrorsComuns
@@ -79,7 +82,7 @@ public class EventoController {
     public ResponseEntity<RestResponseMessageDTO> criarEvento(@RequestBody @Valid EventoCreateDTO request){
         //CONCLUIDO
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(criarEventoUseCase.execute(request));
+            return ResponseEntity.status(HttpStatus.CREATED).body(criarEventoUseCase.execute(request, jwtUtils.getIgrejaId()));
         } catch (RuntimeException ex) {
             logger.warn("Falha ao criar evento.");
             throw ex;
@@ -92,7 +95,7 @@ public class EventoController {
     @PreAuthorize("hasAnyAuthority('SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<RestResponseMessageDTO> apagarEventoUnico(@PathVariable UUID id){
        try {
-           return ResponseEntity.status(HttpStatus.NO_CONTENT).body(apagarEventoUseCase.execute(id));
+           return ResponseEntity.status(HttpStatus.NO_CONTENT).body(apagarEventoUseCase.execute(id, jwtUtils.getIgrejaId()));
        } catch (RuntimeException ex) {
            logger.warn("Falha ao apagar evento unico. id={}", id);
            throw ex;
@@ -106,7 +109,7 @@ public class EventoController {
     public ResponseEntity<RestResponseMessageDTO> apagarEventosMultiplos(@PathVariable UUID id){
         //completo
         try {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(apagarEventosMultiplosUseCase.execute(id));
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(apagarEventosMultiplosUseCase.execute(id, jwtUtils.getIgrejaId()));
         } catch (RuntimeException ex) {
             logger.warn("Falha ao apagar eventos multiplos. id={}", id);
             throw ex;
@@ -119,7 +122,7 @@ public class EventoController {
     @PreAuthorize("hasAnyAuthority('SCOPE_LIDER_MINISTERIO', 'SCOPE_GOVERNO')")
     public ResponseEntity<RestResponseMessageDTO> atualizarEvento(@RequestBody @Valid EventoUpdateDTO evento, @PathVariable("id") UUID id){
         try {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(atualizarEventoUseCase.execute(evento, id));
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(atualizarEventoUseCase.execute(evento, id, jwtUtils.getIgrejaId()));
         } catch (RuntimeException ex) {
             logger.warn("Falha ao atualizar evento. id={}", id);
             throw ex;

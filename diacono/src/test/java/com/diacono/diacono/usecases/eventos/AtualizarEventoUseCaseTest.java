@@ -6,6 +6,7 @@ import com.diacono.diacono.applications.mappers.endereco.EnderecoEventoMapper;
 import com.diacono.diacono.domain.entity.EscalaEvento;
 import com.diacono.diacono.domain.entity.EnderecoEvento;
 import com.diacono.diacono.domain.entity.Evento;
+import com.diacono.diacono.domain.entity.Igreja;
 import com.diacono.diacono.domain.entity.Ministerio;
 import com.diacono.diacono.domain.repository.EventoRepository;
 import com.diacono.diacono.domain.service.EscalaStatusDomainService;
@@ -65,11 +66,14 @@ class AtualizarEventoUseCaseTest {
 	@Test
 	void deveAtualizarEventoComSucesso() {
 		UUID idEvento = UUID.fromString("11111111-1111-1111-1111-111111111111");
+		UUID igrejaId = UUID.fromString("33333333-3333-3333-3333-333333333333");
 		UUID idMinisterioAtual = UUID.fromString("22222222-2222-2222-2222-222222222222");
 
 		Ministerio ministerioAtual = Ministerio.builder().nome("Louvor").build();
 		ReflectionTestUtils.setField(ministerioAtual, "idExterno", idMinisterioAtual);
 		EscalaEvento escalaAtual = EscalaEvento.builder().ministerio(ministerioAtual).build();
+		Igreja igreja = Igreja.builder().nome("Igreja Teste").build();
+		ReflectionTestUtils.setField(igreja, "idExterno", igrejaId);
 
 		Evento evento = Evento.builder()
 				.nome("Evento Antigo")
@@ -78,6 +82,7 @@ class AtualizarEventoUseCaseTest {
 				.custo(BigDecimal.TEN)
 				.dataHoraInicio(LocalDateTime.of(2026, 5, 10, 19, 0))
 				.dataHoraFim(LocalDateTime.of(2026, 5, 10, 21, 0))
+				.igreja(igreja)
 				.escalaEvento(new HashSet<>(Set.of(escalaAtual)))
 				.enderecoEvento(EnderecoEvento.builder().cep("12345678").numero("10").build())
 				.build();
@@ -94,9 +99,9 @@ class AtualizarEventoUseCaseTest {
 		);
 
 		when(eventoRepository.findByIdExterno(idEvento)).thenReturn(Optional.of(evento));
-		when(gerarEscalaEventoUseCase.executeParaAtualizacao(evento, evento.getEscalaEvento(), List.of(idMinisterioAtual))).thenReturn(Set.of(escalaAtual));
+		when(gerarEscalaEventoUseCase.executeParaAtualizacao(evento, evento.getEscalaEvento(), List.of(idMinisterioAtual), igrejaId)).thenReturn(Set.of(escalaAtual));
 
-		RestResponseMessageDTO response = useCase.execute(request, idEvento);
+		RestResponseMessageDTO response = useCase.execute(request, idEvento, igrejaId);
 
 		assertEquals(HttpStatus.OK, response.getStatus());
 		assertEquals("Evento atualizado com sucesso", response.getMessage());
@@ -111,11 +116,12 @@ class AtualizarEventoUseCaseTest {
 	@Test
 	void deveLancarExcecaoQuandoEventoNaoForEncontrado() {
 		UUID idEvento = UUID.fromString("11111111-1111-1111-1111-111111111111");
+		UUID igrejaId = UUID.fromString("33333333-3333-3333-3333-333333333333");
 		EventoUpdateDTO request = new EventoUpdateDTO(null, null, null, null, null, null, null, null);
 
 		when(eventoRepository.findByIdExterno(idEvento)).thenReturn(Optional.empty());
 
-		ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> useCase.execute(request, idEvento));
+		ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> useCase.execute(request, idEvento, igrejaId));
 
 		assertEquals("Evento não encontrado", ex.getMessage());
 	}

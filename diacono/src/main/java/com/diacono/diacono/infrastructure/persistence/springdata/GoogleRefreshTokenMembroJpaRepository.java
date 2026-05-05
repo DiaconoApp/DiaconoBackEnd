@@ -10,7 +10,7 @@ public interface GoogleRefreshTokenMembroJpaRepository extends JpaRepository<Goo
     @Deprecated
     GoogleRefreshTokenMembro findByMembroId(UUID membroId);
     @Deprecated
-    GoogleRefreshTokenMembro findByEmail(String email);
+    GoogleRefreshTokenMembro findByEmailHash(String emailHash);
     Optional<GoogleRefreshTokenMembro> findByMembroIdAndIgrejaId(UUID membroId, UUID igrejaId);
-    Optional<GoogleRefreshTokenMembro> findByEmailAndIgrejaId(String email, UUID igrejaId);
+    Optional<GoogleRefreshTokenMembro> findByEmailHashAndIgrejaId(String emailHash, UUID igrejaId);
 }

@@ -4,6 +4,8 @@ import com.diacono.diacono.infrastructure.exceptions.DateInvalidException;
 import com.diacono.diacono.infrastructure.exceptions.TimeInvalidException;
 import com.diacono.diacono.global.error.exceptions.*;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -22,6 +24,7 @@ import java.util.List;
 
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
+    private static final Logger logger = LoggerFactory.getLogger(RestExceptionHandler.class);
 
     @ExceptionHandler(ObjectNotFoundException.class)
     private ResponseEntity<RestErrorMessage> objectNotFoundHandler(ObjectNotFoundException exception){
@@ -116,11 +119,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
         String detailedMessage = "Falha na autenticação via provedor externo. Tente novamente.";
 
-        System.err.println("OAuth2 Login Error: " + exception.getMessage());
-
-        if (exception.getCause() != null) {
-            System.err.println("Caused por: " + exception.getCause().getMessage());
-        }
+        logger.warn("Falha OAuth2: errorCode=[{}]", exception.getError().getErrorCode());
 
         RestErrorMessage message = new RestErrorMessage(HttpStatus.UNAUTHORIZED, detailedMessage);
 
@@ -140,5 +139,4 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
 }
-
 

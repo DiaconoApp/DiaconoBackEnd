@@ -7,6 +7,8 @@ import com.diacono.diacono.domain.repository.EventoRepository;
 import com.diacono.diacono.domain.service.EscalaStatusDomainService;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,7 @@ import java.util.UUID;
 @Service
 public class AtualizarEscalaEventoPorEventoIdUseCase {
     // TODO: Revisar codigo, talvez possivel excesso de regras. Tambem testar diferentes cenarios do gerar escalas
+    private static final Logger logger = LoggerFactory.getLogger(AtualizarEscalaEventoPorEventoIdUseCase.class);
 
     private final EventoRepository eventoRepository;
     private final GerarEscalaEventoUseCase gerarEscalaEventoUseCase;
@@ -35,6 +38,7 @@ public class AtualizarEscalaEventoPorEventoIdUseCase {
 
     @Transactional
     public RestResponseMessageDTO execute(UUID igrejaId, UUID eventoId, List<EscalaEventoEscaladoDTO> listaEscalaEvento) {
+        validarIds(igrejaId, eventoId);
         validarListaEscalaEvento(listaEscalaEvento);
 
         Evento evento = buscarEvento(igrejaId, eventoId);
@@ -46,10 +50,14 @@ public class AtualizarEscalaEventoPorEventoIdUseCase {
                 .distinct()
                 .toList();
 
+        logger.info("Atualizacao de escalas do evento: igrejaId=[{}], eventoId=[{}], ministeriosEscalados=[{}]",
+                igrejaId, eventoId, ministeriosEscaladosId.size());
+
         evento.setEscalaEvento(gerarEscalaEventoUseCase.executeParaAtualizacao(
                 evento,
                 evento.getEscalaEvento(),
-                ministeriosEscaladosId
+                ministeriosEscaladosId,
+                igrejaId
         ));
 
         eventoRepository.save(evento);
@@ -60,7 +68,28 @@ public class AtualizarEscalaEventoPorEventoIdUseCase {
 
     private void validarListaEscalaEvento(List<EscalaEventoEscaladoDTO> listaEscalaEvento) {
         if (listaEscalaEvento == null || listaEscalaEvento.isEmpty()) {
+            logger.warn("Atualizacao de escalas com lista vazia");
             throw new FieldInvalidException("Lista de escalas do evento nao pode estar vazia");
+        }
+
+        for (EscalaEventoEscaladoDTO escalaEvento : listaEscalaEvento) {
+            if (escalaEvento == null) {
+                logger.warn("Atualizacao de escalas com item nulo na lista");
+                throw new FieldInvalidException("Item da lista de escalas do evento nao pode ser nulo");
+            }
+
+            if (Boolean.TRUE.equals(escalaEvento.isMinisterioEscalado()) && escalaEvento.idExternoMinisterio() == null) {
+                logger.warn("Atualizacao de escalas com ministerio escalado sem idExternoMinisterio");
+                throw new FieldInvalidException("Ministerio escalado deve ter idExternoMinisterio");
+            }
+        }
+    }
+
+    private void validarIds(UUID igrejaId, UUID eventoId) {
+        if (igrejaId == null || eventoId == null) {
+            logger.warn("Atualizacao de escalas com ids invalidos: igrejaIdPresente=[{}], eventoIdPresente=[{}]",
+                    igrejaId != null, eventoId != null);
+            throw new FieldInvalidException("Ids de igreja e evento sao obrigatorios");
         }
     }
 
@@ -75,4 +104,3 @@ public class AtualizarEscalaEventoPorEventoIdUseCase {
         return evento;
     }
 }
-

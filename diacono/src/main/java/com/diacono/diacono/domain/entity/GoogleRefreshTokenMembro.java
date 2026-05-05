@@ -1,8 +1,13 @@
 package com.diacono.diacono.domain.entity;
 
 import com.diacono.diacono.global.util.IdEntityUtils;
+import com.diacono.diacono.global.util.SensitiveSearchIndexUtils;
+import com.diacono.diacono.global.util.SensitiveStringAttributeConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -30,9 +35,14 @@ public class GoogleRefreshTokenMembro extends IdEntityUtils {
 
     @Column(nullable = false)
     @NotBlank(message = "Email não pode estar em branco")
+    @Convert(converter = SensitiveStringAttributeConverter.class)
     private String email;
 
-    @Column(name = "refresh_token", nullable = false)
+    @Column(name = "email_hash", length = 32)
+    private String emailHash;
+
+    @Column(name = "refresh_token", nullable = false, length = 2048)
+    @Convert(converter = SensitiveStringAttributeConverter.class)
     private String refreshToken;
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -40,5 +50,14 @@ public class GoogleRefreshTokenMembro extends IdEntityUtils {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-}
 
+    @PrePersist
+    @PreUpdate
+    public void atualizarIndicesCamposSensiveis() {
+        this.emailHash = SensitiveSearchIndexUtils.exactHash(this.email);
+    }
+
+    public boolean possuiIndicesSensiveis() {
+        return emailHash != null;
+    }
+}

@@ -4,7 +4,6 @@ import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
 import com.diacono.diacono.applications.dtos.membro.MembroDetalheResponseDTO;
 import com.diacono.diacono.applications.dtos.membro.MembroUpdateDTO;
 import com.diacono.diacono.global.error.comuns.ApiErrorsComuns;
-import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.usecases.BuscarPerfilUseCase;
 import com.diacono.diacono.usecases.membro.AtualizarMembroUseCase;
@@ -60,9 +59,9 @@ public class PerfilController {
     public ResponseEntity<RestResponseMessageDTO> atualizarPerfil(@RequestBody @Valid MembroUpdateDTO request) {
         try {
             UUID idExternoMembro = jwtUtils.getSubject();
-            jwtUtils.getIgrejaId();
+            UUID igrejaId = jwtUtils.getIgrejaId();
 
-            RestResponseMessageDTO response = atualizarMembroUseCase.execute(idExternoMembro, request);
+            RestResponseMessageDTO response = atualizarMembroUseCase.execute(idExternoMembro, request, igrejaId);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (RuntimeException ex) {
             logger.warn("Falha ao atualizar perfil do membro autenticado.");

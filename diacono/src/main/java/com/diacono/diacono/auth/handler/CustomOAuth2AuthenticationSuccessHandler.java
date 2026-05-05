@@ -5,6 +5,8 @@ import com.diacono.diacono.applications.dtos.login.LoginResponseDTO;
 import com.diacono.diacono.domain.entity.Membro;
 import com.diacono.diacono.usecases.membro.BuscarPorEmaiUseCase;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -17,6 +19,7 @@ import java.io.IOException;
 
 @Component
 public class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
+    private static final Logger logger = LoggerFactory.getLogger(CustomOAuth2AuthenticationSuccessHandler.class);
 
     private final GenerateTokenUseCase generateTokenUseCase;
     private final BuscarPorEmaiUseCase buscarPorEmaiUseCase;
@@ -46,7 +49,7 @@ public class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationS
         Membro membro = buscarPorEmaiUseCase.execute(email);
 
         if (membro == null) {
-            System.out.println("Erro: Membro não encontrado para o email: " + email);
+            logger.warn("Login OAuth2 sem membro vinculado");
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write("{\"error\": \"Usuário não encontrado após login OAuth2.\"}");
             return;

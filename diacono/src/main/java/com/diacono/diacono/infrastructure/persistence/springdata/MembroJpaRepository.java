@@ -46,20 +46,25 @@ public interface MembroJpaRepository extends JpaRepository<Membro, Long> {
             SELECT m FROM Membro m
             WHERE
             (:buscaGeral IS NULL OR
-            LOWER(nome) LIKE LOWER(:buscaGeral)
-            OR LOWER(email) LIKE LOWER(:buscaGeral)
-            OR LOWER(celular) LIKE LOWER(:buscaGeral))
+            m.buscaTokens LIKE CONCAT('%', :buscaGeral, '%'))
             AND m.igreja.idExterno = :fkIgreja
-            ORDER BY nome
             """
     )
     List<Membro> findAllWithFilter(
             @Param("buscaGeral") String buscaGeral, @Param("fkIgreja") UUID fkIgreja
     );
 
-    Membro findByEmailOrCpf(String email, String cpf);
+    @Query("""
+            SELECT m FROM Membro m
+            WHERE (:emailHash IS NOT NULL AND m.emailHash = :emailHash)
+               OR (:cpfHash IS NOT NULL AND m.cpfHash = :cpfHash)
+            """)
+    Membro findByEmailHashOrCpfHash(
+            @Param("emailHash") String emailHash,
+            @Param("cpfHash") String cpfHash
+    );
 
-    Membro findByEmail(String email);
+    Membro findByEmailHash(String emailHash);
 
 
 //    @Query("""

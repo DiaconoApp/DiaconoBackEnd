@@ -6,7 +6,6 @@ import com.diacono.diacono.domain.entity.Recorrencia;
 import com.diacono.diacono.domain.enums.TipoRecorrencia;
 import com.diacono.diacono.domain.repository.EventoRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.usecases.eventos.validation.ValidarIdExternoPreenchido;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,9 +37,6 @@ class ApagarEventosMultiplosUseCaseTest {
 	@Mock
 	private ValidarIdExternoPreenchido validarIdExternoPreenchido;
 
-	@Mock
-	private JwtUtils jwtUtils;
-
 	@InjectMocks
 	private ApagarEventosMultiplosUseCase useCase;
 
@@ -54,15 +50,15 @@ class ApagarEventosMultiplosUseCaseTest {
 		evento.setRecorrencia(Recorrencia.builder().tipoRecorrencia(TipoRecorrencia.SEMANAL).build());
 
 		when(eventoRepository.findByIdExterno(idEvento)).thenReturn(Optional.of(evento));
-		when(jwtUtils.getIgrejaId()).thenReturn(idIgreja);
 		when(eventoRepository.findByPeriodoAndRecorrencia(evento.getRecorrencia(), evento.getDataHoraInicio(), idIgreja))
 				.thenReturn(new ArrayList<>());
 
-		RestResponseMessageDTO response = useCase.execute(idEvento);
+		RestResponseMessageDTO response = useCase.execute(idEvento, idIgreja);
 
 		assertEquals(HttpStatus.OK, response.getStatus());
 		assertEquals("Eventos apagados com sucesso", response.getMessage());
 
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<List<Evento>> captor = ArgumentCaptor.forClass(List.class);
 		verify(eventoRepository).deleteAll(captor.capture());
 		assertEquals(1, captor.getValue().size());
@@ -74,7 +70,7 @@ class ApagarEventosMultiplosUseCaseTest {
 		UUID idEvento = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		when(eventoRepository.findByIdExterno(idEvento)).thenReturn(Optional.empty());
 
-		ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> useCase.execute(idEvento));
+		ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> useCase.execute(idEvento, UUID.fromString("22222222-2222-2222-2222-222222222222")));
 
 		assertEquals("Não foi possível apagar o evento, verifique se o evento existe", ex.getMessage());
 	}

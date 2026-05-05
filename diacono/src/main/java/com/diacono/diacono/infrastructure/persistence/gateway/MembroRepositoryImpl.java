@@ -3,6 +3,7 @@ package com.diacono.diacono.infrastructure.persistence.gateway;
 import com.diacono.diacono.applications.dtos.membro.*;
 import com.diacono.diacono.domain.entity.Membro;
 import com.diacono.diacono.domain.repository.MembroRepository;
+import com.diacono.diacono.global.util.SensitiveSearchIndexUtils;
 import com.diacono.diacono.infrastructure.persistence.springdata.MembroJpaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +29,8 @@ public class MembroRepositoryImpl implements MembroRepository {
 
     @Override
     public List<Membro> findAllWithFilter(String buscaGeral, UUID fkIgreja) {
-        return jpaRepository.findAllWithFilter(buscaGeral, fkIgreja);
+        String buscaToken = SensitiveSearchIndexUtils.searchToken(buscaGeral);
+        return jpaRepository.findAllWithFilter(SensitiveSearchIndexUtils.likeToken(buscaToken), fkIgreja);
     }
 
     @Override
@@ -37,13 +39,21 @@ public class MembroRepositoryImpl implements MembroRepository {
     }
 
     @Override
+    public Optional<Membro> findByIdExternoAndIgrejaIdExterno(UUID idExterno, UUID igrejaIdExterno) {
+        return jpaRepository.findByIdExternoAndIgrejaIdExterno(idExterno, igrejaIdExterno);
+    }
+
+    @Override
     public Optional<Membro> findByEmailOrCpf(String email, String cpf) {
-        return Optional.ofNullable(jpaRepository.findByEmailOrCpf(email, cpf));
+        return Optional.ofNullable(jpaRepository.findByEmailHashOrCpfHash(
+                SensitiveSearchIndexUtils.exactHash(email),
+                SensitiveSearchIndexUtils.exactHash(cpf)
+        ));
     }
 
     @Override
     public Optional<Membro> findByEmail(String email) {
-        return Optional.ofNullable(jpaRepository.findByEmail(email));
+        return Optional.ofNullable(jpaRepository.findByEmailHash(SensitiveSearchIndexUtils.exactHash(email)));
     }
 
     @Override

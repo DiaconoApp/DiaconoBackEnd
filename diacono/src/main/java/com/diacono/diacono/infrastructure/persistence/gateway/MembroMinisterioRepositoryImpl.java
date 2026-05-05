@@ -7,6 +7,7 @@ import com.diacono.diacono.domain.entity.Membro;
 import com.diacono.diacono.domain.entity.MembroMinisterio;
 import com.diacono.diacono.domain.enums.EnumStatusMembro;
 import com.diacono.diacono.domain.repository.MembroMinisterioRepository;
+import com.diacono.diacono.global.util.SensitiveSearchIndexUtils;
 import com.diacono.diacono.infrastructure.persistence.springdata.MembroMinisterioJpaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,7 +38,13 @@ public class MembroMinisterioRepositoryImpl implements MembroMinisterioRepositor
     @Override
     public Page<MembroMinisterio> buscarPorMembroMinisterioComFiltro(
             Pageable pageable, UUID idMinisterio, String texto, EnumStatusMembro status) {
-        return jpaRepository.buscarPorMembroMinisterioComFiltro(pageable, idMinisterio, texto, status);
+        String buscaToken = SensitiveSearchIndexUtils.searchToken(texto);
+        return jpaRepository.buscarPorMembroMinisterioComFiltro(
+                pageable,
+                idMinisterio,
+                SensitiveSearchIndexUtils.likeToken(buscaToken),
+                status
+        );
     }
 
     @Override
