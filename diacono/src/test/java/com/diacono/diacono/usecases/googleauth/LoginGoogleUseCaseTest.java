@@ -3,6 +3,7 @@ package com.diacono.diacono.usecases.googleauth;
 import com.diacono.diacono.applications.dtos.googleauth.GoogleAuthRequestDTO;
 import com.diacono.diacono.applications.dtos.googleauth.GoogleIdTokenDTO;
 import com.diacono.diacono.applications.dtos.login.LoginResponseDTO;
+import com.diacono.diacono.domain.entity.Igreja;
 import com.diacono.diacono.domain.entity.Membro;
 import com.diacono.diacono.global.error.exceptions.BadCredentialsException;
 import com.diacono.diacono.usecases.GenerateTokenUseCase;
@@ -14,6 +15,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.UUID;
 
@@ -45,6 +47,9 @@ class LoginGoogleUseCaseTest {
     private ArgumentCaptor<UUID> uuidCaptor;
 
     @Captor
+    private ArgumentCaptor<UUID> igrejaIdCaptor;
+
+    @Captor
     private ArgumentCaptor<String> emailCaptor;
 
     @Captor
@@ -66,10 +71,16 @@ class LoginGoogleUseCaseTest {
     void deveLogarQuandoTokenGoogleForValidoEMembroExistir() {
         String email = "usuario@teste.com";
         String refreshToken = "refresh-token-123";
+        UUID membroId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID igrejaId = UUID.fromString("22222222-2222-2222-2222-222222222222");
 
         GoogleAuthRequestDTO request = new GoogleAuthRequestDTO("id-token", refreshToken);
 
         Membro membro = new Membro();
+        Igreja igreja = new Igreja();
+        ReflectionTestUtils.setField(membro, "idExterno", membroId);
+        ReflectionTestUtils.setField(igreja, "idExterno", igrejaId);
+        membro.setIgreja(igreja);
 
         when(autenticarGoogleUseCase.execute("id-token")).thenReturn(
             new GoogleIdTokenDTO(
@@ -90,9 +101,12 @@ class LoginGoogleUseCaseTest {
         // Captura os argumentos da chamada para validar
         verify(atualizarSecretGoogleUseCase).execute(
             uuidCaptor.capture(),
+            igrejaIdCaptor.capture(),
             emailCaptor.capture(),
             refreshTokenCaptor.capture()
         );
+        assertEquals(membroId, uuidCaptor.getValue());
+        assertEquals(igrejaId, igrejaIdCaptor.getValue());
         assertEquals(email, emailCaptor.getValue());
         assertEquals(refreshToken, refreshTokenCaptor.getValue());
     }
@@ -116,7 +130,7 @@ class LoginGoogleUseCaseTest {
         );
 
         assertEquals("Usuario nao cadastrado", exception.getMessage());
-        verify(atualizarSecretGoogleUseCase, never()).execute(any(), anyString(), anyString());
+        verify(atualizarSecretGoogleUseCase, never()).execute(any(), any(), anyString(), anyString());
     }
 
     @Test
@@ -124,8 +138,12 @@ class LoginGoogleUseCaseTest {
         String email = "usuario@teste.com";
 
         GoogleAuthRequestDTO request = new GoogleAuthRequestDTO("id-token", null);
+        UUID igrejaId = UUID.fromString("22222222-2222-2222-2222-222222222222");
 
         Membro membro = new Membro();
+        Igreja igreja = new Igreja();
+        ReflectionTestUtils.setField(igreja, "idExterno", igrejaId);
+        membro.setIgreja(igreja);
 
         when(autenticarGoogleUseCase.execute("id-token")).thenReturn(
             new GoogleIdTokenDTO(
@@ -141,6 +159,6 @@ class LoginGoogleUseCaseTest {
         LoginResponseDTO response = loginGoogleUseCase.execute(request);
 
         assertEquals("jwt-token", response.acessToken());
-        verify(atualizarSecretGoogleUseCase, never()).execute(any(), anyString(), anyString());
+        verify(atualizarSecretGoogleUseCase, never()).execute(any(), any(), anyString(), anyString());
     }
 }

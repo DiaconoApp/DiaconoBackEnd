@@ -2,6 +2,7 @@ package com.diacono.diacono.infrastructure.persistence.gateway;
 
 import com.diacono.diacono.domain.repository.GoogleRefreshTokenMembroRepository;
 import com.diacono.diacono.domain.entity.GoogleRefreshTokenMembro;
+import com.diacono.diacono.global.util.SensitiveSearchIndexUtils;
 import com.diacono.diacono.infrastructure.persistence.springdata.GoogleRefreshTokenMembroJpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -29,9 +30,8 @@ public class GoogleRefreshTokenMembroRepositoryImpl implements GoogleRefreshToke
 
     @Override
     public Optional<GoogleRefreshTokenMembro> findByEmail(String email) {
-        return Optional.ofNullable(jpaRepository.findByEmail(email));
+        return Optional.ofNullable(jpaRepository.findByEmailHash(SensitiveSearchIndexUtils.exactHash(email)));
     }
 }
-
 
 

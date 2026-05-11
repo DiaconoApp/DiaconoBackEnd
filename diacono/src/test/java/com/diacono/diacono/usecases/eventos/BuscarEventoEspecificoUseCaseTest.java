@@ -43,13 +43,15 @@ class BuscarEventoEspecificoUseCaseTest {
 	@Test
 	void deveRetornarEventoCompletoQuandoEventoExistir() {
 		UUID idEvento = UUID.fromString("11111111-1111-1111-1111-111111111111");
+		UUID igrejaId = UUID.fromString("22222222-2222-2222-2222-222222222222");
 		Evento evento = Evento.builder().nome("Culto").dataHoraInicio(LocalDateTime.of(2026, 5, 10, 19, 0)).build();
 		EventoCompletoDTO dto = new EventoCompletoDTO("Culto", "Descricao", "JOVENS", null, null, null, null, null, null, null, null, EnumStatusEvento.PENDENTE);
 
+		evento.setIgreja(com.diacono.diacono.domain.entity.Igreja.builder().idExterno(igrejaId).build());
 		when(eventoRepository.findByIdExterno(idEvento)).thenReturn(Optional.of(evento));
 		when(eventoMapper.paraEventoCompletoDTO(evento)).thenReturn(dto);
 
-		EventoCompletoDTO response = useCase.execute(idEvento);
+		EventoCompletoDTO response = useCase.execute(idEvento, igrejaId);
 
 		assertSame(dto, response);
 		assertEquals(EnumStatusEvento.PENDENTE, response.status());
@@ -61,7 +63,7 @@ class BuscarEventoEspecificoUseCaseTest {
 		UUID idEvento = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		when(eventoRepository.findByIdExterno(idEvento)).thenReturn(Optional.empty());
 
-		ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> useCase.execute(idEvento));
+		ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> useCase.execute(idEvento, null));
 
 		assertEquals("Evento não encontrado", ex.getMessage());
 	}

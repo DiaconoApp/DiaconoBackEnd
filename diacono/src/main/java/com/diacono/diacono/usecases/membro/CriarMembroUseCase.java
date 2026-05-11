@@ -50,24 +50,32 @@ public class CriarMembroUseCase {
     }
 
     @Transactional
-    public RestResponseMessageDTO execute(MembroCreateDTO membroDTO) {
+    public RestResponseMessageDTO execute(MembroCreateDTO membroDTO, UUID igrejaId) {
 
         if (membroDTO == null) {
             throw new ObjectSaveErrorException("Dados do membro não podem ser nulos.");
         }
 
+        if (igrejaId == null) {
+            throw new ObjectSaveErrorException("Igreja do usuário não pode ser nula.");
+        }
+
         if (membroDTO.idExternoMinisterios() == null || membroDTO.idExternoMinisterios().isEmpty()) {
-            criarMembroSemMinisterio(membroDTO);
+            criarMembroSemMinisterio(membroDTO, igrejaId);
             return new RestResponseMessageDTO(HttpStatus.CREATED, "Usuário cadastrado com sucesso");
         }
 
-        return criarMembroComMinisterio(membroDTO);
+        return criarMembroComMinisterio(membroDTO, igrejaId);
     }
 
-    private Membro criarMembroSemMinisterio(MembroCreateDTO membroDTO) {
+    private Membro criarMembroSemMinisterio(MembroCreateDTO membroDTO, UUID igrejaId) {
         if (membroDTO.cargo().equals(EnumCargoMembro.LIDER_MINISTERIO)
                 && (membroDTO.idExternoMinisterios() == null || membroDTO.idExternoMinisterios().isEmpty())) {
             throw new ObjectSaveErrorException("Para cadastrar um líder de ministério, é necessário associar um ministério ao membro.");
+        }
+
+        if (membroDTO.fkIgreja() == null || !membroDTO.fkIgreja().equals(igrejaId)) {
+            throw new ObjectNotFoundException("Igreja não encontrada");
         }
 
         Optional<Membro> membroExistente = membroRepository.findByEmailOrCpf(membroDTO.email(), membroDTO.cpf());
@@ -79,7 +87,7 @@ public class CriarMembroUseCase {
         LocalDate dataHoje = LocalDate.now();
 
         Membro membro = membroMapper.paraMembro(membroDTO);
-        Igreja igreja = buscarIgrejaPorUUIDUseCase.execute(membroDTO.fkIgreja());
+        Igreja igreja = buscarIgrejaPorUUIDUseCase.execute(igrejaId);
         membro.setStatus(EnumStatusMembro.ATIVO);
         membro.setIgreja(igreja);
         membro.setDataRegistro(dataHoje);
@@ -92,16 +100,16 @@ public class CriarMembroUseCase {
         return membroSalvo;
     }
 
-    private RestResponseMessageDTO criarMembroComMinisterio(MembroCreateDTO membroDTO) {
+    private RestResponseMessageDTO criarMembroComMinisterio(MembroCreateDTO membroDTO, UUID igrejaId) {
         List<UUID> idsMinisterios = membroDTO.idExternoMinisterios();
         Set<UUID> idsUnicos = new LinkedHashSet<>(idsMinisterios);
-        Set<Ministerio> ministerios = ministeriosRepository.findAllByIdExternoIn(new ArrayList<>(idsUnicos));
+        Set<Ministerio> ministerios = ministeriosRepository.findAllByIdExternoInAndIgrejaId(new ArrayList<>(idsUnicos), igrejaId);
 
         if (ministerios.size() != idsUnicos.size()) {
             throw new ObjectNotFoundException("Um ou mais ministérios não foram encontrados");
         }
 
-        Membro membro = criarMembroSemMinisterio(membroDTO);
+        Membro membro = criarMembroSemMinisterio(membroDTO, igrejaId);
         apagarMembroMinisterioPorMembro(membro);
 
         for (Ministerio ministerio : ministerios) {

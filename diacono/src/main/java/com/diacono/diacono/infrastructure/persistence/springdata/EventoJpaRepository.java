@@ -20,6 +20,7 @@ import java.util.UUID;
 @Repository
 public interface  EventoJpaRepository extends JpaRepository<Evento, Long> {
 
+    @Transactional(readOnly = true)
     @Query("""
             SELECT e FROM Evento e
             WHERE (e.dataHoraInicio BETWEEN :dataInicio AND :dataFim) AND (e.igreja.idExterno = :igrejaFk)
@@ -28,12 +29,14 @@ public interface  EventoJpaRepository extends JpaRepository<Evento, Long> {
     ArrayList<Evento> findByPeriodo(@Param("dataInicio") LocalDateTime dataInicio, @Param("dataFim") LocalDateTime dataFim, @Param("igrejaFk") UUID igrejaFk);
 
 
+    @Transactional(readOnly = true)
     Evento findByIdExterno(UUID idExterno);
 
     @Transactional
     long deleteByIdExterno(UUID idExterno);
 
-    @Modifying
+    @Transactional
+    @Modifying(clearAutomatically = true)
     @Query("""
             UPDATE Evento e
             SET e.status = :status
@@ -42,6 +45,7 @@ public interface  EventoJpaRepository extends JpaRepository<Evento, Long> {
             """)
     void updateStatusByEventoId(@Param("eventoId") UUID eventoId, @Param("status") EnumStatusEvento status);
 
+    @Transactional(readOnly = true)
     @Query("""
             SELECT e FROM Evento e
             WHERE (e.recorrencia = :recorrencia) AND (e.dataHoraInicio >= :dataInicio) AND  (e.igreja.idExterno = :igrejaFk)
@@ -73,6 +77,7 @@ public interface  EventoJpaRepository extends JpaRepository<Evento, Long> {
 
     //kpis
 
+    @Transactional(readOnly = true)
     @Query("""
             SELECT new com.diacono.diacono.applications.dtos.evento.EventoKpiDTO(
                 m.nome,
@@ -88,6 +93,7 @@ public interface  EventoJpaRepository extends JpaRepository<Evento, Long> {
             """)
     List<EventoKpiDTO> buscarKpisEvento(@Param("anoInicio") int anoInicio, @Param("anoFim") int anoFim, @Param("idIgreja") UUID idIgreja);
 
+    @Transactional(readOnly = true)
     @Query("""
             SELECT new com.diacono.diacono.applications.dtos.ministerio.MinisterioEventoDashDTO(
                 min.nome,
@@ -96,7 +102,7 @@ public interface  EventoJpaRepository extends JpaRepository<Evento, Long> {
             FROM Evento e
             JOIN e.escalaEvento escala
             JOIN escala.ministerio min
-            WHERE e.igreja.idExterno = :idIgreja  
+            WHERE e.igreja.idExterno = :idIgreja
             AND FUNCTION('YEAR', e.dataHoraInicio) BETWEEN :anoInicio and :anoFim
             GROUP BY min.nome
             ORDER BY COUNT(e) DESC

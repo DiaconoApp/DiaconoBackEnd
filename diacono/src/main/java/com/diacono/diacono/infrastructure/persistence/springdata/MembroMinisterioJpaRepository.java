@@ -28,9 +28,7 @@ public interface MembroMinisterioJpaRepository extends JpaRepository<MembroMinis
             JOIN mm.membro m
             WHERE mm.ministerio.idExterno = :idMinisterio
             AND (:status IS NULL OR m.status = :status)
-            AND (:busca IS NULL OR
-            LOWER(m.nome) LIKE LOWER(:busca)
-            OR LOWER(m.email) LIKE LOWER(:busca))
+            AND (:busca IS NULL OR m.buscaTokens LIKE CONCAT('%', :busca, '%'))
                   """)
     Page<MembroMinisterio> buscarPorMembroMinisterioComFiltro(
             Pageable pageable,
@@ -62,6 +60,7 @@ public interface MembroMinisterioJpaRepository extends JpaRepository<MembroMinis
             WHERE m.idExterno = :idExternoMembro
             AND ms.igreja.idExterno = :idExternoIgreja
             AND mm.cargoMembro = com.diacono.diacono.domain.enums.EnumCargoMembroMinisterio.MEMBRO_MINISTERIO
+            AND m.igreja.idExterno = :idExternoIgreja
             """)
     List<MinisterioSuperSimplificadoDTO> buscarMembro(
             @Param("idExternoMembro") UUID idExternoMembro,
@@ -78,6 +77,7 @@ public interface MembroMinisterioJpaRepository extends JpaRepository<MembroMinis
             JOIN mm.membro m
             WHERE m.idExterno = :idExternoMembro
             AND ms.igreja.idExterno = :idExternoIgreja
+            AND m.igreja.idExterno = :idExternoIgreja
             AND mm.cargoMembro = com.diacono.diacono.domain.enums.EnumCargoMembroMinisterio.LIDER_MINISTERIO
             AND ms.status = com.diacono.diacono.domain.enums.EnumStatusMinisterio.ATIVO
             AND m.status = com.diacono.diacono.domain.enums.EnumStatusMembro.ATIVO

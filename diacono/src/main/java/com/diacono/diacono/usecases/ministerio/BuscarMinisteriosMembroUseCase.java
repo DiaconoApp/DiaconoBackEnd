@@ -3,7 +3,8 @@ package com.diacono.diacono.usecases.ministerio;
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioSuperSimplificadoDTO;
 import com.diacono.diacono.domain.repository.MinisteriosRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.global.util.JwtUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,30 +14,26 @@ import java.util.UUID;
 @Service
 public class BuscarMinisteriosMembroUseCase {
 
-    private final MinisteriosRepository ministeriosRepository;
-    private final JwtUtils jwtUtils;
+    private static final Logger logger = LoggerFactory.getLogger(BuscarMinisteriosMembroUseCase.class);
 
-    public BuscarMinisteriosMembroUseCase(MinisteriosRepository ministeriosRepository, JwtUtils jwtUtils) {
+    private final MinisteriosRepository ministeriosRepository;
+
+    public BuscarMinisteriosMembroUseCase(MinisteriosRepository ministeriosRepository) {
         this.ministeriosRepository = ministeriosRepository;
-        this.jwtUtils = jwtUtils;
     }
 
     @Transactional(readOnly = true)
-    public List<MinisterioSuperSimplificadoDTO> execute() {
-        UUID idExternoMembro = jwtUtils.getSubject();
-        UUID idIgreja = jwtUtils.getIgrejaId();
+    public List<MinisterioSuperSimplificadoDTO> execute(UUID igrejaId, UUID membroId) {
 
-        return buscarMinisteriosMembro(idExternoMembro, idIgreja);
-    }
-
-    public List<MinisterioSuperSimplificadoDTO> buscarMinisteriosMembro(UUID idMembro, UUID idIgreja) {
-        List<MinisterioSuperSimplificadoDTO> ministerios = ministeriosRepository.buscarMinisteriosMembro(idMembro, idIgreja);
+        List<MinisterioSuperSimplificadoDTO> ministerios = ministeriosRepository.buscarMinisteriosMembro(membroId, igrejaId);
 
         if (ministerios.isEmpty()) {
+            logger.warn("Nenhum ministério encontrado para o membro. membroId=[{}] igrejaId=[{}]", membroId, igrejaId);
             throw new ObjectNotFoundException("Nenhum ministério encontrado para o membro informado.");
         }
 
         return ministerios;
-    }
-}
 
+    }
+
+}

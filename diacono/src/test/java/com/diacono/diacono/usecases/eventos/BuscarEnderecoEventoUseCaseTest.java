@@ -7,7 +7,6 @@ import com.diacono.diacono.domain.entity.EnderecoIgreja;
 import com.diacono.diacono.domain.entity.Igreja;
 import com.diacono.diacono.domain.repository.EnderecoEventoRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.usecases.igreja.BuscarIgrejaPorUUIDUseCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,9 +31,6 @@ class BuscarEnderecoEventoUseCaseTest {
 	private BuscarIgrejaPorUUIDUseCase buscarIgrejaPorUUIDUseCase;
 
 	@Mock
-	private JwtUtils jwtUtils;
-
-	@Mock
 	private EnderecoEventoRepository enderecoEventoRepository;
 
 	@Mock
@@ -56,12 +52,11 @@ class BuscarEnderecoEventoUseCaseTest {
 				UUID.fromString("22222222-2222-2222-2222-222222222222")
 		);
 
-		when(jwtUtils.getIgrejaId()).thenReturn(idIgreja);
 		when(buscarIgrejaPorUUIDUseCase.execute(idIgreja)).thenReturn(igreja);
 		when(enderecoEventoRepository.findByCep("12345678", "10")).thenReturn(Optional.of(enderecoEvento));
 		when(enderecoEventoMapper.paraEnderecoEventoSimplificadoDTO(enderecoEvento)).thenReturn(dto);
 
-		EnderecoEventoSimplificadoDTO response = useCase.execute();
+		EnderecoEventoSimplificadoDTO response = useCase.execute(idIgreja);
 
 		assertSame(dto, response);
 	}
@@ -73,11 +68,10 @@ class BuscarEnderecoEventoUseCaseTest {
 		EnderecoIgreja enderecoIgreja = EnderecoIgreja.builder().cep("12345678").numero("10").build();
 		Igreja igreja = Igreja.builder().nome("Igreja Central").enderecoIgreja(enderecoIgreja).build();
 
-		when(jwtUtils.getIgrejaId()).thenReturn(idIgreja);
 		when(buscarIgrejaPorUUIDUseCase.execute(idIgreja)).thenReturn(igreja);
 		when(enderecoEventoRepository.findByCep("12345678", "10")).thenReturn(Optional.empty());
 
-		ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> useCase.execute());
+		ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> useCase.execute(idIgreja));
 
 		assertEquals("Endereço do evento não registrado", ex.getMessage());
 	}

@@ -6,7 +6,6 @@ import com.diacono.diacono.domain.entity.Ministerio;
 import com.diacono.diacono.domain.enums.EnumStatusMinisterio;
 import com.diacono.diacono.domain.repository.MinisteriosRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.global.util.JwtUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,9 +31,6 @@ class BuscarMinisteriosGeraisUseCaseTest {
 	@Mock
 	private MinisterioMapper ministerioMapper;
 
-	@Mock
-	private JwtUtils jwtUtils;
-
 	@InjectMocks
 	private BuscarMinisteriosGeraisUseCase useCase;
 
@@ -50,15 +46,13 @@ class BuscarMinisteriosGeraisUseCaseTest {
 				LocalDate.of(2026, 1, 1)
 		);
 
-		when(jwtUtils.getIgrejaId()).thenReturn(idIgreja);
 		when(ministeriosRepository.findByIgrejaIdExterno(idIgreja)).thenReturn(List.of(ministerio));
 		when(ministerioMapper.paraMinisterioSimplificadoDTO(ministerio)).thenReturn(dto);
 
-		List<MinisterioSimplificadoDTO> response = useCase.execute();
+		List<MinisterioSimplificadoDTO> response = useCase.execute(idIgreja);
 
 		assertEquals(1, response.size());
 		assertEquals(dto, response.getFirst());
-		verify(jwtUtils).getIgrejaId();
 		verify(ministeriosRepository).findByIgrejaIdExterno(idIgreja);
 		verify(ministerioMapper).paraMinisterioSimplificadoDTO(ministerio);
 	}
@@ -67,10 +61,9 @@ class BuscarMinisteriosGeraisUseCaseTest {
 	void deveLancarExcecaoQuandoNaoEncontrarMinisterios() {
 		UUID idIgreja = UUID.fromString("11111111-1111-1111-1111-111111111111");
 
-		when(jwtUtils.getIgrejaId()).thenReturn(idIgreja);
 		when(ministeriosRepository.findByIgrejaIdExterno(idIgreja)).thenReturn(List.of());
 
-		ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> useCase.execute());
+		ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> useCase.execute(idIgreja));
 
 		assertEquals("Nenhum ministério encontrado", ex.getMessage());
 		verify(ministerioMapper, never()).paraMinisterioSimplificadoDTO(org.mockito.ArgumentMatchers.any());

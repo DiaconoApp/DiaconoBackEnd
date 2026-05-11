@@ -8,12 +8,15 @@ import com.diacono.diacono.domain.repository.EscalaMinisterioRepository;
 import com.diacono.diacono.domain.repository.MembroMinisterioRepository;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
 public class RevisarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCase {
+    private static final Logger logger = LoggerFactory.getLogger(RevisarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCase.class);
 
     private final EscalaMinisterioRepository escalaMinisterioRepository;
     private final EscalaEventoRepository escalaEventoRepository;
@@ -36,6 +39,7 @@ public class RevisarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCase {
             UUID membroMinisterioIdASerTrocado,
             List<EscalaMembroMinisterioSimplificadoDTO> membrosMinisterioSelecionados
     ) {
+        validarIdsObrigatorios(escalaEventoId, igrejaId, membroId);
         validarEscalaEventoId(escalaEventoId, igrejaId, membroId);
 
         List<EscalaMembroMinisterioSimplificadoDTO> selecionadosAtuais = Optional
@@ -69,7 +73,19 @@ public class RevisarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCase {
         } else {
             response.add(novoMembroSelecionado);
         }
+
+        logger.info("Revisao randomizacao membros ministério: escalaEventoId=[{}], igrejaId=[{}], membroId=[{}], quantidadeSelecionados=[{}], membroSubstituido=[{}]",
+                escalaEventoId, igrejaId, membroId, response.size(), membroMinisterioIdASerTrocado);
+
         return response;
+    }
+
+    private void validarIdsObrigatorios(UUID escalaEventoId, UUID igrejaId, UUID membroId) {
+        if (escalaEventoId == null || igrejaId == null || membroId == null) {
+            logger.warn("Revisao randomizacao com ids inválidos: escalaEventoIdPresente=[{}], igrejaIdPresente=[{}], membroIdPresente=[{}]",
+                    escalaEventoId != null, igrejaId != null, membroId != null);
+            throw new FieldInvalidException("Ids de escalaEvento, igreja e membro sao obrigatórios");
+        }
     }
 
 

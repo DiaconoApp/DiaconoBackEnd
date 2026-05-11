@@ -8,6 +8,8 @@ import com.diacono.diacono.domain.repository.EscalaMinisterioRepository;
 import com.diacono.diacono.domain.repository.MembroMinisterioRepository;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,6 +20,7 @@ import java.util.UUID;
 
 @Service
 public class BuscarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCase {
+    private static final Logger logger = LoggerFactory.getLogger(BuscarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCase.class);
 
     private final EscalaMinisterioRepository escalaMinisterioRepository;
     private final EscalaEventoRepository escalaEventoRepository;
@@ -39,6 +42,7 @@ public class BuscarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCase {
             UUID membroId,
             int quantidadeMembrosRandomizados
     ) {
+        validarIdsObrigatorios(escalaEventoId, igrejaId, membroId);
         validarEscalaEventoId(escalaEventoId, igrejaId, membroId);
         validarQuantidadeMaiorQueZero(quantidadeMembrosRandomizados);
 
@@ -48,13 +52,26 @@ public class BuscarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCase {
 
         List<EscalaMembroMinisterioDTO> membrosRandomizados = randomizarMembros(membrosDisponiveis);
 
-        return membrosRandomizados.stream()
+        List<EscalaMembroMinisterioSimplificadoDTO> resultado = membrosRandomizados.stream()
                 .limit(quantidadeMembrosRandomizados)
                 .map(membro -> new EscalaMembroMinisterioSimplificadoDTO(
                         membro.membroMinisterioId(),
                         membro.nomeMembro()
                 ))
                 .toList();
+
+        logger.info("Randomizacao membros ministério: escalaEventoId=[{}], igrejaId=[{}], membroId=[{}], quantidadeSolicitada=[{}], quantidadeRetornada=[{}]",
+                escalaEventoId, igrejaId, membroId, quantidadeMembrosRandomizados, resultado.size());
+
+        return resultado;
+    }
+
+    private void validarIdsObrigatorios(UUID escalaEventoId, UUID igrejaId, UUID membroId) {
+        if (escalaEventoId == null || igrejaId == null || membroId == null) {
+            logger.warn("Randomizacao membros ministério com ids inválidos: escalaEventoIdPresente=[{}], igrejaIdPresente=[{}], membroIdPresente=[{}]",
+                    escalaEventoId != null, igrejaId != null, membroId != null);
+            throw new FieldInvalidException("Ids de escalaEvento, igreja e membro sao obrigatórios");
+        }
     }
 
     private void validarQuantidadeMaiorQueZero(int quantidadeMembrosRandomizados) {

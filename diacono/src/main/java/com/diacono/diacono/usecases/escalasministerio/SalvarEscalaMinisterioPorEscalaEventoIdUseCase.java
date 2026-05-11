@@ -14,6 +14,8 @@ import com.diacono.diacono.domain.repository.MembroMinisterioRepository;
 import com.diacono.diacono.domain.service.EscalaStatusDomainService;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,7 @@ import java.util.*;
 
 @Service
 public class SalvarEscalaMinisterioPorEscalaEventoIdUseCase {
+    private static final Logger logger = LoggerFactory.getLogger(SalvarEscalaMinisterioPorEscalaEventoIdUseCase.class);
 
     private final EscalaMinisterioRepository escalaMinisterioRepository;
     private final EscalaEventoRepository escalaEventoRepository;
@@ -47,6 +50,7 @@ public class SalvarEscalaMinisterioPorEscalaEventoIdUseCase {
             UUID membroId,
             List<EscalaMinisterioSalvarDTO> escalasMinisterio
     ) {
+        validarIdsObrigatorios(escalaEventoId, igrejaId, membroId);
         validarRequest(escalasMinisterio);
         validarEscalaEventoId(escalaEventoId, igrejaId, membroId);
         validarMembrosDaEscala(escalaEventoId, igrejaId, escalasMinisterio);
@@ -61,13 +65,28 @@ public class SalvarEscalaMinisterioPorEscalaEventoIdUseCase {
 
         escalaMinisterioRepository.replaceEscalaMinisterioByEscalaEventoId(igrejaId, escalaEventoId, escalasParaSalvar);
         escalaStatusDomainService.recalcularStatusPorEscalaEventoId(escalaEventoId);
+        logger.info("Salvar escala ministério: escalaEventoId=[{}], igrejaId=[{}], membroId=[{}], quantidadeEscalados=[{}]",
+                escalaEventoId, igrejaId, membroId, escalasParaSalvar.size());
 
         return new RestResponseMessageDTO(HttpStatus.OK, "Escala de membros do ministério atualizada com sucesso");
+    }
+
+    private void validarIdsObrigatorios(UUID escalaEventoId, UUID igrejaId, UUID membroId) {
+        if (escalaEventoId == null || igrejaId == null || membroId == null) {
+            logger.warn("Salvar escala ministério com ids inválidos: escalaEventoIdPresente=[{}], igrejaIdPresente=[{}], membroIdPresente=[{}]",
+                    escalaEventoId != null, igrejaId != null, membroId != null);
+            throw new FieldInvalidException("Ids de escalaEvento, igreja e membro sao obrigatórios");
+        }
     }
 
     private void validarRequest(List<EscalaMinisterioSalvarDTO> escalasMinisterio) {
         if (escalasMinisterio == null) {
             throw new FieldInvalidException("Lista de escala do ministério não pode ser nula");
+        }
+
+        boolean possuiItemNulo = escalasMinisterio.stream().anyMatch(Objects::isNull);
+        if (possuiItemNulo) {
+            throw new FieldInvalidException("Lista de escala do ministério contém item nulo");
         }
 
         boolean possuiIdMembroNulo = escalasMinisterio.stream()
@@ -184,5 +203,4 @@ public class SalvarEscalaMinisterioPorEscalaEventoIdUseCase {
         return escalasParaSalvar;
     }
 }
-
 

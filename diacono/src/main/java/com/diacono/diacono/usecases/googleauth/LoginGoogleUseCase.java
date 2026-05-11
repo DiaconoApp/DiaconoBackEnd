@@ -34,7 +34,12 @@ public class LoginGoogleUseCase {
         Membro membro = buscarMembro(email);
 
         if (googleAuthRequestDTO.refreshToken() != null) {
-            atualizarSecretGoogleUseCase.execute(membro.getIdExterno(), email, googleAuthRequestDTO.refreshToken());
+            atualizarSecretGoogleUseCase.execute(
+                membro.getIdExterno(),
+                membro.getIgreja().getIdExterno(),
+                email,
+                googleAuthRequestDTO.refreshToken()
+            );
         }
 
         return gerarLoginResponseDTO(membro);

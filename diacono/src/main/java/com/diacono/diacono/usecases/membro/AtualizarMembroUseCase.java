@@ -12,8 +12,8 @@ import com.diacono.diacono.domain.repository.MembroRepository;
 import com.diacono.diacono.domain.repository.MinisteriosRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
-import com.diacono.diacono.usecases.igreja.BuscarIgrejaPorUUIDUseCase;
-import com.diacono.diacono.usecases.membro.validation.ValidarCriacaoMembro;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,30 +28,33 @@ import java.util.UUID;
 @Service
 public class AtualizarMembroUseCase {
 
+    private static final Logger logger = LoggerFactory.getLogger(AtualizarMembroUseCase.class);
+
     private final MembroRepository membroRepository;
     private final MembroMinisterioRepository membroMinisterioRepository;
     private final MinisteriosRepository ministeriosRepository;
-    private final BuscarIgrejaPorUUIDUseCase buscarIgrejaPorUUIDUseCase;
-    private final ValidarCriacaoMembro validarCriacaoMembro;
 
-    public AtualizarMembroUseCase(MembroRepository membroRepository,
-                                  MembroMinisterioRepository membroMinisterioRepository,
-                                  MinisteriosRepository ministeriosRepository,
-                                  BuscarIgrejaPorUUIDUseCase buscarIgrejaPorUUIDUseCase,
-                                  ValidarCriacaoMembro validarCriacaoMembro) {
+    public AtualizarMembroUseCase(
+            MembroRepository membroRepository,
+            MembroMinisterioRepository membroMinisterioRepository,
+            MinisteriosRepository ministeriosRepository
+    ) {
         this.membroRepository = membroRepository;
         this.membroMinisterioRepository = membroMinisterioRepository;
         this.ministeriosRepository = ministeriosRepository;
-        this.buscarIgrejaPorUUIDUseCase = buscarIgrejaPorUUIDUseCase;
-        this.validarCriacaoMembro = validarCriacaoMembro;
     }
 
     @Transactional
-    public RestResponseMessageDTO execute(UUID idExterno, MembroUpdateDTO request) {
-        Membro membro = membroRepository.findByIdExterno(idExterno)
-            .orElseThrow(() -> new ObjectNotFoundException("Membro não encontrado"));
+    public RestResponseMessageDTO execute(UUID idExterno, MembroUpdateDTO request, UUID igrejaId) {
+        Membro membro = membroRepository.findByIdExternoAndIgrejaIdExterno(idExterno, igrejaId)
+            .orElseThrow(() -> new ObjectNotFoundException("Membro não encontrado na igreja autenticada"));
 
-        if (request.fkIgreja() != null) membro.setIgreja(buscarIgrejaPorUUIDUseCase.execute(request.fkIgreja()));
+        if (request.fkIgreja() != null && !request.fkIgreja().equals(igrejaId)) {
+            logger.warn("Tentativa de alterar Igreja do membro fora do escopo. membroId=[{}] igrejaId=[{}] fkIgreja_tentativa=[{}]",
+                idExterno, igrejaId, request.fkIgreja());
+            throw new ObjectSaveErrorException("Alteração de Igreja não é permitida");
+        }
+
         if (request.nome() != null) membro.setNome(request.nome().toLowerCase(Locale.ROOT));
         if (request.cpf() != null) membro.setCpf(request.cpf());
         if (request.email() != null) membro.setEmail(request.email().toLowerCase(Locale.ROOT));
@@ -70,6 +73,10 @@ public class AtualizarMembroUseCase {
         }
 
         membroRepository.save(membro);
+
+        logger.info("Membro atualizado com sucesso. membroId=[{}] igrejaId=[{}] campos_atualizados=[{}]",
+            idExterno, igrejaId, obterCamposAlterados(request));
+
         return new RestResponseMessageDTO(HttpStatus.OK, "Membro atualizado com sucesso");
     }
 
@@ -119,5 +126,20 @@ public class AtualizarMembroUseCase {
 
             membroMinisterioRepository.save(membroMinisterio);
         }
+    }
+
+    private String obterCamposAlterados(MembroUpdateDTO request) {
+        List<String> campos = new ArrayList<>();
+        if (request.nome() != null) campos.add("nome");
+        if (request.cpf() != null) campos.add("cpf");
+        if (request.email() != null) campos.add("email");
+        if (request.celular() != null) campos.add("celular");
+        if (request.dataNascimento() != null) campos.add("dataNascimento");
+        if (request.cargo() != null) campos.add("cargo");
+        if (request.generoMembro() != null) campos.add("generoMembro");
+        if (request.status() != null) campos.add("status");
+        if (request.membroEnderecoDTO() != null) campos.add("endereco");
+        if (request.idExternoMinisterios() != null) campos.add("ministerios");
+        return String.join(",", campos);
     }
 }

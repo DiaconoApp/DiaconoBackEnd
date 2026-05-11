@@ -37,7 +37,7 @@ class ApagarEventoUnicoUseCaseTest {
 		UUID idEvento = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		when(eventoRepository.deleteByIdExterno(idEvento)).thenReturn(1L);
 
-		RestResponseMessageDTO response = useCase.execute(idEvento);
+		RestResponseMessageDTO response = useCase.execute(idEvento, null);
 
 		assertEquals(HttpStatus.OK, response.getStatus());
 		assertEquals("Evento apagado com sucesso", response.getMessage());
@@ -49,7 +49,7 @@ class ApagarEventoUnicoUseCaseTest {
 		UUID idEvento = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		when(eventoRepository.deleteByIdExterno(idEvento)).thenReturn(0L);
 
-		ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> useCase.execute(idEvento));
+		ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> useCase.execute(idEvento, null));
 
 		assertEquals("Não foi possível apagar o evento, verifique se o evento existe", ex.getMessage());
 	}

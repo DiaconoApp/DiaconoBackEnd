@@ -6,6 +6,8 @@ import com.diacono.diacono.domain.entity.Ministerio;
 import com.diacono.diacono.domain.enums.EnumStatusMinisterio;
 import com.diacono.diacono.domain.repository.MinisteriosRepository;
 import com.diacono.diacono.infrastructure.persistence.springdata.MinisteriosJpaRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -17,6 +19,8 @@ import java.util.UUID;
 
 @Repository
 public class MinisteriosRepositoryImpl implements MinisteriosRepository {
+
+    private static final Logger logger = LoggerFactory.getLogger(MinisteriosRepositoryImpl.class);
 
     private final MinisteriosJpaRepository jpaRepository;
 
@@ -35,13 +39,27 @@ public class MinisteriosRepositoryImpl implements MinisteriosRepository {
     }
 
     @Override
+    @Deprecated
     public Optional<Ministerio> findByIdExterno(UUID idExterno) {
+        logger.warn("Uso de findByIdExterno sem scoping por igreja. idExterno=[{}]", idExterno);
         return Optional.ofNullable(jpaRepository.findByIdExterno(idExterno));
     }
 
     @Override
+    public Optional<Ministerio> findByIdExternoAndIgrejaId(UUID idExterno, UUID igrejaId) {
+        return jpaRepository.findByIdExternoAndIgreja_IdExterno(idExterno, igrejaId);
+    }
+
+    @Override
+    @Deprecated
     public Set<Ministerio> findAllByIdExternoIn(List<UUID> idExterno) {
+        logger.warn("Uso de findAllByIdExternoIn sem scoping por igreja. quantidade=[{}]", idExterno.size());
         return jpaRepository.findAllByIdExternoIn(idExterno);
+    }
+
+    @Override
+    public Set<Ministerio> findAllByIdExternoInAndIgrejaId(List<UUID> idExterno, UUID igrejaId) {
+        return jpaRepository.findAllByIdExternoInAndIgreja_IdExterno(idExterno, igrejaId);
     }
 
     @Override
@@ -50,8 +68,15 @@ public class MinisteriosRepositoryImpl implements MinisteriosRepository {
     }
 
     @Override
+    @Deprecated
     public Optional<Long> buscarIdPorUUID(UUID idExterno) {
+        logger.warn("Uso de buscarIdPorUUID sem scoping por igreja. idExterno=[{}]", idExterno);
         return Optional.ofNullable(jpaRepository.buscarIdPorUUID(idExterno));
+    }
+
+    @Override
+    public Optional<Long> buscarIdPorUUIDAndIgrejaId(UUID idExterno, UUID igrejaId) {
+        return Optional.ofNullable(jpaRepository.buscarIdPorUUIDAndIgrejaIdExterno(idExterno, igrejaId));
     }
 
     @Override

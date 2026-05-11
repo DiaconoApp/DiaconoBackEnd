@@ -62,12 +62,12 @@ class BuscarKpiGeneroMembrosDashUseCaseTest {
 	}
 
 	@Test
-	void deveLancarNullPointerQuandoNaoExistiremDadosNoRepositorio() {
+	void deveLancarExcecaoQuandoNaoExistiremDadosNoRepositorio() {
 		UUID idIgreja = UUID.fromString("11111111-1111-1111-1111-111111111111");
 
 		when(jwtUtils.getIgrejaId()).thenReturn(idIgreja);
 		when(membroRepository.buscarMembrosPorGenero(idIgreja, 2026)).thenReturn(null);
 
-		assertThrows(NullPointerException.class, () -> useCase.execute(2025, 2026));
+		assertThrows(com.diacono.diacono.global.error.exceptions.ObjectNotFoundException.class, () -> useCase.execute(2025, 2026));
 	}
 }

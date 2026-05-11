@@ -9,6 +9,7 @@ import com.diacono.diacono.infrastructure.persistence.projection.EscalaMinisteri
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -155,6 +156,7 @@ public interface EscalaMinisterioJpaRepository extends JpaRepository<EscalaMinis
     );
 
     @Modifying
+    @Transactional
     @Query("""
             DELETE FROM EscalaMinisterio em
             WHERE em.escalaEvento.idExterno = :escalaEventoId
@@ -183,6 +185,7 @@ public interface EscalaMinisterioJpaRepository extends JpaRepository<EscalaMinis
             @Param("membrosMinisterioIds") List<UUID> membrosMinisterioIds
     );
 
+    @Deprecated
     @Query("""
             SELECT CASE
                 WHEN COUNT(em) > 0 AND SUM(CASE WHEN em.statusEscalaMinisterio = com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio.CONFIRMADO THEN 1 ELSE 0 END) = COUNT(em)
@@ -193,6 +196,23 @@ public interface EscalaMinisterioJpaRepository extends JpaRepository<EscalaMinis
             WHERE em.escalaEvento.idExterno = :escalaEventoId
             """)
     boolean areAllConfirmadosByEscalaEventoId(@Param("escalaEventoId") UUID escalaEventoId);
+
+    /**
+     * Variante com scoping por igreja para evitar leitura de dados de outro tenant.
+     */
+    @Query("""
+            SELECT CASE
+                WHEN COUNT(em) > 0 AND SUM(CASE WHEN em.statusEscalaMinisterio = com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio.CONFIRMADO THEN 1 ELSE 0 END) = COUNT(em)
+                THEN true
+                ELSE false
+            END
+            FROM EscalaMinisterio em
+            JOIN em.escalaEvento ee
+            JOIN ee.evento e
+            WHERE e.igreja.idExterno = :igrejaId
+              AND em.escalaEvento.idExterno = :escalaEventoId
+            """)
+    boolean areAllConfirmadosByEscalaEventoIdAndIgrejaId(@Param("escalaEventoId") UUID escalaEventoId, @Param("igrejaId") UUID igrejaId);
 
 }
 

@@ -14,6 +14,7 @@ public interface MembroRepository {
     List<Membro> findAllWithFilter(String buscaGeral, UUID fkIgreja);
 
     Optional<Membro> findByIdExterno(UUID idExterno);
+    Optional<Membro> findByIdExternoAndIgrejaIdExterno(UUID idExterno, UUID igrejaIdExterno);
     Optional<Membro> findByEmailOrCpf(String email, String cpf);
     Optional<Membro> findByEmail(String email);
 

@@ -7,12 +7,15 @@ import com.diacono.diacono.domain.repository.EscalaMinisterioRepository;
 import com.diacono.diacono.domain.repository.MembroMinisterioRepository;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
 public class BuscarMembrosMinisterioDisponiveisPorEscalaEventoIdUseCase {
+    private static final Logger logger = LoggerFactory.getLogger(BuscarMembrosMinisterioDisponiveisPorEscalaEventoIdUseCase.class);
 
     private final EscalaMinisterioRepository escalaMinisterioRepository;
     private final EscalaEventoRepository escalaEventoRepository;
@@ -33,16 +36,23 @@ public class BuscarMembrosMinisterioDisponiveisPorEscalaEventoIdUseCase {
             UUID igrejaId,
             UUID membroId
     ) {
+        validarIdsObrigatorios(escalaEventoId, igrejaId, membroId);
         validarEscalaEventoId(escalaEventoId, igrejaId, membroId);
 
         List<EscalaMembroMinisterioDTO> membrosMinisterio = buscarMembroMinisterioByEscalaEventoId(igrejaId, escalaEventoId);
         List<EscalaMembroMinisterioDTO> membrosDisponiveis = filtrarMembrosDisponiveis(igrejaId, escalaEventoId, membrosMinisterio);
 
-        System.out.println("Quantidade de membros disponíveis: " + membrosDisponiveis.size());
-        membrosDisponiveis.forEach(m ->
-                System.out.println("Membro: " + m.nomeMembro() + " - ID: " + m.membroMinisterioId())
-        );
+        logger.info("Consulta membros disponíveis: escalaEventoId=[{}], igrejaId=[{}], membroId=[{}], quantidadeDisponiveis=[{}]",
+                escalaEventoId, igrejaId, membroId, membrosDisponiveis.size());
         return membrosDisponiveis.size();
+    }
+
+    private void validarIdsObrigatorios(UUID escalaEventoId, UUID igrejaId, UUID membroId) {
+        if (escalaEventoId == null || igrejaId == null || membroId == null) {
+            logger.warn("Consulta membros disponíveis com ids inválidos: escalaEventoIdPresente=[{}], igrejaIdPresente=[{}], membroIdPresente=[{}]",
+                    escalaEventoId != null, igrejaId != null, membroId != null);
+            throw new FieldInvalidException("Ids de escalaEvento, igreja e membro sao obrigatorios");
+        }
     }
 
     private void validarEscalaEventoId(UUID escalaEventoId, UUID igrejaId, UUID membroId) {

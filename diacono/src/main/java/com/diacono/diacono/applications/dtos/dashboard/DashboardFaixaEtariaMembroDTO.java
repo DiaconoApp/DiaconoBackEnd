@@ -5,5 +5,6 @@ public record DashboardFaixaEtariaMembroDTO(
         long adolescentes,
         long jovens,
         long adultos,
-        long idosos) {
+        long idosos
+) {
 }

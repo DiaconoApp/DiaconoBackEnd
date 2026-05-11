@@ -67,7 +67,7 @@ public class CriarEventoUseCase {
     }
 
     @Transactional
-    public RestResponseMessageDTO execute(EventoCreateDTO request) {
+    public RestResponseMessageDTO execute(EventoCreateDTO request, UUID igrejaId) {
 
         validarRecorrencia(request.recorrencia(), request.dataHoraInicio());
         validarEnderecoEvento(request.endereco());
@@ -75,17 +75,17 @@ public class CriarEventoUseCase {
         validarHora.validarHoraFuturo(request.dataHoraInicio(), request.dataHoraFim());
 
         if (request.recorrencia().tipoRecorrencia().equals(TipoRecorrencia.NAO_REPETE)) {
-            criarEventoSemRecorrencia(request);
+            criarEventoSemRecorrencia(request, igrejaId);
             return new RestResponseMessageDTO(HttpStatus.CREATED, "Evento sem recorrência criado com sucesso");
         }
 
         if (request.recorrencia().tipoRecorrencia().equals(TipoRecorrencia.SEMANAL)) {
-            criarEventoRecorrenciaSemanal(request);
+            criarEventoRecorrenciaSemanal(request, igrejaId);
             return new RestResponseMessageDTO(HttpStatus.CREATED, "Eventos com recorrência semanal criado com sucesso");
         }
 
         if (request.recorrencia().tipoRecorrencia().equals(TipoRecorrencia.MENSAL)) {
-            criarEventoRecorrenciaMensal(request);
+            criarEventoRecorrenciaMensal(request, igrejaId);
             return new RestResponseMessageDTO(HttpStatus.CREATED, "Eventos com recorrência mensal criados com sucesso");
         }
 
@@ -149,9 +149,9 @@ public class CriarEventoUseCase {
         }
     }
 
-    private RestResponseMessageDTO criarEventoRecorrenciaSemanal(EventoCreateDTO request) {
+    private RestResponseMessageDTO criarEventoRecorrenciaSemanal(EventoCreateDTO request, UUID igrejaId) {
 
-        Evento evento = criarEventoSemRecorrencia(request);
+        Evento evento = criarEventoSemRecorrencia(request, igrejaId);
 
         List<Evento> eventos = new ArrayList<>();
 
@@ -184,9 +184,9 @@ public class CriarEventoUseCase {
     }
 
 
-    private RestResponseMessageDTO criarEventoRecorrenciaMensal(EventoCreateDTO request) {
+    private RestResponseMessageDTO criarEventoRecorrenciaMensal(EventoCreateDTO request, UUID igrejaId) {
 
-        Evento eventoBase = criarEventoSemRecorrencia(request);
+        Evento eventoBase = criarEventoSemRecorrencia(request, igrejaId);
 
         List<Evento> eventos = new ArrayList<>();
 
@@ -218,7 +218,7 @@ public class CriarEventoUseCase {
         return new RestResponseMessageDTO(HttpStatus.CREATED, "Eventos com recorrência mensal criados com sucesso");
     }
 
-    private Evento criarEventoSemRecorrencia(EventoCreateDTO request) {
+    private Evento criarEventoSemRecorrencia(EventoCreateDTO request, UUID igrejaId) {
 
         Recorrencia recorrencia = converterDtoToRecorrencia(request.recorrencia());
 
@@ -234,8 +234,8 @@ public class CriarEventoUseCase {
         evento.setEnderecoEvento(endereco);
         evento.setRecorrencia(recorrencia);
         evento.setOrganizador(buscarPorUUID(jwtUtils.getSubject()));
-        evento.setIgreja(buscarIgrejaPorUUIDUseCase.execute(jwtUtils.getIgrejaId()));
-        evento.setEscalaEvento(gerarEscalaEventoUseCase.executeParaCriacao(evento, request.fkMinisterios()));
+        evento.setIgreja(buscarIgrejaPorUUIDUseCase.execute(igrejaId));
+        evento.setEscalaEvento(gerarEscalaEventoUseCase.executeParaCriacao(evento, request.fkMinisterios(), igrejaId));
 
         Evento eventoSalvo = eventoRepository.save(evento);
         eventoProducer.publicarEventoCriadoAposCommit(eventoSalvo);
