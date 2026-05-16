@@ -3,7 +3,6 @@ package com.diacono.diacono.usecases.ministerio;
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioSuperSimplificadoDTO;
 import com.diacono.diacono.domain.repository.MembroMinisterioRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.global.util.JwtUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,49 +23,29 @@ class BuscarMinisteriosLiderMinisterioUseCaseTest {
 	@Mock
 	private MembroMinisterioRepository membroMinisterioRepository;
 
-	@Mock
-	private JwtUtils jwtUtils;
-
 	@InjectMocks
 	private BuscarMinisteriosLiderMinisterioUseCase useCase;
 
 	@Test
-	void deveBuscarMinisteriosDoLiderPeloExecuteComSucesso() {
+	void deveBuscarMinisteriosDoLiderComSucesso() {
 		UUID idMembro = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		UUID idIgreja = UUID.fromString("22222222-2222-2222-2222-222222222222");
+
 		MinisterioSuperSimplificadoDTO dto = new MinisterioSuperSimplificadoDTO(
 				UUID.fromString("33333333-3333-3333-3333-333333333333"),
 				"Louvor"
 		);
 
-		when(jwtUtils.getSubject()).thenReturn(idMembro);
-		when(jwtUtils.getIgrejaId()).thenReturn(idIgreja);
-		when(membroMinisterioRepository.buscarMinisterioLider(idMembro, idIgreja)).thenReturn(List.of(dto));
+		when(membroMinisterioRepository.buscarMinisterioLider(idMembro, idIgreja))
+				.thenReturn(List.of(dto));
 
-		List<MinisterioSuperSimplificadoDTO> response = useCase.execute();
-
-		assertEquals(1, response.size());
-		assertEquals(dto, response.getFirst());
-		verify(jwtUtils).getSubject();
-		verify(jwtUtils).getIgrejaId();
-		verify(membroMinisterioRepository).buscarMinisterioLider(idMembro, idIgreja);
-	}
-
-	@Test
-	void deveBuscarMinisteriosDoLiderDiretamenteComSucesso() {
-		UUID idMembro = UUID.fromString("11111111-1111-1111-1111-111111111111");
-		UUID idIgreja = UUID.fromString("22222222-2222-2222-2222-222222222222");
-		MinisterioSuperSimplificadoDTO dto = new MinisterioSuperSimplificadoDTO(
-				UUID.fromString("33333333-3333-3333-3333-333333333333"),
-				"Intercessao"
-		);
-
-		when(membroMinisterioRepository.buscarMinisterioLider(idMembro, idIgreja)).thenReturn(List.of(dto));
-
-		List<MinisterioSuperSimplificadoDTO> response = useCase.buscarMinisterioLider(idMembro, idIgreja);
+		List<MinisterioSuperSimplificadoDTO> response = useCase.execute(idIgreja, idMembro);
 
 		assertEquals(1, response.size());
-		assertEquals(dto, response.getFirst());
+		assertEquals(dto, response.get(0));
+
+		verify(membroMinisterioRepository)
+				.buscarMinisterioLider(idMembro, idIgreja);
 	}
 
 	@Test
@@ -74,11 +53,12 @@ class BuscarMinisteriosLiderMinisterioUseCaseTest {
 		UUID idMembro = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		UUID idIgreja = UUID.fromString("22222222-2222-2222-2222-222222222222");
 
-		when(membroMinisterioRepository.buscarMinisterioLider(idMembro, idIgreja)).thenReturn(List.of());
+		when(membroMinisterioRepository.buscarMinisterioLider(idMembro, idIgreja))
+				.thenReturn(List.of());
 
 		ObjectNotFoundException ex = assertThrows(
 				ObjectNotFoundException.class,
-				() -> useCase.buscarMinisterioLider(idMembro, idIgreja)
+				() -> useCase.execute(idIgreja, idMembro)
 		);
 
 		assertEquals("Nenhum ministério encontrado para o líder informado.", ex.getMessage());

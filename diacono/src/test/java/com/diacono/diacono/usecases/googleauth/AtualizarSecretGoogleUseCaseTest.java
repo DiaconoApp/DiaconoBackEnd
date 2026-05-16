@@ -18,37 +18,40 @@ class AtualizarSecretGoogleUseCaseTest {
         AtualizarSecretGoogleUseCase atualizarSecretGoogleUseCase = new AtualizarSecretGoogleUseCase(repository);
 
         UUID membroId = UUID.randomUUID();
+        UUID igrejaId = UUID.randomUUID();
         String email = "usuario@teste.com";
         String refreshToken = "novo-refresh-token";
 
-        atualizarSecretGoogleUseCase.execute(membroId, email, refreshToken);
+        atualizarSecretGoogleUseCase.execute(membroId, igrejaId, email, refreshToken);
 
         assertNotNull(repository.savedEntity);
         assertEquals(membroId, repository.savedEntity.getMembroId());
+        assertEquals(igrejaId, repository.savedEntity.getIgrejaId());
         assertEquals(email, repository.savedEntity.getEmail());
-        assertEquals(refreshToken, repository.savedEntity.getTokenRefresh());
+        assertEquals(refreshToken, repository.savedEntity.getRefreshToken());
     }
 
     @Test
-    void deveAtualizarRegistroExistenteSemCriarNovoQuandoMembroJaPossuirRefreshTokenSalvo() {
+    void deveSalvarRefreshTokenNoMesmoEscopoDaIgrejaQuandoJaExistirRegistro() {
         UUID membroId = UUID.randomUUID();
+        UUID igrejaId = UUID.randomUUID();
         GoogleRefreshTokenMembro existingEntity = GoogleRefreshTokenMembro.builder()
-                .idToken(10L)
                 .membroId(membroId)
+                .igrejaId(igrejaId)
                 .email("email-antigo@teste.com")
-                .tokenRefresh("refresh-antigo")
+                .refreshToken("refresh-antigo")
                 .build();
 
         FakeGoogleRefreshTokenMembroRepository repository = new FakeGoogleRefreshTokenMembroRepository(existingEntity);
         AtualizarSecretGoogleUseCase atualizarSecretGoogleUseCase = new AtualizarSecretGoogleUseCase(repository);
 
-        atualizarSecretGoogleUseCase.execute(membroId, "email-novo@teste.com", "refresh-novo");
+        atualizarSecretGoogleUseCase.execute(membroId, igrejaId, "email-novo@teste.com", "refresh-novo");
 
         assertNotNull(repository.savedEntity);
         assertEquals(membroId, repository.savedEntity.getMembroId());
+        assertEquals(igrejaId, repository.savedEntity.getIgrejaId());
         assertEquals("email-novo@teste.com", repository.savedEntity.getEmail());
-        assertEquals("refresh-novo", repository.savedEntity.getTokenRefresh());
-        assertEquals(10L, repository.savedEntity.getIdToken());
+        assertEquals("refresh-novo", repository.savedEntity.getRefreshToken());
         assertEquals(membroId, repository.lastFindByMembroId);
     }
 

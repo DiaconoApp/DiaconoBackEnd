@@ -9,5 +9,4 @@ import java.util.UUID;
 public interface IgrejaJpaRepository extends JpaRepository<Igreja, Long> {
 
     Optional<Igreja> findByIdExterno(UUID idExterno);
-
 }

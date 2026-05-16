@@ -14,6 +14,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -21,6 +23,8 @@ import java.util.UUID;
 @SpringBootApplication
 @ConfigurationPropertiesScan
 public class DiaconoApplication {
+    // TODO: Controllers e UseCases Ministerios pendente de revisao OWASP v3
+    private static final Logger logger = LoggerFactory.getLogger(DiaconoApplication.class);
 
 	public static void main(String[] args) {
 		SpringApplication.run(DiaconoApplication.class, args);
@@ -68,7 +72,7 @@ public class DiaconoApplication {
 
             repository.save(governo);
 
-            System.out.println("Entidade criada e salva com sucesso: " + governo.getNome());
+            logger.info("Entidade governo inicial criada: membroId=[{}], igrejaId=[{}]", governo.getIdExterno(), igrejaIcf.getIdExterno());
         };
     }
 

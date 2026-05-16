@@ -121,12 +121,11 @@ class CriarEventoUseCaseTest {
 		when(eventoMapper.paraEvento(request)).thenReturn(evento);
 		when(jwtUtils.getSubject()).thenReturn(idMembro);
 		when(membroRepository.findByIdExterno(idMembro)).thenReturn(Optional.of(membro));
-		when(jwtUtils.getIgrejaId()).thenReturn(idIgreja);
 		when(buscarIgrejaPorUUIDUseCase.execute(idIgreja)).thenReturn(igreja);
-		when(gerarEscalaEventoUseCase.executeParaCriacao(evento, List.of(idMinisterio))).thenReturn(new HashSet<>(Set.of(escalaEvento)));
+		when(gerarEscalaEventoUseCase.executeParaCriacao(evento, List.of(idMinisterio), idIgreja)).thenReturn(new HashSet<>(Set.of(escalaEvento)));
 		when(eventoRepository.save(evento)).thenReturn(evento);
 
-		RestResponseMessageDTO response = useCase.execute(request);
+		RestResponseMessageDTO response = useCase.execute(request, idIgreja);
 
 		assertEquals(HttpStatus.CREATED, response.getStatus());
 		assertEquals("Evento sem recorrência criado com sucesso", response.getMessage());
@@ -137,8 +136,9 @@ class CriarEventoUseCaseTest {
 	@Test
 	void deveLancarExcecaoQuandoRecorrenciaSemanalNaoTiverDatas() {
 		EventoCreateDTO request = criarEventoCreateDTOSemanalInvalido();
+		UUID idIgreja = UUID.fromString("33333333-3333-3333-3333-333333333333");
 
-		FieldInvalidException ex = assertThrows(FieldInvalidException.class, () -> useCase.execute(request));
+		FieldInvalidException ex = assertThrows(FieldInvalidException.class, () -> useCase.execute(request, idIgreja));
 
 		assertEquals("É necessário preencher os campos de inicío e término da recorrência", ex.getMessage());
 	}

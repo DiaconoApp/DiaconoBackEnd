@@ -8,8 +8,11 @@ import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.usecases.escalasevento.AtualizarEscalaEventoPorEventoIdUseCase;
 import com.diacono.diacono.usecases.escalasevento.BuscarEscalaEventoConsolidadoPorMesAnoUseCase;
 import com.diacono.diacono.usecases.escalasevento.BuscarEscalaEventoEscaladoPorEventoIdUseCase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,8 +20,11 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/escalas-evento/governo")
+@PreAuthorize("hasAnyAuthority('SCOPE_GOVERNO')")
 public class EscalaEventoController {
     // TODO: Adicionar anotacoes APIErrosComuns, APIResponse, e Scope ou PreAuthorize
+
+    private static final Logger logger = LoggerFactory.getLogger(EscalaEventoController.class);
 
     private final BuscarEscalaEventoConsolidadoPorMesAnoUseCase buscarEscalaEventoConsolidadoPorMesAnoUseCase;
     private final BuscarEscalaEventoEscaladoPorEventoIdUseCase buscarEscalaEventoEscaladoPorEventoIdUseCase;
@@ -70,8 +76,13 @@ public class EscalaEventoController {
     ) {
         UUID igrejaId = jwtUtils.getIgrejaId();
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(atualizarEscalaEventoPorEventoIdUseCase.execute(igrejaId, eventoId, escalasEvento));
+        try {
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(atualizarEscalaEventoPorEventoIdUseCase.execute(igrejaId, eventoId, escalasEvento));
+        } catch (RuntimeException ex) {
+            logger.warn("Falha ao atualizar escala de evento. eventoId={}, igrejaId={}", eventoId, igrejaId);
+            throw ex;
+        }
     }
 }

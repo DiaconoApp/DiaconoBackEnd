@@ -2,13 +2,18 @@ package com.diacono.diacono.usecases.igreja;
 
 import com.diacono.diacono.domain.entity.Igreja;
 import com.diacono.diacono.domain.repository.IgrejaRepository;
+import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 @Service
 public class BuscarIgrejaPorUUIDUseCase {
+
+    private static final Logger logger = LoggerFactory.getLogger(BuscarIgrejaPorUUIDUseCase.class);
 
     private final IgrejaRepository igrejaRepository;
 
@@ -18,10 +23,15 @@ public class BuscarIgrejaPorUUIDUseCase {
 
     /*ESSE MÉTODO SE RELACIONA COM EVENTO*/
     public Igreja execute(UUID idExterno){
-        //adicionar validação da existência da Igreja -- SE DER ERRO LANÇAR EXCEÇÃO
-        Igreja igreja = igrejaRepository.findByIdExterno(idExterno)
-                .orElseThrow(() -> new ObjectNotFoundException("Igreja não encontrada"));;
+        if (idExterno == null) {
+            logger.warn("Tentativa de buscar igreja sem idExterno informado");
+            throw new FieldInvalidException("O Id da igreja é obrigatório");
+        }
 
-        return igreja;
+        return igrejaRepository.findByIdExterno(idExterno)
+                .orElseThrow(() -> {
+                    logger.warn("Igreja nao encontrada para idExterno={}", idExterno);
+                    return new ObjectNotFoundException("Igreja não encontrada");
+                });
     }
 }

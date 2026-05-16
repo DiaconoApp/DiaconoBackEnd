@@ -2,6 +2,7 @@ package com.diacono.diacono.usecases.googleauth;
 
 import com.diacono.diacono.applications.dtos.googleauth.GoogleIdTokenDTO;
 import com.diacono.diacono.applications.dtos.login.LoginResponseDTO;
+import com.diacono.diacono.domain.entity.Igreja;
 import com.diacono.diacono.domain.entity.Membro;
 import com.diacono.diacono.global.error.exceptions.GoogleAuthorizationCodeException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
@@ -71,7 +72,8 @@ class LoginGoogleUseCaseTest {
         Object exchangerProxy = createExchangerProxy(exchangerClass, exchangerArgs, tokenResponse, null);
 
         UUID membroId = UUID.randomUUID();
-        Membro membro = membroComIdExterno(membroId);
+        UUID igrejaId = UUID.randomUUID();
+        Membro membro = membroComIdExterno(membroId, igrejaId);
 
         FakeAutenticarGoogleUseCase autenticarGoogleUseCase = new FakeAutenticarGoogleUseCase(
                 new GoogleIdTokenDTO(java.util.List.of("google-client-id"), email, true)
@@ -103,6 +105,7 @@ class LoginGoogleUseCaseTest {
         assertEquals(idToken, autenticarGoogleUseCase.receivedIdToken);
         assertEquals(email, buscarPorEmaiUseCase.receivedEmail);
         assertEquals(membroId, atualizarSecretGoogleUseCase.receivedMembroId);
+        assertEquals(igrejaId, atualizarSecretGoogleUseCase.receivedIgrejaId);
         assertEquals(email, atualizarSecretGoogleUseCase.receivedEmail);
         assertEquals(refreshToken, atualizarSecretGoogleUseCase.receivedRefreshToken);
     }
@@ -138,7 +141,7 @@ class LoginGoogleUseCaseTest {
         );
 
         Object exchangerProxy = createExchangerProxy(exchangerClass, new AtomicReference<>(), tokenResponse, null);
-        Membro membro = membroComIdExterno(UUID.randomUUID());
+        Membro membro = membroComIdExterno(UUID.randomUUID(), UUID.randomUUID());
 
         FakeAutenticarGoogleUseCase autenticarGoogleUseCase = new FakeAutenticarGoogleUseCase(
                 new GoogleIdTokenDTO(java.util.List.of("google-client-id"), email, true)
@@ -453,9 +456,12 @@ class LoginGoogleUseCaseTest {
         return values;
     }
 
-    private Membro membroComIdExterno(UUID idExterno) {
+    private Membro membroComIdExterno(UUID idExterno, UUID igrejaId) {
         Membro membro = new Membro();
+        Igreja igreja = new Igreja();
+        setField(igreja, "idExterno", igrejaId);
         setField(membro, "idExterno", idExterno);
+        membro.setIgreja(igreja);
         return membro;
     }
 
@@ -496,6 +502,7 @@ class LoginGoogleUseCaseTest {
 
     private static final class FakeAtualizarSecretGoogleUseCase extends AtualizarSecretGoogleUseCase {
         private UUID receivedMembroId;
+        private UUID receivedIgrejaId;
         private String receivedEmail;
         private String receivedRefreshToken;
 
@@ -504,8 +511,9 @@ class LoginGoogleUseCaseTest {
         }
 
         @Override
-        public void execute(UUID membroId, String email, String refreshToken) {
+        public void execute(UUID membroId, UUID igrejaId, String email, String refreshToken) {
             this.receivedMembroId = membroId;
+            this.receivedIgrejaId = igrejaId;
             this.receivedEmail = email;
             this.receivedRefreshToken = refreshToken;
         }

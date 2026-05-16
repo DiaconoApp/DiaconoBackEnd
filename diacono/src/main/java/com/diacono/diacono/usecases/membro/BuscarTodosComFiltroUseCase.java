@@ -6,7 +6,6 @@ import com.diacono.diacono.domain.entity.Membro;
 import com.diacono.diacono.domain.enums.EnumStatusMembro;
 import com.diacono.diacono.domain.repository.MembroRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.global.util.JwtUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -23,12 +23,10 @@ public class BuscarTodosComFiltroUseCase {
 
     private final MembroRepository membroRepository;
     private final MembroMapper membroMapper;
-    private final JwtUtils jwtUtils;
 
-    public BuscarTodosComFiltroUseCase(MembroRepository membroRepository, MembroMapper membroMapper, JwtUtils jwtUtils) {
+    public BuscarTodosComFiltroUseCase(MembroRepository membroRepository, MembroMapper membroMapper) {
         this.membroRepository = membroRepository;
         this.membroMapper = membroMapper;
-        this.jwtUtils = jwtUtils;
     }
 
     @Transactional(readOnly = true)
@@ -36,11 +34,13 @@ public class BuscarTodosComFiltroUseCase {
             Pageable pageable,
             String termoBusca,
             EnumStatusMembro status,
-            UUID fkMinisterio) {
+            UUID fkMinisterio,
+            UUID igrejaId
+    ) {
 
         //REFATORAR
 
-        List<Membro> membrosBrutos = buscaMembros(termoBusca);
+        List<Membro> membrosBrutos = buscaMembros(termoBusca, igrejaId);
 
         List<Membro> membrosFiltrados = membrosBrutos.stream()
                 .filter(membro -> {
@@ -67,6 +67,7 @@ public class BuscarTodosComFiltroUseCase {
                 .collect(Collectors.toList());
 
         validarMembrosEncontradosList(membrosFiltrados);
+        membrosFiltrados.sort(Comparator.comparing(Membro::getNome, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)));
 
         int pageSize = pageable.getPageSize();
         int start = (int) pageable.getOffset();
@@ -89,14 +90,14 @@ public class BuscarTodosComFiltroUseCase {
         );
     }
 
-    private List<Membro> buscaMembros(String busca) {
+    private List<Membro> buscaMembros(String busca, UUID igrejaId) {
 
         String buscaFormatada = null;
         if (busca != null && !busca.isBlank()) {
             buscaFormatada = "%" + busca + "%";
         }
 
-        List<Membro> membros = membroRepository.findAllWithFilter(buscaFormatada, jwtUtils.getIgrejaId());
+        List<Membro> membros = membroRepository.findAllWithFilter(buscaFormatada, igrejaId);
 
         if(membros.isEmpty() || membros == null){
             throw new ObjectNotFoundException("Nenhum membro encontrado");

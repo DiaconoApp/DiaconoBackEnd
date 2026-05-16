@@ -8,4 +8,3 @@ public record GoogleIdTokenDTO(
         Boolean emailVerified
 ) {
 }
-

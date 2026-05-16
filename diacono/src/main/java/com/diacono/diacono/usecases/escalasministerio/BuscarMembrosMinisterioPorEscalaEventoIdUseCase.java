@@ -3,9 +3,12 @@ package com.diacono.diacono.usecases.escalasministerio;
 import com.diacono.diacono.applications.dtos.escalaministerio.EscalaMembroMinisterioDTO;
 import com.diacono.diacono.applications.dtos.ministerio.MinisterioSuperSimplificadoDTO;
 import com.diacono.diacono.domain.repository.MembroMinisterioRepository;
+import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.domain.repository.EscalaEventoRepository;
 import com.diacono.diacono.domain.repository.EscalaMinisterioRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -16,6 +19,7 @@ import java.util.UUID;
 @Service
 public class BuscarMembrosMinisterioPorEscalaEventoIdUseCase {
     // TODO: Adicionar valicao se escala evento faz parte de ministerio que o usuario lidera
+    private static final Logger logger = LoggerFactory.getLogger(BuscarMembrosMinisterioPorEscalaEventoIdUseCase.class);
 
     private final EscalaMinisterioRepository escalaMinisterioRepository;
     private final EscalaEventoRepository escalaEventoRepository;
@@ -32,6 +36,7 @@ public class BuscarMembrosMinisterioPorEscalaEventoIdUseCase {
     }
 
     public List<EscalaMembroMinisterioDTO> execute(UUID escalaEventoId, UUID igrejaId, UUID membroId) {
+        validarIdsObrigatorios(escalaEventoId, igrejaId, membroId);
         validarEscalaEventoId(escalaEventoId, igrejaId, membroId);
 
         List<EscalaMembroMinisterioDTO> membrosMinisterio = buscarMembroMinisterioByEscalaEventoId(igrejaId, escalaEventoId);
@@ -39,7 +44,7 @@ public class BuscarMembrosMinisterioPorEscalaEventoIdUseCase {
                 escalaMinisterioRepository.findMembrosMinisterioOcupadosByEscalaEventoId(igrejaId, escalaEventoId)
         );
 
-        return membrosMinisterio.stream()
+        List<EscalaMembroMinisterioDTO> membrosComStatus = membrosMinisterio.stream()
                 .map(membro -> new EscalaMembroMinisterioDTO(
                         membro.membroMinisterioId(),
                         membro.nomeMembro(),
@@ -47,6 +52,19 @@ public class BuscarMembrosMinisterioPorEscalaEventoIdUseCase {
                         membrosOcupados.contains(membro.membroMinisterioId())
                 ))
                 .toList();
+
+        logger.info("Consulta membros ministério por escala: escalaEventoId=[{}], igrejaId=[{}], membroId=[{}], quantidadeMembros=[{}]",
+                escalaEventoId, igrejaId, membroId, membrosComStatus.size());
+
+        return membrosComStatus;
+    }
+
+    private void validarIdsObrigatorios(UUID escalaEventoId, UUID igrejaId, UUID membroId) {
+        if (escalaEventoId == null || igrejaId == null || membroId == null) {
+            logger.warn("Consulta membros ministério por escala com ids inválidos: escalaEventoIdPresente=[{}], igrejaIdPresente=[{}], membroIdPresente=[{}]",
+                    escalaEventoId != null, igrejaId != null, membroId != null);
+            throw new FieldInvalidException("Ids de escalaEvento, igreja e membro sao obrigatórios");
+        }
     }
 
     private void validarEscalaEventoId(UUID escalaEventoId, UUID igrejaId, UUID membroId) {

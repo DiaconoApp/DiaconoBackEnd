@@ -22,9 +22,15 @@ public class BuscarMembroPorUUIDUseCase {
     }
 
     @Transactional(readOnly = true)
-    public MembroDetalheResponseDTO execute(UUID idExterno) {
+    public MembroDetalheResponseDTO execute(UUID idExterno, UUID igrejaId) {
         Membro membro = membroRepository.findByIdExterno(idExterno)
                 .orElseThrow(() -> new ObjectNotFoundException("Membro não encontrado"));
+
+        if (igrejaId != null) {
+            if (membro.getIgreja() == null || !igrejaId.equals(membro.getIgreja().getIdExterno())) {
+                throw new ObjectNotFoundException("Membro não encontrado");
+            }
+        }
 
         return membroMapper.paraMembroDetalheResponseDTO(membro);
     }

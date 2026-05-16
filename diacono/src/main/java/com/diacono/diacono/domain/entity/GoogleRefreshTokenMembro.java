@@ -1,6 +1,15 @@
 package com.diacono.diacono.domain.entity;
 
-import jakarta.persistence.*;
+import com.diacono.diacono.global.util.IdEntityUtils;
+import com.diacono.diacono.global.util.SensitiveSearchIndexUtils;
+import com.diacono.diacono.global.util.SensitiveStringAttributeConverter;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,38 +22,42 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "token_google")
 @SuperBuilder(toBuilder = true)
-public class GoogleRefreshTokenMembro {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idToken;
+public class GoogleRefreshTokenMembro extends IdEntityUtils {
 
     @Column(name = "membro_id", nullable = false)
+    @NotNull(message = "O membroId não pode ser nulo")
     private UUID membroId;
 
+    @Column(name = "igreja_id", nullable = false)
+    @NotNull(message = "IgrejaId não pode ser nulo")
+    private UUID igrejaId;
+
     @Column(nullable = false)
+    @NotBlank(message = "Email não pode estar em branco")
+    @Convert(converter = SensitiveStringAttributeConverter.class)
     private String email;
 
-    @Column(name = "token_Refresh", nullable = false)
-    private String tokenRefresh;
+    @Column(name = "email_hash", length = 32)
+    private String emailHash;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "refresh_token", nullable = false, length = 2048)
+    @Convert(converter = SensitiveStringAttributeConverter.class)
+    private String refreshToken;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @PrePersist
-    protected void onCreate() {
-        LocalDateTime now = LocalDateTime.now();
-        createdAt = now;
-        updatedAt = now;
+    @PreUpdate
+    public void atualizarIndicesCamposSensiveis() {
+        this.emailHash = SensitiveSearchIndexUtils.exactHash(this.email);
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+    public boolean possuiIndicesSensiveis() {
+        return emailHash != null;
     }
 }
