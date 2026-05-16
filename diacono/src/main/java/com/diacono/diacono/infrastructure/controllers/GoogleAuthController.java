@@ -1,6 +1,6 @@
 package com.diacono.diacono.infrastructure.controllers;
 
-import com.diacono.diacono.applications.dtos.googleauth.GoogleAuthRequestDTO;
+import com.diacono.diacono.applications.dtos.googleauth.GoogleAuthorizationCodeRequestDTO;
 import com.diacono.diacono.applications.dtos.login.LoginResponseDTO;
 import com.diacono.diacono.usecases.googleauth.LoginGoogleUseCase;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +20,7 @@ public class GoogleAuthController {
     }
 
     @PostMapping
-    public ResponseEntity<LoginResponseDTO> autenticarComGoogle(@RequestBody GoogleAuthRequestDTO googleAuthRequestDTO) {
+    public ResponseEntity<LoginResponseDTO> autenticarComGoogle(@RequestBody GoogleAuthorizationCodeRequestDTO googleAuthRequestDTO) {
         return ResponseEntity.ok(loginGoogleUseCase.execute(googleAuthRequestDTO));
     }
 }

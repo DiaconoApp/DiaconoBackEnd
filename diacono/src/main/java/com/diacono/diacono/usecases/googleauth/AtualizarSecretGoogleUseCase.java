@@ -16,11 +16,13 @@ public class AtualizarSecretGoogleUseCase {
     }
 
     public void execute(UUID membroId, String email, String refreshToken) {
-        GoogleRefreshTokenMembro googleRefreshTokenMembro = GoogleRefreshTokenMembro.builder()
-                .membroId(membroId)
-                .email(email)
-                .refreshToken(refreshToken)
-                .build();
+        GoogleRefreshTokenMembro googleRefreshTokenMembro = googleRefreshTokenMembroRepository.findByMembroId(membroId)
+                .orElseGet(() -> GoogleRefreshTokenMembro.builder()
+                        .membroId(membroId)
+                        .build());
+
+        googleRefreshTokenMembro.setEmail(email);
+        googleRefreshTokenMembro.setTokenRefresh(refreshToken);
 
         googleRefreshTokenMembroRepository.save(googleRefreshTokenMembro);
     }
