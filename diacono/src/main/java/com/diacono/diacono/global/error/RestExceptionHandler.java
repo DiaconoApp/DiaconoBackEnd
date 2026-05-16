@@ -132,6 +132,18 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(message);
     }
 
+    @ExceptionHandler(GoogleAuthorizationCodeException.class)
+    private ResponseEntity<RestErrorMessage> googleAuthorizationCodeHandler(GoogleAuthorizationCodeException exception){
+        RestErrorMessage message = new RestErrorMessage(HttpStatus.UNAUTHORIZED, exception.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(message);
+    }
+
+    @ExceptionHandler(GoogleOAuthIntegrationException.class)
+    private ResponseEntity<RestErrorMessage> googleOAuthIntegrationHandler(GoogleOAuthIntegrationException exception){
+        RestErrorMessage message = new RestErrorMessage(HttpStatus.BAD_GATEWAY, exception.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(message);
+    }
+
     @ExceptionHandler(ObjectExistsException.class)
     private ResponseEntity<RestErrorMessage> objectExistsHandler(ObjectExistsException exception){
         RestErrorMessage message = new RestErrorMessage(HttpStatus.CONFLICT,exception.getMessage());

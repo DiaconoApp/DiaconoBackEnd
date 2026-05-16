@@ -1,14 +1,13 @@
 package com.diacono.diacono.usecases.googleauth;
 
-import com.diacono.diacono.applications.dtos.googleauth.GoogleAuthRequestDTO;
 import com.diacono.diacono.applications.dtos.googleauth.GoogleIdTokenDTO;
 import com.diacono.diacono.applications.dtos.login.LoginResponseDTO;
 import com.diacono.diacono.domain.entity.Igreja;
 import com.diacono.diacono.domain.entity.Membro;
-import com.diacono.diacono.global.error.exceptions.BadCredentialsException;
+import com.diacono.diacono.global.error.exceptions.GoogleAuthorizationCodeException;
+import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.usecases.GenerateTokenUseCase;
 import com.diacono.diacono.usecases.membro.BuscarPorEmaiUseCase;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -17,34 +16,64 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+import static org.junit.jupiter.api.Assertions.fail;
 class LoginGoogleUseCaseTest {
 
-    @Mock
-    private AutenticarGoogleUseCase autenticarGoogleUseCase;
+    private static final String GOOGLE_CODE_REQUEST_DTO =
+            "com.diacono.diacono.applications.dtos.googleauth.GoogleAuthorizationCodeRequestDTO";
+    private static final String GOOGLE_TOKEN_RESPONSE_DTO =
+            "com.diacono.diacono.applications.dtos.googleauth.GoogleTokenResponseDTO";
+    private static final String GOOGLE_AUTHORIZATION_CODE_EXCHANGER =
+            "com.diacono.diacono.infrastructure.auth.GoogleAuthorizationCodeExchanger";
 
-    @Mock
-    private AtualizarSecretGoogleUseCase atualizarSecretGoogleUseCase;
+    @Test
+    void deveLogarQuandoAuthorizationCodeForTrocadoComSucessoERetornarRefreshToken() throws Exception {
+        Class<?> requestDtoClass = loadRequiredClass(GOOGLE_CODE_REQUEST_DTO);
+        Class<?> tokenResponseDtoClass = loadRequiredClass(GOOGLE_TOKEN_RESPONSE_DTO);
+        Class<?> exchangerClass = loadRequiredClass(GOOGLE_AUTHORIZATION_CODE_EXCHANGER);
+        AtomicReference<Object[]> exchangerArgs = new AtomicReference<>();
 
-    @Mock
-    private GenerateTokenUseCase generateTokenUseCase;
+        String authorizationCode = "google-auth-code";
+        String redirectUri = "https://app.exemplo.com/auth/google/callback";
+        String codeVerifier = "pkce-code-verifier";
+        String email = "usuario@teste.com";
+        String idToken = "google-id-token";
+        String refreshToken = "google-refresh-token";
 
-    @Mock
-    private BuscarPorEmaiUseCase buscarPorEmaiUseCase;
+        Object request = newRecordInstance(
+                requestDtoClass,
+                Map.of(
+                        "authorizationCode", authorizationCode,
+                        "redirectUri", redirectUri,
+                        "codeVerifier", codeVerifier
+                )
+        );
 
-    @Captor
-    private ArgumentCaptor<UUID> uuidCaptor;
+        Object tokenResponse = newRecordInstance(
+                tokenResponseDtoClass,
+                Map.of(
+                        "accessToken", "google-access-token",
+                        "idToken", idToken,
+                        "refreshToken", refreshToken,
+                        "expiresIn", 3600L,
+                        "tokenType", "Bearer",
+                        "scope", "openid email profile"
+                )
+        );
 
     @Captor
     private ArgumentCaptor<UUID> igrejaIdCaptor;
@@ -52,29 +81,67 @@ class LoginGoogleUseCaseTest {
     @Captor
     private ArgumentCaptor<String> emailCaptor;
 
-    @Captor
-    private ArgumentCaptor<String> refreshTokenCaptor;
+        UUID membroId = UUID.randomUUID();
+        UUID igrejaId = UUID.randomUUID();
+        Membro membro = membroComIdExterno(membroId, igrejaId);
 
-    private LoginGoogleUseCase loginGoogleUseCase;
+        FakeAutenticarGoogleUseCase autenticarGoogleUseCase = new FakeAutenticarGoogleUseCase(
+                new GoogleIdTokenDTO(java.util.List.of("google-client-id"), email, true)
+        );
+        FakeAtualizarSecretGoogleUseCase atualizarSecretGoogleUseCase = new FakeAtualizarSecretGoogleUseCase();
+        FakeGenerateTokenUseCase generateTokenUseCase = new FakeGenerateTokenUseCase("jwt-token", 3600L);
+        FakeBuscarPorEmaiUseCase buscarPorEmaiUseCase = new FakeBuscarPorEmaiUseCase(membro);
 
-    @BeforeEach
-    void setup() {
-        loginGoogleUseCase = new LoginGoogleUseCase(
+        LoginGoogleUseCase loginGoogleUseCase = instantiateUseCase(
+                exchangerClass,
+                exchangerProxy,
                 autenticarGoogleUseCase,
                 atualizarSecretGoogleUseCase,
                 generateTokenUseCase,
                 buscarPorEmaiUseCase
         );
+
+        LoginResponseDTO response = executeUseCase(loginGoogleUseCase, request);
+
+        assertEquals("jwt-token", response.acessToken());
+        assertEquals(3600L, response.expiresIn());
+
+        Object[] args = exchangerArgs.get();
+        assertNotNull(args, "A troca do authorization code deveria ocorrer antes da autenticacao interna.");
+        assertEquals(authorizationCode, extractArgumentValue(args, "authorizationCode"));
+        assertEquals(redirectUri, extractArgumentValue(args, "redirectUri"));
+        assertEquals(codeVerifier, extractArgumentValue(args, "codeVerifier"));
+
+        assertEquals(idToken, autenticarGoogleUseCase.receivedIdToken);
+        assertEquals(email, buscarPorEmaiUseCase.receivedEmail);
+        assertEquals(membroId, atualizarSecretGoogleUseCase.receivedMembroId);
+        assertEquals(igrejaId, atualizarSecretGoogleUseCase.receivedIgrejaId);
+        assertEquals(email, atualizarSecretGoogleUseCase.receivedEmail);
+        assertEquals(refreshToken, atualizarSecretGoogleUseCase.receivedRefreshToken);
     }
 
     @Test
-    void deveLogarQuandoTokenGoogleForValidoEMembroExistir() {
+    void naoDevePersistirRefreshTokenQuandoGoogleNaoOEnviar() throws Exception {
+        Class<?> requestDtoClass = loadRequiredClass(GOOGLE_CODE_REQUEST_DTO);
+        Class<?> tokenResponseDtoClass = loadRequiredClass(GOOGLE_TOKEN_RESPONSE_DTO);
+        Class<?> exchangerClass = loadRequiredClass(GOOGLE_AUTHORIZATION_CODE_EXCHANGER);
+
         String email = "usuario@teste.com";
         String refreshToken = "refresh-token-123";
         UUID membroId = UUID.fromString("11111111-1111-1111-1111-111111111111");
         UUID igrejaId = UUID.fromString("22222222-2222-2222-2222-222222222222");
 
-        GoogleAuthRequestDTO request = new GoogleAuthRequestDTO("id-token", refreshToken);
+        Object tokenResponse = newRecordInstance(
+                tokenResponseDtoClass,
+                mapWithNullableValues(
+                        "accessToken", "google-access-token",
+                        "idToken", idToken,
+                        "refreshToken", null,
+                        "expiresIn", 3600L,
+                        "tokenType", "Bearer",
+                        "scope", "openid email profile"
+                )
+        );
 
         Membro membro = new Membro();
         Igreja igreja = new Igreja();
@@ -82,21 +149,32 @@ class LoginGoogleUseCaseTest {
         ReflectionTestUtils.setField(igreja, "idExterno", igrejaId);
         membro.setIgreja(igreja);
 
-        when(autenticarGoogleUseCase.execute("id-token")).thenReturn(
-            new GoogleIdTokenDTO(
-                java.util.List.of("google-client-id"),
-                email,
-                true
-            )
+        FakeAutenticarGoogleUseCase autenticarGoogleUseCase = new FakeAutenticarGoogleUseCase(
+                new GoogleIdTokenDTO(java.util.List.of("google-client-id"), email, true)
         );
-        when(buscarPorEmaiUseCase.execute(email)).thenReturn(membro);
-        when(generateTokenUseCase.execute(membro)).thenReturn("jwt-token");
-        when(generateTokenUseCase.getExpiresIn()).thenReturn(3600L);
+        FakeAtualizarSecretGoogleUseCase atualizarSecretGoogleUseCase = new FakeAtualizarSecretGoogleUseCase();
+        FakeGenerateTokenUseCase generateTokenUseCase = new FakeGenerateTokenUseCase("jwt-token", 3600L);
+        FakeBuscarPorEmaiUseCase buscarPorEmaiUseCase = new FakeBuscarPorEmaiUseCase(membro);
 
-        LoginResponseDTO response = loginGoogleUseCase.execute(request);
+        LoginGoogleUseCase loginGoogleUseCase = instantiateUseCase(
+                exchangerClass,
+                exchangerProxy,
+                autenticarGoogleUseCase,
+                atualizarSecretGoogleUseCase,
+                generateTokenUseCase,
+                buscarPorEmaiUseCase
+        );
+
+        LoginResponseDTO response = executeUseCase(loginGoogleUseCase, request);
 
         assertEquals("jwt-token", response.acessToken());
-        assertEquals(3600L, response.expiresIn());
+        assertEquals(null, atualizarSecretGoogleUseCase.receivedRefreshToken);
+    }
+
+    @Test
+    void devePropagarFalhaNaTrocaDoAuthorizationCodeESemAvancarNoFluxo() throws Exception {
+        Class<?> requestDtoClass = loadRequiredClass(GOOGLE_CODE_REQUEST_DTO);
+        Class<?> exchangerClass = loadRequiredClass(GOOGLE_AUTHORIZATION_CODE_EXCHANGER);
 
         // Captura os argumentos da chamada para validar
         verify(atualizarSecretGoogleUseCase).execute(
@@ -112,30 +190,63 @@ class LoginGoogleUseCaseTest {
     }
 
     @Test
-    void deveLancarExcecaoQuandoMembroNaoExistir() {
-        GoogleAuthRequestDTO request = new GoogleAuthRequestDTO("id-token", "refresh-token");
+    void devePropagarQuandoEmailDoGoogleNaoCorresponderAMembroInterno() throws Exception {
+        Class<?> requestDtoClass = loadRequiredClass(GOOGLE_CODE_REQUEST_DTO);
+        Class<?> tokenResponseDtoClass = loadRequiredClass(GOOGLE_TOKEN_RESPONSE_DTO);
+        Class<?> exchangerClass = loadRequiredClass(GOOGLE_AUTHORIZATION_CODE_EXCHANGER);
 
-        when(autenticarGoogleUseCase.execute("id-token")).thenReturn(
-            new GoogleIdTokenDTO(
-                java.util.List.of("google-client-id"),
-                "naoexiste@teste.com",
-                true
-            )
+        String email = "naoexiste@teste.com";
+        String idToken = "google-id-token";
+
+        Object request = newRecordInstance(
+                requestDtoClass,
+                mapWithNullableValues(
+                        "authorizationCode", "google-auth-code",
+                        "redirectUri", "https://app.exemplo.com/auth/google/callback",
+                        "codeVerifier", null
+                )
         );
-        when(buscarPorEmaiUseCase.execute("naoexiste@teste.com")).thenReturn(null);
 
-        BadCredentialsException exception = assertThrows(
-                BadCredentialsException.class,
-                () -> loginGoogleUseCase.execute(request)
+        Object tokenResponse = newRecordInstance(
+                tokenResponseDtoClass,
+                Map.of(
+                        "accessToken", "google-access-token",
+                        "idToken", idToken,
+                        "refreshToken", "google-refresh-token",
+                        "expiresIn", 3600L,
+                        "tokenType", "Bearer",
+                        "scope", "openid email profile"
+                )
+        );
+
+        Object exchangerProxy = createExchangerProxy(exchangerClass, new AtomicReference<>(), tokenResponse, null);
+        FakeAutenticarGoogleUseCase autenticarGoogleUseCase = new FakeAutenticarGoogleUseCase(
+                new GoogleIdTokenDTO(java.util.List.of("google-client-id"), email, true)
+        );
+        FakeAtualizarSecretGoogleUseCase atualizarSecretGoogleUseCase = new FakeAtualizarSecretGoogleUseCase();
+        FakeGenerateTokenUseCase generateTokenUseCase = new FakeGenerateTokenUseCase("jwt-token", 3600L);
+        FakeBuscarPorEmaiUseCase buscarPorEmaiUseCase = new FakeBuscarPorEmaiUseCase(
+                new ObjectNotFoundException("Membro não encontrado com o email fornecido.")
         );
 
         assertEquals("Usuario nao cadastrado", exception.getMessage());
         verify(atualizarSecretGoogleUseCase, never()).execute(any(), any(), anyString(), anyString());
     }
 
-    @Test
-    void naoDevePersistirSecretSeRefreshTokenNaoForFornecido() {
-        String email = "usuario@teste.com";
+    private LoginGoogleUseCase instantiateUseCase(
+            Class<?> exchangerClass,
+            Object exchangerProxy,
+            AutenticarGoogleUseCase autenticarGoogleUseCase,
+            AtualizarSecretGoogleUseCase atualizarSecretGoogleUseCase,
+            GenerateTokenUseCase generateTokenUseCase,
+            BuscarPorEmaiUseCase buscarPorEmaiUseCase
+    ) {
+        Constructor<?> constructor = Arrays.stream(LoginGoogleUseCase.class.getConstructors())
+                .filter(candidate -> candidate.getParameterCount() == 5)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError(
+                        "LoginGoogleUseCase deve expor um construtor com 5 dependencias, incluindo o trocador de authorization code."
+                ));
 
         GoogleAuthRequestDTO request = new GoogleAuthRequestDTO("id-token", null);
         UUID igrejaId = UUID.fromString("22222222-2222-2222-2222-222222222222");
@@ -145,18 +256,27 @@ class LoginGoogleUseCaseTest {
         ReflectionTestUtils.setField(igreja, "idExterno", igrejaId);
         membro.setIgreja(igreja);
 
-        when(autenticarGoogleUseCase.execute("id-token")).thenReturn(
-            new GoogleIdTokenDTO(
-                java.util.List.of("google-client-id"),
-                email,
-                true
-            )
-        );
-        when(buscarPorEmaiUseCase.execute(email)).thenReturn(membro);
-        when(generateTokenUseCase.execute(membro)).thenReturn("jwt-token");
-        when(generateTokenUseCase.getExpiresIn()).thenReturn(3600L);
+            if (failure != null) {
+                throw failure;
+            }
 
-        LoginResponseDTO response = loginGoogleUseCase.execute(request);
+            return response;
+        };
+
+        return Proxy.newProxyInstance(
+                exchangerClass.getClassLoader(),
+                new Class<?>[]{exchangerClass},
+                handler
+        );
+    }
+
+    private LoginResponseDTO executeUseCase(LoginGoogleUseCase useCase, Object request) {
+        try {
+            Method executeMethod = Arrays.stream(LoginGoogleUseCase.class.getMethods())
+                    .filter(method -> method.getName().equals("execute"))
+                    .filter(method -> method.getParameterCount() == 1)
+                    .findFirst()
+                    .orElseThrow(() -> new AssertionError("LoginGoogleUseCase deve expor execute com um unico request DTO."));
 
         assertEquals("jwt-token", response.acessToken());
         verify(atualizarSecretGoogleUseCase, never()).execute(any(), any(), anyString(), anyString());

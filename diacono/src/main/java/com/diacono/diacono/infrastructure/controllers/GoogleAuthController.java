@@ -1,8 +1,9 @@
 package com.diacono.diacono.infrastructure.controllers;
 
-import com.diacono.diacono.applications.dtos.googleauth.GoogleAuthRequestDTO;
+import com.diacono.diacono.applications.dtos.googleauth.GoogleAuthorizationCodeRequestDTO;
 import com.diacono.diacono.applications.dtos.login.LoginResponseDTO;
 import com.diacono.diacono.usecases.googleauth.LoginGoogleUseCase;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class GoogleAuthController {
     }
 
     @PostMapping
-    public ResponseEntity<LoginResponseDTO> autenticarComGoogle(@Valid @RequestBody GoogleAuthRequestDTO googleAuthRequestDTO) {
+    public ResponseEntity<LoginResponseDTO> autenticarComGoogle(@Valid @RequestBody GoogleAuthorizationCodeRequestDTO googleAuthRequestDTO) {
         try {
             LoginResponseDTO response = loginGoogleUseCase.execute(googleAuthRequestDTO);
             logger.info("Autenticação Google realizado com sucesso");
