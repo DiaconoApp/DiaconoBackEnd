@@ -38,12 +38,12 @@ public class LoginGoogleUseCase {
 
         Membro membro = buscarPorEmaiUseCase.execute(email);
 
-        if (googleAuthRequestDTO.refreshToken() != null) {
+        if (googleTokenResponse.refreshToken() != null && !googleTokenResponse.refreshToken().isBlank()) {
             atualizarSecretGoogleUseCase.execute(
                 membro.getIdExterno(),
                 membro.getIgreja().getIdExterno(),
                 email,
-                googleAuthRequestDTO.refreshToken()
+                googleTokenResponse.refreshToken()
             );
         }
 
