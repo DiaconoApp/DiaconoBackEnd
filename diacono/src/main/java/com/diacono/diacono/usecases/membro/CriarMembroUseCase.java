@@ -22,7 +22,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -45,37 +50,44 @@ public class CriarMembroUseCase {
     }
 
     @Transactional
-    public RestResponseMessageDTO execute(MembroCreateDTO membroDTO) {
+    public RestResponseMessageDTO execute(MembroCreateDTO membroDTO, UUID igrejaId) {
 
         if (membroDTO == null) {
             throw new ObjectSaveErrorException("Dados do membro não podem ser nulos.");
         }
 
-        if (membroDTO.idExternoMinisterios() == null) {
-            Membro response = criarMembroSemMinisterio(membroDTO);
+        if (igrejaId == null) {
+            throw new ObjectSaveErrorException("Igreja do usuário não pode ser nula.");
+        }
+
+        if (membroDTO.idExternoMinisterios() == null || membroDTO.idExternoMinisterios().isEmpty()) {
+            criarMembroSemMinisterio(membroDTO, igrejaId);
             return new RestResponseMessageDTO(HttpStatus.CREATED, "Usuário cadastrado com sucesso");
         }
 
-        return criarMembroComMinisterio(membroDTO);
+        return criarMembroComMinisterio(membroDTO, igrejaId);
     }
 
-    private Membro criarMembroSemMinisterio(MembroCreateDTO membroDTO) {
-
-        if (membroDTO.cargo().equals(EnumCargoMembro.LIDER_MINISTERIO) && (membroDTO.idExternoMinisterios() == null)) {
+    private Membro criarMembroSemMinisterio(MembroCreateDTO membroDTO, UUID igrejaId) {
+        if (membroDTO.cargo().equals(EnumCargoMembro.LIDER_MINISTERIO)
+                && (membroDTO.idExternoMinisterios() == null || membroDTO.idExternoMinisterios().isEmpty())) {
             throw new ObjectSaveErrorException("Para cadastrar um líder de ministério, é necessário associar um ministério ao membro.");
         }
 
-        Membro membroExistente = membroRepository.findByEmailOrCpf(membroDTO.email(), membroDTO.cpf())
-                .orElseThrow(() -> new ObjectNotFoundException("Membro não encontrado"));
+        if (membroDTO.fkIgreja() == null || !membroDTO.fkIgreja().equals(igrejaId)) {
+            throw new ObjectNotFoundException("Igreja não encontrada");
+        }
 
-        if(membroExistente != null){
+        Optional<Membro> membroExistente = membroRepository.findByEmailOrCpf(membroDTO.email(), membroDTO.cpf());
+
+        if(membroExistente.isPresent()){
             throw new ObjectExistsException("Email ou CPF ja cadastrado");
         }
 
         LocalDate dataHoje = LocalDate.now();
 
         Membro membro = membroMapper.paraMembro(membroDTO);
-        Igreja igreja = buscarIgrejaPorUUIDUseCase.execute(membroDTO.fkIgreja());
+        Igreja igreja = buscarIgrejaPorUUIDUseCase.execute(igrejaId);
         membro.setStatus(EnumStatusMembro.ATIVO);
         membro.setIgreja(igreja);
         membro.setDataRegistro(dataHoje);
@@ -88,20 +100,28 @@ public class CriarMembroUseCase {
         return membroSalvo;
     }
 
-    private RestResponseMessageDTO criarMembroComMinisterio(MembroCreateDTO membroDTO) {
-        Ministerio ministerios = buscarPorUUID(membroDTO.idExternoMinisterios());
+    private RestResponseMessageDTO criarMembroComMinisterio(MembroCreateDTO membroDTO, UUID igrejaId) {
+        List<UUID> idsMinisterios = membroDTO.idExternoMinisterios();
+        Set<UUID> idsUnicos = new LinkedHashSet<>(idsMinisterios);
+        Set<Ministerio> ministerios = ministeriosRepository.findAllByIdExternoInAndIgrejaId(new ArrayList<>(idsUnicos), igrejaId);
 
-        Membro membro = criarMembroSemMinisterio(membroDTO);
+        if (ministerios.size() != idsUnicos.size()) {
+            throw new ObjectNotFoundException("Um ou mais ministérios não foram encontrados");
+        }
+
+        Membro membro = criarMembroSemMinisterio(membroDTO, igrejaId);
         apagarMembroMinisterioPorMembro(membro);
 
-        MembroMinisterio membroMinisterio = MembroMinisterio.builder()
-                .membro(membro)
-                .ministerio(ministerios)
-                .cargoMembro(EnumCargoMembroMinisterio.MEMBRO_MINISTERIO)
-                .nomeMinisterio(ministerios.getNome())
-                .build();
+        for (Ministerio ministerio : ministerios) {
+            MembroMinisterio membroMinisterio = MembroMinisterio.builder()
+                    .membro(membro)
+                    .ministerio(ministerio)
+                    .cargoMembro(EnumCargoMembroMinisterio.MEMBRO_MINISTERIO)
+                    .nomeMinisterio(ministerio.getNome())
+                    .build();
 
-        salvarTodos(membroMinisterio);
+            salvarTodos(membroMinisterio);
+        }
 
         return new RestResponseMessageDTO(HttpStatus.CREATED, "Usuário cadastrado com sucesso");
 

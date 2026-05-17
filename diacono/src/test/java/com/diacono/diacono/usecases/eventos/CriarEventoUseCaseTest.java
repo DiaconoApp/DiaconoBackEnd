@@ -8,6 +8,7 @@ import com.diacono.diacono.applications.mappers.endereco.EnderecoEventoMapper;
 import com.diacono.diacono.applications.mappers.evento.EventoMapper;
 import com.diacono.diacono.applications.mappers.recorrencia.RecorrenciaMapper;
 import com.diacono.diacono.domain.entity.EnderecoEvento;
+import com.diacono.diacono.domain.entity.EscalaEvento;
 import com.diacono.diacono.domain.entity.Evento;
 import com.diacono.diacono.domain.entity.Igreja;
 import com.diacono.diacono.domain.entity.Membro;
@@ -19,6 +20,8 @@ import com.diacono.diacono.domain.repository.MembroRepository;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.util.JwtUtils;
+import com.diacono.diacono.infrastructure.messaging.EventoProducer;
+import com.diacono.diacono.usecases.escalasevento.GerarEscalaEventoUseCase;
 import com.diacono.diacono.usecases.eventos.validation.ValidarHora;
 import com.diacono.diacono.usecases.igreja.BuscarIgrejaPorUUIDUseCase;
 import com.diacono.diacono.usecases.ministerio.BuscarMembroMinisterioLiderMinisterioComFiltroUseCase;
@@ -31,6 +34,7 @@ import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -79,6 +83,12 @@ class CriarEventoUseCaseTest {
 	@Mock
 	private BuscarMinisterioPorUUIDUseCase buscarMinisterioPorUUIDUseCase;
 
+	@Mock
+	private EventoProducer eventoProducer;
+  
+  @Mock
+	private GerarEscalaEventoUseCase gerarEscalaEventoUseCase;
+
 	@InjectMocks
 	private CriarEventoUseCase useCase;
 
@@ -104,18 +114,18 @@ class CriarEventoUseCaseTest {
 		Membro membro = new Membro();
 		Igreja igreja = Igreja.builder().nome("Igreja Central").build();
 		Ministerio ministerio = Ministerio.builder().nome("Louvor").build();
+		EscalaEvento escalaEvento = new EscalaEvento();
 
 		when(recorrenciaMapper.paraRecorrencia(request.recorrencia())).thenReturn(recorrencia);
 		when(buscarEnderecoEventoPorUUIDUseCase.execute(idEndereco)).thenReturn(enderecoEvento);
 		when(eventoMapper.paraEvento(request)).thenReturn(evento);
 		when(jwtUtils.getSubject()).thenReturn(idMembro);
 		when(membroRepository.findByIdExterno(idMembro)).thenReturn(Optional.of(membro));
-		when(jwtUtils.getIgrejaId()).thenReturn(idIgreja);
 		when(buscarIgrejaPorUUIDUseCase.execute(idIgreja)).thenReturn(igreja);
-		when(buscarMinisterioPorUUIDUseCase.execute(List.of(idMinisterio))).thenReturn(Set.of(ministerio));
+		when(gerarEscalaEventoUseCase.executeParaCriacao(evento, List.of(idMinisterio), idIgreja)).thenReturn(new HashSet<>(Set.of(escalaEvento)));
 		when(eventoRepository.save(evento)).thenReturn(evento);
 
-		RestResponseMessageDTO response = useCase.execute(request);
+		RestResponseMessageDTO response = useCase.execute(request, idIgreja);
 
 		assertEquals(HttpStatus.CREATED, response.getStatus());
 		assertEquals("Evento sem recorrência criado com sucesso", response.getMessage());
@@ -126,8 +136,9 @@ class CriarEventoUseCaseTest {
 	@Test
 	void deveLancarExcecaoQuandoRecorrenciaSemanalNaoTiverDatas() {
 		EventoCreateDTO request = criarEventoCreateDTOSemanalInvalido();
+		UUID idIgreja = UUID.fromString("33333333-3333-3333-3333-333333333333");
 
-		FieldInvalidException ex = assertThrows(FieldInvalidException.class, () -> useCase.execute(request));
+		FieldInvalidException ex = assertThrows(FieldInvalidException.class, () -> useCase.execute(request, idIgreja));
 
 		assertEquals("É necessário preencher os campos de inicío e término da recorrência", ex.getMessage());
 	}

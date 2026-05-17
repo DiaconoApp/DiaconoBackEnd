@@ -9,7 +9,6 @@ import com.diacono.diacono.domain.enums.EnumCargoMembro;
 import com.diacono.diacono.domain.enums.EnumStatusMembro;
 import com.diacono.diacono.domain.repository.MembroRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectExistsException;
-import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.error.exceptions.ObjectSaveErrorException;
 import com.diacono.diacono.usecases.igreja.BuscarIgrejaPorUUIDUseCase;
 import com.diacono.diacono.usecases.membro.validation.ValidarCriacaoMembro;
@@ -17,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Service
 public class CadastrarMembroUseCase {
@@ -46,11 +46,10 @@ public class CadastrarMembroUseCase {
             throw new ObjectSaveErrorException("Dados do membro não podem ser nulos.");
         }
 
-        Membro membroExistente = membroRepository.findByEmailOrCpf(membroDTO.email(), membroDTO.cpf())
-                .orElseThrow(() -> new ObjectNotFoundException("Membro não encontrado"));
+        Optional<Membro> membroExistente = membroRepository.findByEmailOrCpf(membroDTO.email(), membroDTO.cpf());
 
-        if(membroExistente != null){
-            throw new ObjectExistsException("Erro ao se cadastrar");
+        if(membroExistente.isPresent()){
+            throw new ObjectExistsException("Email ou CPF ja cadastrado");
         }
 
         LocalDate dataHoje = LocalDate.now();

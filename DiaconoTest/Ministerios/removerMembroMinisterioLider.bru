@@ -1,17 +1,17 @@
 meta {
   name: removerMembroMinisterioLider
   type: http
-  seq: 6
+  seq: 7
 }
 
 delete {
-  url: http://localhost:8080/api/v1/ministerios/lider-ministerio/45a8725d-a7f3-4667-bc5d-51ac8f9c67d6/18c9cedd-ad5b-46f4-90cb-ebc05ea99f63
+  url: {{baseUrl}}/api/v1/ministerios/lider-ministerio/{{ministerioId}}/{{membroMinisterioId}}
   body: none
   auth: bearer
 }
 
 auth:bearer {
-  token: {{acessToken}}
+  token: {{token}}
 }
 
 settings {

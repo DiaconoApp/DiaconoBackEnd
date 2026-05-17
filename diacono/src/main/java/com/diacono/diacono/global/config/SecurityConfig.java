@@ -9,6 +9,9 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -40,16 +43,19 @@ public class SecurityConfig {
     private RSAPublicKey rsaPublicKey;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOidcUserService customOidcUserService, CustomOAuth2AuthenticationSuccessHandler successHandler ) throws Exception{
-
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            CustomOidcUserService customOidcUserService,
+            CustomOAuth2AuthenticationSuccessHandler successHandler
+    ) throws Exception{
         http
-                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
+                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login/**","/api/v1/auth/**",  "/oauth2/**", "/register/**").permitAll()
+                        .requestMatchers("/login/**","/api/v1/auth/**",  "/oauth2/**", "/api/v1/register/**").permitAll()
                         .requestMatchers("/h2-console/**", "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
-                                "/webjars/**").permitAll()
+                                "/webjars/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf.disable())
@@ -68,7 +74,11 @@ public class SecurityConfig {
     }
 
     @Bean
-    public JwtEncoder jwtEncoder(){
+    public JwtEncoder jwtEncoder(Environment env){
+        String privKeyProp = env.getProperty("jwt.private.key", "");
+        if(privKeyProp.contains("classpath:teste")){
+            logger.warn("A chave privada JWT está configurada a partir de um recurso de teste no classpath ({}). NÃO utilize chaves de teste em produção", privKeyProp);
+        }
         JWK jwk = new RSAKey.Builder(this.rsaPublicKey).privateKey(this.rsaPrivateKey).build();
         var jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
 
@@ -76,9 +86,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    public JwtDecoder jwtDecoder(){
+    public JwtDecoder jwtDecoder(Environment env){
+        String pubKeyProp = env.getProperty("jwt.public.key", "");
+        if(pubKeyProp.contains("classpath:teste")){
+            logger.warn("A chave pública JWT está configurada a partir de um recurso de teste no classpath ({}). NÃO utilize chaves de teste em produção", pubKeyProp);
+        }
         return NimbusJwtDecoder.withPublicKey(rsaPublicKey).build();
     }
+
+    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
     //CRIPTOGRAFIA DA SENHA
 
@@ -97,7 +113,11 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:5173"));
+        configuration.setAllowedOriginPatterns(List.of(
+            "http://localhost:5173", 
+            "https://odiacono.duckdns.org" 
+        ));
+        
         configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

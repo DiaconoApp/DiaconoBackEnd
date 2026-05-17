@@ -17,6 +17,8 @@ import com.diacono.diacono.domain.repository.MembroRepository;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.util.JwtUtils;
+import com.diacono.diacono.infrastructure.messaging.EventoProducer;
+import com.diacono.diacono.usecases.escalasevento.GerarEscalaEventoUseCase;
 import com.diacono.diacono.usecases.igreja.BuscarIgrejaPorUUIDUseCase;
 import com.diacono.diacono.usecases.eventos.validation.ValidarHora;
 import com.diacono.diacono.usecases.ministerio.BuscarMembroMinisterioLiderMinisterioComFiltroUseCase;
@@ -28,7 +30,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,8 +47,10 @@ public class CriarEventoUseCase {
     private final ValidarHora validarHora;
     private final EnderecoEventoMapper enderecoEventoMapper;
     private final BuscarMinisterioPorUUIDUseCase buscarMinisterioPorUUIDUseCase;
+    private final EventoProducer eventoProducer;
+    private final GerarEscalaEventoUseCase gerarEscalaEventoUseCase;
 
-    public CriarEventoUseCase(EventoRepository eventoRepository, EventoMapper eventoMapper, BuscarEnderecoEventoPorUUIDUseCase buscarEnderecoEventoPorUUIDUseCase, RecorrenciaMapper recorrenciaMapper, BuscarMembroMinisterioLiderMinisterioComFiltroUseCase buscarMembroMinisterioLiderMinisterioComFiltroUseCase, MembroRepository membroRepository, BuscarIgrejaPorUUIDUseCase buscarIgrejaPorUUIDUseCase, JwtUtils jwtUtils, ValidarHora validarHora, EnderecoEventoMapper enderecoEventoMapper, BuscarMinisterioPorUUIDUseCase buscarMinisterioPorUUIDUseCase) {
+    public CriarEventoUseCase(EventoRepository eventoRepository, EventoMapper eventoMapper, BuscarEnderecoEventoPorUUIDUseCase buscarEnderecoEventoPorUUIDUseCase, RecorrenciaMapper recorrenciaMapper, BuscarMembroMinisterioLiderMinisterioComFiltroUseCase buscarMembroMinisterioLiderMinisterioComFiltroUseCase, MembroRepository membroRepository, BuscarIgrejaPorUUIDUseCase buscarIgrejaPorUUIDUseCase, JwtUtils jwtUtils, ValidarHora validarHora, EnderecoEventoMapper enderecoEventoMapper, BuscarMinisterioPorUUIDUseCase buscarMinisterioPorUUIDUseCase, EventoProducer eventoProducer, GerarEscalaEventoUseCase gerarEscalaEventoUseCase) {
         this.eventoRepository = eventoRepository;
         this.eventoMapper = eventoMapper;
         this.buscarEnderecoEventoPorUUIDUseCase = buscarEnderecoEventoPorUUIDUseCase;
@@ -59,10 +62,12 @@ public class CriarEventoUseCase {
         this.validarHora = validarHora;
         this.enderecoEventoMapper = enderecoEventoMapper;
         this.buscarMinisterioPorUUIDUseCase = buscarMinisterioPorUUIDUseCase;
+        this.eventoProducer = eventoProducer;
+        this.gerarEscalaEventoUseCase = gerarEscalaEventoUseCase;
     }
 
     @Transactional
-    public RestResponseMessageDTO execute(EventoCreateDTO request) {
+    public RestResponseMessageDTO execute(EventoCreateDTO request, UUID igrejaId) {
 
         validarRecorrencia(request.recorrencia(), request.dataHoraInicio());
         validarEnderecoEvento(request.endereco());
@@ -70,17 +75,17 @@ public class CriarEventoUseCase {
         validarHora.validarHoraFuturo(request.dataHoraInicio(), request.dataHoraFim());
 
         if (request.recorrencia().tipoRecorrencia().equals(TipoRecorrencia.NAO_REPETE)) {
-            criarEventoSemRecorrencia(request);
+            criarEventoSemRecorrencia(request, igrejaId);
             return new RestResponseMessageDTO(HttpStatus.CREATED, "Evento sem recorrência criado com sucesso");
         }
 
         if (request.recorrencia().tipoRecorrencia().equals(TipoRecorrencia.SEMANAL)) {
-            criarEventoRecorrenciaSemanal(request);
+            criarEventoRecorrenciaSemanal(request, igrejaId);
             return new RestResponseMessageDTO(HttpStatus.CREATED, "Eventos com recorrência semanal criado com sucesso");
         }
 
         if (request.recorrencia().tipoRecorrencia().equals(TipoRecorrencia.MENSAL)) {
-            criarEventoRecorrenciaMensal(request);
+            criarEventoRecorrenciaMensal(request, igrejaId);
             return new RestResponseMessageDTO(HttpStatus.CREATED, "Eventos com recorrência mensal criados com sucesso");
         }
 
@@ -144,9 +149,9 @@ public class CriarEventoUseCase {
         }
     }
 
-    private RestResponseMessageDTO criarEventoRecorrenciaSemanal(EventoCreateDTO request) {
+    private RestResponseMessageDTO criarEventoRecorrenciaSemanal(EventoCreateDTO request, UUID igrejaId) {
 
-        Evento evento = criarEventoSemRecorrencia(request);
+        Evento evento = criarEventoSemRecorrencia(request, igrejaId);
 
         List<Evento> eventos = new ArrayList<>();
 
@@ -160,7 +165,6 @@ public class CriarEventoUseCase {
             novoEvento.setIgreja(evento.getIgreja());
             novoEvento.setOrganizador(evento.getOrganizador());
             novoEvento.setEnderecoEvento(evento.getEnderecoEvento());
-            novoEvento.setMinisterios(new HashSet<>(evento.getMinisterios()));
             novoEvento.setRecorrencia(evento.getRecorrencia());
             novoEvento.setNome(evento.getNome());
             novoEvento.setDescricao(evento.getDescricao());
@@ -168,19 +172,21 @@ public class CriarEventoUseCase {
             novoEvento.setDataHoraInicio(evento.getDataHoraInicio().plusWeeks(i));
             novoEvento.setDataHoraFim(evento.getDataHoraFim().plusWeeks(i));
             novoEvento.setCusto(evento.getCusto());
+            novoEvento.setEscalaEvento(gerarEscalaEventoUseCase.executeParaClonagem(novoEvento, evento.getEscalaEvento()));
 
             eventos.add(novoEvento);
         }
 
-        eventoRepository.saveAll(eventos);
+        List<Evento> eventosSalvos = eventoRepository.saveAll(eventos);
+        eventosSalvos.forEach(eventoProducer::publicarEventoCriadoAposCommit);
 
         return new RestResponseMessageDTO(HttpStatus.CREATED, "Eventos com recorrência semanal criado com sucesso");
     }
 
 
-    private RestResponseMessageDTO criarEventoRecorrenciaMensal(EventoCreateDTO request) {
+    private RestResponseMessageDTO criarEventoRecorrenciaMensal(EventoCreateDTO request, UUID igrejaId) {
 
-        Evento eventoBase = criarEventoSemRecorrencia(request);
+        Evento eventoBase = criarEventoSemRecorrencia(request, igrejaId);
 
         List<Evento> eventos = new ArrayList<>();
 
@@ -194,7 +200,6 @@ public class CriarEventoUseCase {
             novoEvento.setIgreja(eventoBase.getIgreja());
             novoEvento.setOrganizador(eventoBase.getOrganizador());
             novoEvento.setEnderecoEvento(eventoBase.getEnderecoEvento());
-            novoEvento.setMinisterios(new HashSet<>(eventoBase.getMinisterios()));
             novoEvento.setRecorrencia(eventoBase.getRecorrencia());
             novoEvento.setNome(eventoBase.getNome());
             novoEvento.setDescricao(eventoBase.getDescricao());
@@ -202,16 +207,18 @@ public class CriarEventoUseCase {
             novoEvento.setDataHoraInicio(eventoBase.getDataHoraInicio().plusMonths(i));
             novoEvento.setDataHoraFim(eventoBase.getDataHoraFim().plusMonths(i));
             novoEvento.setCusto(eventoBase.getCusto());
+            novoEvento.setEscalaEvento(gerarEscalaEventoUseCase.executeParaClonagem(novoEvento, eventoBase.getEscalaEvento()));
 
             eventos.add(novoEvento);
         }
 
-        eventoRepository.saveAll(eventos);
+        List<Evento> eventosSalvos = eventoRepository.saveAll(eventos);
+        eventosSalvos.forEach(eventoProducer::publicarEventoCriadoAposCommit);
 
         return new RestResponseMessageDTO(HttpStatus.CREATED, "Eventos com recorrência mensal criados com sucesso");
     }
 
-    private Evento criarEventoSemRecorrencia(EventoCreateDTO request) {
+    private Evento criarEventoSemRecorrencia(EventoCreateDTO request, UUID igrejaId) {
 
         Recorrencia recorrencia = converterDtoToRecorrencia(request.recorrencia());
 
@@ -227,10 +234,13 @@ public class CriarEventoUseCase {
         evento.setEnderecoEvento(endereco);
         evento.setRecorrencia(recorrencia);
         evento.setOrganizador(buscarPorUUID(jwtUtils.getSubject()));
-        evento.setIgreja(buscarIgrejaPorUUIDUseCase.execute(jwtUtils.getIgrejaId()));
-        evento.setMinisterios(buscarMinisterioPorUUIDUseCase.execute(request.fkMinisterios()));
+        evento.setIgreja(buscarIgrejaPorUUIDUseCase.execute(igrejaId));
+        evento.setEscalaEvento(gerarEscalaEventoUseCase.executeParaCriacao(evento, request.fkMinisterios(), igrejaId));
 
-        return eventoRepository.save(evento);
+        Evento eventoSalvo = eventoRepository.save(evento);
+        eventoProducer.publicarEventoCriadoAposCommit(eventoSalvo);
+
+        return eventoSalvo;
     }
 
     public Membro buscarPorUUID(UUID idExterno) {

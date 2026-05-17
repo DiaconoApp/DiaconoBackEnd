@@ -1,23 +1,23 @@
 meta {
   name: readAllMembros
   type: http
-  seq: 3
+  seq: 2
 }
 
 get {
-  url: http://localhost:8080/membros?page=0&size=30&sort=nome,asc
+  url: {{baseUrl}}/api/v1/membros?page={{page}}&size={{size}}&sort=nome,asc
   body: none
   auth: bearer
 }
 
 params:query {
-  page: 0
-  size: 30
+  page: {{page}}
+  size: {{size}}
   sort: nome,asc
 }
 
 auth:bearer {
-  token: {{acessToken}}
+  token: {{token}}
 }
 
 settings {

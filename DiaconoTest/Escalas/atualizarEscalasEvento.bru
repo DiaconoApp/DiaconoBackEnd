@@ -1,0 +1,34 @@
+meta {
+  name: atualizarEscalasEvento
+  type: http
+  seq: 3
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/escalas-evento/governo/{{eventoId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  [
+    {
+      "idExternoEscalaEvento": "{{escalaEventoId}}",
+      "idExternoMinisterio": "{{ministerioId}}",
+      "isMinisterioEscalado": true
+    }
+  ]
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

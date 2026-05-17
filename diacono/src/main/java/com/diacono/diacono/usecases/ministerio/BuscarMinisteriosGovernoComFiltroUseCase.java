@@ -6,32 +6,37 @@ import com.diacono.diacono.domain.entity.Ministerio;
 import com.diacono.diacono.domain.enums.EnumStatusMinisterio;
 import com.diacono.diacono.domain.repository.MinisteriosRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.global.util.JwtUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 public class BuscarMinisteriosGovernoComFiltroUseCase {
 
+    private static final Logger logger = LoggerFactory.getLogger(BuscarMinisteriosGovernoComFiltroUseCase.class);
+
     private final MinisteriosRepository ministeriosRepository;
     private final MinisterioMapper mapper;
-    private final JwtUtils jwtUtils;
 
-    public BuscarMinisteriosGovernoComFiltroUseCase(MinisteriosRepository ministeriosRepository, MinisterioMapper mapper, JwtUtils jwtUtils) {
+    public BuscarMinisteriosGovernoComFiltroUseCase(MinisteriosRepository ministeriosRepository, MinisterioMapper mapper) {
         this.ministeriosRepository = ministeriosRepository;
         this.mapper = mapper;
-        this.jwtUtils = jwtUtils;
     }
 
     @Transactional(readOnly = true)
-    public Page<MinisterioSimplificadoDTO> execute(Pageable pageable, String buscaGeral, EnumStatusMinisterio status) {
+    public Page<MinisterioSimplificadoDTO> execute(Pageable pageable, String buscaGeral, EnumStatusMinisterio status, UUID igrejaId) {
 
-        String stringBusca = "%" + buscaGeral.trim().toUpperCase() + "%";
+        String stringBusca = (buscaGeral != null ? buscaGeral.trim().toUpperCase() : "");
 
-        Page<Ministerio> ministeriosPage = ministeriosRepository.buscarComFiltros(pageable, stringBusca, status, jwtUtils.getIgrejaId());
+        Page<Ministerio> ministeriosPage = ministeriosRepository.buscarComFiltros(pageable, stringBusca, status, igrejaId);
+
         if (ministeriosPage.isEmpty()) {
+            logger.warn("Nenhum ministério encontrado com filtros aplicados. igrejaId=[{}]", igrejaId);
             throw new ObjectNotFoundException("Nenhum ministério encontrado");
         }
 

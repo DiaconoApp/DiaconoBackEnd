@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -59,19 +60,52 @@ class CriarMembroUseCaseTest {
 
 	@Test
 	void deveLancarExcecaoQuandoDadosDoMembroForemNulos() {
-		ObjectSaveErrorException ex = assertThrows(ObjectSaveErrorException.class, () -> useCase.execute(null));
+		UUID igrejaId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+		ObjectSaveErrorException ex = assertThrows(ObjectSaveErrorException.class, () -> useCase.execute(null, igrejaId));
 
 		assertEquals("Dados do membro não podem ser nulos.", ex.getMessage());
 		verifyNoInteractions(membroRepository, membroMapper, validarCriacaoMembro, buscarIgrejaPorUUIDUseCase);
 	}
 
 	@Test
-	void deveLancarExcecaoQuandoCargoForLiderSemMinisterioAssociado() {
+	void deveLancarExcecaoQuandoIgrejaIdForNulo() {
 		MembroCreateDTO dto = criarMembroCreateDTO();
+		ObjectSaveErrorException ex = assertThrows(ObjectSaveErrorException.class, () -> useCase.execute(dto, null));
 
-		ObjectSaveErrorException ex = assertThrows(ObjectSaveErrorException.class, () -> useCase.execute(dto));
+		assertEquals("Igreja do usuário não pode ser nula.", ex.getMessage());
+	}
+
+	@Test
+	void deveLancarExcecaoQuandoCargoForLiderSemMinisterioAssociado() {
+		UUID igrejaId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+		MembroCreateDTO dto = criarMembroCreateDTOComIgreja(igrejaId);
+
+		ObjectSaveErrorException ex = assertThrows(ObjectSaveErrorException.class, () -> useCase.execute(dto, igrejaId));
 
 		assertEquals("Para cadastrar um líder de ministério, é necessário associar um ministério ao membro.", ex.getMessage());
+	}
+
+	@Test
+	void deveLancarExcecaoQuandoFkIgrejaNaoBateComIgrejaId() {
+		UUID igrejaId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+		UUID igrejaIdDifferente = UUID.fromString("33333333-3333-3333-3333-333333333333");
+		MembroCreateDTO dto = new MembroCreateDTO(
+				igrejaIdDifferente,
+				"Samuel",
+				"12345678909",
+				LocalDate.of(2000, 1, 1),
+				"samuel@teste.com",
+				"11999999999",
+				"123456",
+				null,
+				EnumCargoMembro.MEMBRO,
+				EnumGeneroMembro.MASCULINO,
+				new EnderecoMembroDTO("12345678", "SP", "SAO PAULO", "CENTRO", "RUA A", "AP 1", "10")
+		);
+
+		ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> useCase.execute(dto, igrejaId));
+
+		assertEquals("Igreja não encontrada", ex.getMessage());
 	}
 
 	@Test
@@ -122,6 +156,22 @@ class CriarMembroUseCaseTest {
 	private MembroCreateDTO criarMembroCreateDTO() {
 		return new MembroCreateDTO(
 				UUID.fromString("22222222-2222-2222-2222-222222222222"),
+				"Samuel",
+				"12345678909",
+				LocalDate.of(2000, 1, 1),
+				"samuel@teste.com",
+				"11999999999",
+				"123456",
+				null,
+				EnumCargoMembro.LIDER_MINISTERIO,
+				EnumGeneroMembro.MASCULINO,
+				new EnderecoMembroDTO("12345678", "SP", "SAO PAULO", "CENTRO", "RUA A", "AP 1", "10")
+		);
+	}
+
+	private MembroCreateDTO criarMembroCreateDTOComIgreja(UUID igrejaId) {
+		return new MembroCreateDTO(
+				igrejaId,
 				"Samuel",
 				"12345678909",
 				LocalDate.of(2000, 1, 1),

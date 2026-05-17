@@ -5,10 +5,10 @@ import com.diacono.diacono.applications.mappers.membro.MembroMapper;
 import com.diacono.diacono.domain.entity.Membro;
 import com.diacono.diacono.domain.entity.MembroMinisterio;
 import com.diacono.diacono.domain.entity.Ministerio;
+import com.diacono.diacono.domain.enums.EnumCargoMembro;
 import com.diacono.diacono.domain.enums.EnumStatusMembro;
 import com.diacono.diacono.domain.repository.MembroRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.global.util.JwtUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -41,9 +41,6 @@ class BuscarTodosComFiltroUseCaseTest {
 	@Mock
 	private MembroMapper membroMapper;
 
-	@Mock
-	private JwtUtils jwtUtils;
-
 	@InjectMocks
 	private BuscarTodosComFiltroUseCase useCase;
 
@@ -70,14 +67,14 @@ class BuscarTodosComFiltroUseCaseTest {
 				"11999999999",
 				LocalDate.of(2000, 1, 1),
 				null,
-				EnumStatusMembro.ATIVO
+				EnumStatusMembro.ATIVO,
+                EnumCargoMembro.MEMBRO
 		);
 
-		when(jwtUtils.getIgrejaId()).thenReturn(idIgreja);
 		when(membroRepository.findAllWithFilter("%sam%", idIgreja)).thenReturn(List.of(membro));
 		when(membroMapper.paraMembrosResponseDTO(List.of(membro))).thenReturn(List.of(dto));
 
-		Page<MembroResponseDTO> response = useCase.execute(pageable, "sam", EnumStatusMembro.ATIVO, idMinisterio);
+		Page<MembroResponseDTO> response = useCase.execute(pageable, "sam", EnumStatusMembro.ATIVO, idMinisterio, idIgreja);
 
 		assertEquals(1, response.getTotalElements());
 		assertEquals(dto, response.getContent().getFirst());
@@ -90,12 +87,11 @@ class BuscarTodosComFiltroUseCaseTest {
 		UUID idIgreja = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		Pageable pageable = PageRequest.of(0, 10);
 
-		when(jwtUtils.getIgrejaId()).thenReturn(idIgreja);
 		when(membroRepository.findAllWithFilter("%sam%", idIgreja)).thenReturn(List.of());
 
 		ObjectNotFoundException ex = assertThrows(
 				ObjectNotFoundException.class,
-				() -> useCase.execute(pageable, "sam", null, null)
+							() -> useCase.execute(pageable, "sam", null, null, idIgreja)
 		);
 
 		assertEquals("Nenhum membro encontrado", ex.getMessage());
@@ -110,12 +106,11 @@ class BuscarTodosComFiltroUseCaseTest {
 		Membro membro = new Membro();
 		membro.setStatus(EnumStatusMembro.INATIVO);
 
-		when(jwtUtils.getIgrejaId()).thenReturn(idIgreja);
 		when(membroRepository.findAllWithFilter("%sam%", idIgreja)).thenReturn(List.of(membro));
 
 		ObjectNotFoundException ex = assertThrows(
 				ObjectNotFoundException.class,
-				() -> useCase.execute(pageable, "sam", EnumStatusMembro.ATIVO, null)
+							() -> useCase.execute(pageable, "sam", EnumStatusMembro.ATIVO, null, idIgreja)
 		);
 
 		assertEquals("Nenhum membro encontrado", ex.getMessage());

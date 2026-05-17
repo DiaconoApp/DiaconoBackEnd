@@ -31,11 +31,13 @@ class BuscarMinisterioPorUUIDUseCaseTest {
 	@Test
 	void deveRetornarMinisteriosQuandoEncontrados() {
 		UUID idMinisterio = UUID.fromString("11111111-1111-1111-1111-111111111111");
+		UUID igrejaId = UUID.fromString("22222222-2222-2222-2222-222222222222");
 		Ministerio ministerio = Ministerio.builder().nome("Louvor").build();
 
-		when(ministeriosRepository.findAllByIdExternoIn(List.of(idMinisterio))).thenReturn(Set.of(ministerio));
+		// A01: Validar scoping por Igreja
+		when(ministeriosRepository.findAllByIdExternoInAndIgrejaId(List.of(idMinisterio), igrejaId)).thenReturn(Set.of(ministerio));
 
-		Set<Ministerio> response = useCase.execute(List.of(idMinisterio));
+		Set<Ministerio> response = useCase.execute(List.of(idMinisterio), igrejaId);
 
 		assertEquals(1, response.size());
 	}
@@ -43,9 +45,11 @@ class BuscarMinisterioPorUUIDUseCaseTest {
 	@Test
 	void deveLancarExcecaoQuandoNaoEncontrarMinisterios() {
 		UUID idMinisterio = UUID.fromString("11111111-1111-1111-1111-111111111111");
-		when(ministeriosRepository.findAllByIdExternoIn(List.of(idMinisterio))).thenReturn(Set.of());
+		UUID igrejaId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+		when(ministeriosRepository.findAllByIdExternoInAndIgrejaId(List.of(idMinisterio), igrejaId)).thenReturn(Set.of());
 
-		ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> useCase.execute(List.of(idMinisterio)));
+		// A01: Validar que ObjectNotFoundException é lançada quando nenhum ministério da Igreja é encontrado
+		ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> useCase.execute(List.of(idMinisterio), igrejaId));
 
 		assertEquals("Ministérios não encontrados", ex.getMessage());
 	}

@@ -3,10 +3,10 @@ package com.diacono.diacono.usecases.membro;
 import com.diacono.diacono.applications.dtos.membro.MembroResponseDTO;
 import com.diacono.diacono.applications.mappers.membro.MembroMapper;
 import com.diacono.diacono.domain.entity.Membro;
+import com.diacono.diacono.domain.enums.EnumCargoMembro;
 import com.diacono.diacono.domain.enums.EnumStatusMembro;
 import com.diacono.diacono.domain.repository.MembroRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
-import com.diacono.diacono.global.util.JwtUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,9 +36,6 @@ class BuscarTodosSemFiltroUseCaseTest {
 	@Mock
 	private MembroMapper membroMapper;
 
-	@Mock
-	private JwtUtils jwtUtils;
-
 	@InjectMocks
 	private BuscarTodosSemFiltroUseCase useCase;
 
@@ -55,16 +52,16 @@ class BuscarTodosSemFiltroUseCaseTest {
 				"11999999999",
 				LocalDate.of(2000, 1, 1),
 				null,
-				EnumStatusMembro.ATIVO
+				EnumStatusMembro.ATIVO,
+                EnumCargoMembro.MEMBRO
 		);
 
 		Page<Membro> membrosPage = new PageImpl<>(List.of(membro), pageable, 1);
 
-		when(jwtUtils.getIgrejaId()).thenReturn(idIgreja);
 		when(membroRepository.findByIgrejaIdExterno(idIgreja, pageable)).thenReturn(membrosPage);
 		when(membroMapper.paraMembroResponseDTO(membro)).thenReturn(dto);
 
-		Page<MembroResponseDTO> response = useCase.execute(pageable);
+		Page<MembroResponseDTO> response = useCase.execute(pageable, idIgreja);
 
 		assertEquals(1, response.getTotalElements());
 		assertEquals(dto, response.getContent().getFirst());
@@ -76,10 +73,9 @@ class BuscarTodosSemFiltroUseCaseTest {
 		UUID idIgreja = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		Pageable pageable = PageRequest.of(0, 10);
 
-		when(jwtUtils.getIgrejaId()).thenReturn(idIgreja);
 		when(membroRepository.findByIgrejaIdExterno(idIgreja, pageable)).thenReturn(Page.empty());
 
-		ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> useCase.execute(pageable));
+		ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> useCase.execute(pageable, idIgreja));
 
 		assertEquals("Nenhum membro encontrado", ex.getMessage());
 		verify(membroMapper, never()).paraMembroResponseDTO(org.mockito.ArgumentMatchers.any());

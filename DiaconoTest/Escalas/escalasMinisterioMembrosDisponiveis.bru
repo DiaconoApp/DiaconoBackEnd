@@ -1,0 +1,20 @@
+meta {
+  name: escalasMinisterioMembrosDisponiveis
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/escalas-ministerio/lider-ministerio/{{escalaEventoId}}/membros-disponiveis
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,0 +1,109 @@
+contexto_operacional:
+  papel:
+    - "atuar como especialista em backend"
+    - "atuar como especialista em engenharia de prompts"
+    - "atuar como mantenedor de documentacao estruturada para consumo por IA"
+  objetivo_operacional:
+    - "atualizar arquivos de contexto em /docs com base no codigo"
+    - "garantir que os documentos representem fielmente o estado atual do sistema"
+    - "preservar consistencia para uso futuro por IA"
+
+objetivo:
+  descrever: "garantir consistencia entre codigo backend e documentos em /docs"
+
+regras_globais:
+  - "nao recriar documentos"
+  - "nao alterar estrutura dos arquivos"
+  - "seguir rigorosamente o padrao de formato ja existente em cada documento"
+  - "replicar padroes existentes de escrita, identacao e organizacao"
+  - "nao escrever fora do formato existente"
+  - "nao inventar informacoes"
+  - "basear todas as alteracoes no codigo real"
+  - "realizar alteracoes minimas e precisas"
+
+documentos_alvo:
+  - "/docs/ARQUITETURA.md"
+  - "/docs/FLUXOS_NEGOCIO.md"
+  - "/docs/REGRAS_NEGOCIO.md"
+
+processo:
+  - etapa: "analisar_codigo"
+    acoes:
+      - "identificar alteracoes relevantes no codigo"
+      - "inspecionar controllers"
+      - "inspecionar usecases"
+      - "inspecionar domain services"
+      - "inspecionar entidades"
+      - "inspecionar repositories"
+
+  - etapa: "classificar_mudancas"
+    acoes:
+      - "classificar como nova_funcionalidade"
+      - "classificar como alteracao_regra"
+      - "classificar como alteracao_fluxo"
+      - "classificar como alteracao_arquitetura"
+
+  - etapa: "mapear_impacto"
+    regras:
+      - "se alteracao_regra entao atualizar REGRAS_NEGOCIO.md"
+      - "se alteracao_fluxo entao atualizar FLUXOS_NEGOCIO.md"
+      - "se alteracao_arquitetura entao atualizar ARQUITETURA.md"
+
+  - etapa: "atualizar_documentos"
+    acoes:
+      - "localizar secoes impactadas"
+      - "modificar apenas entradas necessarias"
+      - "preservar completamente o formato existente"
+      - "seguir exatamente o padrao de campos e organizacao ja utilizados"
+
+atualizacao_por_documento:
+  ARQUITETURA.md:
+    acoes:
+      - "atualizar lista de camadas"
+      - "atualizar principais_classes"
+      - "atualizar dependencias"
+      - "atualizar fluxos principais se impactados"
+      - "registrar violacoes de arquitetura mantendo formato existente"
+
+  FLUXOS_NEGOCIO.md:
+    acoes:
+      - "validar fluxos existentes"
+      - "corrigir sequencias incorretas"
+      - "adicionar novos fluxos quando necessario"
+      - "seguir padrao exato de estrutura de fluxo ja existente"
+      - "atualizar entidades_afetadas"
+      - "atualizar estados antes e depois"
+      - "atualizar regras_aplicadas"
+
+  REGRAS_NEGOCIO.md:
+    acoes:
+      - "validar regras existentes"
+      - "corrigir condicao e acao"
+      - "adicionar novas regras com id sequencial"
+      - "nao alterar ids existentes"
+      - "seguir padrao de escrita de regras ja existente"
+      - "atualizar origem_codigo"
+
+consistencia_cruzada:
+  acoes:
+    - "garantir que regras existem nos fluxos"
+    - "garantir que fluxos refletem controllers reais"
+    - "garantir que arquitetura reflete dependencias reais"
+
+validacoes:
+  - "confirmar existencia de classes e metodos referenciados"
+  - "confirmar correspondencia entre regra e implementacao"
+  - "confirmar sequencia real de chamadas"
+  - "rejeitar alteracoes sem evidencia no codigo"
+
+restricoes:
+  - "nao simplificar regras complexas"
+  - "nao remover informacao sem validacao"
+  - "nao alterar nomenclatura de dominio"
+  - "nao gerar texto explicativo adicional"
+  - "nao alterar formato existente dos documentos"
+
+resultado:
+  - "retornar apenas documentos atualizados"
+  - "manter formato original"
+  - "garantir consistencia com codigo"

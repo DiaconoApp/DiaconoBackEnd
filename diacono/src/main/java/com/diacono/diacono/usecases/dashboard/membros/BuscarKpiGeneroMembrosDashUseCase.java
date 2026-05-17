@@ -6,12 +6,15 @@ import com.diacono.diacono.domain.repository.MembroRepository;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import com.diacono.diacono.global.util.JwtUtils;
 import com.diacono.diacono.usecases.dashboard.validation.DashboardPeriodoValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 @Service
 public class BuscarKpiGeneroMembrosDashUseCase {
+    private static final Logger logger = LoggerFactory.getLogger(BuscarKpiGeneroMembrosDashUseCase.class);
 
     private final DashboardPeriodoValidator periodoValidator;
     private final MembroRepository membroRepository;
@@ -51,8 +54,8 @@ public class BuscarKpiGeneroMembrosDashUseCase {
 
         MembroDashGeneroDTO response = membroRepository.buscarMembrosPorGenero(idExternoIgreja, anoFim);
 
-        System.out.println(response.feminino());
-        System.out.println(response.masculino());
+        logger.info("Consulta dashboard genero membros: igrejaId=[{}], anoFim=[{}], possuiResultado=[{}]",
+                idExternoIgreja, anoFim, response != null);
 
         return response;
     }
