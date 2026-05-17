@@ -1,18 +1,13 @@
 package com.diacono.diacono.global.util;
 
 import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
 import javax.crypto.Mac;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.Optional;
 
 public final class SensitiveFieldCryptoUtils {
     private static final String ENCRYPTED_PREFIX = "enc:v1:";
@@ -20,7 +15,7 @@ public final class SensitiveFieldCryptoUtils {
     private static final String HMAC_ALGORITHM = "HmacSHA256";
     private static final int GCM_TAG_BITS = 128;
     private static final int IV_LENGTH = 12;
-    private static final SecretKey SECRET_KEY = loadRequiredKey();
+    private static volatile SecretKeySpec secretKey;
 
     private SensitiveFieldCryptoUtils() {
     }
@@ -40,7 +35,7 @@ public final class SensitiveFieldCryptoUtils {
             random.nextBytes(iv);
 
             Cipher cipher = Cipher.getInstance(TRANSFORMATION);
-            cipher.init(Cipher.ENCRYPT_MODE, SECRET_KEY, new GCMParameterSpec(GCM_TAG_BITS, iv));
+            cipher.init(Cipher.ENCRYPT_MODE, requireConfiguredKey(), new GCMParameterSpec(GCM_TAG_BITS, iv));
             byte[] encrypted = cipher.doFinal(value.getBytes(StandardCharsets.UTF_8));
 
             byte[] payload = new byte[iv.length + encrypted.length];
@@ -67,7 +62,7 @@ public final class SensitiveFieldCryptoUtils {
             byte[] encrypted = Arrays.copyOfRange(payload, IV_LENGTH, payload.length);
 
             Cipher cipher = Cipher.getInstance(TRANSFORMATION);
-            cipher.init(Cipher.DECRYPT_MODE, SECRET_KEY, new GCMParameterSpec(GCM_TAG_BITS, iv));
+            cipher.init(Cipher.DECRYPT_MODE, requireConfiguredKey(), new GCMParameterSpec(GCM_TAG_BITS, iv));
             return new String(cipher.doFinal(encrypted), StandardCharsets.UTF_8);
         } catch (Exception ex) {
             throw new IllegalStateException("Falha ao descriptografar campo sensivel", ex);
@@ -81,7 +76,7 @@ public final class SensitiveFieldCryptoUtils {
 
         try {
             Mac mac = Mac.getInstance(HMAC_ALGORITHM);
-            mac.init(new SecretKeySpec(SECRET_KEY.getEncoded(), HMAC_ALGORITHM));
+            mac.init(new SecretKeySpec(requireConfiguredKey().getEncoded(), HMAC_ALGORITHM));
             byte[] digest = mac.doFinal(value.getBytes(StandardCharsets.UTF_8));
             return Base64.getUrlEncoder().withoutPadding()
                     .encodeToString(Arrays.copyOf(digest, 16));
@@ -91,56 +86,30 @@ public final class SensitiveFieldCryptoUtils {
     }
 
     public static void validateConfigured() {
-        loadRequiredKey();
+        requireConfiguredKey();
     }
 
-    private static SecretKey loadRequiredKey() {
-        String keyBase64 = loadConfiguredKey()
-                .orElseThrow(() -> new IllegalStateException("APP_FIELD_ENCRYPTION_KEY e obrigatoria para criptografia de campos sensiveis"));
+    public static void configure(String keyBase64) {
+        if (keyBase64 == null || keyBase64.isBlank()) {
+            throw new IllegalStateException("APP_FIELD_ENCRYPTION_KEY e obrigatoria para criptografia de campos sensiveis");
+        }
 
         try {
             byte[] keyBytes = Base64.getDecoder().decode(keyBase64);
             if (keyBytes.length != 16 && keyBytes.length != 24 && keyBytes.length != 32) {
                 throw new IllegalStateException("APP_FIELD_ENCRYPTION_KEY deve ter 16, 24 ou 32 bytes em Base64");
             }
-            return new SecretKeySpec(keyBytes, "AES");
+            secretKey = new SecretKeySpec(keyBytes, "AES");
         } catch (IllegalArgumentException ex) {
             throw new IllegalStateException("APP_FIELD_ENCRYPTION_KEY deve estar em Base64 valido", ex);
         }
     }
 
-    private static Optional<String> loadConfiguredKey() {
-        String keyBase64 = System.getenv("APP_FIELD_ENCRYPTION_KEY");
-        if (keyBase64 == null || keyBase64.isBlank()) {
-            keyBase64 = System.getProperty("app.field.encryption.key");
+    private static SecretKeySpec requireConfiguredKey() {
+        SecretKeySpec configuredKey = secretKey;
+        if (configuredKey == null) {
+            throw new IllegalStateException("APP_FIELD_ENCRYPTION_KEY e obrigatoria para criptografia de campos sensiveis");
         }
-
-        if (keyBase64 == null || keyBase64.isBlank()) {
-            keyBase64 = readEnvFileValue(Path.of(".env"))
-                    .or(() -> readEnvFileValue(Path.of("diacono/.env")))
-                    .orElse(null);
-        }
-
-        return Optional.ofNullable(keyBase64)
-                .map(String::trim)
-                .filter(value -> !value.isBlank());
-    }
-
-    private static Optional<String> readEnvFileValue(Path path) {
-        if (!Files.isRegularFile(path)) {
-            return Optional.empty();
-        }
-
-        try {
-            return Files.readAllLines(path, StandardCharsets.UTF_8)
-                    .stream()
-                    .map(String::trim)
-                    .filter(line -> line.startsWith("APP_FIELD_ENCRYPTION_KEY="))
-                    .map(line -> line.substring("APP_FIELD_ENCRYPTION_KEY=".length()).trim())
-                    .filter(value -> !value.isBlank())
-                    .findFirst();
-        } catch (IOException ex) {
-            return Optional.empty();
-        }
+        return configuredKey;
     }
 }
