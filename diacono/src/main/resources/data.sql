@@ -71,7 +71,8 @@ INSERT INTO endereco_membro (id_externo, rua, numero, bairro, cidade, estado, ce
 ('10000000-0000-0000-0000-000000000046', 'Rua Evangelina', '400', 'Vila Carrão', 'São Paulo', 'SP', '03421-000', NULL),
 ('10000000-0000-0000-0000-000000000047', 'Rua Francisca de Paula', '300', 'Vila Carrão', 'São Paulo', 'SP', '03436-000', NULL),
 ('10000000-0000-0000-0000-000000000048', 'Rua Xiririca', '500', 'Vila Carrão', 'São Paulo', 'SP', '03441-000', NULL),
-('10000000-0000-0000-0000-000000000049', 'Rua Lutécia', '800', 'Vila Carrão', 'São Paulo', 'SP', '03423-000', 'Casa de esquina');
+('10000000-0000-0000-0000-000000000049', 'Rua Lutécia', '800', 'Vila Carrão', 'São Paulo', 'SP', '03423-000', 'Casa de esquina'),
+('10000000-0000-0000-0000-000000000050', 'Rua Ibatiba', '123', 'Vila Metalúrgica', 'Santo Andre', 'São Paulo', '09220608', 'Casa 138');
 
 -- Endereços dos Eventos (prefixo 1100...)
 INSERT INTO endereco_evento (id_externo, rua, numero, bairro, cidade, estado, cep) VALUES
@@ -135,7 +136,8 @@ INSERT INTO membro (
 ('20000000-0000-0000-0000-000000000046', 1, 46, 3, 'enc:v1:+Ll9QkxEuNOFlsnedkgp+8BgcujWEGnWVzyxbtSFpjLWSebvoEVmSw==', 'enc:v1:k/Pw51uEX8OElEmcbNdCqOaZA6Xlr7UOFz7vllOoZx4a5v5AFHVU', '1994-04-02', '2021-06-12', 'enc:v1:q343z+K8iz1qs+mx64jkKxyRECKOzbj+d6W2ruoZ1ettnL6f7+K5KrvcEjrCJuDJBA==', 'enc:v1:sWkojQI9h1t8MGwpmD+WJKjndc0b7DIFuO2Wsx2+cqrwYrsMkzGb', '$2a$10$agCzV50qLUM5cxjjiIbFi.WyjGf1lqWgGL.1HMD96aIOURmgF2aZW', 'ATIVO', 'MEMBRO', 'MASCULINO'),
 ('20000000-0000-0000-0000-000000000047', 1, 47, 2, 'enc:v1:SR26ORqUNho5d3W3sgBpYPm4oDQ8mdiCpglxPrnDjrn0/NmgvRi7Onld', 'enc:v1:b354ffNCg1+fld02/khax46OfV5wLvFJVij38p9xObRAnGebyx2M', '1995-12-25', '2023-01-05', 'enc:v1:jAoYNWQv0JuRaZI34XZeSMgT5LBCub1eSu/z7nxexz60xKiGU6u1+g+NtKDcpV6Knw==', 'enc:v1:hx5hMpWZwReTpG5Ovq4wRkarbEKV8PWgMu/84t8NMYGWwZIfAiuU', '$2a$10$agCzV50qLUM5cxjjiIbFi.WyjGf1lqWgGL.1HMD96aIOURmgF2aZW', 'ATIVO', 'MEMBRO', 'FEMININO'),
 ('20000000-0000-0000-0000-000000000048', 1, 48, 3, 'enc:v1:wj/iXZX/WM+sQMG/DUQnlnVa36OZSFRMjjb8r8e893EN/nv1Tfi16ng53g==', 'enc:v1:F63tf36g3+L32nOGtatQI6SYLov9nIJKnfGuntwQe0fgfadhVktC', '2002-02-18', '2023-08-20', 'enc:v1:3v9nI/VYNUpeAkhP+iicGEP+d1R4w6/O0lugdz0if37THys2gVL8+s2SwNvzYmZy', 'enc:v1:k3L7C7vOlztS7HgQGtDFx/QADvc7lXVuv6F4aPuw/m528rmCtfmK', '$2a$10$agCzV50qLUM5cxjjiIbFi.WyjGf1lqWgGL.1HMD96aIOURmgF2aZW', 'ATIVO', 'MEMBRO', 'MASCULINO'),
-('20000000-0000-0000-0000-000000000049', 1, 49, 2, 'enc:v1:NO39yJ80uqbdiZTk/V6G25y7Nnd3v8L36fWC3okTKAOmHRtx9RCt4+Um', 'enc:v1:256Zu6+S9tpU+hBVmTN1TMNR0fBxzpHaOGMqtnM2qc3uXP5ceAZG', '1983-03-08', '2015-05-20', 'enc:v1:rRRL9p1NQcZRF9TugoD5+CtONNEUbFhDE/3rrAGsz2aGNFBk9CesHeCvSnsoR7ngOn7c', 'enc:v1:qg7Nv7ycTuKGw8I87tY7qKgJ6aL97M26hTe+zuntuxS/iNxno5S2', '$2a$10$agCzV50qLUM5cxjjiIbFi.WyjGf1lqWgGL.1HMD96aIOURmgF2aZW', 'ATIVO', 'MEMBRO', 'FEMININO');
+('20000000-0000-0000-0000-000000000049', 1, 49, 2, 'enc:v1:NO39yJ80uqbdiZTk/V6G25y7Nnd3v8L36fWC3okTKAOmHRtx9RCt4+Um', 'enc:v1:256Zu6+S9tpU+hBVmTN1TMNR0fBxzpHaOGMqtnM2qc3uXP5ceAZG', '1983-03-08', '2015-05-20', 'enc:v1:rRRL9p1NQcZRF9TugoD5+CtONNEUbFhDE/3rrAGsz2aGNFBk9CesHeCvSnsoR7ngOn7c', 'enc:v1:qg7Nv7ycTuKGw8I87tY7qKgJ6aL97M26hTe+zuntuxS/iNxno5S2', '$2a$10$agCzV50qLUM5cxjjiIbFi.WyjGf1lqWgGL.1HMD96aIOURmgF2aZW', 'ATIVO', 'MEMBRO', 'FEMININO'),
+('20000000-0000-0000-0000-000000000050', 1, 50, NULL, 'Tico', '74431506012', '2002-10-24', '2026-05-17', 'fabiam.damaceno@gmail.com', '11987654321', '$2y$10$YHxFhsLOPnbHMXU6bUIK0.qX6TSaC0Bk/TcDqH64kQuGboEFSztHS', 'ATIVO', 'GOVERNO', 'MASCULINO');
 
 -- ==================================================================================
 -- 3. MINISTÉRIOS (Corrigido para hexadecimais válidos: prefixo 3000...)
@@ -1034,5 +1036,4 @@ INSERT INTO escala_ministerio (id_externo, fk_escala_evento, fk_membro_ministeri
 ('70000000-0000-0000-0000-000000000635', 68, 2, 'CONFIRMADO'),
 ('70000000-0000-0000-0000-000000000636', 68, 20, 'CONFIRMADO'),
 ('70000000-0000-0000-0000-000000000637', 68, 23, 'CONFIRMADO');
-
 
