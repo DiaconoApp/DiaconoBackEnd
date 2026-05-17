@@ -51,7 +51,7 @@ public class SecurityConfig {
         http
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login/**","/api/v1/auth/**",  "/oauth2/**", "/register/**").permitAll()
+                        .requestMatchers("/login/**","/api/v1/auth/**",  "/oauth2/**", "/api/v1/register/**").permitAll()
                         .requestMatchers("/h2-console/**", "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",

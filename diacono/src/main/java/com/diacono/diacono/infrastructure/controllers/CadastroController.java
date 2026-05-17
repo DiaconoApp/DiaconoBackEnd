@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/register")
+@RequestMapping("/api/v1/register")
 public class CadastroController {
 
     private final CadastrarMembroUseCase cadastrarMembroUseCase;
