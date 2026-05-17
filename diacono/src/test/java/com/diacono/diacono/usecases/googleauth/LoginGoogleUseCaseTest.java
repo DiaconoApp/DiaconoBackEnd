@@ -40,7 +40,7 @@ class LoginGoogleUseCaseTest {
                 fakeAutenticador(new GoogleIdTokenDTO(java.util.List.of("google-client-id"), email, true)),
                 atualizarSecretGoogleUseCase,
                 fakeGenerateTokenUseCase("jwt-token", 3600L),
-                fakeBuscarPorEmailUseCase(membro)
+                fakeBuscarPorEmailUseCaseRetornando(membro)
         );
 
         LoginResponseDTO response = loginGoogleUseCase.execute(request);
@@ -71,7 +71,7 @@ class LoginGoogleUseCaseTest {
                 fakeAutenticador(new GoogleIdTokenDTO(java.util.List.of("google-client-id"), email, true)),
                 atualizarSecretGoogleUseCase,
                 fakeGenerateTokenUseCase("jwt-token", 3600L),
-                fakeBuscarPorEmailUseCase(membro)
+                fakeBuscarPorEmailUseCaseRetornando(membro)
         );
 
         LoginResponseDTO response = loginGoogleUseCase.execute(request);
@@ -90,7 +90,7 @@ class LoginGoogleUseCaseTest {
                 fakeAutenticador(null),
                 new FakeAtualizarSecretGoogleUseCase(),
                 fakeGenerateTokenUseCase("jwt-token", 3600L),
-                fakeBuscarPorEmailUseCase(null)
+                fakeBuscarPorEmailUseCaseRetornando(null)
         );
 
         GoogleAuthorizationCodeException exception = assertThrows(
@@ -114,7 +114,7 @@ class LoginGoogleUseCaseTest {
                 fakeAutenticador(new GoogleIdTokenDTO(java.util.List.of("google-client-id"), email, true)),
                 new FakeAtualizarSecretGoogleUseCase(),
                 fakeGenerateTokenUseCase("jwt-token", 3600L),
-                fakeBuscarPorEmailUseCase(new ObjectNotFoundException("Membro não encontrado com o email fornecido."))
+                fakeBuscarPorEmailUseCaseLanca(new ObjectNotFoundException("Membro não encontrado com o email fornecido."))
         );
 
         ObjectNotFoundException exception = assertThrows(
@@ -152,7 +152,7 @@ class LoginGoogleUseCaseTest {
         };
     }
 
-    private BuscarPorEmaiUseCase fakeBuscarPorEmailUseCase(Membro membro) {
+    private BuscarPorEmaiUseCase fakeBuscarPorEmailUseCaseRetornando(Membro membro) {
         return new BuscarPorEmaiUseCase(null) {
             @Override
             public Membro execute(String email) {
@@ -161,7 +161,7 @@ class LoginGoogleUseCaseTest {
         };
     }
 
-    private BuscarPorEmaiUseCase fakeBuscarPorEmailUseCase(ObjectNotFoundException exception) {
+    private BuscarPorEmaiUseCase fakeBuscarPorEmailUseCaseLanca(ObjectNotFoundException exception) {
         return new BuscarPorEmaiUseCase(null) {
             @Override
             public Membro execute(String email) {
