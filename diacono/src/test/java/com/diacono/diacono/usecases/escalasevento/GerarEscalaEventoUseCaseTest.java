@@ -34,6 +34,27 @@ class GerarEscalaEventoUseCaseTest {
     private GerarEscalaEventoUseCase useCase;
 
     @Test
+    void deveGerarEscalasNaCriacaoMesmoQuandoEventoAindaNaoFoiPersistido() {
+        UUID idIgreja = UUID.fromString("44444444-4444-4444-4444-444444444444");
+        UUID idMinisterio = UUID.fromString("22222222-2222-2222-2222-222222222222");
+
+        Evento evento = Evento.builder().build();
+
+        Ministerio ministerio = Ministerio.builder().nome("Louvor").build();
+        ReflectionTestUtils.setField(ministerio, "idExterno", idMinisterio);
+
+        when(buscarMinisterioPorUUIDUseCase.execute(List.of(idMinisterio), idIgreja))
+                .thenReturn(Set.of(ministerio));
+
+        Set<EscalaEvento> resultado = useCase.executeParaCriacao(evento, List.of(idMinisterio), idIgreja);
+
+        assertEquals(1, resultado.size());
+        EscalaEvento escala = resultado.iterator().next();
+        assertSame(evento, escala.getEvento());
+        assertSame(ministerio, escala.getMinisterio());
+    }
+
+    @Test
     void deveReaproveitarEscalaExistenteEcriarSomenteASolicitada() {
         UUID idEvento = UUID.fromString("11111111-1111-1111-1111-111111111111");
         UUID idIgreja = UUID.fromString("44444444-4444-4444-4444-444444444444");
@@ -101,4 +122,3 @@ class GerarEscalaEventoUseCaseTest {
         verifyNoInteractions(buscarMinisterioPorUUIDUseCase);
     }
 }
-
