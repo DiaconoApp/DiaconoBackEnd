@@ -39,7 +39,6 @@ public class GoogleRefreshTokenMembro extends IdEntityUtils {
     private String emailHash;
 
     @Column(name = "refresh_token", nullable = false, length = 2048)
-    @Convert(converter = SensitiveStringAttributeConverter.class)
     private String refreshToken;
 
     @Column(name = "created_at", nullable = false, updatable = false)
