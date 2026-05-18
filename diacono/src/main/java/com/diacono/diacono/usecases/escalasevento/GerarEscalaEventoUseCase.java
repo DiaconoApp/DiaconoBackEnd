@@ -112,9 +112,9 @@ public class GerarEscalaEventoUseCase {
     }
 
     private void validarEvento(Evento evento, String operacao) {
-        if (evento == null || evento.getIdExterno() == null) {
-            logger.warn("Operacao de escala com evento invalido: operacao=[{}], eventoIdPresente=[{}]",
-                    operacao, evento != null);
+        if (evento == null) {
+            logger.warn("Operacao de escala com evento invalido: operacao=[{}], eventoIdPresente=[false]",
+                    operacao);
             throw new FieldInvalidException("Evento é obrigatório para gerar escala");
         }
     }
