@@ -22,29 +22,38 @@ public class AtualizarSecretGoogleUseCase {
     }
 
     public void execute(UUID membroId, UUID igrejaId, String email, String refreshToken) {
-        validarEscopoIgreja(membroId, igrejaId);
-
         LocalDateTime now = LocalDateTime.now();
+        GoogleRefreshTokenMembro existingToken = validarEscopoIgreja(membroId, igrejaId).orElse(null);
 
-        GoogleRefreshTokenMembro googleRefreshTokenMembro = GoogleRefreshTokenMembro.builder()
-                .membroId(membroId)
-                .igrejaId(igrejaId)
-                .email(email)
-                .refreshToken(refreshToken)
-                .createdAt(now)
-                .updatedAt(now)
-                .build();
+        GoogleRefreshTokenMembro googleRefreshTokenMembro = existingToken == null
+                ? GoogleRefreshTokenMembro.builder()
+                    .membroId(membroId)
+                    .igrejaId(igrejaId)
+                    .email(email)
+                    .refreshToken(refreshToken)
+                    .createdAt(now)
+                    .updatedAt(now)
+                    .build()
+                : existingToken.toBuilder()
+                    .email(email)
+                    .refreshToken(refreshToken)
+                    .updatedAt(now)
+                    .build();
 
         googleRefreshTokenMembroRepository.save(googleRefreshTokenMembro);
     }
 
-    private void validarEscopoIgreja(UUID membroId, UUID igrejaId) {
-        googleRefreshTokenMembroRepository.findByMembroId(membroId)
+    private java.util.Optional<GoogleRefreshTokenMembro> validarEscopoIgreja(UUID membroId, UUID igrejaId) {
+        java.util.Optional<GoogleRefreshTokenMembro> tokenExistente = googleRefreshTokenMembroRepository.findByMembroId(membroId);
+
+        tokenExistente
                 .filter(token -> !igrejaId.equals(token.getIgrejaId()))
                 .ifPresent(token -> {
                     logger.warn("Tentativa de atualizar refresh token fora do escopo da igreja. membroId=[{}], igrejaSolicitante=[{}], igrejaRegistro=[{}]",
                             membroId, igrejaId, token.getIgrejaId());
                     throw new BadCredentialsException("Usuario nao autorizado para atualizar token Google");
                 });
+
+        return tokenExistente;
     }
 }

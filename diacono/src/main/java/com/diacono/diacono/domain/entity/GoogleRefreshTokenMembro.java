@@ -3,11 +3,7 @@ package com.diacono.diacono.domain.entity;
 import com.diacono.diacono.global.util.IdEntityUtils;
 import com.diacono.diacono.global.util.SensitiveSearchIndexUtils;
 import com.diacono.diacono.global.util.SensitiveStringAttributeConverter;
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Entity;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -23,6 +19,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
+@Table(name = "token_google")
 public class GoogleRefreshTokenMembro extends IdEntityUtils {
 
     @Column(name = "membro_id", nullable = false)
