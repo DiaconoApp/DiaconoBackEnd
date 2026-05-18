@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 class AtualizarSecretGoogleUseCaseTest {
 
@@ -40,6 +41,7 @@ class AtualizarSecretGoogleUseCaseTest {
                 .igrejaId(igrejaId)
                 .email("email-antigo@teste.com")
                 .refreshToken("refresh-antigo")
+                .createdAt(java.time.LocalDateTime.of(2026, 5, 17, 10, 0))
                 .build();
 
         FakeGoogleRefreshTokenMembroRepository repository = new FakeGoogleRefreshTokenMembroRepository(existingEntity);
@@ -53,6 +55,7 @@ class AtualizarSecretGoogleUseCaseTest {
         assertEquals("email-novo@teste.com", repository.savedEntity.getEmail());
         assertEquals("refresh-novo", repository.savedEntity.getRefreshToken());
         assertEquals(membroId, repository.lastFindByMembroId);
+        assertEquals(existingEntity.getCreatedAt(), repository.savedEntity.getCreatedAt());
     }
 
     @Test
