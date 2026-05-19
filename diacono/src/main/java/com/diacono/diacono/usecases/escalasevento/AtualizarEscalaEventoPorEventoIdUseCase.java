@@ -2,7 +2,9 @@ package com.diacono.diacono.usecases.escalasevento;
 
 import com.diacono.diacono.applications.dtos.RestResponseMessageDTO;
 import com.diacono.diacono.applications.dtos.escalasevento.EscalaEventoEscaladoDTO;
+import com.diacono.diacono.domain.entity.EscalaEvento;
 import com.diacono.diacono.domain.entity.Evento;
+import com.diacono.diacono.domain.repository.EscalaMinisterioRepository;
 import com.diacono.diacono.domain.repository.EventoRepository;
 import com.diacono.diacono.domain.service.EscalaStatusDomainService;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -23,15 +26,18 @@ public class AtualizarEscalaEventoPorEventoIdUseCase {
     private static final Logger logger = LoggerFactory.getLogger(AtualizarEscalaEventoPorEventoIdUseCase.class);
 
     private final EventoRepository eventoRepository;
+    private final EscalaMinisterioRepository escalaMinisterioRepository;
     private final GerarEscalaEventoUseCase gerarEscalaEventoUseCase;
     private final EscalaStatusDomainService escalaStatusDomainService;
 
     public AtualizarEscalaEventoPorEventoIdUseCase(
             EventoRepository eventoRepository,
+            EscalaMinisterioRepository escalaMinisterioRepository,
             GerarEscalaEventoUseCase gerarEscalaEventoUseCase,
             EscalaStatusDomainService escalaStatusDomainService
     ) {
         this.eventoRepository = eventoRepository;
+        this.escalaMinisterioRepository = escalaMinisterioRepository;
         this.gerarEscalaEventoUseCase = gerarEscalaEventoUseCase;
         this.escalaStatusDomainService = escalaStatusDomainService;
     }
@@ -53,6 +59,9 @@ public class AtualizarEscalaEventoPorEventoIdUseCase {
         logger.info("Atualizacao de escalas do evento: igrejaId=[{}], eventoId=[{}], ministeriosEscalados=[{}]",
                 igrejaId, eventoId, ministeriosEscaladosId.size());
 
+        List<UUID> escalasRemovidas = identificarEscalasRemovidas(evento.getEscalaEvento(), ministeriosEscaladosId);
+        excluirEscalasMinisterioRemovidas(igrejaId, escalasRemovidas);
+
         evento.setEscalaEvento(gerarEscalaEventoUseCase.executeParaAtualizacao(
                 evento,
                 evento.getEscalaEvento(),
@@ -64,6 +73,26 @@ public class AtualizarEscalaEventoPorEventoIdUseCase {
         escalaStatusDomainService.recalcularStatusEvento(eventoId);
 
         return new RestResponseMessageDTO(HttpStatus.OK, "Escala do evento atualizada com sucesso");
+    }
+
+    private List<UUID> identificarEscalasRemovidas(Set<EscalaEvento> escalasAtuais, List<UUID> ministeriosEscaladosId) {
+        if (escalasAtuais == null || escalasAtuais.isEmpty()) {
+            return List.of();
+        }
+
+        return escalasAtuais.stream()
+                .filter(escala -> escala.getMinisterio() != null)
+                .filter(escala -> escala.getMinisterio().getIdExterno() != null)
+                .filter(escala -> !ministeriosEscaladosId.contains(escala.getMinisterio().getIdExterno()))
+                .map(EscalaEvento::getIdExterno)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    private void excluirEscalasMinisterioRemovidas(UUID igrejaId, List<UUID> escalasRemovidas) {
+        for (UUID escalaEventoId : escalasRemovidas) {
+            escalaMinisterioRepository.deleteByEscalaEventoIdAndIgrejaId(igrejaId, escalaEventoId);
+        }
     }
 
     private void validarListaEscalaEvento(List<EscalaEventoEscaladoDTO> listaEscalaEvento) {
