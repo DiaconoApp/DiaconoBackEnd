@@ -5,6 +5,8 @@ import com.diacono.diacono.applications.dtos.escalasevento.EscalaEventoEscaladoD
 import com.diacono.diacono.domain.entity.EscalaEvento;
 import com.diacono.diacono.domain.entity.Evento;
 import com.diacono.diacono.domain.entity.Igreja;
+import com.diacono.diacono.domain.entity.Ministerio;
+import com.diacono.diacono.domain.repository.EscalaMinisterioRepository;
 import com.diacono.diacono.domain.repository.EventoRepository;
 import com.diacono.diacono.domain.service.EscalaStatusDomainService;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
@@ -33,6 +35,9 @@ class AtualizarEscalaEventoPorEventoIdUseCaseTest {
 
     @Mock
     private EventoRepository eventoRepository;
+
+    @Mock
+    private EscalaMinisterioRepository escalaMinisterioRepository;
 
     @Mock
     private GerarEscalaEventoUseCase gerarEscalaEventoUseCase;
@@ -91,6 +96,61 @@ class AtualizarEscalaEventoPorEventoIdUseCaseTest {
     }
 
     @Test
+    void deveExcluirEscalasMinisterioQuandoRemoverMinisterioDaEscalaEvento() {
+        UUID igrejaId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID eventoId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+        UUID ministerioMantidoId = UUID.fromString("33333333-3333-3333-3333-333333333333");
+        UUID ministerioRemovidoId = UUID.fromString("44444444-4444-4444-4444-444444444444");
+        UUID escalaMantidaId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        UUID escalaRemovidaId = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+
+        Igreja igreja = Igreja.builder().nome("Igreja Central").build();
+        ReflectionTestUtils.setField(igreja, "idExterno", igrejaId);
+
+        Ministerio ministerioMantido = Ministerio.builder().nome("Louvor").build();
+        ReflectionTestUtils.setField(ministerioMantido, "idExterno", ministerioMantidoId);
+
+        Ministerio ministerioRemovido = Ministerio.builder().nome("Recepcao").build();
+        ReflectionTestUtils.setField(ministerioRemovido, "idExterno", ministerioRemovidoId);
+
+        Evento evento = Evento.builder()
+                .igreja(igreja)
+                .escalaEvento(new HashSet<>())
+                .build();
+
+        EscalaEvento escalaMantida = EscalaEvento.builder()
+                .evento(evento)
+                .ministerio(ministerioMantido)
+                .build();
+        ReflectionTestUtils.setField(escalaMantida, "idExterno", escalaMantidaId);
+
+        EscalaEvento escalaRemovida = EscalaEvento.builder()
+                .evento(evento)
+                .ministerio(ministerioRemovido)
+                .build();
+        ReflectionTestUtils.setField(escalaRemovida, "idExterno", escalaRemovidaId);
+
+        evento.setEscalaEvento(new HashSet<>(Set.of(escalaMantida, escalaRemovida)));
+
+        List<EscalaEventoEscaladoDTO> request = List.of(
+                new EscalaEventoEscaladoDTO(ministerioMantidoId, "Louvor", escalaMantidaId, true),
+                new EscalaEventoEscaladoDTO(ministerioRemovidoId, "Recepcao", escalaRemovidaId, false)
+        );
+
+        Set<EscalaEvento> escalaAtualizada = new HashSet<>(Set.of(escalaMantida));
+
+        when(eventoRepository.findByIdExterno(eventoId)).thenReturn(Optional.of(evento));
+        when(gerarEscalaEventoUseCase.executeParaAtualizacao(evento, evento.getEscalaEvento(), List.of(ministerioMantidoId), igrejaId))
+                .thenReturn(escalaAtualizada);
+
+        RestResponseMessageDTO response = useCase.execute(igrejaId, eventoId, request);
+
+        assertEquals(HttpStatus.OK, response.getStatus());
+        verify(escalaMinisterioRepository).deleteByEscalaEventoIdAndIgrejaId(igrejaId, escalaRemovidaId);
+        verify(eventoRepository).save(evento);
+    }
+
+    @Test
     void deveLancarExcecaoQuandoEventoNaoPertencerAIgreja() {
         UUID igrejaTokenId = UUID.fromString("11111111-1111-1111-1111-111111111111");
         UUID igrejaEventoId = UUID.fromString("55555555-5555-5555-5555-555555555555");
@@ -116,4 +176,3 @@ class AtualizarEscalaEventoPorEventoIdUseCaseTest {
         assertEquals("Evento nao encontrado", ex.getMessage());
     }
 }
-
