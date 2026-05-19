@@ -55,7 +55,7 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**", "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
-                                "/webjars/**").authenticated()
+                                "/webjars/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf.disable())

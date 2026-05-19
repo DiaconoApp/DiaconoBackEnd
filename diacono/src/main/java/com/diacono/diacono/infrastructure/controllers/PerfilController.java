@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/perfil")
+@RequestMapping("api/v1/perfil")
 public class PerfilController {
 
     private static final Logger logger = LoggerFactory.getLogger(PerfilController.class);
