@@ -24,6 +24,18 @@ public interface MembroMinisterioJpaRepository extends JpaRepository<MembroMinis
     List<MembroMinisterio> findAllByIdExternoIn(List<UUID> idsExternoMembroMinisterio);
 
     @Query("""
+            SELECT mm
+            FROM MembroMinisterio mm
+            JOIN mm.membro m
+            WHERE m.idExterno = :membroIdExterno
+              AND m.igreja.idExterno = :igrejaIdExterno
+            """)
+    List<MembroMinisterio> findAllByMembroIdExternoAndIgrejaIdExterno(
+            @Param("membroIdExterno") UUID membroIdExterno,
+            @Param("igrejaIdExterno") UUID igrejaIdExterno
+    );
+
+    @Query("""
             SELECT mm FROM MembroMinisterio mm
             JOIN mm.membro m
             WHERE mm.ministerio.idExterno = :idMinisterio

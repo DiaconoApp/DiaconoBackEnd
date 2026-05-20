@@ -167,6 +167,18 @@ public interface EscalaMinisterioJpaRepository extends JpaRepository<EscalaMinis
             @Param("escalaEventoId") UUID escalaEventoId
     );
 
+    @Modifying
+    @Transactional
+    @Query("""
+            DELETE FROM EscalaMinisterio em
+            WHERE em.membroMinisterio.idExterno IN :membroMinisterioIds
+              AND em.membroMinisterio.membro.igreja.idExterno = :igrejaId
+            """)
+    void deleteByMembroMinisterioIdsAndIgrejaId(
+            @Param("igrejaId") UUID igrejaId,
+            @Param("membroMinisterioIds") List<UUID> membroMinisterioIds
+    );
+
 
 
     @Query("""
@@ -215,4 +227,3 @@ public interface EscalaMinisterioJpaRepository extends JpaRepository<EscalaMinis
     boolean areAllConfirmadosByEscalaEventoIdAndIgrejaId(@Param("escalaEventoId") UUID escalaEventoId, @Param("igrejaId") UUID igrejaId);
 
 }
-

@@ -117,6 +117,15 @@ public class EscalaMinisterioRepositoryImpl implements EscalaMinisterioRepositor
     }
 
     @Override
+    public void deleteByMembroMinisterioIdsAndIgrejaId(UUID igrejaId, List<UUID> membroMinisterioIds) {
+        if (membroMinisterioIds == null || membroMinisterioIds.isEmpty()) {
+            return;
+        }
+
+        jpaRepository.deleteByMembroMinisterioIdsAndIgrejaId(igrejaId, membroMinisterioIds);
+    }
+
+    @Override
     public void replaceEscalaMinisterioByEscalaEventoId(UUID igrejaId, UUID escalaEventoId, List<EscalaMinisterio> escalasParaSalvar) {
         jpaRepository.deleteByEscalaEventoIdAndIgrejaId(igrejaId, escalaEventoId);
 

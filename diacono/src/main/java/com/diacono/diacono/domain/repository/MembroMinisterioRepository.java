@@ -15,6 +15,7 @@ import java.util.UUID;
 public interface MembroMinisterioRepository {
     int deleteByMembro(Membro membro);
     MembroMinisterio save(MembroMinisterio membroMinisterio);
+    List<MembroMinisterio> findAllByMembroIdExternoAndIgrejaIdExterno(UUID membroIdExterno, UUID igrejaIdExterno);
 
     Page<MembroMinisterio> buscarPorMembroMinisterioComFiltro(
             Pageable pageable, UUID idMinisterio, String texto, EnumStatusMembro status);

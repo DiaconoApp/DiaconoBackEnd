@@ -7,6 +7,7 @@ import com.diacono.diacono.domain.entity.MembroMinisterio;
 import com.diacono.diacono.domain.entity.Ministerio;
 import com.diacono.diacono.domain.entity.Membro;
 import com.diacono.diacono.domain.enums.EnumCargoMembroMinisterio;
+import com.diacono.diacono.domain.repository.EscalaMinisterioRepository;
 import com.diacono.diacono.domain.repository.MembroMinisterioRepository;
 import com.diacono.diacono.domain.repository.MembroRepository;
 import com.diacono.diacono.domain.repository.MinisteriosRepository;
@@ -19,11 +20,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class AtualizarMembroUseCase {
@@ -33,15 +36,18 @@ public class AtualizarMembroUseCase {
     private final MembroRepository membroRepository;
     private final MembroMinisterioRepository membroMinisterioRepository;
     private final MinisteriosRepository ministeriosRepository;
+    private final EscalaMinisterioRepository escalaMinisterioRepository;
 
     public AtualizarMembroUseCase(
             MembroRepository membroRepository,
             MembroMinisterioRepository membroMinisterioRepository,
-            MinisteriosRepository ministeriosRepository
+            MinisteriosRepository ministeriosRepository,
+            EscalaMinisterioRepository escalaMinisterioRepository
     ) {
         this.membroRepository = membroRepository;
         this.membroMinisterioRepository = membroMinisterioRepository;
         this.ministeriosRepository = ministeriosRepository;
+        this.escalaMinisterioRepository = escalaMinisterioRepository;
     }
 
     @Transactional
@@ -55,9 +61,9 @@ public class AtualizarMembroUseCase {
             throw new ObjectSaveErrorException("Alteração de Igreja não é permitida");
         }
 
-        if (request.nome() != null) membro.setNome(request.nome().toLowerCase(Locale.ROOT));
+        if (request.nome() != null) membro.setNome(request.nome());
         if (request.cpf() != null) membro.setCpf(request.cpf());
-        if (request.email() != null) membro.setEmail(request.email().toLowerCase(Locale.ROOT));
+        if (request.email() != null) membro.setEmail(request.email());
         if (request.celular() != null) membro.setCelular(request.celular());
         if (request.dataNascimento() != null) membro.setDataNascimento(request.dataNascimento());
         if (request.cargo() != null) membro.setCargoMembro(request.cargo());
@@ -102,21 +108,60 @@ public class AtualizarMembroUseCase {
     }
 
     private void atualizarMinisterioMembro(Membro membro, List<UUID> idsExternosMinisterio) {
-        membroMinisterioRepository.deleteByMembro(membro);
-        membroMinisterioRepository.flush();
+        Set<UUID> idsUnicos = new LinkedHashSet<>(idsExternosMinisterio);
+        List<MembroMinisterio> vinculosAtuais = membroMinisterioRepository
+                .findAllByMembroIdExternoAndIgrejaIdExterno(membro.getIdExterno(), membro.getIgreja().getIdExterno());
 
-        if (idsExternosMinisterio.isEmpty()) {
+        Map<UUID, MembroMinisterio> vinculosPorMinisterioId = vinculosAtuais.stream()
+                .filter(vinculo -> vinculo.getMinisterio() != null && vinculo.getMinisterio().getIdExterno() != null)
+                .collect(Collectors.toMap(
+                        vinculo -> vinculo.getMinisterio().getIdExterno(),
+                        vinculo -> vinculo,
+                        (existente, duplicado) -> existente,
+                        HashMap::new
+                ));
+
+        List<MembroMinisterio> vinculosRemovidos = vinculosAtuais.stream()
+                .filter(vinculo -> vinculo.getMinisterio() != null)
+                .filter(vinculo -> vinculo.getMinisterio().getIdExterno() != null)
+                .filter(vinculo -> !idsUnicos.contains(vinculo.getMinisterio().getIdExterno()))
+                .toList();
+
+        if (!vinculosRemovidos.isEmpty()) {
+            escalaMinisterioRepository.deleteByMembroMinisterioIdsAndIgrejaId(
+                    membro.getIgreja().getIdExterno(),
+                    vinculosRemovidos.stream()
+                            .map(MembroMinisterio::getIdExterno)
+                            .toList()
+            );
+
+            for (MembroMinisterio vinculoRemovido : vinculosRemovidos) {
+                membroMinisterioRepository.deleteByMembroIdExternoAndMinisterioIdExterno(
+                        membro.getIdExterno(),
+                        vinculoRemovido.getMinisterio().getIdExterno()
+                );
+            }
+            membroMinisterioRepository.flush();
+        }
+
+        if (idsUnicos.isEmpty()) {
             return;
         }
 
-        Set<UUID> idsUnicos = new LinkedHashSet<>(idsExternosMinisterio);
-        Set<Ministerio> ministerios = ministeriosRepository.findAllByIdExternoIn(new ArrayList<>(idsUnicos));
+        Set<Ministerio> ministerios = ministeriosRepository.findAllByIdExternoInAndIgrejaId(
+                new ArrayList<>(idsUnicos),
+                membro.getIgreja().getIdExterno()
+        );
 
         if (ministerios.size() != idsUnicos.size()) {
             throw new ObjectNotFoundException("Um ou mais ministérios não foram encontrados");
         }
 
         for (Ministerio ministerio : ministerios) {
+            if (vinculosPorMinisterioId.containsKey(ministerio.getIdExterno())) {
+                continue;
+            }
+
             MembroMinisterio membroMinisterio = MembroMinisterio.builder()
                     .membro(membro)
                     .ministerio(ministerio)
