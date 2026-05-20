@@ -2,7 +2,7 @@ FLUXOS
 - nome: "CADASTRO_MEMBRO_EXTERNO"
   descricao: "Cadastro de membro por fluxo publico de registro."
   entrada:
-    endpoint: "/register"
+    endpoint: "/api/v1/register"
     metodo: "POST"
   sequencia:
     - passo: 1
@@ -40,7 +40,7 @@ FLUXOS
 - nome: "CADASTRO_MEMBRO_INTERNO"
   descricao: "Cadastro de membro por endpoint autenticado de membros."
   entrada:
-    endpoint: "/membros"
+    endpoint: "/api/v1/membros"
     metodo: "POST"
   sequencia:
     - passo: 1
@@ -87,7 +87,7 @@ FLUXOS
 - nome: "CONSULTA_MEMBROS"
   descricao: "Busca paginada de membros com ou sem filtro."
   entrada:
-    endpoint: "/membros"
+    endpoint: "/api/v1/membros"
     metodo: "GET"
   sequencia:
     - passo: 1
@@ -558,4 +558,3 @@ FLUXOS
   regras:
     - quando EscalaEvento eh CONFIRMADO
     - quando Evento eh CONFIRMADO
-

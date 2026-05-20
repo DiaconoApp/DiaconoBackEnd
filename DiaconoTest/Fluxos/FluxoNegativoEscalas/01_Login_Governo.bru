@@ -1,5 +1,5 @@
 meta {
-  name: 01 Login
+  name: 01 Login Governo
   type: http
   seq: 1
 }
@@ -24,12 +24,11 @@ body:json {
 script:post-response {
   const body = res.getBody();
   const token = body.acessToken || body.accessToken || "";
-  bru.setVar("token", token);
   bru.setVar("tokenGoverno", token);
 }
 
 tests {
-  test("deve autenticar", function () {
+  test("deve autenticar governo", function () {
     expect(res.getStatus()).to.equal(200);
     const body = res.getBody();
     expect(Boolean(body.acessToken || body.accessToken)).to.equal(true);

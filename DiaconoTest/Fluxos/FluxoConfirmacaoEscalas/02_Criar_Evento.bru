@@ -19,8 +19,9 @@ headers {
 }
 
 script:pre-request {
+  const nowMs = Date.now();
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  let n = Date.now();
+  let n = nowMs;
   let suffix = "";
 
   for (let i = 0; i < 6; i++) {
@@ -29,6 +30,39 @@ script:pre-request {
   }
 
   bru.setVar("nomeEvento", `Culto de celebração ${suffix}`);
+
+  const pad = (value) => String(value).padStart(2, "0");
+  const inicio = new Date(nowMs + 45 * 24 * 60 * 60 * 1000);
+  const hora = 8 + (Math.floor(nowMs / 1000) % 10);
+  const minuto = Math.floor(nowMs / 60000) % 60;
+  const segundo = Math.floor(nowMs / 1000) % 60;
+  inicio.setHours(hora, minuto, segundo, 0);
+
+  const fim = new Date(inicio.getTime());
+  fim.setHours(fim.getHours() + 2);
+
+  const toLocalDateTime = (date) =>
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:00`;
+
+  const dataHoraInicioGerada = toLocalDateTime(inicio);
+  const dataHoraFimGerada = toLocalDateTime(fim);
+
+  bru.setVar("dataHoraInicio", dataHoraInicioGerada);
+  bru.setVar("dataHoraFim", dataHoraFimGerada);
+  bru.setVar("anoEvento", String(inicio.getFullYear()));
+  bru.setVar("mesEvento", String(inicio.getMonth() + 1));
+
+  const sanitizeVar = (value) => {
+    const normalized = String(value || "").trim();
+    return normalized.startsWith("{{") ? "" : normalized;
+  };
+
+  const dataHoraInicio = sanitizeVar(bru.getVar("dataHoraInicio")) || sanitizeVar("{{dataHoraInicio}}");
+  if (dataHoraInicio && dataHoraInicio.length >= 10 && dataHoraInicio.includes("T")) {
+    const [ano, mes] = dataHoraInicio.split("T")[0].split("-");
+    bru.setVar("anoEvento", String(Number(ano)));
+    bru.setVar("mesEvento", String(Number(mes)));
+  }
 }
 
 body:json {
@@ -69,4 +103,3 @@ tests {
     expect(body.message).to.contain("criado com sucesso");
   });
 }
-

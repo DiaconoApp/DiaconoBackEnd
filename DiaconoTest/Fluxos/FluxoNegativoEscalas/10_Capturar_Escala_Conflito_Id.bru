@@ -1,0 +1,53 @@
+meta {
+  name: 10 Capturar Escala Conflito Id
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{baseUrl}}/api/v1/escalas-evento/governo/{{eventoNegEscalaBId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{tokenGoverno}}
+}
+
+script:post-response {
+  const body = res.getBody();
+  if (!Array.isArray(body)) {
+    throw new Error(`Resposta invalida ao buscar escala do evento de conflito. HTTP body=${JSON.stringify(body)}`);
+  }
+  const normalize = (value) => String(value || "").trim().toLowerCase();
+  const sanitizeVar = (value) => {
+    const normalized = normalize(value);
+    return normalized.startsWith("{{") ? "" : normalized;
+  };
+
+  let ministerioId1 = sanitizeVar(bru.getVar("ministerioId1")) || sanitizeVar("{{ministerioId1}}");
+  const escalados = body.filter((item) => item.isMinisterioEscalado === true);
+
+  if (!ministerioId1 && escalados.length >= 1) {
+    ministerioId1 = normalize(escalados[0].idExternoMinisterio);
+    bru.setVar("ministerioId1", ministerioId1);
+  }
+
+  const escala = body.find(
+    (item) => normalize(item.idExternoMinisterio) === ministerioId1 && item.isMinisterioEscalado === true
+  );
+
+  if (!escala) {
+    const idsRetornados = body.map((item) => `${item.idExternoMinisterio}:${item.idExternoEscalaEvento}:${item.isMinisterioEscalado}`).join(", ");
+    throw new Error(`Nao foi possivel localizar a escala do evento de conflito. Esperado: ${ministerioId1}. Retornados: ${idsRetornados}`);
+  }
+
+  bru.setVar("escalaEventoNegEscalaB1", escala.idExternoEscalaEvento);
+}
+
+tests {
+  test("deve obter id da escala de conflito", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(bru.getVar("escalaEventoNegEscalaB1")).to.be.a("string");
+  });
+}

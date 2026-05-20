@@ -1,0 +1,89 @@
+meta {
+  name: 02 Criar Evento Base
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/eventos
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{tokenGoverno}}
+}
+
+headers {
+  content-type: application/json
+}
+
+script:pre-request {
+  const nowMs = Date.now();
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let n = nowMs;
+  let suffix = "";
+
+  for (let i = 0; i < 6; i++) {
+    suffix += chars[n % 26];
+    n = Math.floor(n / 26);
+  }
+
+  bru.setVar("nomeEventoNegEscalaA", `Culto Negativo Escala A ${suffix}`);
+  bru.setVar("nomeEventoNegEscalaB", `Culto Negativo Escala B ${suffix}`);
+
+  const pad = (value) => String(value).padStart(2, "0");
+  const inicio = new Date(nowMs + 60 * 24 * 60 * 60 * 1000);
+  const hora = 10 + (Math.floor(nowMs / 1000) % 8);
+  const minuto = Math.floor(nowMs / 60000) % 60;
+  const segundo = Math.floor(nowMs / 1000) % 60;
+  inicio.setHours(hora, minuto, segundo, 0);
+
+  const fim = new Date(inicio.getTime());
+  fim.setHours(fim.getHours() + 2);
+
+  const toLocalDateTime = (date) =>
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+
+  bru.setVar("dataHoraInicioNegEscala", toLocalDateTime(inicio));
+  bru.setVar("dataHoraFimNegEscala", toLocalDateTime(fim));
+  bru.setVar("mesEventoNegEscala", String(inicio.getMonth() + 1));
+  bru.setVar("anoEventoNegEscala", String(inicio.getFullYear()));
+}
+
+body:json {
+  {
+    "fkMinisterios": [
+      "{{ministerioId1}}",
+      "{{ministerioId2}}"
+    ],
+    "endereco": {
+      "idExterno": null,
+      "cep": "04094000",
+      "estado": "SP",
+      "cidade": "SAO PAULO",
+      "bairro": "VILA MARIANA",
+      "rua": "PARQUE IBIRAPUERA",
+      "complemento": "PORTAO PRINCIPAL",
+      "numero": "S N",
+      "apelido": "LOCAL EVENTO NEGATIVO"
+    },
+    "recorrencia": {
+      "tipoRecorrencia": "NAO_REPETE",
+      "dataInicioRecorrencia": null,
+      "dataTerminoRecorrencia": null
+    },
+    "nome": "{{nomeEventoNegEscalaA}}",
+    "descricao": "Culto negativo escala base",
+    "publicoAlvo": "MEMBROS",
+    "dataHoraInicio": "{{dataHoraInicioNegEscala}}",
+    "dataHoraFim": "{{dataHoraFimNegEscala}}",
+    "custo": 0
+  }
+}
+
+tests {
+  test("deve criar evento base", function () {
+    expect(res.getStatus()).to.equal(201);
+  });
+}

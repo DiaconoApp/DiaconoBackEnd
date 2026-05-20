@@ -1,0 +1,57 @@
+meta {
+  name: 02 Negativo Lider Sem Ministerio
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/membros
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{tokenLiderMinisterio}}
+}
+
+headers {
+  content-type: application/json
+}
+
+script:pre-request {
+  const nowMs = Date.now();
+  bru.setVar("emailNegMembroLider", `lider.sem.ministerio.${nowMs}@email.com`);
+}
+
+body:json {
+  {
+    "fkIgreja": "{{igrejaId}}",
+    "nome": "Samuel Oliveira",
+    "cpf": "11144477735",
+    "dataNascimento": "1992-03-15",
+    "email": "{{emailNegMembroLider}}",
+    "celular": "11912345678",
+    "senha": "Senha@123",
+    "idExternoMinisterios": null,
+    "cargo": "LIDER_MINISTERIO",
+    "generoMembro": "MASCULINO",
+    "membroEnderecoDTO": {
+      "cep": "01310100",
+      "estado": "SP",
+      "cidade": "SAO PAULO",
+      "bairro": "BELA VISTA",
+      "rua": "RUA ILHA DOS RATONES",
+      "numero": "1500",
+      "complemento": "APTO 304"
+    }
+  }
+}
+
+tests {
+  test("deve rejeitar lider sem ministerio associado", function () {
+    expect(res.getStatus()).to.equal(400);
+    const body = res.getBody();
+    expect(body.message).to.contain("líder de ministério");
+    expect(body.message).to.contain("associar um ministério");
+  });
+}

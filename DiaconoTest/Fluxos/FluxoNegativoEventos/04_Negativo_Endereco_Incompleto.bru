@@ -1,0 +1,58 @@
+meta {
+  name: 04 Negativo Endereco Incompleto
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/eventos
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{tokenGoverno}}
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+    "fkMinisterios": [
+      "{{ministerioId1}}",
+      "{{ministerioId2}}"
+    ],
+    "nome": "Culto endereco incompleto",
+    "descricao": "VALIDACAO EVENTO NEGATIVO",
+    "publicoAlvo": "MEMBROS",
+    "dataHoraInicio": "{{dataHoraInicioNegEvento}}",
+    "dataHoraFim": "{{dataHoraFimNegEvento}}",
+    "custo": 0,
+    "recorrencia": {
+      "tipoRecorrencia": "NAO_REPETE",
+      "dataInicioRecorrencia": null,
+      "dataTerminoRecorrencia": null
+    },
+    "endereco": {
+      "idExterno": null,
+      "cep": "04094000",
+      "rua": "PARQUE IBIRAPUERA",
+      "cidade": "SAO PAULO",
+      "estado": "SP",
+      "bairro": "VILA MARIANA",
+      "complemento": "PORTAO PRINCIPAL",
+      "numero": "S N",
+      "apelido": null
+    }
+  }
+}
+
+tests {
+  test("deve rejeitar endereco incompleto sem idExterno", function () {
+    expect(res.getStatus()).to.equal(400);
+    const body = res.getBody();
+    expect(body.message).to.contain("apelido");
+  });
+}

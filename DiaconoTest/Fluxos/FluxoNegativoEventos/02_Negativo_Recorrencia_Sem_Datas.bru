@@ -1,0 +1,76 @@
+meta {
+  name: 02 Negativo Recorrencia Sem Datas
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/eventos
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{tokenGoverno}}
+}
+
+headers {
+  content-type: application/json
+}
+
+script:pre-request {
+  const nowMs = Date.now();
+  const pad = (value) => String(value).padStart(2, "0");
+  const inicio = new Date(nowMs + 75 * 24 * 60 * 60 * 1000);
+  inicio.setHours(19, 0, 0, 0);
+  const fim = new Date(inicio.getTime());
+  fim.setHours(fim.getHours() + 2);
+
+  const toLocalDateTime = (date) =>
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+
+  bru.setVar("dataHoraInicioNegEvento", toLocalDateTime(inicio));
+  bru.setVar("dataHoraFimNegEvento", toLocalDateTime(fim));
+}
+
+body:json {
+  {
+    "fkMinisterios": [
+      "{{ministerioId1}}",
+      "{{ministerioId2}}"
+    ],
+    "nome": "Culto recorrencia sem datas",
+    "descricao": "VALIDACAO EVENTO NEGATIVO",
+    "publicoAlvo": "MEMBROS",
+    "dataHoraInicio": "{{dataHoraInicioNegEvento}}",
+    "dataHoraFim": "{{dataHoraFimNegEvento}}",
+    "custo": 0,
+    "recorrencia": {
+      "tipoRecorrencia": "SEMANAL",
+      "dataInicioRecorrencia": null,
+      "dataTerminoRecorrencia": null
+    },
+    "endereco": {
+      "idExterno": null,
+      "cep": "04094000",
+      "rua": "PARQUE IBIRAPUERA",
+      "cidade": "SAO PAULO",
+      "estado": "SP",
+      "bairro": "VILA MARIANA",
+      "complemento": "PORTAO PRINCIPAL",
+      "numero": "S N",
+      "apelido": "LOCAL EVENTO"
+    }
+  }
+}
+
+tests {
+  test("deve rejeitar recorrencia sem datas", function () {
+    expect(res.getStatus()).to.equal(400);
+    const body = res.getBody();
+    expect(body.message).to.equal("Erros de validação encontrados.");
+    expect(Array.isArray(body.details)).to.equal(true);
+    const possuiDetalhe = body.details.some((item) => item.includes("início e término da recorrência"));
+    expect(possuiDetalhe).to.equal(true);
+  });
+}

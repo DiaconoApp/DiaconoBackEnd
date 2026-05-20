@@ -1,0 +1,36 @@
+meta {
+  name: 07 Negativo Membro Fora Do Ministerio
+  type: http
+  seq: 8
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/escalas-ministerio/lider-ministerio/{{escalaEventoNegEscalaA1}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{tokenLiderMinisterio}}
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  [
+    {
+      "idExternoMembroMinisterio": "{{membroMinisterioId2}}",
+      "status": "CONFIRMADO"
+    }
+  ]
+}
+
+tests {
+  test("deve rejeitar membro fora do ministerio da escala", function () {
+    expect(res.getStatus()).to.equal(400);
+    const body = res.getBody();
+    expect(body.message).to.contain("não pertencem ao ministério");
+  });
+}

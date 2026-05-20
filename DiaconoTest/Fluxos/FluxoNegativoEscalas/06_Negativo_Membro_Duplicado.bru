@@ -1,0 +1,40 @@
+meta {
+  name: 06 Negativo Membro Duplicado
+  type: http
+  seq: 7
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/escalas-ministerio/lider-ministerio/{{escalaEventoNegEscalaA1}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{tokenLiderMinisterio}}
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  [
+    {
+      "idExternoMembroMinisterio": "{{membroMinisterioId1}}",
+      "status": "CONFIRMADO"
+    },
+    {
+      "idExternoMembroMinisterio": "{{membroMinisterioId1}}",
+      "status": "PENDENTE"
+    }
+  ]
+}
+
+tests {
+  test("deve rejeitar membro duplicado na escala", function () {
+    expect(res.getStatus()).to.equal(400);
+    const body = res.getBody();
+    expect(body.message).to.contain("membros duplicados");
+  });
+}

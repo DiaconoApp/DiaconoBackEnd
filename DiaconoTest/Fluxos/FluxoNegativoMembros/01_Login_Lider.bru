@@ -1,5 +1,5 @@
 meta {
-  name: 01 Login
+  name: 01 Login Lider
   type: http
   seq: 1
 }
@@ -16,20 +16,19 @@ headers {
 
 body:json {
   {
-    "email": "{{emailGoverno}}",
-    "senha": "{{senhaGoverno}}"
+    "email": "{{emailLiderMinisterio}}",
+    "senha": "{{senhaLiderMinisterio}}"
   }
 }
 
 script:post-response {
   const body = res.getBody();
   const token = body.acessToken || body.accessToken || "";
-  bru.setVar("token", token);
-  bru.setVar("tokenGoverno", token);
+  bru.setVar("tokenLiderMinisterio", token);
 }
 
 tests {
-  test("deve autenticar", function () {
+  test("deve autenticar lider", function () {
     expect(res.getStatus()).to.equal(200);
     const body = res.getBody();
     expect(Boolean(body.acessToken || body.accessToken)).to.equal(true);

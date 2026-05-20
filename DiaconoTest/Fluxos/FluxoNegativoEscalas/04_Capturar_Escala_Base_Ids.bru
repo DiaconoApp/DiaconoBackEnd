@@ -1,0 +1,62 @@
+meta {
+  name: 04 Capturar Escala Base Ids
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/escalas-evento/governo/{{eventoNegEscalaAId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{tokenGoverno}}
+}
+
+script:post-response {
+  const body = res.getBody();
+  if (!Array.isArray(body)) {
+    throw new Error(`Resposta invalida ao buscar escalas do evento base. HTTP body=${JSON.stringify(body)}`);
+  }
+  const normalize = (value) => String(value || "").trim().toLowerCase();
+  const sanitizeVar = (value) => {
+    const normalized = normalize(value);
+    return normalized.startsWith("{{") ? "" : normalized;
+  };
+
+  let ministerioId1 = sanitizeVar(bru.getVar("ministerioId1")) || sanitizeVar("{{ministerioId1}}");
+  let ministerioId2 = sanitizeVar(bru.getVar("ministerioId2")) || sanitizeVar("{{ministerioId2}}");
+
+  const escalados = body.filter((item) => item.isMinisterioEscalado === true);
+
+  if ((!ministerioId1 || !ministerioId2) && escalados.length >= 2) {
+    ministerioId1 = normalize(escalados[0].idExternoMinisterio);
+    ministerioId2 = normalize(escalados[1].idExternoMinisterio);
+    bru.setVar("ministerioId1", ministerioId1);
+    bru.setVar("ministerioId2", ministerioId2);
+  }
+
+  const escala1 = body.find(
+    (item) => normalize(item.idExternoMinisterio) === ministerioId1 && item.isMinisterioEscalado === true
+  );
+  const escala2 = body.find(
+    (item) => normalize(item.idExternoMinisterio) === ministerioId2 && item.isMinisterioEscalado === true
+  );
+
+  if (!escala1 || !escala2) {
+    const idsRetornados = body.map((item) => `${item.idExternoMinisterio}:${item.idExternoEscalaEvento}:${item.isMinisterioEscalado}`).join(", ");
+    throw new Error(`Nao foi possivel localizar as escalas do evento base. Esperados: ${ministerioId1}, ${ministerioId2}. Retornados: ${idsRetornados}`);
+  }
+
+  bru.setVar("escalaEventoNegEscalaA1", escala1.idExternoEscalaEvento);
+  bru.setVar("escalaEventoNegEscalaA2", escala2.idExternoEscalaEvento);
+}
+
+tests {
+  test("deve obter ids das escalas do evento base", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(bru.getVar("escalaEventoNegEscalaA1")).to.be.a("string");
+    expect(bru.getVar("escalaEventoNegEscalaA2")).to.be.a("string");
+  });
+}

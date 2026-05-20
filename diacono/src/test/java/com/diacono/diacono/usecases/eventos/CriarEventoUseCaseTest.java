@@ -33,6 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -141,6 +142,75 @@ class CriarEventoUseCaseTest {
 		FieldInvalidException ex = assertThrows(FieldInvalidException.class, () -> useCase.execute(request, idIgreja));
 
 		assertEquals("É necessário preencher os campos de inicío e término da recorrência", ex.getMessage());
+	}
+
+	@Test
+	void deveLancarExcecaoQuandoDataFinalDaRecorrenciaNaoForMaiorQueInicial() {
+		RecorrenciaCreateDTO recorrencia = new RecorrenciaCreateDTO(
+				TipoRecorrencia.SEMANAL,
+				LocalDate.of(2026, 6, 10),
+				LocalDate.of(2026, 6, 10)
+		);
+
+		FieldInvalidException ex = assertThrows(
+				FieldInvalidException.class,
+				() -> useCase.validarRecorrencia(recorrencia, LocalDateTime.of(2026, 6, 10, 19, 0))
+		);
+
+		assertEquals("A data final da recorrência precisa ser maior que a data de início, para eventos com recorrência.", ex.getMessage());
+	}
+
+	@Test
+	void deveLancarExcecaoQuandoRecorrenciaUltrapassarUmAno() {
+		RecorrenciaCreateDTO recorrencia = new RecorrenciaCreateDTO(
+				TipoRecorrencia.MENSAL,
+				LocalDate.of(2026, 1, 10),
+				LocalDate.of(2027, 1, 11)
+		);
+
+		FieldInvalidException ex = assertThrows(
+				FieldInvalidException.class,
+				() -> useCase.validarRecorrencia(recorrencia, LocalDateTime.of(2026, 1, 10, 19, 0))
+		);
+
+		assertEquals("A data final da recorrência precisar estar dentro do período de um ano", ex.getMessage());
+	}
+
+	@Test
+	void deveLancarExcecaoQuandoDataInicioDaRecorrenciaForDiferenteDaDataDoEvento() {
+		RecorrenciaCreateDTO recorrencia = new RecorrenciaCreateDTO(
+				TipoRecorrencia.SEMANAL,
+				LocalDate.of(2026, 6, 11),
+				LocalDate.of(2026, 7, 11)
+		);
+
+		FieldInvalidException ex = assertThrows(
+				FieldInvalidException.class,
+				() -> useCase.validarRecorrencia(recorrencia, LocalDateTime.of(2026, 6, 10, 19, 0))
+		);
+
+		assertEquals("A data de início da recorrência precisa ser igual à data de início do evento.", ex.getMessage());
+	}
+
+	@Test
+	void deveLancarExcecaoQuandoEnderecoNovoEstiverIncompleto() {
+		UUID idIgreja = UUID.fromString("33333333-3333-3333-3333-333333333333");
+		EventoCreateDTO request = new EventoCreateDTO(
+				List.of(UUID.fromString("44444444-4444-4444-4444-444444444444")),
+				new EnderecoEventoDTO(null, "12345678", "SP", "SAO PAULO", "CENTRO", "RUA A", "AP 1", "10", null),
+				new RecorrenciaCreateDTO(TipoRecorrencia.NAO_REPETE, null, null),
+				"Culto",
+				"Descricao",
+				"GERAL",
+				LocalDateTime.of(2026, 5, 10, 19, 0),
+				LocalDateTime.of(2026, 5, 10, 21, 0),
+				BigDecimal.ZERO
+		);
+
+		FieldInvalidException ex = assertThrows(FieldInvalidException.class, () -> useCase.execute(request, idIgreja));
+
+		assertEquals("Você precisa preencher o apelido", ex.getMessage());
+		verifyNoInteractions(validarHora, eventoRepository, eventoProducer);
 	}
 
 	@Test

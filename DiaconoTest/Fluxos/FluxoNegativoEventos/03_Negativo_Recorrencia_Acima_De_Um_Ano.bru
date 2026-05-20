@@ -1,0 +1,73 @@
+meta {
+  name: 03 Negativo Recorrencia Acima De Um Ano
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/eventos
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{tokenGoverno}}
+}
+
+headers {
+  content-type: application/json
+}
+
+script:pre-request {
+  const dataHoraInicio = String(bru.getVar("dataHoraInicioNegEvento") || "{{dataHoraInicioNegEvento}}").trim();
+  const dataBase = dataHoraInicio.split("T")[0];
+  bru.setVar("dataInicioRecorrenciaNegEvento", dataBase);
+
+  const [ano, mes, dia] = dataBase.split("-").map(Number);
+  const dataFinal = new Date(ano, mes - 1, dia);
+  dataFinal.setDate(dataFinal.getDate() + 370);
+  const pad = (value) => String(value).padStart(2, "0");
+  bru.setVar(
+    "dataTerminoRecorrenciaNegEvento",
+    `${dataFinal.getFullYear()}-${pad(dataFinal.getMonth() + 1)}-${pad(dataFinal.getDate())}`
+  );
+}
+
+body:json {
+  {
+    "fkMinisterios": [
+      "{{ministerioId1}}",
+      "{{ministerioId2}}"
+    ],
+    "nome": "Culto recorrencia longa",
+    "descricao": "VALIDACAO EVENTO NEGATIVO",
+    "publicoAlvo": "MEMBROS",
+    "dataHoraInicio": "{{dataHoraInicioNegEvento}}",
+    "dataHoraFim": "{{dataHoraFimNegEvento}}",
+    "custo": 0,
+    "recorrencia": {
+      "tipoRecorrencia": "MENSAL",
+      "dataInicioRecorrencia": "{{dataInicioRecorrenciaNegEvento}}",
+      "dataTerminoRecorrencia": "{{dataTerminoRecorrenciaNegEvento}}"
+    },
+    "endereco": {
+      "idExterno": null,
+      "cep": "04094000",
+      "rua": "PARQUE IBIRAPUERA",
+      "cidade": "SAO PAULO",
+      "estado": "SP",
+      "bairro": "VILA MARIANA",
+      "complemento": "PORTAO PRINCIPAL",
+      "numero": "S N",
+      "apelido": "LOCAL EVENTO"
+    }
+  }
+}
+
+tests {
+  test("deve rejeitar recorrencia acima de um ano", function () {
+    expect(res.getStatus()).to.equal(400);
+    const body = res.getBody();
+    expect(body.message).to.contain("dentro do período de um ano");
+  });
+}

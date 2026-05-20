@@ -20,28 +20,27 @@ Colecao para validar propagacao de status no fluxo:
 
 Arquivo: `environments/local.bru`
 
-- `email` e `senha`: credenciais para login
+- `emailGoverno` e `senhaGoverno`: credenciais de governo para criar evento e consultar `escalas-evento/governo`
+- `emailLiderMinisterio` e `senhaLiderMinisterio`: credenciais de lider para consultar e salvar `escalas-ministerio/lider-ministerio`
 - `ministerioId1` e `ministerioId2`: dois ministerios existentes no `data.sql`
 - `membroMinisterioId1` e `membroMinisterioId2`: membros validos dos ministerios escolhidos
+- `dataHoraInicio` e `dataHoraFim`: horario do evento a ser criado; `mesEvento` e `anoEvento` sao sincronizados automaticamente a partir de `dataHoraInicio`
 
 ## Sequencia do fluxo
 
 1. Login
-2. Criar evento com 2 ministerios
-3. Capturar `eventoId`
-4. Capturar `escalaEventoId1` e `escalaEventoId2`
-5. Validacoes iniciais
-6. Alimentar primeira escala
-7. Validacoes intermediarias
-8. Alimentar segunda escala
-9. Validacoes finais
+2. Login lider
+3. Criar evento com 2 ministerios
+4. Capturar `eventoId`
+5. Capturar `escalaEventoId1` e `escalaEventoId2`
+6. Validacoes iniciais
+7. Alimentar primeira escala
+8. Validacoes intermediarias
+9. Alimentar segunda escala
+10. Validacoes finais
 
-## Observacao sobre contrato da API
+## Observacoes sobre contrato da API
 
-O endpoint `GET /api/v1/eventos/{id}` nao expoe campo `status` no DTO atual.
-Por isso, a verificacao de status do evento foi feita em:
-
-- `GET /api/v1/escalas-evento/governo?mes&ano&nomeEvento`
-
-Esse endpoint retorna `EscalaEventoConsolidadoDTO.status` (status do evento).
-
+- O fluxo usa credencial de `GOVERNO` porque os endpoints `escalas-evento/governo` exigem esse escopo.
+- O fluxo troca para credencial de `LIDER_MINISTERIO` nas etapas de `escalas-ministerio`, porque os use cases validam vínculo real do lider com o ministerio da escala.
+- O endpoint `GET /api/v1/eventos/{id}` expoe `status` no DTO atual e pode ser usado como validacao complementar do estado do evento.

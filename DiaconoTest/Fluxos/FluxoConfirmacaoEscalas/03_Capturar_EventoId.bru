@@ -20,7 +20,10 @@ script:post-response {
   const alvo = eventos.find((e) => e.nome === bru.getVar("nomeEvento"));
 
   if (!alvo) {
-    throw new Error("Evento criado nao encontrado na listagem do mes/ano");
+    const nomes = eventos.map((e) => e.nome).join(", ");
+    throw new Error(
+      `Evento criado nao encontrado na listagem do mes/ano. nomeEvento=${bru.getVar("nomeEvento")} mes=${bru.getVar("mesEvento")} ano=${bru.getVar("anoEvento")} retornados=[${nomes}]`
+    );
   }
 
   bru.setVar("eventoId", alvo.idExterno);
@@ -32,4 +35,3 @@ tests {
     expect(bru.getVar("eventoId")).to.be.a("string");
   });
 }
-

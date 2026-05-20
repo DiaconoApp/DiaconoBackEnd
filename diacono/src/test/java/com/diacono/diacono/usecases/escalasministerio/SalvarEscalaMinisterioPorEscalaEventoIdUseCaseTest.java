@@ -7,6 +7,7 @@ import com.diacono.diacono.applications.dtos.ministerio.MinisterioSuperSimplific
 import com.diacono.diacono.domain.entity.EscalaEvento;
 import com.diacono.diacono.domain.entity.EscalaMinisterio;
 import com.diacono.diacono.domain.entity.MembroMinisterio;
+import com.diacono.diacono.domain.entity.Ministerio;
 import com.diacono.diacono.domain.enums.EnumStatusEscalaMinisterio;
 import com.diacono.diacono.domain.repository.EscalaEventoRepository;
 import com.diacono.diacono.domain.repository.EscalaMinisterioRepository;
@@ -14,8 +15,10 @@ import com.diacono.diacono.domain.repository.MembroMinisterioRepository;
 import com.diacono.diacono.domain.service.EscalaStatusDomainService;
 import com.diacono.diacono.global.error.exceptions.FieldInvalidException;
 import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,10 +30,11 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
-import org.mockito.ArgumentCaptor;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -52,223 +56,146 @@ class SalvarEscalaMinisterioPorEscalaEventoIdUseCaseTest {
     @InjectMocks
     private SalvarEscalaMinisterioPorEscalaEventoIdUseCase useCase;
 
-    @Test
-    void deveSalvarListaDeEscaladosComSucesso() {
-        UUID igrejaId = UUID.fromString("11111111-1111-1111-1111-111111111111");
-        UUID escalaEventoId = UUID.fromString("22222222-2222-2222-2222-222222222222");
-        UUID membroId = UUID.fromString("33333333-3333-3333-3333-333333333333");
-        UUID ministerioId = UUID.fromString("44444444-4444-4444-4444-444444444444");
-        UUID membroMinisterioId = UUID.fromString("55555555-5555-5555-5555-555555555555");
-        EscalaEvento escalaEvento = new EscalaEvento();
-        MembroMinisterio membroMinisterio = MembroMinisterio.builder().build();
+    private UUID escalaEventoId;
+    private UUID igrejaId;
+    private UUID liderId;
+    private UUID ministerioId;
+    private UUID membroMinisterioId1;
+    private UUID membroMinisterioId2;
 
-        List<EscalaMinisterioSalvarDTO> request = List.of(
-                new EscalaMinisterioSalvarDTO(membroMinisterioId, null)
+    @BeforeEach
+    void setUp() {
+        escalaEventoId = UUID.randomUUID();
+        igrejaId = UUID.randomUUID();
+        liderId = UUID.randomUUID();
+        ministerioId = UUID.randomUUID();
+        membroMinisterioId1 = UUID.randomUUID();
+        membroMinisterioId2 = UUID.randomUUID();
+    }
+
+    @Test
+    void deveLancarErroQuandoListaForNula() {
+        FieldInvalidException ex = assertThrows(
+                FieldInvalidException.class,
+                () -> useCase.execute(escalaEventoId, igrejaId, liderId, null)
         );
 
-        when(escalaEventoRepository.findMinisterioIdByEscalaEventoId(igrejaId, escalaEventoId))
-                .thenReturn(ministerioId);
-        when(membroMinisterioRepository.buscarMinisterioLider(membroId, igrejaId))
-                .thenReturn(List.of(new MinisterioSuperSimplificadoDTO(ministerioId, "Ministerio Teste")));
+        assertEquals("Lista de escala do ministério não pode ser nula", ex.getMessage());
+        verify(escalaMinisterioRepository, never()).replaceEscalaMinisterioByEscalaEventoId(eq(igrejaId), eq(escalaEventoId), anyList());
+    }
+
+    @Test
+    void deveLancarErroQuandoListaContiverMembrosDuplicados() {
+        List<EscalaMinisterioSalvarDTO> request = List.of(
+                new EscalaMinisterioSalvarDTO(membroMinisterioId1, EnumStatusEscalaMinisterio.CONFIRMADO),
+                new EscalaMinisterioSalvarDTO(membroMinisterioId1, EnumStatusEscalaMinisterio.PENDENTE)
+        );
+
+        FieldInvalidException ex = assertThrows(
+                FieldInvalidException.class,
+                () -> useCase.execute(escalaEventoId, igrejaId, liderId, request)
+        );
+
+        assertEquals("A lista de escalados contém membros duplicados", ex.getMessage());
+        verify(escalaMinisterioRepository, never()).replaceEscalaMinisterioByEscalaEventoId(eq(igrejaId), eq(escalaEventoId), anyList());
+    }
+
+    @Test
+    void deveLancarErroQuandoLiderNaoPossuirVinculoComMinisterioDaEscala() {
+        List<EscalaMinisterioSalvarDTO> request = List.of(
+                new EscalaMinisterioSalvarDTO(membroMinisterioId1, EnumStatusEscalaMinisterio.CONFIRMADO)
+        );
+
+        when(escalaEventoRepository.findMinisterioIdByEscalaEventoId(igrejaId, escalaEventoId)).thenReturn(ministerioId);
+        when(membroMinisterioRepository.buscarMinisterioLider(liderId, igrejaId)).thenReturn(List.of());
+
+        ObjectNotFoundException ex = assertThrows(
+                ObjectNotFoundException.class,
+                () -> useCase.execute(escalaEventoId, igrejaId, liderId, request)
+        );
+
+        assertEquals("O líder informado não possui vínculo com o ministério solicitado.", ex.getMessage());
+    }
+
+    @Test
+    void deveLancarErroQuandoMembroNaoPertencerAoMinisterioDaEscala() {
+        List<EscalaMinisterioSalvarDTO> request = List.of(
+                new EscalaMinisterioSalvarDTO(membroMinisterioId2, EnumStatusEscalaMinisterio.CONFIRMADO)
+        );
+
+        mockLiderComVinculoAoMinisterio();
         when(escalaMinisterioRepository.findEscalaMembroMinisterioByEscalaEventoId(igrejaId, escalaEventoId))
-                .thenReturn(List.of(new EscalaMembroMinisterioDTO(membroMinisterioId, "Ana", null, false)));
+                .thenReturn(List.of(new EscalaMembroMinisterioDTO(membroMinisterioId1, "Membro 1", null, false)));
+
+        FieldInvalidException ex = assertThrows(
+                FieldInvalidException.class,
+                () -> useCase.execute(escalaEventoId, igrejaId, liderId, request)
+        );
+
+        assertEquals("A lista contém membros que não pertencem ao ministério da escala informada", ex.getMessage());
+    }
+
+    @Test
+    void deveLancarErroQuandoExistirConflitoDeHorario() {
+        List<EscalaMinisterioSalvarDTO> request = List.of(
+                new EscalaMinisterioSalvarDTO(membroMinisterioId1, EnumStatusEscalaMinisterio.CONFIRMADO)
+        );
+
+        mockLiderComVinculoAoMinisterio();
+        when(escalaMinisterioRepository.findEscalaMembroMinisterioByEscalaEventoId(igrejaId, escalaEventoId))
+                .thenReturn(List.of(new EscalaMembroMinisterioDTO(membroMinisterioId1, "Membro 1", null, true)));
+        when(escalaMinisterioRepository.findMembrosMinisterioOcupadosByEscalaEventoId(igrejaId, escalaEventoId))
+                .thenReturn(List.of(membroMinisterioId1));
+
+        FieldInvalidException ex = assertThrows(
+                FieldInvalidException.class,
+                () -> useCase.execute(escalaEventoId, igrejaId, liderId, request)
+        );
+
+        assertEquals("A lista contém membros com conflito de escala para este horário", ex.getMessage());
+    }
+
+    @Test
+    void deveSalvarEscalaComStatusConfirmadoQuandoStatusForNulo() {
+        List<EscalaMinisterioSalvarDTO> request = List.of(
+                new EscalaMinisterioSalvarDTO(membroMinisterioId1, null)
+        );
+
+        mockLiderComVinculoAoMinisterio();
+        when(escalaMinisterioRepository.findEscalaMembroMinisterioByEscalaEventoId(igrejaId, escalaEventoId))
+                .thenReturn(List.of(new EscalaMembroMinisterioDTO(membroMinisterioId1, "Membro 1", null, false)));
         when(escalaMinisterioRepository.findMembrosMinisterioOcupadosByEscalaEventoId(igrejaId, escalaEventoId))
                 .thenReturn(List.of());
+
+        EscalaEvento escalaEvento = EscalaEvento.builder()
+                .ministerio(Ministerio.builder().nome("Louvor").build())
+                .build();
         when(escalaEventoRepository.findEscalaEventoByIdExternoAndIgrejaId(igrejaId, escalaEventoId))
                 .thenReturn(escalaEvento);
-        when(escalaMinisterioRepository.findMembrosMinisterioByEscalaEventoIdAndIds(eq(igrejaId), eq(escalaEventoId), anyList()))
-                .thenReturn(Map.of(membroMinisterioId, membroMinisterio));
 
-        RestResponseMessageDTO response = useCase.execute(escalaEventoId, igrejaId, membroId, request);
+        MembroMinisterio membroMinisterio = MembroMinisterio.builder().build();
+        when(escalaMinisterioRepository.findMembrosMinisterioByEscalaEventoIdAndIds(igrejaId, escalaEventoId, List.of(membroMinisterioId1)))
+                .thenReturn(Map.of(membroMinisterioId1, membroMinisterio));
+
+        RestResponseMessageDTO response = useCase.execute(escalaEventoId, igrejaId, liderId, request);
 
         assertEquals(HttpStatus.OK, response.getStatus());
         assertEquals("Escala de membros do ministério atualizada com sucesso", response.getMessage());
 
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<EscalaMinisterio>> escalasCaptor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<List<EscalaMinisterio>> captor = ArgumentCaptor.forClass(List.class);
+        verify(escalaMinisterioRepository, times(1))
+                .replaceEscalaMinisterioByEscalaEventoId(eq(igrejaId), eq(escalaEventoId), captor.capture());
+        verify(escalaStatusDomainService, times(1)).recalcularStatusPorEscalaEventoId(escalaEventoId);
 
-        verify(escalaMinisterioRepository).replaceEscalaMinisterioByEscalaEventoId(eq(igrejaId), eq(escalaEventoId), escalasCaptor.capture());
-        verify(escalaStatusDomainService).recalcularStatusPorEscalaEventoId(escalaEventoId);
-
-        List<EscalaMinisterio> escalasSalvas = escalasCaptor.getValue();
+        List<EscalaMinisterio> escalasSalvas = captor.getValue();
         assertEquals(1, escalasSalvas.size());
-        assertEquals(escalaEvento, escalasSalvas.get(0).getEscalaEvento());
-        assertEquals(membroMinisterio, escalasSalvas.get(0).getMembroMinisterio());
-        assertEquals(EnumStatusEscalaMinisterio.CONFIRMADO, escalasSalvas.get(0).getStatusEscalaMinisterio());
+        assertEquals(EnumStatusEscalaMinisterio.CONFIRMADO, escalasSalvas.getFirst().getStatusEscalaMinisterio());
+        assertTrue(escalasSalvas.getFirst().getEscalaEvento() == escalaEvento);
     }
 
-    @Test
-    void deveLancarExcecaoQuandoEscalaEventoNaoPertencerAIgreja() {
-        UUID igrejaId = UUID.fromString("11111111-1111-1111-1111-111111111111");
-        UUID escalaEventoId = UUID.fromString("22222222-2222-2222-2222-222222222222");
-        UUID membroId = UUID.fromString("33333333-3333-3333-3333-333333333333");
-
-        List<EscalaMinisterioSalvarDTO> request = List.of();
-
-        when(escalaEventoRepository.findMinisterioIdByEscalaEventoId(igrejaId, escalaEventoId))
-                .thenReturn(null);
-
-        ObjectNotFoundException ex = assertThrows(
-                ObjectNotFoundException.class,
-                () -> useCase.execute(escalaEventoId, igrejaId, membroId, request)
-        );
-
-        assertEquals("Escala evento não encontrada para a igreja informada.", ex.getMessage());
-        verify(escalaMinisterioRepository, never()).replaceEscalaMinisterioByEscalaEventoId(eq(igrejaId), eq(escalaEventoId), anyList());
-    }
-
-    @Test
-    void deveLancarExcecaoQuandoListaForNula() {
-        UUID igrejaId = UUID.fromString("11111111-1111-1111-1111-111111111111");
-        UUID escalaEventoId = UUID.fromString("22222222-2222-2222-2222-222222222222");
-        UUID membroId = UUID.fromString("33333333-3333-3333-3333-333333333333");
-
-        FieldInvalidException ex = assertThrows(
-                FieldInvalidException.class,
-                () -> useCase.execute(escalaEventoId, igrejaId, membroId, null)
-        );
-
-        assertEquals("Lista de escala do ministério não pode ser nula", ex.getMessage());
-        verify(escalaEventoRepository, never()).findMinisterioIdByEscalaEventoId(igrejaId, escalaEventoId);
-    }
-
-    @Test
-    void deveLancarExcecaoQuandoListaPossuirMembrosDuplicados() {
-        UUID igrejaId = UUID.fromString("11111111-1111-1111-1111-111111111111");
-        UUID escalaEventoId = UUID.fromString("22222222-2222-2222-2222-222222222222");
-        UUID membroId = UUID.fromString("33333333-3333-3333-3333-333333333333");
-        UUID membroMinisterioId = UUID.fromString("55555555-5555-5555-5555-555555555555");
-
-        List<EscalaMinisterioSalvarDTO> request = List.of(
-                new EscalaMinisterioSalvarDTO(membroMinisterioId, EnumStatusEscalaMinisterio.CONFIRMADO),
-                new EscalaMinisterioSalvarDTO(membroMinisterioId, EnumStatusEscalaMinisterio.PENDENTE)
-        );
-
-        FieldInvalidException ex = assertThrows(
-                FieldInvalidException.class,
-                () -> useCase.execute(escalaEventoId, igrejaId, membroId, request)
-        );
-
-        assertEquals("A lista de escalados contém membros duplicados", ex.getMessage());
-        verify(escalaEventoRepository, never()).findMinisterioIdByEscalaEventoId(igrejaId, escalaEventoId);
-    }
-
-    @Test
-    void deveLancarExcecaoQuandoListaPossuirMembroForaDoMinisterioDaEscala() {
-        UUID igrejaId = UUID.fromString("11111111-1111-1111-1111-111111111111");
-        UUID escalaEventoId = UUID.fromString("22222222-2222-2222-2222-222222222222");
-        UUID membroId = UUID.fromString("33333333-3333-3333-3333-333333333333");
-        UUID ministerioId = UUID.fromString("44444444-4444-4444-4444-444444444444");
-        UUID membroValidoId = UUID.fromString("55555555-5555-5555-5555-555555555555");
-        UUID membroInvalidoId = UUID.fromString("66666666-6666-6666-6666-666666666666");
-
-        List<EscalaMinisterioSalvarDTO> request = List.of(
-                new EscalaMinisterioSalvarDTO(membroInvalidoId, EnumStatusEscalaMinisterio.CONFIRMADO)
-        );
-
-        when(escalaEventoRepository.findMinisterioIdByEscalaEventoId(igrejaId, escalaEventoId))
-                .thenReturn(ministerioId);
-        when(membroMinisterioRepository.buscarMinisterioLider(membroId, igrejaId))
-                .thenReturn(List.of(new MinisterioSuperSimplificadoDTO(ministerioId, "Ministerio Teste")));
-        when(escalaMinisterioRepository.findEscalaMembroMinisterioByEscalaEventoId(igrejaId, escalaEventoId))
-                .thenReturn(List.of(new EscalaMembroMinisterioDTO(membroValidoId, "Ana", null, false)));
-
-        FieldInvalidException ex = assertThrows(
-                FieldInvalidException.class,
-                () -> useCase.execute(escalaEventoId, igrejaId, membroId, request)
-        );
-
-        assertEquals("A lista contém membros que não pertencem ao ministério da escala informada", ex.getMessage());
-        verify(escalaMinisterioRepository, never()).replaceEscalaMinisterioByEscalaEventoId(eq(igrejaId), eq(escalaEventoId), anyList());
-    }
-
-    @Test
-    void deveLancarExcecaoQuandoListaPossuirConflitoDeEscala() {
-        UUID igrejaId = UUID.fromString("11111111-1111-1111-1111-111111111111");
-        UUID escalaEventoId = UUID.fromString("22222222-2222-2222-2222-222222222222");
-        UUID membroId = UUID.fromString("33333333-3333-3333-3333-333333333333");
-        UUID ministerioId = UUID.fromString("44444444-4444-4444-4444-444444444444");
-        UUID membroMinisterioId = UUID.fromString("55555555-5555-5555-5555-555555555555");
-
-        List<EscalaMinisterioSalvarDTO> request = List.of(
-                new EscalaMinisterioSalvarDTO(membroMinisterioId, EnumStatusEscalaMinisterio.CONFIRMADO)
-        );
-
-        when(escalaEventoRepository.findMinisterioIdByEscalaEventoId(igrejaId, escalaEventoId))
-                .thenReturn(ministerioId);
-        when(membroMinisterioRepository.buscarMinisterioLider(membroId, igrejaId))
-                .thenReturn(List.of(new MinisterioSuperSimplificadoDTO(ministerioId, "Ministerio Teste")));
-        when(escalaMinisterioRepository.findEscalaMembroMinisterioByEscalaEventoId(igrejaId, escalaEventoId))
-                .thenReturn(List.of(new EscalaMembroMinisterioDTO(membroMinisterioId, "Ana", null, false)));
-        when(escalaMinisterioRepository.findMembrosMinisterioOcupadosByEscalaEventoId(igrejaId, escalaEventoId))
-                .thenReturn(List.of(membroMinisterioId));
-
-        FieldInvalidException ex = assertThrows(
-                FieldInvalidException.class,
-                () -> useCase.execute(escalaEventoId, igrejaId, membroId, request)
-        );
-
-        assertEquals("A lista contém membros com conflito de escala para este horário", ex.getMessage());
-        verify(escalaMinisterioRepository, never()).replaceEscalaMinisterioByEscalaEventoId(eq(igrejaId), eq(escalaEventoId), anyList());
-    }
-
-    @Test
-    void deveLancarExcecaoQuandoEscalaEventoNaoForEncontradaAoBuscarEntidade() {
-        UUID igrejaId = UUID.fromString("11111111-1111-1111-1111-111111111111");
-        UUID escalaEventoId = UUID.fromString("22222222-2222-2222-2222-222222222222");
-        UUID membroId = UUID.fromString("33333333-3333-3333-3333-333333333333");
-        UUID ministerioId = UUID.fromString("44444444-4444-4444-4444-444444444444");
-        UUID membroMinisterioId = UUID.fromString("55555555-5555-5555-5555-555555555555");
-
-        List<EscalaMinisterioSalvarDTO> request = List.of(
-                new EscalaMinisterioSalvarDTO(membroMinisterioId, EnumStatusEscalaMinisterio.CONFIRMADO)
-        );
-
-        when(escalaEventoRepository.findMinisterioIdByEscalaEventoId(igrejaId, escalaEventoId))
-                .thenReturn(ministerioId);
-        when(membroMinisterioRepository.buscarMinisterioLider(membroId, igrejaId))
-                .thenReturn(List.of(new MinisterioSuperSimplificadoDTO(ministerioId, "Ministerio Teste")));
-        when(escalaMinisterioRepository.findEscalaMembroMinisterioByEscalaEventoId(igrejaId, escalaEventoId))
-                .thenReturn(List.of(new EscalaMembroMinisterioDTO(membroMinisterioId, "Ana", null, false)));
-        when(escalaMinisterioRepository.findMembrosMinisterioOcupadosByEscalaEventoId(igrejaId, escalaEventoId))
-                .thenReturn(List.of());
-        when(escalaEventoRepository.findEscalaEventoByIdExternoAndIgrejaId(igrejaId, escalaEventoId))
-                .thenReturn(null);
-
-        ObjectNotFoundException ex = assertThrows(
-                ObjectNotFoundException.class,
-                () -> useCase.execute(escalaEventoId, igrejaId, membroId, request)
-        );
-
-        assertEquals("Escala evento não encontrada para a igreja informada.", ex.getMessage());
-        verify(escalaMinisterioRepository, never()).replaceEscalaMinisterioByEscalaEventoId(eq(igrejaId), eq(escalaEventoId), anyList());
-    }
-
-    @Test
-    void deveLancarExcecaoQuandoMembroNaoForLiderDoMinisterioDaEscala() {
-        UUID igrejaId = UUID.fromString("11111111-1111-1111-1111-111111111111");
-        UUID escalaEventoId = UUID.fromString("22222222-2222-2222-2222-222222222222");
-        UUID membroId = UUID.fromString("33333333-3333-3333-3333-333333333333");
-        UUID ministerioId = UUID.fromString("44444444-4444-4444-4444-444444444444");
-        UUID outroMinisterioId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
-        UUID membroMinisterioId = UUID.fromString("55555555-5555-5555-5555-555555555555");
-
-        List<EscalaMinisterioSalvarDTO> request = List.of(
-                new EscalaMinisterioSalvarDTO(membroMinisterioId, EnumStatusEscalaMinisterio.CONFIRMADO)
-        );
-
-        when(escalaEventoRepository.findMinisterioIdByEscalaEventoId(igrejaId, escalaEventoId))
-                .thenReturn(ministerioId);
-        when(membroMinisterioRepository.buscarMinisterioLider(membroId, igrejaId))
-                .thenReturn(List.of(new MinisterioSuperSimplificadoDTO(outroMinisterioId, "Outro Ministerio")));
-
-        ObjectNotFoundException ex = assertThrows(
-                ObjectNotFoundException.class,
-                () -> useCase.execute(escalaEventoId, igrejaId, membroId, request)
-        );
-
-        assertEquals("O líder informado não possui vínculo com o ministério solicitado.", ex.getMessage());
-        verify(escalaMinisterioRepository, never()).replaceEscalaMinisterioByEscalaEventoId(eq(igrejaId), eq(escalaEventoId), anyList());
+    private void mockLiderComVinculoAoMinisterio() {
+        when(escalaEventoRepository.findMinisterioIdByEscalaEventoId(igrejaId, escalaEventoId)).thenReturn(ministerioId);
+        when(membroMinisterioRepository.buscarMinisterioLider(liderId, igrejaId))
+                .thenReturn(List.of(new MinisterioSuperSimplificadoDTO(ministerioId, "Louvor")));
     }
 }
-

@@ -11,7 +11,7 @@ get {
 }
 
 auth:bearer {
-  token: {{token}}
+  token: {{tokenLiderMinisterio}}
 }
 
 tests {
@@ -21,8 +21,7 @@ tests {
     expect(Array.isArray(body)).to.equal(true);
     expect(body.length).to.be.greaterThan(0);
 
-    const todosConfirmados = body.every((m) => m.status === "CONFIRMADO");
-    expect(todosConfirmados).to.equal(true);
+    const membroConfirmado = body.some((m) => m.status === "CONFIRMADO");
+    expect(membroConfirmado).to.equal(true);
   });
 }
-

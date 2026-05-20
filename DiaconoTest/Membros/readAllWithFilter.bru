@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/membros?page={{page}}&size={{size}}&sort=nome,desc&buscaGeral={{buscaGeral}}&status={{statusMembro}}&fkMinisterio={{ministerioId}}
+  url: {{baseUrl}}/api/v1/membros?page={{page}}&size={{size}}&sort=nome,desc&buscaGeral={{buscaGeral}}&status={{statusMembro}}&fkMinisterio={{ministerioId}}
   body: none
   auth: bearer
 }

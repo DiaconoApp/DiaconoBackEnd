@@ -1,0 +1,36 @@
+meta {
+  name: 11 Negativo Conflito De Horario
+  type: http
+  seq: 12
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/escalas-ministerio/lider-ministerio/{{escalaEventoNegEscalaB1}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{tokenLiderMinisterio}}
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  [
+    {
+      "idExternoMembroMinisterio": "{{membroMinisterioId1}}",
+      "status": "CONFIRMADO"
+    }
+  ]
+}
+
+tests {
+  test("deve rejeitar membro com conflito de horario", function () {
+    expect(res.getStatus()).to.equal(400);
+    const body = res.getBody();
+    expect(body.message).to.contain("conflito de escala");
+  });
+}

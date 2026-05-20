@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: {{baseUrl}}/membros
+  url: {{baseUrl}}/api/v1/membros
   body: json
   auth: bearer
 }
@@ -22,21 +22,22 @@ body:json {
   {
     "fkIgreja": "{{igrejaId}}",
     "nome": "Lucas Oliveira",
-    "cpf": "12345678909",
+    "cpf": "52998224725",
     "dataNascimento": "1992-03-15",
     "email": "lucas.oliveira@email.com",
     "celular": "11912345678",
     "senha": "Senha@123",
-    "idExternoMinisterios": "{{ministerioId}}",
+    "idExternoMinisterios": [
+      "{{ministerioId}}"
+    ],
     "cargo": "MEMBRO",
     "generoMembro": "MASCULINO",
     "membroEnderecoDTO": {
       "cep": "01310100",
-      "logradouro": "AVENIDA PAULISTA",
-      "bairro": "BELA VISTA",
-      "cidade": "SAO PAULO",
-      "rua": "RUA ILHA DOS RATONES",
       "estado": "SP",
+      "cidade": "SAO PAULO",
+      "bairro": "BELA VISTA",
+      "rua": "RUA ILHA DOS RATONES",
       "numero": "1500",
       "complemento": "APTO 304"
     }

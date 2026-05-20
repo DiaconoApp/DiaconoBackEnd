@@ -11,7 +11,23 @@ get {
 }
 
 auth:bearer {
-  token: {{token}}
+  token: {{tokenLiderMinisterio}}
+}
+
+script:post-response {
+  const body = res.getBody();
+
+  if (!Array.isArray(body)) {
+    throw new Error(`Resposta invalida ao consultar membros da escala 1. body=${JSON.stringify(body)}`);
+  }
+
+  const membroDisponivel = body.find((membro) => membro && membro.isMembroOcupado === false);
+
+  if (!membroDisponivel || !membroDisponivel.membroMinisterioId) {
+    throw new Error("Nao foi encontrado membro disponivel para a primeira escala do fluxo de confirmacao");
+  }
+
+  bru.setVar("membroMinisterioEscala1DisponivelId", membroDisponivel.membroMinisterioId);
 }
 
 tests {
@@ -23,6 +39,6 @@ tests {
 
     const possuiConfirmado = body.some((m) => m.status === "CONFIRMADO");
     expect(possuiConfirmado).to.equal(false);
+    expect(bru.getVar("membroMinisterioEscala1DisponivelId")).to.be.a("string");
   });
 }
-

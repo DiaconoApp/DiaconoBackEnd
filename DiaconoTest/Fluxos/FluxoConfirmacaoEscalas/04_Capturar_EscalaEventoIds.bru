@@ -16,6 +16,9 @@ auth:bearer {
 
 script:post-response {
   const body = res.getBody();
+  if (!Array.isArray(body)) {
+    throw new Error(`Resposta invalida ao buscar escalas do evento. HTTP body=${JSON.stringify(body)}`);
+  }
   const normalize = (value) => String(value || "").trim().toLowerCase();
   const sanitizeVar = (value) => {
     const normalized = normalize(value);
@@ -64,4 +67,3 @@ tests {
     expect(bru.getVar("escalaEventoId2")).to.be.a("string");
   });
 }
-

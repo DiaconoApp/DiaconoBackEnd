@@ -1,0 +1,34 @@
+meta {
+  name: 05 Preparar Conflito Base
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/escalas-ministerio/lider-ministerio/{{escalaEventoNegEscalaA1}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{tokenLiderMinisterio}}
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  [
+    {
+      "idExternoMembroMinisterio": "{{membroMinisterioId1}}",
+      "status": "CONFIRMADO"
+    }
+  ]
+}
+
+tests {
+  test("deve preparar a primeira escala para o cenario de conflito", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
