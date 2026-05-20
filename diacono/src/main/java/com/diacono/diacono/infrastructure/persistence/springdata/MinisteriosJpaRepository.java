@@ -46,7 +46,7 @@ public interface MinisteriosJpaRepository extends JpaRepository<Ministerio, Long
 
     @Query("""
         SELECT m FROM Ministerio m
-        WHERE (:busca IS NULL OR UPPER(nome) LIKE :busca OR UPPER(nomeLider) LIKE :busca)
+        WHERE (:busca IS NULL OR UPPER(nome) LIKE CONCAT('%', :busca, '%') OR UPPER(nomeLider) LIKE CONCAT('%', :busca, '%'))
         AND (:status IS NULL OR m.status = :status)
         AND (m.igreja.idExterno = :fkIgreja)
     """)

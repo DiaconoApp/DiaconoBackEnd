@@ -5,7 +5,6 @@ import com.diacono.diacono.applications.mappers.ministerio.MinisterioMapper;
 import com.diacono.diacono.domain.entity.Ministerio;
 import com.diacono.diacono.domain.enums.EnumStatusMinisterio;
 import com.diacono.diacono.domain.repository.MinisteriosRepository;
-import com.diacono.diacono.global.error.exceptions.ObjectNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,7 +20,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -68,19 +66,16 @@ class BuscarMinisteriosGovernoComFiltroUseCaseTest {
 	}
 
 	@Test
-	void deveLancarExcecaoQuandoNenhumMinisterioForEncontrado() {
+	void deveRetornarPaginaVaziaQuandoNenhumMinisterioForEncontrado() {
 		UUID idIgreja = UUID.fromString("11111111-1111-1111-1111-111111111111");
 		Pageable pageable = PageRequest.of(0, 10);
 
 		when(ministeriosRepository.buscarComFiltros(pageable, "LOUVOR", EnumStatusMinisterio.ATIVO, idIgreja))
 				.thenReturn(Page.empty());
 
-		ObjectNotFoundException ex = assertThrows(
-				ObjectNotFoundException.class,
-				() -> useCase.execute(pageable, "louvor", EnumStatusMinisterio.ATIVO, idIgreja)
-		);
+		Page<MinisterioSimplificadoDTO> response = useCase.execute(pageable, "louvor", EnumStatusMinisterio.ATIVO, idIgreja);
 
-		assertEquals("Nenhum ministério encontrado", ex.getMessage());
+		assertEquals(0, response.getTotalElements());
 		verify(mapper, never()).paraMinisterioSimplificadoDTO(any());
 	}
 }
