@@ -36,6 +36,11 @@ public class MembroMinisterioRepositoryImpl implements MembroMinisterioRepositor
     }
 
     @Override
+    public List<MembroMinisterio> findAllByMembroIdExternoAndIgrejaIdExterno(UUID membroIdExterno, UUID igrejaIdExterno) {
+        return jpaRepository.findAllByMembroIdExternoAndIgrejaIdExterno(membroIdExterno, igrejaIdExterno);
+    }
+
+    @Override
     public Page<MembroMinisterio> buscarPorMembroMinisterioComFiltro(
             Pageable pageable, UUID idMinisterio, String texto, EnumStatusMembro status) {
         String buscaToken = SensitiveSearchIndexUtils.searchToken(texto);

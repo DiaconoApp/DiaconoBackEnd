@@ -17,6 +17,7 @@ public interface EscalaMinisterioRepository {
     List<UUID> findMembrosMinisterioOcupadosByEscalaEventoId(UUID igrejaId, UUID escalaEventoId);
     Map<UUID, MembroMinisterio> findMembrosMinisterioByEscalaEventoIdAndIds (UUID igrejaId, UUID escalaEventoId, List<UUID> idsMembrosMinisterio);
     void deleteByEscalaEventoIdAndIgrejaId(UUID igrejaId, UUID escalaEventoId);
+    void deleteByMembroMinisterioIdsAndIgrejaId(UUID igrejaId, List<UUID> membroMinisterioIds);
     void replaceEscalaMinisterioByEscalaEventoId(UUID igrejaId, UUID escalaEventoId, List<EscalaMinisterio> escalasParaSalvar);
     boolean areAllConfirmadosByEscalaEventoId(UUID escalaEventoId);
 }
