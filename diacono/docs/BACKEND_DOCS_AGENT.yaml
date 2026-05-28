@@ -10,6 +10,7 @@ contexto_operacional:
 
 objetivo:
   descrever: "garantir consistencia entre codigo backend e documentos em /docs"
+  modo_execucao: "revisao sequencial, um arquivo por vez"
 
 regras_globais:
   - "nao recriar documentos"
@@ -20,11 +21,20 @@ regras_globais:
   - "nao inventar informacoes"
   - "basear todas as alteracoes no codigo real"
   - "realizar alteracoes minimas e precisas"
+  - "registrar internamente evidencia objetiva para cada alteracao (arquivo, classe, metodo)"
+  - "executar atualizacao de apenas um documento alvo por execucao"
+  - "quando uma mudanca impactar mais de um documento, atualizar somente o documento em foco e registrar pendencias dos demais em adhoc"
+  - "se houver necessidade de nova secao estrutural, nao criar; registrar pendencia em adhoc para revisao humana"
 
 documentos_alvo:
   - "/docs/ARQUITETURA.md"
   - "/docs/FLUXOS_NEGOCIO.md"
   - "/docs/REGRAS_NEGOCIO.md"
+
+documento_em_foco:
+  regra:
+    - "selecionar exatamente um item de documentos_alvo por execucao"
+    - "rejeitar execucao sem documento_em_foco definido"
 
 processo:
   - etapa: "analisar_codigo"
@@ -35,6 +45,10 @@ processo:
       - "inspecionar domain services"
       - "inspecionar entidades"
       - "inspecionar repositories"
+      - "inspecionar configuracoes de seguranca e autenticacao"
+      - "inspecionar classes de infraestrutura e persistencia"
+      - "inspecionar mappers, dtos e contratos entre camadas"
+      - "inspecionar exceptions e validacoes compartilhadas"
 
   - etapa: "classificar_mudancas"
     acoes:
@@ -48,6 +62,7 @@ processo:
       - "se alteracao_regra entao atualizar REGRAS_NEGOCIO.md"
       - "se alteracao_fluxo entao atualizar FLUXOS_NEGOCIO.md"
       - "se alteracao_arquitetura entao atualizar ARQUITETURA.md"
+      - "se uma alteracao afetar documentos adicionais alem do documento_em_foco, registrar pendencia em adhoc para ciclos seguintes"
 
   - etapa: "atualizar_documentos"
     acoes:
@@ -64,6 +79,7 @@ atualizacao_por_documento:
       - "atualizar dependencias"
       - "atualizar fluxos principais se impactados"
       - "registrar violacoes de arquitetura mantendo formato existente"
+      - "validar aderencia de dependencias entre camadas contra imports e injecoes reais"
 
   FLUXOS_NEGOCIO.md:
     acoes:
@@ -74,6 +90,7 @@ atualizacao_por_documento:
       - "atualizar entidades_afetadas"
       - "atualizar estados antes e depois"
       - "atualizar regras_aplicadas"
+      - "validar alinhamento do fluxo com controller, usecase e repositorio efetivamente chamados"
 
   REGRAS_NEGOCIO.md:
     acoes:
@@ -83,6 +100,7 @@ atualizacao_por_documento:
       - "nao alterar ids existentes"
       - "seguir padrao de escrita de regras ja existente"
       - "atualizar origem_codigo"
+      - "garantir que origem_codigo aponte para classe e metodo verificaveis"
 
 consistencia_cruzada:
   acoes:
@@ -95,6 +113,10 @@ validacoes:
   - "confirmar correspondencia entre regra e implementacao"
   - "confirmar sequencia real de chamadas"
   - "rejeitar alteracoes sem evidencia no codigo"
+  - "confirmar que cada alteracao possui evidencia minima (arquivo, classe, metodo)"
+  - "confirmar que somente o documento_em_foco foi alterado na execucao atual"
+  - "confirmar que impactos em outros documentos foram registrados em adhoc"
+  - "confirmar consistencia de nomenclatura entre documentos e codigo"
 
 restricoes:
   - "nao simplificar regras complexas"
@@ -102,8 +124,11 @@ restricoes:
   - "nao alterar nomenclatura de dominio"
   - "nao gerar texto explicativo adicional"
   - "nao alterar formato existente dos documentos"
+  - "nao atualizar documento com base em suposicao sem referencia verificavel no codigo"
 
 resultado:
-  - "retornar apenas documentos atualizados"
+  - "retornar apenas o documento_em_foco atualizado"
   - "manter formato original"
   - "garantir consistencia com codigo"
+  - "manter rastreabilidade interna entre alteracao realizada e evidencia no codigo"
+  - "listar pendencias para proximos ciclos em adhoc quando houver impacto cruzado"

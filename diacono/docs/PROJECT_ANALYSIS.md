@@ -11,7 +11,7 @@ The Diacono Backend is a Spring Boot application built with **Clean Architecture
 - **Primary Pattern**: Clean Architecture with UseCase (Commands) pattern
 - **Framework**: Spring Boot with Spring Data JPA
 - **Build Tool**: Maven
-- **Authentication**: OAuth2 (Google, Government)
+- **Authentication**: Spring Security resource server with JWT and Google OAuth authorization-code login
 - **API Documentation**: Swagger/OpenAPI 3.0
 
 ### Layered Structure
@@ -37,7 +37,7 @@ The Diacono Backend is a Spring Boot application built with **Clean Architecture
 
 ### Root Package
 - **Path**: `com.diacono.diacono`
-- **Main Class**: `DiaconoApplication.java` - Spring Boot entry point with CommandLineRunner for data initialization
+- **Main Class**: `DiaconoApplication.java` - Spring Boot entry point with `@ConfigurationPropertiesScan`
 
 ### 2.1 Applications Layer (`applications/`)
 **Purpose**: DTOs and mappers for API communication
@@ -97,7 +97,7 @@ Core business entities and domain logic
 - `TipoRecorrencia` - Recurrence type
 
 #### Domain Repositories (`domain/repository/`)
-Spring Data JPA repository interfaces:
+Domain repository contracts:
 - `EnderecoEventoRepository`
 - `EscalaEventoRepository`
 - `EscalaMinisterioRepository`
@@ -118,7 +118,7 @@ Technical implementation details and external system integration
 
 #### Controllers (`infrastructure/controllers/`)
 REST API endpoints:
-- **MembroController** - Member operations (POST create, GET list with/without filters)
+- **MembroController** - Member operations (create, list, detail, update)
 - **MinisteriosController** - Ministry operations (create, edit, list, member management)
 - **EventoController** - Event operations (create, update, delete, search by month/year)
 - **EscalaEventoController** - Event schedule management
@@ -127,6 +127,7 @@ REST API endpoints:
 - **GoogleAuthController** - Google OAuth integration
 - **LoginController** - Login/authentication endpoints
 - **CadastroController** - External registration/signup
+- **PerfilController** - Authenticated member profile operations
 
 #### Persistence (`infrastructure/persistence/`)
 JPA implementations and query results:
@@ -134,9 +135,6 @@ JPA implementations and query results:
 **Membro Persistence**:
 - `MembroJpaRepository` - Spring Data JPA interface
 - `MembroRepositoryImpl` - Custom implementation
-
-**Ministry-member lookup**:
-- `MinisteriosMembros/` - consultas de ministérios do membro autenticado
 
 **Query Results** (specialized DTOs for complex queries):
 - `EscalaEventoEscaladoQueryResult`
@@ -146,13 +144,15 @@ JPA implementations and query results:
 - `EscalaMinisterioConsolidadoQueryResult`
 - `EscalaMinisterioQueryResult`
 
-Observação: a consulta de ministérios do membro usa projeção direta para `MinisterioSuperSimplificadoDTO`; não existe `MinisterioSuperSimplificadoQueryResult` no código atual.
+Observação: a consulta de ministérios do membro usa projeção direta para `MinisterioSuperSimplificadoDTO`.
 
-**Other Persistence Folders**:
-- `EnderecoEvento/`, `EscalaEvento/`, `EscalaMinisterio/` - Specific entity implementations
-- `Evento/`, `Igreja/`, `Ministerios/` - Ministry-related persistence
-- `MembroMinisterio/`, `Recorrencia/` - Relationship and configuration entities
-- `Googleauth/` - OAuth token persistence
+#### Messaging (`infrastructure/messaging/`)
+- `EventoProducer` - Publishes created event messages after transaction commit
+
+**Other Persistence Packages**:
+- `gateway/` - Domain repository implementations backed by Spring Data repositories
+- `springdata/` - Spring Data JPA repositories
+- `projection/` - Read-only projection interfaces for complex queries
 
 #### Exceptions (`infrastructure/exceptions/`)
 Custom exception classes:
@@ -163,6 +163,8 @@ Custom exception classes:
 
 #### Auth Integration (`infrastructure/auth/`)
 Google OAuth2 integration:
+- `GoogleAuthorizationCodeExchanger` - Interface for authorization-code exchange
+- `GoogleAuthorizationCodeExchangerImpl` - Exchanges Google authorization code for tokens
 - `GoogleIdTokenVerifier` - Interface for token verification
 - `GoogleIdTokenVerifierImpl` - Google token validation implementation
 
@@ -170,6 +172,7 @@ Google OAuth2 integration:
 Application-specific business logic organized by domain
 
 #### Root UseCase Classes
+- `BuscarPerfilUseCase` - Authenticated member profile retrieval
 - `GenerateTokenUseCase` - JWT token generation
 - `LoginServiceUseCase` - Login business logic
 
@@ -183,6 +186,7 @@ Event management operations:
 - `AtualizarEventoUseCase` - Update event
 - `ApagarEventoUnicoUseCase` - Delete single event
 - `ApagarEventosMultiplosUseCase` - Delete multiple events
+- `BuscarMinisterioPorUUIDUseCase` - Get ministry by ID for event workflows
 - **validation/** - Event validation logic
 
 #### Ministry UseCase (`usecases/ministerio/`)
@@ -198,12 +202,13 @@ Ministry and member-ministry operations:
 - `BuscarMembroMinisterioLiderMinisterioComFiltroUseCase` - Filter ministry members
 - `AdicionarMembroMinisterioLiderMinisterioUseCase` - Add member to ministry
 - `RemoverMembroMinisterioLiderMinisterioUseCase` - Remove member from ministry
-- `BuscarMinisterioPorUUIDUseCase` - Get ministry by ID
 
 #### Member UseCase (`usecases/membro/`)
 Member operations:
 - `CriarMembroUseCase` - Create new member
 - `CadastrarMembroUseCase` - Register via external form
+- `AtualizarMembroUseCase` - Update member and ministry links
+- `BuscarMembroPorUUIDUseCase` - Get member details by ID
 - `BuscarTodosSemFiltroUseCase` - List all members paginated
 - `BuscarTodosComFiltroUseCase` - Search with filters (name, status, ministry)
 - `BuscarPorEmaiUseCase` - Find member by email
@@ -239,7 +244,7 @@ Analytics and KPI generation
 **Ministry Analytics** (`dashboard/ministerios/`):
 - `BuscarKpiEvolucaoMinisteriosDashUseCase` - Ministry growth
 - `BuscarKpiMinisteriosDashUseCase` - General ministry KPIs
-- `BuscarKpiQuantidadeMembrosPerMinisterioDashUseCase` - Members per ministry
+- `BuscarKpiQuantidadeMembrosPorMinisterioDashUseCase` - Members per ministry
 - `buscarKpiQuantidadeEventosPorMinisterioDashUseCase` - Events per ministry
 
 #### Church UseCase (`usecases/igreja/`)
@@ -249,8 +254,8 @@ Church information:
 
 #### Google Auth UseCase (`usecases/googleauth/`)
 OAuth2 integrations:
-- `LoginGoogleUseCase` - Google login
-- `AutenticarGoogleUseCase` - Google authentication
+- `LoginGoogleUseCase` - Google authorization-code login orchestration
+- `AutenticarGoogleUseCase` - Google ID token validation
 - `AtualizarSecretGoogleUseCase` - Update Google OAuth secrets
 
 ### 3.5 Global Package (`global/`)
@@ -259,42 +264,50 @@ Cross-cutting concerns
 #### Configuration (`global/config/`)
 - `GoogleOAuthProperties` - Google OAuth configuration properties
 - `SecurityConfig` - Spring Security configuration (OAuth2, JWT)
+- `RabbitMQConfig` - RabbitMQ exchange, queue and binding configuration for events
+- `SensitiveDataStartupRunner` - Updates sensitive-field search indexes at startup
+- `SensitiveFieldCryptoConfiguration` - Sensitive-field crypto configuration
 
 #### Error Handling (`global/error/`)
 - **exceptions/** - Custom exception hierarchy
 - **comuns/** - Common error response handling
-- **error/** - Error response DTOs
+- `RestErrorMessage` - Error response DTO
 
 #### Utilities (`global/util/`)
-- `JwtUtils` - JWT token generation/validation
+- `JwtUtils` - JWT claim extraction from the authenticated `SecurityContext`
 - `IdEntityUtils` - UUID/ID utilities
+- `SensitiveFieldCryptoUtils` - Encryption/decryption helper for sensitive fields
+- `SensitiveSearchIndexUtils` - Deterministic hash helper for searchable sensitive fields
+- `SensitiveStringAttributeConverter` - JPA converter for encrypted string fields
 
 ---
 
 ## 4. CONTROLLERS & ENDPOINTS
 
 ### MembroController
-**Base Path**: `/membros`
+**Base Path**: `/api/v1/membros`
 
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
-| POST | `/membros` | Create new member |
-| GET | `/membros` | List members (with optional filters: search, status, ministry) |
+| POST | `/api/v1/membros` | Create new member |
+| GET | `/api/v1/membros` | List members (with optional filters: search, status, ministry) |
+| GET | `/api/v1/membros/{idExterno}` | Get member details |
+| PATCH | `/api/v1/membros/{idExterno}` | Update member |
 
 ### MinisteriosController
 **Base Path**: `/api/v1/ministerios`
 
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
-| POST | `/api/v1/ministerios` | Create ministry |
-| PUT | `/api/v1/ministerios/{id}` | Update ministry |
 | GET | `/api/v1/ministerios` | Get all active ministries |
 | GET | `/api/v1/ministerios/governo` | Admin view of ministries (with filters) |
-| GET | `/api/v1/ministerios/lider` | Ministry leader's view |
+| POST | `/api/v1/ministerios/governo` | Create ministry |
+| PATCH | `/api/v1/ministerios/governo/{idMinisterio}` | Update ministry |
+| GET | `/api/v1/ministerios/lider-ministerio` | Ministry leader's ministries |
+| GET | `/api/v1/ministerios/lider-ministerio/{idMinisterio}` | Members of specific ministry |
 | GET | `/api/v1/ministerios/membro` | Authenticated member's ministries |
-| GET | `/api/v1/ministerios/{id}/membros` | Members of specific ministry |
-| POST | `/api/v1/ministerios/{id}/membros` | Add member to ministry |
-| DELETE | `/api/v1/ministerios/{id}/membros/{membroId}` | Remove member from ministry |
+| PATCH | `/api/v1/ministerios/lider-ministerio/{idMinisterio}` | Add member to ministry |
+| DELETE | `/api/v1/ministerios/lider-ministerio/{idMinisterio}/{idMembroMinisterio}` | Remove member from ministry |
 
 ### EventoController
 **Base Path**: `/api/v1/eventos`
@@ -305,39 +318,83 @@ Cross-cutting concerns
 | GET | `/api/v1/eventos/{id}` | Get specific event details |
 | GET | `/api/v1/eventos/enderecos` | Get all event addresses |
 | POST | `/api/v1/eventos` | Create event |
-| PUT | `/api/v1/eventos/{id}` | Update event |
+| PATCH | `/api/v1/eventos/{id}` | Update event |
 | DELETE | `/api/v1/eventos/unico/{id}` | Delete single event |
-| DELETE | `/api/v1/eventos/multiplos` | Delete multiple events |
+| DELETE | `/api/v1/eventos/multiplos/{id}` | Delete recurring events from the selected event forward |
 
 ### EscalaEventoController
-**Base Path**: `/api/v1/escalas-evento`
+**Base Path**: `/api/v1/escalas-evento/governo`
 
-Manages event schedule generation and viewing
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| GET | `/api/v1/escalas-evento/governo` | Consolidated event schedule by month/year |
+| GET | `/api/v1/escalas-evento/governo/{eventoId}` | Event schedule details |
+| PATCH | `/api/v1/escalas-evento/governo/{eventoId}` | Update event schedule ministries |
 
 ### EscalaMinisterioController
 **Base Path**: `/api/v1/escalas-ministerio`
 
-Manages ministry member assignments to events
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| GET | `/api/v1/escalas-ministerio/lider-ministerio` | Consolidated ministry schedule by leader |
+| GET | `/api/v1/escalas-ministerio/lider-ministerio/{escalaEventoId}/membros-disponiveis` | Count available ministry members |
+| GET | `/api/v1/escalas-ministerio/lider-ministerio/{escalaEventoId}` | List ministry members for an event scale |
+| GET | `/api/v1/escalas-ministerio/lider-ministerio/{escalaEventoId}/{quantidadeMembrosRandomizados}` | Randomize available members |
+| POST | `/api/v1/escalas-ministerio/lider-ministerio/{escalaEventoId}/revisar-randomizacao/{membroMinisterioIdASerTrocado}` | Review randomized member selection |
+| PATCH | `/api/v1/escalas-ministerio/lider-ministerio/{escalaEventoId}` | Save ministry schedule assignments |
+| GET | `/api/v1/escalas-ministerio/membro` | Authenticated member schedule |
 
 ### DashboardController
-**Base Path**: `/api/v1/dashboard`
+**Base Path**: `/api/v1/dashboards`
 
-KPI and analytics endpoints for members and ministries
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| GET | `/api/v1/dashboards/membros/kpis` | Member KPIs |
+| GET | `/api/v1/dashboards/membros/evolucao` | Member evolution |
+| GET | `/api/v1/dashboards/membros/faixa-etaria` | Members by age group |
+| GET | `/api/v1/dashboards/membros/genero` | Members by gender |
+| GET | `/api/v1/dashboards/ministerios/kpis` | Ministry KPIs |
+| GET | `/api/v1/dashboards/ministerios/evolucao/{idMinisterio}` | Ministry evolution |
+| GET | `/api/v1/dashboards/ministerios/quantidade-membros` | Member count per ministry |
+| GET | `/api/v1/dashboards/ministerios/quantidade-eventos` | Event count per ministry |
 
 ### GoogleAuthController
-**Base Path**: `/api/v1/google-auth`
+**Base Path**: `/api/v1/auth/google`
 
-OAuth2 Google login integration
+OAuth2 Google authorization-code login integration
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| POST | `/api/v1/auth/google` | Exchange Google authorization code, validate ID token and return API JWT |
 
 ### LoginController
-**Base Path**: `/api/v1/login`
+**Base Path**: `/api/v1/auth/login`
 
 Authentication and token generation
 
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| POST | `/api/v1/auth/login` | Authenticate with local email/password and return API JWT |
+
 ### CadastroController
-**Base Path**: `/api/v1/cadastro`
+**Base Path**: `/api/v1/register`
 
 External registration for non-members
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| GET | `/api/v1/register` | List churches available for public registration |
+| POST | `/api/v1/register` | Register member through public form |
+
+### PerfilController
+**Base Path**: `/api/v1/perfil`
+
+Authenticated member profile retrieval and update
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| GET | `/api/v1/perfil` | Get authenticated member profile |
+| PATCH | `/api/v1/perfil` | Update authenticated member profile |
 
 ---
 
@@ -349,14 +406,22 @@ External registration for non-members
 - Login request/response objects
 - Token generation responses
 
+#### Google Auth DTOs (`dtos/googleauth/`)
+- `GoogleAuthorizationCodeRequestDTO` - Google authorization-code login request
+- `GoogleTokenResponseDTO` - Token response returned by Google token endpoint
+- `GoogleIdTokenDTO` - Decoded Google ID token claims
+- `GoogleRefreshTokenResponseDTO` - Refresh token response projection
+- `GoogleAuthRequestDTO` - Legacy ID token request DTO, not used by `GoogleAuthController`
+
 #### Member DTOs (`dtos/membro/`)
 - `MembroCreateDTO` - Create member request
 - `MembroUpdateDTO` - Update member request
 - `MembroResponseDTO` - Member response
+- `MembroDetalheResponseDTO` - Detailed member response
 - `MembroSimplificadoDTO` - Simplified member view
 - `MembroDashEvolucaoDTO` - Member evolution (dashboard)
-- `MembroDashFaixaEtariaDTO` - Age group analytics
-- `MembroDashGeneroDTO` - Gender analytics
+- `DashboardFaixaEtariaMembroDTO` - Age group analytics
+- `DashboardGeneroMembroDTO` - Gender analytics
 - `MembroKpiResponseDTO` - KPI response
 - `MembroMinisterioCreateDTO` - Member-ministry link creation
 - `MembroMinisterioDTO` - Member-ministry relationship
@@ -383,7 +448,6 @@ External registration for non-members
 - `MinisterioDashEvolucaoDTO` - Ministry growth analytics
 - `MinisterioDashQuantidadeMembrosDTO` - Members per ministry analytics
 - `MinisterioEventoDashDTO` - Event per ministry analytics
-- `MinisterioKpisResponseDTO` - Ministry KPIs
 - `KpisMembrosDTO` - Member KPIs
 - `KpisMinisteriosDTO` - Ministry KPIs
 
@@ -405,10 +469,11 @@ External registration for non-members
 #### Other DTOs
 - `CadastroExternoDTO` - External registration form
 - `RestResponseMessageDTO` - Standard API response message
-- `RecorrenciaDTO` - Recurrence configuration
+- `RecorrenciaCreateDTO` - Recurrence creation request
+- `RecorrenciaSimplificadaDTO` - Simplified recurrence response
 
-### Infrastructure Persistence DTOs (`infrastructure/persistence/dtos/`)
-Query result objects for complex database queries (read-only):
+### Infrastructure Persistence Projections (`infrastructure/persistence/projection/`)
+Projection interfaces for complex database queries (read-only):
 - `EscalaEventoEscaladoQueryResult`
 - `EscalaEventoQueryResult`
 - `EscalaMembroMinisterioQueryResult`
@@ -416,7 +481,7 @@ Query result objects for complex database queries (read-only):
 - `EscalaMinisterioConsolidadoQueryResult`
 - `EscalaMinisterioQueryResult`
 
-Ministry lookups currently project directly to `MinisterioSuperSimplificadoDTO`; there is no dedicated `MinisterioSuperSimplificadoQueryResult`.
+Ministry lookups currently project directly to `MinisterioSuperSimplificadoDTO`.
 
 ---
 
@@ -429,9 +494,9 @@ Ministry lookups currently project directly to `MinisterioSuperSimplificadoDTO`;
 **Purpose**: Manages business logic for scale/schedule status transitions and validation
 
 **Key Responsibilities**:
-- Status validation
-- Status transitions
-- Business rule enforcement for scheduling
+- Recalculate `EscalaEvento` status from `EscalaMinisterio` confirmations
+- Recalculate `Evento` status from `EscalaEvento` confirmations
+- Propagate pending/confirmed status after schedule assignment changes
 
 ---
 
@@ -446,9 +511,9 @@ Located in `applications/mappers/`, organized by domain:
 - **ministerio/** - Ministry entity mapping
 - **recorrencia/** - Recurrence entity mapping
 
-MapStruct or manual mappers that convert between:
+Manual Spring mappers that convert between:
 - Domain Entities ↔ DTOs
-- DTOs ↔ Persistence Models
+- Request DTOs ↔ Domain Entities
 
 ---
 
@@ -458,14 +523,14 @@ All enums located in `domain/enums/`:
 
 | Enum | Purpose | Values |
 |------|---------|--------|
-| `EnumCargoMembro` | Member's global role in church | (Deacon, Member, etc.) |
-| `EnumCargoMembroMinisterio` | Member's role within ministry | (Leader, Coordinator, Volunteer, etc.) |
-| `EnumGeneroMembro` | Member's gender | M, F, Other |
-| `EnumStatusEscalaMinisterio` | Ministry schedule status | (Confirmed, Pending, Cancelled, etc.) |
-| `EnumStatusEvento` | Event status | (Scheduled, Cancelled, Completed, etc.) |
-| `EnumStatusMembro` | Member's status in system | (Active, Inactive, Blocked, etc.) |
-| `EnumStatusMinisterio` | Ministry's operational status | (Active, Inactive, etc.) |
-| `TipoRecorrencia` | Event recurrence pattern | (Weekly, Biweekly, Monthly, etc.) |
+| `EnumCargoMembro` | Member's global role in church | GOVERNO, LIDER_MINISTERIO, MEMBRO |
+| `EnumCargoMembroMinisterio` | Member's role within ministry | LIDER_MINISTERIO, MEMBRO_MINISTERIO |
+| `EnumGeneroMembro` | Member's gender | MASCULINO, FEMININO |
+| `EnumStatusEscalaMinisterio` | Ministry schedule status | PENDENTE, CONFIRMADO, CONCLUIDO |
+| `EnumStatusEvento` | Event status | PENDENTE, CONFIRMADO, CONCLUIDO |
+| `EnumStatusMembro` | Member's status in system | ATIVO, INATIVO |
+| `EnumStatusMinisterio` | Ministry's operational status | ATIVO, INATIVO |
+| `TipoRecorrencia` | Event recurrence pattern | NAO_REPETE, SEMANAL, MENSAL |
 
 ---
 
@@ -473,8 +538,9 @@ All enums located in `domain/enums/`:
 
 ### Security Configuration (`global/config/SecurityConfig.java`)
 - Spring Security configuration
-- OAuth2 authentication provider setup
-- JWT token validation
+- OAuth2 resource server JWT validation
+- Public routes for `/api/v1/auth/**`, `/api/v1/register/**`, OAuth2, H2 and Swagger
+- RSA-based JWT encoder/decoder beans
 - CORS configuration
 - HTTP security rules
 
@@ -482,43 +548,59 @@ All enums located in `domain/enums/`:
 Configuration properties for Google OAuth integration:
 - Client ID
 - Client Secret
-- Redirect URIs
-- Scopes
+- Token URI with default `https://oauth2.googleapis.com/token`
 
 ### JWT Utilities (`global/util/JwtUtils.java`)
-- Token generation
-- Token validation
 - Claims extraction
-- Token expiration handling
+- Authenticated member subject extraction
+- Authenticated church id extraction
+- Authenticated role extraction
 
 ### ID Utilities (`global/util/IdEntityUtils.java`)
 - UUID generation/validation
 - Entity ID handling
+
+### RabbitMQ Configuration (`global/config/RabbitMQConfig.java`)
+- Topic exchange, queue and binding for created event messages
+
+### Sensitive Field Utilities
+- AES/GCM encryption for sensitive fields
+- Deterministic hashes for exact lookup of encrypted fields
 
 ---
 
 ## 10. ERROR HANDLING
 
 ### Custom Exceptions
+Located in `global/error/exceptions/`:
+
+- `BadCredentialsException` - Authentication/authorization failures (HTTP 401)
+- `FieldInvalidException` - Invalid business input (HTTP 400)
+- `GoogleAuthorizationCodeException` - Google authorization-code validation failure (HTTP 401)
+- `GoogleOAuthIntegrationException` - Google OAuth communication/configuration failure (HTTP 502)
+- `ObjectExistsException` - Conflict with existing object (HTTP 409)
+- `ObjectNotFoundException` - Object not found (HTTP 404)
+- `ObjectSaveErrorException` - Object save/validation failure (HTTP 400)
+
 Located in `infrastructure/exceptions/`:
 
-- `MembroNaoEncontradoException` - When member doesn't exist (HTTP 404)
-- `MinisterioNaoEncontradoException` - When ministry doesn't exist (HTTP 404)
 - `DateInvalidException` - Invalid date format/value (HTTP 400)
 - `TimeInvalidException` - Invalid time format/value (HTTP 400)
+- `MembroNaoEncontradoException` - Legacy member not found exception
+- `MinisterioNaoEncontradoException` - Legacy ministry not found exception
 
 ### Global Error Handling
 - Located in `global/error/`
 - Custom exception handlers
 - Standardized error response format
-- ApiErrorCommons annotation for Swagger documentation
+- `ApiErrorsComuns` annotation for Swagger documentation
 
 ---
 
 ## 11. DATA ACCESS & PERSISTENCE
 
 ### JPA Repository Pattern
-All repositories extend `JpaRepository` with custom queries:
+Domain repositories are implemented by infrastructure gateways backed by Spring Data JPA repositories:
 - Pagination support via `Pageable`
 - Custom query methods
 - Filter and search functionality
@@ -534,6 +616,9 @@ Complex queries return specialized result objects:
 Membro (Member) ──┬── MembroMinisterio ──── Ministerio
                   ├── EscalaMinisterio ─┬── EscalaEvento ──── Evento
                   └── EnderecoMembro     └────────────────── Igreja
+Igreja ───────────┬── Ministerio
+                  ├── Evento
+                  └── Membro
 ```
 
 ---
@@ -577,23 +662,29 @@ Membro (Member) ──┬── MembroMinisterio ──── Ministerio
 ✓ Members per ministry  
 
 ### Authentication & Authorization
-✓ Google OAuth2 integration  
-✓ Government authentication  
+✓ Google OAuth2 authorization-code integration
 ✓ JWT token-based API security  
 ✓ Role-based access control  
+✓ Local email/password authentication
 
 ---
 
 ## 13. EXTERNAL INTEGRATIONS
 
 ### Google OAuth2
-- Authentication handler: `CustomOAuth2AuthenticationSuccessHandler`
-- OIDC User service: `CustomOidcUserService`
-- Token verification: `GoogleIdTokenVerifierImpl`
-- Token refresh: `GoogleRefreshTokenMembroRepository`
+- Authorization code exchange: `GoogleAuthorizationCodeExchangerImpl`
+- ID token verification: `GoogleIdTokenVerifierImpl`
+- Client configuration: `GoogleOAuthProperties`
+- Refresh token persistence: `GoogleRefreshTokenMembroRepository`
+- OAuth2 client handlers still exist: `CustomOAuth2AuthenticationSuccessHandler`, `CustomOidcUserService`
+
+### RabbitMQ
+- Event publication: `EventoProducer`
+- Exchange/queue/binding configuration: `RabbitMQConfig`
+- Created event payload: `EventoCriadoMessageDTO`
 
 ### Spring Security
-- OAuth2 authentication
+- OAuth2 resource server and OAuth2 client dependencies
 - JWT token validation
 - CORS support
 - Role-based access control
@@ -609,9 +700,9 @@ Membro (Member) ──┬── MembroMinisterio ──── Ministerio
 - **Error Handling**: Custom exception handlers with standardized error response
 
 ### Authentication
-- **Type**: OAuth2 + JWT
+- **Type**: JWT resource server + local login + Google authorization-code login
 - **Header**: `Authorization: Bearer {token}`
-- **Token Generation**: Via `LoginServiceUseCase` and `GenerateTokenUseCase`
+- **Token Generation**: Via `LoginServiceUseCase`, `LoginGoogleUseCase` and `GenerateTokenUseCase`
 
 ### Validation
 - Input validation on DTOs
@@ -624,27 +715,28 @@ Membro (Member) ──┬── MembroMinisterio ──── Ministerio
 
 | Category | Count |
 |----------|-------|
-| Controllers | 9 |
+| Controllers | 10 |
 | Domain Entities | 12 |
 | Enumerations | 8 |
 | Repository Interfaces | 10 |
-| UseCase Classes | 40+ |
-| DTO Classes | 50+ |
-| Mappers | 6 |
-| Custom Exceptions | 4 |
-| Domain Services | 1 (core) |
+| UseCase Classes | 59 |
+| DTO Classes | 56 |
+| Mappers | 9 |
+| Custom Exceptions | 11 |
+| Domain Services | 2 files / 1 service |
 
 ---
 
 ## 16. TECHNOLOGY STACK
 
-- **Runtime**: Java 11+
+- **Runtime**: Java 21
 - **Framework**: Spring Boot 3.x
-- **Database**: JPA/Hibernate (MySQL/PostgreSQL)
-- **Authentication**: Spring Security + OAuth2 + JWT
+- **Database**: JPA/Hibernate with H2 default and environment-configurable datasource
+- **Authentication**: Spring Security + OAuth2 client/resource server + JWT
 - **API Documentation**: Springdoc OpenAPI 3.0
 - **Build**: Maven
-- **Mapping**: (MapStruct or manual)
+- **Messaging**: Spring AMQP / RabbitMQ
+- **Mapping**: Manual Spring mappers
 - **Validation**: Jakarta Bean Validation (formerly javax.validation)
 
 ---
@@ -666,12 +758,12 @@ Membro (Member) ──┬── MembroMinisterio ──── Ministerio
 
 6. **Escalas**: Event schedules (EscalaEvento) are generated and then ministry members are assigned (EscalaMinisterio).
 
-7. **OAuth2**: Google authentication is handled via custom handlers that create/update Membro records.
+7. **OAuth2**: Google API login receives an authorization code, exchanges it with Google, validates the returned ID token, optionally stores the refresh token, and emits the backend JWT.
 
 8. **Error Handling**: Always use custom exceptions for business logic errors; they're automatically mapped to HTTP responses.
 
 ---
 
-**Analysis Generated**: April 2026  
+**Analysis Generated**: May 2026
 **Project Type**: Spring Boot Clean Architecture  
 **Version**: Based on current codebase structure

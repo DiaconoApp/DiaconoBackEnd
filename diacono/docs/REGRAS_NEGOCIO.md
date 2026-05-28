@@ -56,10 +56,10 @@ REGRAS
   dependencias: ["REGRA_004"]
 
 - id: REGRA_006
-  nome: "Cargo inicial de membro interno"
-  descricao: "Membro cadastrado internamente pode ter cargo LIDER_MINISTERIO ou MEMBRO."
+  nome: "Cargo de membro interno conforme DTO"
+  descricao: "Membro cadastrado internamente recebe o cargo informado no DTO."
   entidade: "Membro"
-  condicao: "membro.cargo == LIDER_MINISTERIO || membro.cargo == MEMBRO"
+  condicao: "membroDTO.cargo() informado"
   acao: "define cargoMembro conforme DTO"
   origem_codigo:
     classe: "CriarMembroUseCase"
@@ -70,7 +70,7 @@ REGRAS
   nome: "Lider de ministerio deve ter ministerio"
   descricao: "Se cargo eh LIDER_MINISTERIO, deve ter idExternoMinisterios preenchido."
   entidade: "Membro"
-  condicao: "cargo == LIDER_MINISTERIO && idExternoMinisterios == null"
+  condicao: "cargo == LIDER_MINISTERIO && (idExternoMinisterios == null || idExternoMinisterios.isEmpty())"
   acao: "lanca ObjectSaveErrorException"
   origem_codigo:
     classe: "CriarMembroUseCase"
@@ -112,7 +112,7 @@ REGRAS
 
 - id: REGRA_011
   nome: "Validacao de horario de evento"
-  descricao: "Horario de fim do evento deve ser maior que horario de inicio."
+  descricao: "Horario de fim do evento nao pode ser anterior ao horario de inicio."
   entidade: "Evento"
   condicao: "dataHoraFim.isBefore(dataHoraInicio)"
   acao: "lanca TimeInvalidException"
@@ -145,9 +145,9 @@ REGRAS
 
 - id: REGRA_014
   nome: "Gerador de escala de evento na criacao"
-  descricao: "Escala de evento eh gerada automaticamente ao criar evento com ministerios selecionados."
+  descricao: "Escala de evento eh gerada automaticamente ao criar evento."
   entidade: "EscalaEvento"
-  condicao: "evento criado com fkMinisterios informado"
+  condicao: "evento sem recorrencia criado"
   acao: "chama GerarEscalaEventoUseCase.executeParaCriacao()"
   origem_codigo:
     classe: "CriarEventoUseCase"
@@ -354,10 +354,10 @@ REGRAS
 
 - id: REGRA_033
   nome: "Validacao de email para login"
-  descricao: "Email deve existir na base para autentica local."
+  descricao: "Email deve existir na base para autenticacao local."
   entidade: "Membro"
-  condicao: "findByEmail(email).isEmpty()"
-  acao: "lanca BadCredentialsException"
+  condicao: "BuscarPorEmaiUseCase.execute(email) lanca ObjectNotFoundException"
+  acao: "executa dummy BCrypt e lanca BadCredentialsException"
   origem_codigo:
     classe: "LoginServiceUseCase"
     metodo: "execute"
@@ -378,7 +378,7 @@ REGRAS
   nome: "Validacao de audience do Google"
   descricao: "Audience do idToken deve conter clientId configurado."
   entidade: "Membro"
-  condicao: "!audience.contains(googleClientId)"
+  condicao: "googleClientId ausente || audience == null || !audience.contains(googleClientId)"
   acao: "lanca BadCredentialsException"
   origem_codigo:
     classe: "AutenticarGoogleUseCase"
@@ -433,8 +433,8 @@ REGRAS
   nome: "Calculo de retencao de membros"
   descricao: "Retencao eh calculada como (membrosAtivos - membrosInativos) / totalMembros."
   entidade: "Membro"
-  condicao: "membrosInativos > 0"
-  acao: "calcula resultado e aplica percentual com limite maximo de 100"
+  condicao: "membrosInativos == 0 ? 100 : round((membrosAtivos - membrosInativos) * 100 / totalMembros)"
+  acao: "retorna retencao no DTO de KPIs de membros"
   origem_codigo:
     classe: "BuscarKpiMembrosDashUseCase"
     metodo: "execute"
@@ -461,22 +461,6 @@ REGRAS
     classe: "BuscarTodosComFiltroUseCase"
     metodo: "execute"
   dependencias: []
-
-ANALISE
-
-duplicadas:
-  - REGRA_025 e REGRA_026 sao inversas mas complementares (nao duplicada)
-  - REGRA_023 e REGRA_024 sao inversas mas complementares (nao duplicada)
-
-inconsistentes:
-  - REGRA_032 define status CONFIRMADO por padrao, mas nao ha validacao explicitita de estado anterior
-
-ausentes:
-  - Regra de auditoria de alteracoes em entidades criticas
-  - Regra de restricao de acesso por permissoes de funcao
-  - Regra de exclusao de eventos com escalas confirmadas
-  - Regra de excecao para eventos sem escalas (status automatico)
-  - Regra de validacao de unidade de negocio (Igreja) para acesso multiplo-loci
 
 - id: REGRA_043
   nome: "Validacao de lider existente em ministerio"
@@ -535,10 +519,10 @@ ausentes:
 
 - id: REGRA_048
   nome: "Exclusao de serie de eventos recorrentes"
-  descricao: "Ao deletar evento recorrente, toda a serie dentro da mesma igreja eh deletada."
+  descricao: "Ao deletar multiplos eventos, o evento informado e eventos da mesma recorrencia a partir da data inicial sao removidos."
   entidade: "Evento"
-  condicao: "evento.recorrencia != null"
-  acao: "busca todos eventos da mesma recorrencia e deleta serie inteira"
+  condicao: "evento encontrado dentro da igreja autenticada"
+  acao: "busca por recorrencia/data inicial/igreja e executa deleteAll"
   origem_codigo:
     classe: "ApagarEventosMultiplosUseCase"
     metodo: "execute"
@@ -548,7 +532,7 @@ ausentes:
   nome: "Validacao de vinculo membro-ministerio para remocao"
   descricao: "Membro so pode ser removido do ministerio se estiver vinculado."
   entidade: "MembroMinisterio"
-  condicao: "membroMinisterioRepository.deleteByMembro retorna 0 registros"
+  condicao: "deleteByMembroIdExternoAndMinisterioIdExterno retorna 0 registros"
   acao: "lanca ObjectNotFoundException"
   origem_codigo:
     classe: "RemoverMembroMinisterioLiderMinisterioUseCase"
@@ -559,7 +543,7 @@ ausentes:
   nome: "Restricao de acesso por lideranca de ministerio"
   descricao: "Apenas lider vinculado ao ministerio pode executar operacoes na escala."
   entidade: "MembroMinisterio"
-  condicao: "!listaMinisteriosLider.contains(ministerioId) || listaMinisteriosLider.isEmpty()"
+  condicao: "ministerioId == null || !listaMinisteriosLider.contains(ministerioId)"
   acao: "lanca ObjectNotFoundException"
   origem_codigo:
     classe: "BuscarMembrosMinisterioPorEscalaEventoIdUseCase"
@@ -578,10 +562,10 @@ ausentes:
   dependencias: []
 
 - id: REGRA_052
-  nome: "Validacao de membro ja escalado na revisao randomizada"
-  descricao: "Novo membro selecionado nao pode estar ja escalado nem ser o mesmo da troca."
+  nome: "Validacao de membro a trocar na revisao randomizada"
+  descricao: "Membro a ser trocado deve ser informado, existir na lista selecionada e haver substituto disponivel."
   entidade: "EscalaMinisterio"
-  condicao: "novoMembroId == membroAtualId || membrosSelecionados.contains(novoMembroId)"
+  condicao: "membroMinisterioIdASerTrocado == null || !selecionados.contains(membroMinisterioIdASerTrocado) || membrosDisponiveisParaRevisao.isEmpty()"
   acao: "lanca FieldInvalidException"
   origem_codigo:
     classe: "RevisarMembrosMinisterioRandomizadosPorEscalaEventoIdUseCase"
@@ -604,20 +588,20 @@ ausentes:
   descricao: "Membro consultado deve estar vinculado ao ministerio informado."
   entidade: "MembroMinisterio"
   condicao: "ministerioId informado && !membroHasMinisterio(membroId, ministerioId)"
-  acao: "lanca FieldInvalidException"
+  acao: "lanca ObjectNotFoundException"
   origem_codigo:
     classe: "BuscarEscalaMinisterioPorMembroIdMesAnoUseCase"
     metodo: "execute"
   dependencias: []
 
 - id: REGRA_055
-  nome: "Atomicidade transacional em operacoes criticas"
-  descricao: "Operacoes que envolvem multiplas entidades sao executadas em transacao para manter consistencia."
-  entidade: "Membro, Ministerio, Evento, EscalaEvento, EscalaMinisterio"
-  condicao: "operacao comeca em usecase"
+  nome: "Atomicidade transacional na criacao de evento"
+  descricao: "Criacao de evento, recorrencia, escalas e publicacao pos-commit sao coordenadas em transacao."
+  entidade: "Evento, Recorrencia, EscalaEvento"
+  condicao: "CriarEventoUseCase.execute iniciado"
   acao: "@Transactional envolve o execute garantindo rollback em erro"
   origem_codigo:
-    classe: "AdicionarMinisterioUseCase, EditarMinisterioUseCase, CriarMembroUseCase, CriarEventoUseCase, AtualizarEventoUseCase, SalvarEscalaMinisterioPorEscalaEventoIdUseCase, ApagarEventosMultiplosUseCase"
+    classe: "CriarEventoUseCase"
     metodo: "execute"
   dependencias: []
 
@@ -625,8 +609,8 @@ ausentes:
   nome: "Restrincao de igreja para acesso de dados"
   descricao: "Qualquer operacao ler/escrever deve respeitar a igreja do JWT do usuario."
   entidade: "Igreja"
-  condicao: "igrejaId do JWT == null"
-  acao: "lanca SecurityException ou impossibilita acesso a dados"
+  condicao: "SecurityContext sem JWT || claim fk_igreja ausente ou invalida"
+  acao: "lanca BadCredentialsException"
   origem_codigo:
     classe: "JwtUtils"
     metodo: "getIgrejaId"
@@ -643,6 +627,138 @@ ausentes:
     metodo: "execute"
   dependencias: ["REGRA_056"]
 
+- id: REGRA_058
+  nome: "Validacao de configuracao OAuth Google"
+  descricao: "clientId e clientSecret devem estar configurados para trocar authorization code no Google."
+  entidade: "GoogleOAuth"
+  condicao: "clientId ausente || clientSecret ausente"
+  acao: "lanca GoogleOAuthIntegrationException"
+  origem_codigo:
+    classe: "GoogleAuthorizationCodeExchangerImpl"
+    metodo: "validarConfiguracao"
+  dependencias: []
+
+- id: REGRA_059
+  nome: "Validacao da resposta de token Google"
+  descricao: "Resposta da troca de authorization code deve conter id_token."
+  entidade: "GoogleTokenResponse"
+  condicao: "tokenResponse == null || idToken == null || idToken.isBlank()"
+  acao: "lanca GoogleOAuthIntegrationException"
+  origem_codigo:
+    classe: "GoogleAuthorizationCodeExchangerImpl"
+    metodo: "exchange"
+  dependencias: ["REGRA_058"]
+
+- id: REGRA_060
+  nome: "Traducao de erro do authorization code Google"
+  descricao: "Erros de resposta do Google na troca do authorization code sao traduzidos para excecoes especificas."
+  entidade: "GoogleOAuth"
+  condicao: "redirect_uri_mismatch || invalid_grant || invalid_request || resposta 4xx"
+  acao: "lanca GoogleAuthorizationCodeException"
+  origem_codigo:
+    classe: "GoogleAuthorizationCodeExchangerImpl"
+    metodo: "traduzirErroRespostaGoogle"
+  dependencias: ["REGRA_058"]
+
+- id: REGRA_061
+  nome: "Restricao de igreja para refresh token Google"
+  descricao: "Refresh token Google existente so pode ser atualizado pela mesma igreja do registro."
+  entidade: "GoogleRefreshTokenMembro"
+  condicao: "tokenExistente.igrejaId != igrejaId"
+  acao: "lanca BadCredentialsException"
+  origem_codigo:
+    classe: "AtualizarSecretGoogleUseCase"
+    metodo: "validarEscopoIgreja"
+  dependencias: ["REGRA_056"]
+
+- id: REGRA_062
+  nome: "Persistencia opcional de refresh token Google"
+  descricao: "Refresh token retornado pelo Google so e persistido quando nao esta vazio."
+  entidade: "GoogleRefreshTokenMembro"
+  condicao: "googleTokenResponse.refreshToken() != null && !googleTokenResponse.refreshToken().isBlank()"
+  acao: "executa AtualizarSecretGoogleUseCase.execute"
+  origem_codigo:
+    classe: "LoginGoogleUseCase"
+    metodo: "execute"
+  dependencias: ["REGRA_061"]
+
+- id: REGRA_063
+  nome: "Validacao de payload do login local"
+  descricao: "Payload de login local deve conter email e senha preenchidos."
+  entidade: "Membro"
+  condicao: "loginRequestDTO == null || email em branco || senha em branco"
+  acao: "lanca BadCredentialsException"
+  origem_codigo:
+    classe: "LoginServiceUseCase"
+    metodo: "validateLoginRequest"
+  dependencias: []
+
+- id: REGRA_064
+  nome: "Validacao de ids obrigatorios para salvar escala ministerio"
+  descricao: "Salvar escala ministerial exige escalaEventoId, igrejaId e membroId."
+  entidade: "EscalaMinisterio"
+  condicao: "escalaEventoId == null || igrejaId == null || membroId == null"
+  acao: "lanca FieldInvalidException"
+  origem_codigo:
+    classe: "SalvarEscalaMinisterioPorEscalaEventoIdUseCase"
+    metodo: "validarIdsObrigatorios"
+  dependencias: []
+
+- id: REGRA_065
+  nome: "Validacao de item nulo na escala ministerio"
+  descricao: "Lista de escala ministerial nao pode conter itens nulos."
+  entidade: "EscalaMinisterio"
+  condicao: "escalasMinisterio.stream().anyMatch(item == null)"
+  acao: "lanca FieldInvalidException"
+  origem_codigo:
+    classe: "SalvarEscalaMinisterioPorEscalaEventoIdUseCase"
+    metodo: "validarRequest"
+  dependencias: ["REGRA_017"]
+
+- id: REGRA_066
+  nome: "Validacao de ministerio escalado na escala evento"
+  descricao: "Item marcado como ministerio escalado deve informar idExternoMinisterio."
+  entidade: "EscalaEvento"
+  condicao: "isMinisterioEscalado == true && idExternoMinisterio == null"
+  acao: "lanca FieldInvalidException"
+  origem_codigo:
+    classe: "AtualizarEscalaEventoPorEventoIdUseCase"
+    metodo: "validarListaEscalaEvento"
+  dependencias: ["REGRA_016"]
+
+- id: REGRA_067
+  nome: "Restricao de igreja para lider de ministerio"
+  descricao: "Lider informado na criacao de ministerio deve pertencer a igreja do token."
+  entidade: "Membro"
+  condicao: "liderMinisterio.igreja == null || liderMinisterio.igreja.idExterno != igrejaIdToken"
+  acao: "lanca ObjectNotFoundException"
+  origem_codigo:
+    classe: "AdicionarMinisterioUseCase"
+    metodo: "execute"
+  dependencias: ["REGRA_043", "REGRA_056"]
+
+- id: REGRA_068
+  nome: "Atualizacao de lider do ministerio"
+  descricao: "Novo lider precisa existir, pertencer a mesma igreja e assumir cargo LIDER_MINISTERIO."
+  entidade: "MembroMinisterio"
+  condicao: "idLiderNovo informado"
+  acao: "atualiza vinculo de lider e rebaixa lider antigo quando nao lidera outro ministerio"
+  origem_codigo:
+    classe: "EditarMinisterioUseCase"
+    metodo: "atualizarLider"
+  dependencias: ["REGRA_056"]
+
+- id: REGRA_069
+  nome: "Restricao de igreja para exclusao de evento"
+  descricao: "Evento so pode ser excluido quando pertence a igreja autenticada."
+  entidade: "Evento"
+  condicao: "evento.igreja == null || evento.igreja.idExterno != igrejaId"
+  acao: "lanca ObjectNotFoundException"
+  origem_codigo:
+    classe: "ApagarEventoUnicoUseCase"
+    metodo: "execute"
+  dependencias: ["REGRA_056"]
+
 ANALISE
 
 duplicadas: []
@@ -650,4 +766,3 @@ duplicadas: []
 inconsistentes: []
 
 ausentes: []
-
