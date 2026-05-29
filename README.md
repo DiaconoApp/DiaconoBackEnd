@@ -171,3 +171,11 @@ API backend para gestão de igrejas, membros, ministérios, eventos e escalas de
   - `GET /api/v1/dashboards/ministerios/evolucao/{idMinisterio}`
   - `GET /api/v1/dashboards/ministerios/quantidade-membros`
   - `GET /api/v1/dashboards/ministerios/quantidade-eventos`
+
+## 📚 Documentação
+- [`diacono/docs/BACKEND_DOCS_AGENT.yaml`](diacono/docs/BACKEND_DOCS_AGENT.yaml): guia para atualização futura dos documentos do backend.
+- [`diacono/docs/PROJECT_ANALYSIS.md`](diacono/docs/PROJECT_ANALYSIS.md): visão geral, contexto operacional, configuração, riscos e pendências.
+- [`diacono/docs/ARQUITETURA.md`](diacono/docs/ARQUITETURA.md): arquitetura real, camadas, componentes e acoplamentos.
+- [`diacono/docs/FLUXOS_NEGOCIO.md`](diacono/docs/FLUXOS_NEGOCIO.md): fluxos reais de negócio do backend.
+- [`diacono/docs/REGRAS_NEGOCIO.md`](diacono/docs/REGRAS_NEGOCIO.md): regras de negócio validadas no código.
+- [`diacono/README-rabbitmq.md`](diacono/README-rabbitmq.md): referência operacional da mensageria RabbitMQ.
