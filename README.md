@@ -178,4 +178,3 @@ API backend para gestão de igrejas, membros, ministérios, eventos e escalas de
 - [`diacono/docs/ARQUITETURA.md`](diacono/docs/ARQUITETURA.md): arquitetura real, camadas, componentes e acoplamentos.
 - [`diacono/docs/FLUXOS_NEGOCIO.md`](diacono/docs/FLUXOS_NEGOCIO.md): fluxos reais de negócio do backend.
 - [`diacono/docs/REGRAS_NEGOCIO.md`](diacono/docs/REGRAS_NEGOCIO.md): regras de negócio validadas no código.
-- [`diacono/README-rabbitmq.md`](diacono/README-rabbitmq.md): referência operacional da mensageria RabbitMQ.
